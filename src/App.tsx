@@ -10,7 +10,6 @@ import { LevelUpModal } from './components/LevelUpModal';
 import { GrimoireModal } from './components/GrimoireModal';
 import { PdfCharacterImportModal } from './components/PdfCharacterImportModal';
 import { UiScaleConfiguratorModal } from './components/UiScaleConfiguratorModal';
-import { SkinSelectorModal } from './components/SkinSelectorModal';
 import { CompendiumView } from './components/CompendiumView';
 import { EquipmentBuilderModal } from './components/EquipmentBuilderModal';
 import { PathfinderGothicCard } from './components/PathfinderGothicCard';
@@ -55,12 +54,7 @@ export default function App() {
   } = useCharacterStore();
 
   const { scale: uiScale, setScale: setUiScale, resetZoom } = useUiScale();
-  const { skin, setSkin } = useUiSkin();
-  const { currentUser, setUsername } = useUserStore();
-
-  // Player name editing in header cartouche
-  const [isEditingPlayerName, setIsEditingPlayerName] = useState(false);
-  const [tempPlayerName, setTempPlayerName] = useState(currentUser.username);
+  const { currentUser } = useUserStore();
 
   // Navigation tab state
   const [currentTab, setCurrentTab] = useState<'characters' | 'compendium'>('characters');
@@ -95,7 +89,6 @@ export default function App() {
   const [grimoireCharacter, setGrimoireCharacter] = useState<Character | null>(null);
   const [pdfImportModalOpen, setPdfImportModalOpen] = useState(false);
   const [uiScaleModalOpen, setUiScaleModalOpen] = useState(false);
-  const [skinModalOpen, setSkinModalOpen] = useState(false);
   const [settingsMenuOpen, setSettingsMenuOpen] = useState(false);
 
   // Quick HP adjustments on cards
@@ -432,104 +425,15 @@ export default function App() {
             </div>
           </div>
 
-          {/* Right: User Identity Cartouche & Consolidated Settings Gear */}
+          {/* Right: Consolidated Settings Gear */}
           <div className="flex items-center gap-3 sm:gap-4 ml-auto">
-            {/* User Account / Player Identity Display - Auto-adjusting 3-Part Heraldic Cartouche */}
-            <div className="relative flex items-center shrink-0">
-              <div
-                onClick={() => {
-                  if (!isEditingPlayerName) {
-                    setTempPlayerName(currentUser.username);
-                    setIsEditingPlayerName(true);
-                  }
-                }}
-                className="relative h-10 flex items-center shrink-0 filter drop-shadow-[0_2px_6px_rgba(0,0,0,0.85)] select-none transition-all duration-150 cursor-pointer group hover:brightness-110"
-                title="Haz clic para cambiar tu nombre de jugador"
-              >
-                {/* 1. Left Rosette Cap */}
-                <div className="relative h-10 shrink-0">
-                  <img
-                    src="/assets/ui/cartouche_cap_left.png"
-                    alt=""
-                    className="h-10 w-auto object-contain pointer-events-none -mr-[1px]"
-                  />
-                  {/* Miniature Sparkles inside Rosette */}
-                  <div className="absolute left-[20%] top-0 bottom-0 w-6 flex items-center justify-center pointer-events-none">
-                    <Sparkles className="w-3.5 h-3.5 text-[#ffd56b] drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]" />
-                  </div>
-                </div>
-
-                {/* 2. Middle Body - Auto-stretches cleanly to the player's name */}
-                <div
-                  style={{
-                    backgroundImage: 'url(/assets/ui/cartouche_mid.png)',
-                    backgroundSize: 'auto 100%',
-                    backgroundRepeat: 'repeat-x',
-                  }}
-                  className="h-10 flex items-center px-1.5 -mx-[1px]"
-                >
-                  <div className="flex items-center gap-1.5 whitespace-nowrap">
-                    <span className="text-[#a89279] text-[10px] uppercase tracking-wider font-semibold">
-                      Jugador:
-                    </span>
-
-                    {isEditingPlayerName ? (
-                      <form
-                        onSubmit={(e) => {
-                          e.preventDefault();
-                          const trimmed = tempPlayerName.trim() || 'Aventurero';
-                          setUsername(trimmed);
-                          setIsEditingPlayerName(false);
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                        className="flex items-center"
-                      >
-                        <input
-                          type="text"
-                          autoFocus
-                          value={tempPlayerName}
-                          onChange={(e) => setTempPlayerName(e.target.value)}
-                          onBlur={() => {
-                            const trimmed = tempPlayerName.trim() || 'Aventurero';
-                            setUsername(trimmed);
-                            setIsEditingPlayerName(false);
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Escape') {
-                              setIsEditingPlayerName(false);
-                            }
-                          }}
-                          maxLength={24}
-                          className="bg-[#120a05]/90 text-xs font-fantasy font-bold text-[#ffd56b] border border-[#d4af37]/60 rounded px-1.5 py-0.5 outline-none shadow-inner w-28"
-                        />
-                      </form>
-                    ) : (
-                      <div className="flex items-center gap-1">
-                        <span className="text-xs font-fantasy font-bold text-[#f5eee2] drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] group-hover:text-[#ffd56b] transition">
-                          {currentUser.username}
-                        </span>
-                        <Edit2 className="w-2.5 h-2.5 text-[#a89279] opacity-0 group-hover:opacity-100 transition-opacity ml-0.5" />
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* 3. Right Ornate Bracket Cap */}
-                <img
-                  src="/assets/ui/cartouche_cap_right.png"
-                  alt=""
-                  className="h-10 w-auto object-contain pointer-events-none -ml-[1px] shrink-0"
-                />
-              </div>
-            </div>
-
             {/* Consolidated Settings Gear (⚙️) Button */}
             <div className="relative z-50">
               <button
                 type="button"
                 onClick={() => setSettingsMenuOpen(!settingsMenuOpen)}
                 className="relative flex items-center justify-center w-10 h-10 transition-transform duration-150 cursor-pointer active:scale-95 group shrink-0"
-                title="Ajustes del Portal (Escala de Interfaz y Apariencia)"
+                title="Ajustes del Portal (Escala de Interfaz)"
                 aria-label="Ajustes del Portal"
               >
                 <img
@@ -568,15 +472,15 @@ export default function App() {
                     }}
                   >
                     <div className="space-y-3 pt-1">
-                      {/* Popover Header */}
-                      <div className="flex items-center justify-between pb-2 border-b border-[#dfbe7e]/25 relative">
-                        <span className="font-fantasy font-bold text-xs uppercase tracking-wider text-[#ffd56b] drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">
+                      {/* Popover Header: Perfectly Centered Title */}
+                      <div className="relative flex items-center justify-center pb-2 border-b border-[#dfbe7e]/25">
+                        <span className="font-fantasy font-bold text-xs uppercase tracking-wider text-[#ffd56b] drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] text-center">
                           Ajustes del Portal
                         </span>
                         <button
                           type="button"
                           onClick={() => setSettingsMenuOpen(false)}
-                          className="text-[#a89279] hover:text-[#fdfaf3] p-1 rounded hover:bg-[#3d2717]/60 transition cursor-pointer"
+                          className="absolute right-0 top-1/2 -translate-y-1/2 -mt-1 text-[#a89279] hover:text-[#fdfaf3] p-1 rounded hover:bg-[#3d2717]/60 transition cursor-pointer"
                           aria-label="Cerrar ajustes"
                         >
                           <X className="w-4 h-4" />
@@ -584,7 +488,7 @@ export default function App() {
                       </div>
 
                       {/* Zoom / Scale Config */}
-                      <div className="space-y-1.5 px-1">
+                      <div className="space-y-1.5 px-1 pb-1">
                         <div className="flex items-center justify-between text-xs text-[#c0ad97] px-1.5">
                           <span className="flex items-center gap-1.5 font-fantasy">
                             <Sliders className="w-3.5 h-3.5 text-[#dfbe7e]" /> Escala de Vista
@@ -635,27 +539,6 @@ export default function App() {
                           className="w-full text-center text-[10.5px] text-[#dfbe7e] hover:text-[#ffd56b] hover:underline pt-0.5 cursor-pointer font-fantasy"
                         >
                           Ajuste fino de interfaz...
-                        </button>
-                      </div>
-
-                      {/* Theme / Aspect Button */}
-                      <div className="pt-2 border-t border-[#dfbe7e]/20 flex justify-center">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSettingsMenuOpen(false);
-                            setSkinModalOpen(true);
-                          }}
-                          style={{
-                            backgroundImage: 'url(/assets/ui/btn_nav_normal.png)',
-                            backgroundSize: '100% 100%',
-                            backgroundRepeat: 'no-repeat',
-                            backgroundColor: 'transparent',
-                          }}
-                          className="w-[210px] h-8.5 flex items-center justify-center text-[11.5px] font-fantasy font-bold text-[#dfbe7e] hover:text-[#fff6db] hover:brightness-110 active:scale-95 transition cursor-pointer drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)] select-none whitespace-nowrap"
-                          title="Abrir selector de temas y aspectos visuales"
-                        >
-                          <span>Cambiar aspecto visual</span>
                         </button>
                       </div>
                     </div>
@@ -1142,17 +1025,7 @@ export default function App() {
         />
       )}
 
-      {/* 8. Skin / Visual Theme Selector Modal */}
-      {skinModalOpen && (
-        <SkinSelectorModal
-          isOpen={skinModalOpen}
-          currentSkin={skin}
-          onSelectSkin={setSkin}
-          onClose={() => setSkinModalOpen(false)}
-        />
-      )}
-
-      {/* 9. Themed Notification Alert Modal */}
+      {/* 8. Themed Notification Alert Modal */}
       <ThemedNotificationModal
         isOpen={themedAlert.isOpen}
         onClose={() => setThemedAlert((prev) => ({ ...prev, isOpen: false }))}
