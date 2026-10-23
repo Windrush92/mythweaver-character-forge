@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Character, AbilityScores, CharacterAttack, Spell, AvatarFrameStyle } from '../types';
 import {
   WIKIDOT_RACES,
@@ -135,7 +135,7 @@ import {
 } from 'lucide-react';
 import { exportCharacterToOfficialPdf } from '../utils/pdfCharacterExporter';
 import { SkillTooltip } from './SkillTooltip';
-import { startCharacterCreatorTutorial } from '../utils/characterCreatorTutorial';
+import { startCharacterCreatorTutorial, TutorialContext } from '../utils/characterCreatorTutorial';
 
 interface DiceRollResult {
   dice: number[];
@@ -558,6 +558,23 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
       }
     }
   };
+
+  const [isTutorialMenuOpen, setIsTutorialMenuOpen] = useState(false);
+  const tutorialMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (tutorialMenuRef.current && !tutorialMenuRef.current.contains(e.target as Node)) {
+        setIsTutorialMenuOpen(false);
+      }
+    };
+    if (isTutorialMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isTutorialMenuOpen]);
 
   // Active Wikidot entities (nullable when not selected)
   const raceCounts = useMemo(() => {
@@ -2372,6 +2389,62 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
     }
   };
 
+  const tutorialContext = useMemo<TutorialContext>(() => ({
+    currentStep: currentStep as TutorialContext['currentStep'],
+    characterLevel,
+    activeRace,
+    activeSubrace,
+    selectedRaceId,
+    selectedSubraceId,
+    raceAnyCount,
+    hasBonusRacialSkills:
+      (selectedRaceId === 'humano' && selectedSubraceId === 'humano-variante') ||
+      selectedRaceId === 'semielfo' ||
+      selectedRaceId === 'kenku' ||
+      selectedRaceId === 'cambiaformas' ||
+      selectedRaceId === 'leonin',
+    hasRacialMagic: racialSpellcastingInfo.hasRacialMagic,
+    activeBackground,
+    activeClass,
+    activeSubclass,
+    subclassUnlockLevel,
+    isSubclassUnlocked,
+    isCaster,
+    hasTacticalFeatures,
+    hasExpertise: expertiseConfig.allowedCount > 0,
+    hasFightingStyle:
+      ['guerrero', 'paladin', 'explorador'].includes(activeClass?.id || '') && hasTacticalFeatures,
+    pendingDecisionsCount: pendingCreationDecisions.length,
+    hasBackgroundBonusFeat: !!activeBackground?.bonusFeatId,
+    hasBackgroundTools: !!activeBackground?.toolChoices,
+    hasBackgroundLanguages:
+      ((activeBackground?.languagesCount && activeBackground.languagesCount > 0) ||
+        (activeBackground?.fixedLanguages && activeBackground.fixedLanguages.length > 0)) ||
+      false,
+    hasBackgroundTrinkets: !!(
+      activeBackground?.equipmentChoices && activeBackground.equipmentChoices.length > 0
+    ),
+    hasBackgroundSkillChoices: !!activeBackground?.skillChoices,
+  }), [
+    currentStep,
+    characterLevel,
+    activeRace,
+    activeSubrace,
+    selectedRaceId,
+    selectedSubraceId,
+    raceAnyCount,
+    racialSpellcastingInfo.hasRacialMagic,
+    activeBackground,
+    activeClass,
+    activeSubclass,
+    subclassUnlockLevel,
+    isSubclassUnlocked,
+    isCaster,
+    hasTacticalFeatures,
+    expertiseConfig.allowedCount,
+    pendingCreationDecisions.length,
+  ]);
+
   return (
     <div className="fixed inset-0 z-50 flex flex-col w-screen h-screen overflow-hidden bg-[#100905] animate-fadeIn font-serif text-[#2c241b]">
       {/* Outer Container Filling Full Screen */}
@@ -2486,15 +2559,64 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
               <span className="hidden sm:inline">{isSidebarOpen ? 'Ocultar Hoja' : 'Ver Hoja'}</span>
             </button>
 
-            <button
-              type="button"
-              onClick={() => startCharacterCreatorTutorial((stepId) => setCurrentStep(stepId as CreatorStep), isCaster)}
-              className="px-2.5 py-1 sm:py-1.5 rounded-lg text-xs font-fantasy font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm bg-gradient-to-r from-[#3b174a] to-[#261033] hover:from-[#4d1f61] hover:to-[#351647] text-[#e8c8fa] border border-[#8c4ba8]/60 hover:text-white active:scale-95"
-              title="Iniciar tutorial interactivo paso a paso"
-            >
-              <span>🎓</span>
-              <span className="hidden md:inline">Tutorial</span>
-            </button>
+            {/* Tutorial Dropdown Plaque */}
+            <div className="relative" ref={tutorialMenuRef}>
+              <button
+                type="button"
+                onClick={() => setIsTutorialMenuOpen((prev) => !prev)}
+                className="px-2.5 py-1 sm:py-1.5 rounded-lg text-xs font-fantasy font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm bg-gradient-to-r from-[#3b174a] to-[#261033] hover:from-[#4d1f61] hover:to-[#351647] text-[#e8c8fa] border border-[#8c4ba8]/60 hover:text-white active:scale-95"
+                title="Menú de tutorial interactivo paso a paso"
+              >
+                <span>🎓</span>
+                <span className="hidden md:inline">Tutorial</span>
+                <ChevronDown className={`w-3 h-3 text-[#d2a3ea] transition-transform ${isTutorialMenuOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {isTutorialMenuOpen && (
+                <div className="absolute right-0 top-full mt-1.5 w-64 bg-[#20150d] border-2 border-[#b88c32] rounded-xl shadow-2xl z-50 p-2 space-y-1.5 font-serif animate-fadeIn">
+                  <div className="px-2 py-1 border-b border-[#5a4325] text-left">
+                    <span className="text-[10px] font-fantasy uppercase tracking-wider text-[#d4af59] font-bold block">
+                      Guía Interactiva 5e
+                    </span>
+                    <span className="text-[11px] text-[#e8dcd0]">
+                      Elige el tipo de recorrido:
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsTutorialMenuOpen(false);
+                      startCharacterCreatorTutorial(tutorialContext, (stepId) => setCurrentStep(stepId as CreatorStep), 'full');
+                    }}
+                    className="w-full text-left p-2 rounded-lg bg-[#2e1d13] hover:bg-[#422919] text-[#f7f2ea] border border-[#5a4325] transition cursor-pointer flex flex-col gap-0.5 group"
+                  >
+                    <span className="font-fantasy font-bold text-xs text-[#f2cb6b] group-hover:text-white flex items-center gap-1.5">
+                      🧭 Recorrido Completo (1 al 9)
+                    </span>
+                    <span className="text-[10.5px] text-[#d6c4aa] opacity-90 leading-tight">
+                      Guía paso a paso desde la identidad hasta la exportación a PDF.
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsTutorialMenuOpen(false);
+                      startCharacterCreatorTutorial(tutorialContext, (stepId) => setCurrentStep(stepId as CreatorStep), 'step');
+                    }}
+                    className="w-full text-left p-2 rounded-lg bg-[#2e1d13] hover:bg-[#422919] text-[#f7f2ea] border border-[#5a4325] transition cursor-pointer flex flex-col gap-0.5 group"
+                  >
+                    <span className="font-fantasy font-bold text-xs text-[#f2cb6b] group-hover:text-white flex items-center gap-1.5">
+                      🎯 Guía de este Paso Actual
+                    </span>
+                    <span className="text-[10.5px] text-[#d6c4aa] opacity-90 leading-tight">
+                      Explica sólo las opciones y subdecisiones de la pestaña activa.
+                    </span>
+                  </button>
+                </div>
+              )}
+            </div>
 
             <button
               onClick={handleAttemptClose}
@@ -2747,7 +2869,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                     </div>
                     <button
                       type="button"
-                      onClick={() => startCharacterCreatorTutorial((stepId) => setCurrentStep(stepId as CreatorStep))}
+                      onClick={() => startCharacterCreatorTutorial(tutorialContext, (stepId) => setCurrentStep(stepId as CreatorStep), 'full')}
                       className="text-[10.5px] text-[#8c672b] hover:text-[#5c4a35] font-fantasy font-bold flex items-center gap-1 cursor-pointer shrink-0"
                     >
                       <Sparkles className="w-3 h-3 text-[#c59b27]" /> Tutorial Guiado
@@ -2789,7 +2911,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                     </div>
 
                     {/* Level Selector in Step 1 */}
-                    <div className="py-1 px-2 bg-[#f5ede0] rounded-lg border border-[#d6c4aa] space-y-0.5 shadow-2xs min-w-0">
+                    <div id="creator-identity-level" className="py-1 px-2 bg-[#f5ede0] rounded-lg border border-[#d6c4aa] space-y-0.5 shadow-2xs min-w-0">
                       <div className="flex items-center justify-between">
                         <label className="block text-[10.5px] font-bold font-fantasy text-[#4a361c] uppercase leading-tight">
                           Nivel del Personaje *
@@ -3304,7 +3426,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div id="creator-abilities-targets" className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       {(['str', 'dex', 'con', 'int', 'wis', 'cha'] as (keyof AbilityScores)[]).map((statKey) => {
                         const info = ABILITY_SCORE_EXPLANATIONS[statKey];
                         const isAssigned = assignedStats[statKey] !== undefined;
@@ -3561,7 +3683,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   <div id="creator-race-traits" className="space-y-4">
                     {/* Subrace Selector if applicable */}
                   {activeRace && activeRace.subraces && activeRace.subraces.length > 0 && (
-                    <div className="p-4 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] space-y-3 shadow-xs">
+                    <div id="creator-race-subraces" className="p-4 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] space-y-3 shadow-xs">
                       <div className="flex items-center justify-between">
                         <label className="block text-xs font-bold font-fantasy text-[#4a361c] uppercase">
                           Subraza / Linaje de {activeRace.name}
@@ -3590,7 +3712,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
 
                   {/* Flexible Racial Ability Points Picker */}
                   {raceAnyCount > 0 && activeRace && (
-                    <div className="p-4 bg-[#f5ede0] rounded-xl border-2 border-[#b88c32] space-y-3 shadow-sm">
+                    <div id="creator-race-flexible" className="p-4 bg-[#f5ede0] rounded-xl border-2 border-[#b88c32] space-y-3 shadow-sm">
                       <div className="flex items-center justify-between">
                         <div>
                           <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
@@ -3647,7 +3769,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                     selectedRaceId === 'kenku' ||
                     selectedRaceId === 'cambiaformas' ||
                     selectedRaceId === 'leonin') && (
-                    <div className="p-4 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] space-y-3 shadow-xs">
+                    <div id="creator-race-bonus-skills" className="p-4 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] space-y-3 shadow-xs">
                       <div className="flex items-center justify-between">
                         <div>
                           <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
@@ -3707,7 +3829,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
 
                   {/* Active Race Details & Traits */}
                   {activeRace ? (
-                    <div className="p-4 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] space-y-3 shadow-xs">
+                    <div id="creator-race-active-traits" className="p-4 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] space-y-3 shadow-xs">
                       <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
                         <Award className="w-4 h-4 text-[#8c672b]" /> Rasgos Raciales de {activeRace.name} {activeSubrace ? `(${activeSubrace.name})` : ''}
                       </h5>
@@ -3969,7 +4091,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   {/* Feats & Campaign Level 1 Feats Section */}
                   <div id="creator-asi-feat-section" className="space-y-4">
                     {/* Optional House Rule / Level 1 Campaign Feat Checkbox (Always visible and toggleable on/off) */}
-                    <div className="p-3 bg-[#fcf9f2] rounded-xl border border-[#d6c4aa] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                    <div id="creator-asi-level1-toggle" className="p-3 bg-[#fcf9f2] rounded-xl border border-[#d6c4aa] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
                       <div>
                         <span className="font-fantasy font-bold text-xs text-[#4a361c] block">
                           Regla Opcional de Campaña: Dote Inicial a Nivel 1
@@ -4373,7 +4495,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                     <>
                       {/* SUBCLASS SELECTOR & ADAPTIVE POPUP LAUNCHER */}
                       {activeClass.subclasses && activeClass.subclasses.length > 0 && (
-                        <div className="p-4 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] space-y-3 shadow-xs">
+                        <div id="creator-class-subclass" className="p-4 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] space-y-3 shadow-xs">
                           <div className="flex items-center justify-between">
                             <label className="block text-xs font-bold font-fantasy text-[#4a361c] uppercase flex items-center gap-1.5">
                               <Sword className="w-4 h-4 text-[#8c672b]" /> Subclase / Especialización ({activeClass.subclassesName})
@@ -4520,7 +4642,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
 
                       {/* CLASS & SUBCLASS DECISIONS (Disciplinas elementales, Tótem, Kensei, Runas, Maniobras, Invocaciones, etc.) */}
                       {pendingCreationDecisions.length > 0 && (
-                        <div className="space-y-4">
+                        <div id="creator-class-decisions" className="space-y-4">
                           {pendingCreationDecisions.map((dec) => {
                             const selectedList = creatorClassDecisions[dec.id] || [];
                             const isCompleted = selectedList.length === dec.countNeeded;
@@ -4665,7 +4787,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       )}
 
                       {/* LEVEL-BY-LEVEL PROGRESSION ACCORDION (1 to 20) */}
-                      <div className="p-4 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] space-y-3 shadow-xs">
+                      <div id="creator-class-progression" className="p-4 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] space-y-3 shadow-xs">
                         <div className="flex items-center justify-between">
                           <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
                             <BookOpen className="w-4 h-4 text-[#8c672b]" /> Progresión Nivel a Nivel de {activeClass.name}
@@ -4771,7 +4893,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
 
                         {/* Expertise (Doble Competencia x2) Selector if eligible */}
                         {expertiseConfig.allowedCount > 0 && (
-                          <div className="p-4 bg-[#f5ede0] rounded-xl border-2 border-[#b88c32] space-y-3 shadow-sm">
+                          <div id="creator-class-expertise" className="p-4 bg-[#f5ede0] rounded-xl border-2 border-[#b88c32] space-y-3 shadow-sm">
                             <div className="flex items-center justify-between">
                               <div>
                                 <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
@@ -4813,7 +4935,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
 
                         {/* Fighting Style Selector directly inside Class Step if applicable */}
                         {(['guerrero', 'paladin', 'explorador'].includes(activeClass.id)) && hasTacticalFeatures && (
-                          <div className="p-4 bg-[#f5ede0] rounded-xl border-2 border-[#b88c32] space-y-3 shadow-sm">
+                          <div id="creator-class-fighting-style" className="p-4 bg-[#f5ede0] rounded-xl border-2 border-[#b88c32] space-y-3 shadow-sm">
                             <div className="flex items-center justify-between">
                               <div>
                                 <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
@@ -5167,7 +5289,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
 
                       {/* Interactive Skill Choices (if background grants choices) */}
                       {activeBackground.skillChoices ? (
-                        <div className="p-4 bg-[#fcf9f2] rounded-xl border border-[#d6c4aa] shadow-xs space-y-2.5">
+                        <div id="creator-background-skill-choices" className="p-4 bg-[#fcf9f2] rounded-xl border border-[#d6c4aa] shadow-xs space-y-2.5">
                           <div className="flex items-center justify-between">
                             <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
                               <Award className="w-4 h-4 text-[#8c672b]" /> Elección de Habilidades (Elige {activeBackground.skillChoices.count})
@@ -5250,7 +5372,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
 
                       {/* Interactive Tool Choices (if background grants tool choices) */}
                       {activeBackground.toolChoices && (
-                        <div className="p-4 bg-[#fcf9f2] rounded-xl border border-[#d6c4aa] shadow-xs space-y-3">
+                        <div id="creator-background-tools" className="p-4 bg-[#fcf9f2] rounded-xl border border-[#d6c4aa] shadow-xs space-y-3">
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 border-b border-[#e2d2bc] pb-2">
                             <div>
                               <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
@@ -5356,7 +5478,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
 
                       {/* Interactive Equipment Choices (Evidence, Trinkets, Specialized items) */}
                       {activeBackground.equipmentChoices && activeBackground.equipmentChoices.length > 0 && (
-                        <div className="space-y-3">
+                        <div id="creator-background-trinkets" className="space-y-3">
                           {activeBackground.equipmentChoices.map((choice) => (
                             <div key={choice.id} className="p-4 bg-[#fcf9f2] rounded-xl border border-[#d6c4aa] shadow-xs space-y-3">
                               <div className="flex items-center justify-between">
@@ -5553,7 +5675,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       {/* Background Languages Selector (if granted) */}
                       {((activeBackground.languagesCount && activeBackground.languagesCount > 0) ||
                         (activeBackground.fixedLanguages && activeBackground.fixedLanguages.length > 0)) && (
-                        <div className="p-4 bg-[#fcf9f2] rounded-xl border border-[#d6c4aa] shadow-xs space-y-3.5">
+                        <div id="creator-background-languages" className="p-4 bg-[#fcf9f2] rounded-xl border border-[#d6c4aa] shadow-xs space-y-3.5">
                           {/* Header */}
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 border-b border-[#e2d2bc] pb-2">
                             <div>
@@ -5915,7 +6037,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       {activeBackground.bonusFeatId && (() => {
                         const bonusFeat = OFFICIAL_5E_FEATS.find((f) => f.id === activeBackground.bonusFeatId);
                         return (
-                          <div className="p-4 bg-gradient-to-br from-[#fcf6e9] via-[#f7edd8] to-[#f4e6c8] rounded-xl border-2 border-[#b88c32] shadow-md space-y-3">
+                          <div id="creator-background-bonus-feat" className="p-4 bg-gradient-to-br from-[#fcf6e9] via-[#f7edd8] to-[#f4e6c8] rounded-xl border-2 border-[#b88c32] shadow-md space-y-3">
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#d8be8a] pb-2.5">
                               <div>
                                 <span className="text-[10px] font-mono uppercase tracking-wider text-[#9c6a1e] font-bold block">
@@ -6425,7 +6547,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       })}
 
                       {/* Fixed Class Equipment & Starting Wealth */}
-                      <div className="p-4 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] space-y-2 shadow-xs">
+                      <div id="creator-equipment-wealth" className="p-4 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] space-y-2 shadow-xs">
                         <div className="flex items-center justify-between">
                           <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
                             <Coins className="w-4 h-4 text-[#8c672b]" /> Riqueza y Equipo Fijo de {startingEquipmentConfig.className}
@@ -6482,7 +6604,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       )}
 
                       {/* Live Equipment & Armor Class Tactical Management */}
-                      <div className="p-4 bg-[#fcf9f2] rounded-xl border-2 border-[#8c672b] shadow-sm space-y-3">
+                      <div id="creator-equipment-defense" className="p-4 bg-[#fcf9f2] rounded-xl border-2 border-[#8c672b] shadow-sm space-y-3">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#e2d2bc] pb-2.5">
                           <div>
                             <h5 className="font-fantasy font-bold text-xs sm:text-sm text-[#4a361c] uppercase flex items-center gap-2">
@@ -6644,7 +6766,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
 
                   {/* Limit Capacity Banner (for Casters) */}
                   {isCaster && (
-                    <div className="p-3 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs font-mono shadow-xs">
+                    <div id="creator-spells-limits-banner" className="p-3 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs font-mono shadow-xs">
                       <span className="text-[#5c4a35]">
                         Capacidad 5e: <strong>{spellLimits.explanation}</strong>
                       </span>
@@ -6674,7 +6796,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   {!isCaster ? (
                     <div className="space-y-4">
                       {/* Non-Caster Status & Ability Summary */}
-                      <div className="p-3 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs font-mono shadow-xs">
+                      <div id="creator-spells-noncaster-summary" className="p-3 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs font-mono shadow-xs">
                         <span className="text-[#5c4a35]">
                           Magia Innata / Racial: <strong>{selectedSpells.length > 0 ? `${selectedSpells.length} conjuro${selectedSpells.length > 1 ? 's' : ''} registrado${selectedSpells.length > 1 ? 's' : ''}` : 'Sin conjuros de clase'}</strong>
                         </span>
@@ -6690,7 +6812,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
 
                       {/* 1. SECCIÓN DE MAGIA RACIAL INNATA CONCEDIDA */}
                       {racialSpellcastingInfo.hasRacialMagic ? (
-                        <div className="p-4 rounded-xl bg-gradient-to-br from-purple-50/80 via-[#fcf9f2] to-[#f5ede0] border-2 border-purple-300 text-[#2c241b] shadow-sm space-y-4">
+                        <div id="creator-spells-innate-panel" className="p-4 rounded-xl bg-gradient-to-br from-purple-50/80 via-[#fcf9f2] to-[#f5ede0] border-2 border-purple-300 text-[#2c241b] shadow-sm space-y-4">
                           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-purple-200 pb-3">
                             <div className="flex items-center gap-2.5">
                               <div className="w-8 h-8 rounded-lg bg-purple-100 border border-purple-300 flex items-center justify-center text-purple-700 shrink-0">
@@ -6847,7 +6969,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
 
                       {/* 3. HEROE MARCIAL PURO (SI NO TIENE MAGIA RACIAL NI CONJUROS) */}
                       {!racialSpellcastingInfo.hasRacialMagic && grantedRacialSpells.length === 0 && selectedSpells.length === 0 && (
-                        <div className="p-8 bg-gradient-to-br from-[#f8f1e5] to-[#ebdcc4] rounded-2xl border-2 border-[#8c672b] text-center space-y-4 shadow-sm">
+                        <div id="creator-spells-pure-martial" className="p-8 bg-gradient-to-br from-[#f8f1e5] to-[#ebdcc4] rounded-2xl border-2 border-[#8c672b] text-center space-y-4 shadow-sm">
                           <div className="w-16 h-16 mx-auto rounded-2xl bg-[#4a361c] text-[#f5ebd7] flex items-center justify-center shadow-md">
                             <Sword className="w-8 h-8 text-[#d4ab59]" />
                           </div>
@@ -7126,7 +7248,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       <div className="space-y-6 max-h-[50vh] overflow-y-auto pr-1">
                         {/* SECTION A: CANTRIPS */}
                         {(spellActiveTab === 'all' || spellActiveTab === 'cantrips') && (
-                          <div className="space-y-3">
+                          <div id="creator-spells-cantrips" className="space-y-3">
                             <div className="flex items-center justify-between border-b-2 border-[#8c672b] pb-1.5">
                               <h5 className="font-fantasy font-bold text-sm text-[#4a361c] flex items-center gap-2">
                                 <Sparkles className="w-4 h-4 text-[#8c672b]" />
@@ -7164,7 +7286,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
 
                         {/* SECTION B: LEVELED SPELLS (Grouped strictly by level) */}
                         {(spellActiveTab === 'all' || spellActiveTab === 'leveled') && (
-                          <div className="space-y-5 pt-2">
+                          <div id="creator-spells-leveled" className="space-y-5 pt-2">
                             <div className="flex items-center justify-between border-b-2 border-[#8c672b] pb-1.5">
                               <h5 className="font-fantasy font-bold text-sm text-[#4a361c] flex items-center gap-2">
                                 <BookOpen className="w-4 h-4 text-[#8c672b]" />
@@ -7239,7 +7361,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
               {currentStep === 'review' && (
                 <div id="step-tab-review-content" className="space-y-4">
                   {/* Step Explanation Banner */}
-                  <div className="p-3.5 sm:p-4 rounded-xl bg-[#f5ede0] border-2 border-[#d6c4aa] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                  <div id="creator-review-export-banner" className="p-3.5 sm:p-4 rounded-xl bg-[#f5ede0] border-2 border-[#d6c4aa] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
                     <div className="flex items-start gap-3">
                       <Star className="w-5 h-5 text-[#8c672b] shrink-0 mt-0.5" />
                       <div>
@@ -8039,6 +8161,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                 </button>
               ) : (
                 <button
+                  id="creator-final-save-btn"
                   type="button"
                   onClick={handleFinalSave}
                   className="px-4 py-1 rounded-lg text-xs font-fantasy font-extrabold text-[#1c130b] transition-all flex items-center gap-1.5 cursor-pointer shadow-xs hover:brightness-110 active:scale-95 border border-[#ffe28a] shrink-0"
