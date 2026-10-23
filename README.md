@@ -10,6 +10,13 @@
 
 ---
 
+## 🚀 Acceso Inmediato (Sin Node.js ni instalaciones previas)
+
+* 🌐 **Usar Online en el Navegador:** [https://windrush92.github.io/mythweaver-character-forge/](https://windrush92.github.io/mythweaver-character-forge/) *(Funciona en PC, tablet o celular al instante)*
+* 💻 **Descargar Aplicación para Windows (.zip portable):** [MythWeaver-5e-Windows-x64.zip (Release v1.0.0)](https://github.com/Windrush92/mythweaver-character-forge/releases/download/v1.0.0/MythWeaver-5e-Windows-x64.zip) *(Descargas, descomprimes y haces doble clic en MythWeaver-5e.exe para usarlo como programa de escritorio 100% offline)*
+
+---
+
 ## 🌟 ¿Qué es MythWeaver Character Forge?
 
 **MythWeaver Character Forge** es una aplicación web independiente de código abierto diseñada para crear, gestionar y jugar personajes de **D&D 5ª Edición**.
