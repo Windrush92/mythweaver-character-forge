@@ -60,6 +60,7 @@ import { WeaponPickerModal } from './WeaponPickerModal';
 import { ArmorPickerModal } from './ArmorPickerModal';
 import { FantasyAvatarFrame } from './FantasyAvatarFrame';
 import { AvatarLightboxModal } from './AvatarLightboxModal';
+import { EquipmentBadge } from './EquipmentBadge';
 import {
   findWeaponByName,
   findArmorByName,
@@ -6539,9 +6540,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                 }`}
                               >
                                 <div className="flex items-center gap-2.5 min-w-0">
-                                  <span className="text-lg shrink-0">
-                                    {weaponDef ? '⚔️' : armorDef ? (armorDef.category === 'shield' ? '🛡️' : '🥋') : isShield ? '🛡️' : '📦'}
-                                  </span>
+                                  <EquipmentBadge name={item} size="md" />
                                   <div className="min-w-0">
                                     <span className={`text-xs font-bold block truncate ${isEquipped ? 'text-[#382b20]' : 'text-[#7a6448]'}`}>
                                       {item}
@@ -7924,9 +7923,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                 }`}
                               >
                                 <div className="flex items-center gap-2 min-w-0">
-                                  <span className="text-base shrink-0">
-                                    {weaponDef ? '⚔️' : armorDef ? (armorDef.category === 'shield' ? '🛡️' : '🥋') : isShield ? '🛡️' : '📦'}
-                                  </span>
+                                  <EquipmentBadge name={item} size="sm" />
                                   <div className="min-w-0">
                                     <span className="block truncate font-bold">{item}</span>
                                     <div className="flex flex-wrap items-center gap-1 mt-0.5">
@@ -8780,7 +8777,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                   : 'bg-[#faf7f0] border-[#d6c4aa] text-[#7a6448] opacity-75'
                               }`}
                             >
-                              <span className="truncate">• {item}</span>
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <EquipmentBadge name={item} size="sm" className="w-4.5 h-4.5 min-w-[18px]" />
+                                <span className="truncate">{item}</span>
+                              </div>
                               <span
                                 className={`text-[9px] px-1.5 py-0.2 rounded font-mono font-bold shrink-0 ${
                                   isEquipped

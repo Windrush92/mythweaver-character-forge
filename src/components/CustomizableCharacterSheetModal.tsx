@@ -54,6 +54,7 @@ import {
   isItemEquipable,
 } from '../data/weaponsAndArmorData';
 import { getWeaponBadgeAsset, getArmorBadgeAsset } from '../utils/equipmentAssets';
+import { EquipmentBadge } from './EquipmentBadge';
 import {
   WILD_MAGIC_SURGE_TABLE,
   getWildMagicSurgeByRoll,
@@ -7294,24 +7295,8 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                         {/* Top Subrow: Badge + Full Item Name (Never truncated) + Actions */}
                         <div className="flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                            {/* Forged Weapon / Armor Badge */}
-                            {(armor || isShield) && (
-                              <img
-                                src={getArmorBadgeAsset(item, armor?.category)}
-                                alt=""
-                                className="w-8 h-8 object-contain shrink-0 drop-shadow-xs group-hover:scale-105 transition-transform"
-                              />
-                            )}
-                            {weapon && (
-                              <img
-                                src={getWeaponBadgeAsset(item, weapon?.category)}
-                                alt=""
-                                className="w-8 h-8 object-contain shrink-0 drop-shadow-xs group-hover:scale-105 transition-transform"
-                              />
-                            )}
-                            {!armor && !weapon && !isShield && (
-                              <span className="text-base shrink-0">📦</span>
-                            )}
+                            {/* Forged Equipment Badge */}
+                            <EquipmentBadge name={item} size="md" />
 
                             <div className="min-w-0 flex-1">
                               <span className={`text-xs font-fantasy font-bold block leading-snug break-words ${isEquipped ? 'text-[#2c1d0d]' : 'text-[#382b20]'}`}>

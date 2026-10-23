@@ -17,6 +17,7 @@ import { ALL_5E_WEAPONS, ALL_5E_ARMORS, WeaponDef, ArmorDef } from '../data/weap
 import { Spell } from '../types';
 import { SpellDetailModal } from './SpellDetailModal';
 import { CompendiumInspectModal, CompendiumInspectData } from './CompendiumInspectModal';
+import { EquipmentBadge } from './EquipmentBadge';
 import {
   OFFICIAL_5E_CONDITIONS,
   OFFICIAL_5E_TACTICAL_RULES,
@@ -1886,11 +1887,14 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                   key={w.id}
                   className="bg-[#fcf9f2] p-3.5 rounded-xl border border-[#d8c8af] space-y-1.5"
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="font-fantasy font-bold text-xs text-[#2c221a]">
-                      {w.name}
-                    </span>
-                    <span className="text-xs font-mono font-bold text-[#8c672b]">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <EquipmentBadge name={w.name} category={w.category} size="md" />
+                      <span className="font-fantasy font-bold text-xs text-[#2c221a] truncate">
+                        {w.name}
+                      </span>
+                    </div>
+                    <span className="text-xs font-mono font-bold text-[#8c672b] shrink-0">
                       {w.damageDice} {w.damageType}
                     </span>
                   </div>
@@ -1913,11 +1917,14 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                   key={a.id}
                   className="bg-[#fcf9f2] p-3.5 rounded-xl border border-[#d8c8af] space-y-1.5"
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="font-fantasy font-bold text-xs text-[#2c221a]">
-                      {a.name}
-                    </span>
-                    <span className="text-xs font-mono font-bold text-[#8c672b]">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <EquipmentBadge name={a.name} category={a.category} size="md" />
+                      <span className="font-fantasy font-bold text-xs text-[#2c221a] truncate">
+                        {a.name}
+                      </span>
+                    </div>
+                    <span className="text-xs font-mono font-bold text-[#8c672b] shrink-0">
                       CA {a.baseAc}
                     </span>
                   </div>

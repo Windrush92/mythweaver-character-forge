@@ -932,6 +932,12 @@ export function findArmorByName(query: string): ArmorDef | undefined {
   if (!query) return undefined;
   const q = query.toLowerCase().trim();
 
+  // Guard: If item is clearly a non-armor category, never treat as body armor or shield unless explicitly specified
+  const isNonArmorCategory = /libro|grimorio|tomo|diario|notas|manual|mochila|bolsa|bolsita|saco|frasco|vial|botella|pergamino|pluma|cuchillo|antorcha|cuerda|raciones|odre|instrumento|herramientas|kit|bota|guante|cintur|estuche|vaina|amuleto|anillo|gema|moneda|taza|vela/i.test(q);
+  if (isNonArmorCategory && !/armadura|escudo|cota|coraza|camisote/i.test(q)) {
+    return undefined;
+  }
+
   // 1. Direct match on id, full name or English name
   const exact = ALL_5E_ARMORS.find(
     (a) =>
@@ -951,16 +957,21 @@ export function findArmorByName(query: string): ArmorDef | undefined {
   if (baseMatch) return baseMatch;
 
   // 3. Synonym and keyword heuristic match for natural language Spanish/English gear
-  if (q.includes('escama') || q.includes('scale')) {
+  if (/cota de escamas|scale mail/i.test(q) || (q.includes('escama') && /cota|armadura/i.test(q))) {
     return ALL_5E_ARMORS.find((a) => a.id === 'cota-escamas');
   }
-  if (q.includes('cuero tachonado') || q.includes('studded')) {
+  if (/cuero tachonado|studded/i.test(q)) {
     return ALL_5E_ARMORS.find((a) => a.id === 'cuero-tachonado');
   }
-  if (q.includes('cuero') || q.includes('leather')) {
+  if (
+    /armadura de cuero|leather armor/i.test(q) ||
+    q === 'cuero' ||
+    q === 'leather' ||
+    (q.includes('cuero') && /armadura/i.test(q))
+  ) {
     return ALL_5E_ARMORS.find((a) => a.id === 'cuero');
   }
-  if (q.includes('media armadura') || q.includes('half plate')) {
+  if (/media armadura|half plate/i.test(q) || (q.includes('semiplaca') && /armadura/i.test(q))) {
     return ALL_5E_ARMORS.find((a) => a.id === 'media-armadura');
   }
   if (q.includes('coraza') || q.includes('breastplate')) {
@@ -972,22 +983,22 @@ export function findArmorByName(query: string): ArmorDef | undefined {
   if (q.includes('cota de malla') || q.includes('chain mail') || q.includes('armadura de malla')) {
     return ALL_5E_ARMORS.find((a) => a.id === 'cota-malla');
   }
-  if (q.includes('anilla') || q.includes('ring mail')) {
+  if (/cota de anillas|ring mail/i.test(q) || (q.includes('anillas') && /cota|armadura/i.test(q))) {
     return ALL_5E_ARMORS.find((a) => a.id === 'cota-anillas');
   }
-  if (q.includes('banda') || q.includes('splint')) {
+  if (/cota de bandas|splint/i.test(q) || (q.includes('bandas') && /cota|armadura/i.test(q))) {
     return ALL_5E_ARMORS.find((a) => a.id === 'bandas');
   }
-  if (q.includes('placa') || q.includes('plate') || q.includes('arnés') || q.includes('arnes')) {
+  if (/placas completas|plate armor/i.test(q) || (q.includes('placa') && /armadura|arnés|arnes/i.test(q))) {
     return ALL_5E_ARMORS.find((a) => a.id === 'placas-completas');
   }
-  if (q.includes('piel') || q.includes('hide')) {
+  if (/armadura de piel|hide armor/i.test(q) || (q.includes('piel') && /armadura/i.test(q))) {
     return ALL_5E_ARMORS.find((a) => a.id === 'pieles');
   }
   if (q.includes('acolchad') || q.includes('padded')) {
     return ALL_5E_ARMORS.find((a) => a.id === 'acolchada');
   }
-  if (q.includes('escudo') || q.includes('shield')) {
+  if ((q.includes('escudo') || q.includes('shield')) && !/hechizo|conjuro|fe/i.test(q)) {
     return ALL_5E_ARMORS.find((a) => a.id === 'escudo');
   }
 

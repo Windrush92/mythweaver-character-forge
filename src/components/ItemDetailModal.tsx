@@ -7,6 +7,7 @@ import {
   ArmorDef,
 } from '../data/weaponsAndArmorData';
 import { getWeaponBadgeAsset, getArmorBadgeAsset } from '../utils/equipmentAssets';
+import { EquipmentBadge } from './EquipmentBadge';
 import { X, Check, Shield, Sword, AlertCircle, Package, Weight, Coins, Zap } from 'lucide-react';
 
 interface ItemDetailModalProps {
@@ -81,11 +82,7 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
         <div className="p-4 px-5 bg-gradient-to-r from-[#24170e] via-[#352214] to-[#24170e] border-b-2 border-[#b88c32] flex items-center justify-between text-[#f7f2ea]">
           <div className="flex items-center gap-3 min-w-0">
             <div className="relative w-12 h-12 shrink-0 flex items-center justify-center">
-              <img
-                src={badgeSrc}
-                alt=""
-                className="w-12 h-12 object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.85)]"
-              />
+              <EquipmentBadge name={itemName} size="lg" className="w-12 h-12" />
             </div>
             <div className="min-w-0">
               <h3 className="text-base sm:text-lg font-bold font-fantasy text-[#f7f2ea] tracking-wide truncate">
