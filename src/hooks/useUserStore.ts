@@ -26,5 +26,6 @@ export function useUserStore() {
     users: [currentUser],
     activeUserId: 'local-player',
     setUsername,
+    isDm: false,
   };
 }

@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Character } from '../types';
+import { WeaponDef, ArmorDef } from '../data/weaponsAndArmorData';
 
 const CHARACTERS_STORAGE_KEY = 'mythweaver_standalone_characters_v1';
+const WEAPONS_STORAGE_KEY = 'mythweaver_standalone_custom_weapons_v1';
+const ARMORS_STORAGE_KEY = 'mythweaver_standalone_custom_armors_v1';
 
 export function useCharacterStore() {
   const [characters, setCharacters] = useState<Character[]>(() => {
@@ -16,6 +19,30 @@ export function useCharacterStore() {
     return [];
   });
 
+  const [customWeapons, setCustomWeapons] = useState<WeaponDef[]>(() => {
+    try {
+      const saved = localStorage.getItem(WEAPONS_STORAGE_KEY);
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch (e) {
+      console.error('Error loading custom weapons:', e);
+    }
+    return [];
+  });
+
+  const [customArmors, setCustomArmors] = useState<ArmorDef[]>(() => {
+    try {
+      const saved = localStorage.getItem(ARMORS_STORAGE_KEY);
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch (e) {
+      console.error('Error loading custom armors:', e);
+    }
+    return [];
+  });
+
   const [activeCharacterId, setActiveCharacterId] = useState<string | null>(null);
 
   // Sync to localStorage
@@ -26,6 +53,22 @@ export function useCharacterStore() {
       console.error('Error saving characters to localStorage:', e);
     }
   }, [characters]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(WEAPONS_STORAGE_KEY, JSON.stringify(customWeapons));
+    } catch (e) {
+      console.error('Error saving custom weapons:', e);
+    }
+  }, [customWeapons]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(ARMORS_STORAGE_KEY, JSON.stringify(customArmors));
+    } catch (e) {
+      console.error('Error saving custom armors:', e);
+    }
+  }, [customArmors]);
 
   const saveCharacter = (char: Character) => {
     setCharacters((prev) => {
@@ -97,6 +140,38 @@ export function useCharacterStore() {
     downloadAnchor.remove();
   };
 
+  const saveCustomWeapon = (weapon: WeaponDef) => {
+    setCustomWeapons((prev) => {
+      const idx = prev.findIndex((w) => w.id === weapon.id);
+      if (idx >= 0) {
+        const next = [...prev];
+        next[idx] = weapon;
+        return next;
+      }
+      return [...prev, weapon];
+    });
+  };
+
+  const deleteCustomWeapon = (id: string) => {
+    setCustomWeapons((prev) => prev.filter((w) => w.id !== id));
+  };
+
+  const saveCustomArmor = (armor: ArmorDef) => {
+    setCustomArmors((prev) => {
+      const idx = prev.findIndex((a) => a.id === armor.id);
+      if (idx >= 0) {
+        const next = [...prev];
+        next[idx] = armor;
+        return next;
+      }
+      return [...prev, armor];
+    });
+  };
+
+  const deleteCustomArmor = (id: string) => {
+    setCustomArmors((prev) => prev.filter((a) => a.id !== id));
+  };
+
   return {
     characters,
     activeCharacterId,
@@ -107,5 +182,11 @@ export function useCharacterStore() {
     importCharacters,
     exportAllJson,
     exportSingleJson,
+    customWeapons,
+    customArmors,
+    saveCustomWeapon,
+    deleteCustomWeapon,
+    saveCustomArmor,
+    deleteCustomArmor,
   };
 }

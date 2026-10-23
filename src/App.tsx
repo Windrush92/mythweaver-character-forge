@@ -8,6 +8,9 @@ import { CustomizableCharacterSheetModal } from './components/CustomizableCharac
 import { PdfCharacterImportModal } from './components/PdfCharacterImportModal';
 import { UiScaleConfiguratorModal } from './components/UiScaleConfiguratorModal';
 import { SkinSelectorModal } from './components/SkinSelectorModal';
+import { CompendiumView } from './components/CompendiumView';
+import { EquipmentBuilderModal } from './components/EquipmentBuilderModal';
+import { WeaponDef, ArmorDef } from './data/weaponsAndArmorData';
 import { FantasyAvatarFrame } from './components/FantasyAvatarFrame';
 import { exportCharacterToOfficialPdf } from './utils/pdfCharacterExporter';
 import {
@@ -30,6 +33,7 @@ import {
   Check,
   FolderDown,
   ExternalLink,
+  BookOpen,
 } from 'lucide-react';
 
 export default function App() {
@@ -41,10 +45,19 @@ export default function App() {
     importCharacters,
     exportAllJson,
     exportSingleJson,
+    customWeapons,
+    customArmors,
+    saveCustomWeapon,
+    deleteCustomWeapon,
+    saveCustomArmor,
+    deleteCustomArmor,
   } = useCharacterStore();
 
   const { scale, setScale, resetZoom } = useUiScale();
   const { skin, setSkin } = useUiSkin();
+
+  // Navigation tab state
+  const [currentTab, setCurrentTab] = useState<'characters' | 'compendium'>('characters');
 
   // Modals state
   const [characterCreatorModalOpen, setCharacterCreatorModalOpen] = useState(false);
@@ -55,6 +68,11 @@ export default function App() {
   const [skinModalOpen, setSkinModalOpen] = useState(false);
   const [exportingPdfId, setExportingPdfId] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+
+  // Equipment Builder modal state
+  const [equipmentBuilderOpen, setEquipmentBuilderOpen] = useState(false);
+  const [editingWeapon, setEditingWeapon] = useState<WeaponDef | null>(null);
+  const [editingArmor, setEditingArmor] = useState<ArmorDef | null>(null);
 
   const jsonFileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -211,6 +229,35 @@ export default function App() {
             </div>
           </div>
 
+          {/* Center Navigation Switcher: Characters vs Compendium */}
+          <div className="flex items-center p-1 rounded-xl bg-[#120a05] border border-[#8c672b]/60 shadow-inner shrink-0">
+            <button
+              type="button"
+              onClick={() => setCurrentTab('characters')}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-fantasy font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                currentTab === 'characters'
+                  ? 'bg-gradient-to-r from-[#8c672b] to-[#b88c32] text-white shadow-xs'
+                  : 'text-[#dfbe7e] hover:text-[#ffd56b]'
+              }`}
+            >
+              <Swords className="w-3.5 h-3.5" />
+              <span>Mis Aventureros ({characters.length})</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setCurrentTab('compendium')}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-fantasy font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                currentTab === 'compendium'
+                  ? 'bg-gradient-to-r from-[#8c672b] to-[#b88c32] text-white shadow-xs'
+                  : 'text-[#dfbe7e] hover:text-[#ffd56b]'
+              }`}
+            >
+              <BookOpen className="w-3.5 h-3.5 text-[#ffd56b]" />
+              <span>Compendio 5e & Armería</span>
+            </button>
+          </div>
+
           {/* Quick Header Actions */}
           <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-end">
             <button
@@ -290,37 +337,39 @@ export default function App() {
       {/* MAIN CONTENT DASHBOARD                                    */}
       {/* ========================================================= */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
-        {/* Banner with Community & Reddit Sharing info */}
-        <div
-          className="rounded-2xl p-4 sm:p-5 border border-[#8c672b]/60 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4"
-          style={{
-            backgroundImage: 'linear-gradient(rgba(28, 18, 11, 0.92), rgba(19, 12, 7, 0.96)), url(/assets/backgrounds/bg_mahogany_table.jpg)',
-            backgroundColor: '#1a1009',
-          }}
-        >
-          <div className="space-y-1 text-center md:text-left">
-            <div className="flex items-center justify-center md:justify-start gap-2">
-              <Sparkles className="w-4 h-4 text-[#ffd56b]" />
-              <h2 className="font-fantasy font-bold text-sm sm:text-base text-[#f5d47a] uppercase tracking-wide">
-                Bienvenido al Creador de Personajes D&D 5e
-              </h2>
-            </div>
-            <p className="text-xs text-[#d1bea3] max-w-2xl leading-relaxed">
-              Forja tu héroe paso a paso con las reglas oficiales de D&D 5e: 99 trasfondos mecánicos con equipamiento y monedas exactas de Wikidot, tiradas 4d6 interactivas, cálculo automático de CA, PG, conjuros y exportación directa a la <strong>Hoja Oficial Editable en PDF</strong>.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2.5 shrink-0">
-            <button
-              type="button"
-              onClick={handleOpenNewCharacter}
-              className="px-4 py-2 rounded-xl font-fantasy font-bold text-xs text-[#1c130b] bg-gradient-to-r from-[#f5d47a] to-[#d4a73b] hover:brightness-110 transition shadow-md flex items-center gap-1.5 cursor-pointer active:scale-95"
+        {currentTab === 'characters' ? (
+          <>
+            {/* Banner with Community & Reddit Sharing info */}
+            <div
+              className="rounded-2xl p-4 sm:p-5 border border-[#8c672b]/60 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4"
+              style={{
+                backgroundImage: 'linear-gradient(rgba(28, 18, 11, 0.92), rgba(19, 12, 7, 0.96)), url(/assets/backgrounds/bg_mahogany_table.jpg)',
+                backgroundColor: '#1a1009',
+              }}
             >
-              <Swords className="w-4 h-4" />
-              <span>Forjar Nuevo Héroe</span>
-            </button>
-          </div>
-        </div>
+              <div className="space-y-1 text-center md:text-left">
+                <div className="flex items-center justify-center md:justify-start gap-2">
+                  <Sparkles className="w-4 h-4 text-[#ffd56b]" />
+                  <h2 className="font-fantasy font-bold text-sm sm:text-base text-[#f5d47a] uppercase tracking-wide">
+                    Bienvenido al Creador de Personajes D&D 5e
+                  </h2>
+                </div>
+                <p className="text-xs text-[#d1bea3] max-w-2xl leading-relaxed">
+                  Forja tu héroe paso a paso con las reglas oficiales de D&D 5e: 99 trasfondos mecánicos con equipamiento y monedas exactas de Wikidot, tiradas 4d6 interactivas, cálculo automático de CA, PG, conjuros y exportación directa a la <strong>Hoja Oficial Editable en PDF</strong>.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleOpenNewCharacter}
+                  className="px-4 py-2 rounded-xl font-fantasy font-bold text-xs text-[#1c130b] bg-gradient-to-r from-[#f5d47a] to-[#d4a73b] hover:brightness-110 transition shadow-md flex items-center gap-1.5 cursor-pointer active:scale-95"
+                >
+                  <Swords className="w-4 h-4" />
+                  <span>Forjar Nuevo Héroe</span>
+                </button>
+              </div>
+            </div>
 
         {/* Character Roster */}
         {characters.length === 0 ? (
@@ -549,6 +598,25 @@ export default function App() {
             </div>
           </div>
         )}
+          </>
+        ) : (
+          /* ========================================================= */
+          /* COMPENDIUM 5e VIEW (STANDALONE FOR PLAYERS)               */
+          /* ========================================================= */
+          <div className="bg-[#fcf9f2] text-[#2c221a] rounded-3xl p-4 sm:p-6 shadow-2xl border border-[#d8c8af] overflow-hidden">
+            <CompendiumView
+              customWeapons={customWeapons}
+              customArmors={customArmors}
+              onOpenEquipmentBuilder={(weapon, armor) => {
+                setEditingWeapon(weapon || null);
+                setEditingArmor(armor || null);
+                setEquipmentBuilderOpen(true);
+              }}
+              onDeleteCustomWeapon={deleteCustomWeapon}
+              onDeleteCustomArmor={deleteCustomArmor}
+            />
+          </div>
+        )}
       </main>
 
       {/* ========================================================= */}
@@ -642,6 +710,26 @@ export default function App() {
           onClose={() => setSkinModalOpen(false)}
           currentSkin={skin}
           onSelectSkin={setSkin}
+        />
+      )}
+
+      {/* ========================================================= */}
+      {/* MODALS: EQUIPMENT BUILDER (CUSTOM WEAPONS & ARMORS)       */}
+      {/* ========================================================= */}
+      {equipmentBuilderOpen && (
+        <EquipmentBuilderModal
+          isOpen={equipmentBuilderOpen}
+          onClose={() => setEquipmentBuilderOpen(false)}
+          initialWeapon={editingWeapon}
+          initialArmor={editingArmor}
+          onSaveWeapon={(weapon) => {
+            saveCustomWeapon(weapon);
+            setEquipmentBuilderOpen(false);
+          }}
+          onSaveArmor={(armor) => {
+            saveCustomArmor(armor);
+            setEquipmentBuilderOpen(false);
+          }}
         />
       )}
     </div>
