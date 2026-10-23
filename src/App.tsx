@@ -2,14 +2,11 @@ import React, { useState, useRef, useMemo } from 'react';
 import { Character } from './types';
 import { useCharacterStore } from './hooks/useCharacterStore';
 import { useUserStore } from './hooks/useUserStore';
-import { useUiScale } from './hooks/useUiScale';
-import { useUiSkin } from './hooks/useUiSkin';
 import { CharacterCreatorModal } from './components/CharacterCreatorModal';
 import { CustomizableCharacterSheetModal } from './components/CustomizableCharacterSheetModal';
 import { LevelUpModal } from './components/LevelUpModal';
 import { GrimoireModal } from './components/GrimoireModal';
 import { PdfCharacterImportModal } from './components/PdfCharacterImportModal';
-import { UiScaleConfiguratorModal } from './components/UiScaleConfiguratorModal';
 import { CompendiumView } from './components/CompendiumView';
 import { EquipmentBuilderModal } from './components/EquipmentBuilderModal';
 import { PathfinderGothicCard } from './components/PathfinderGothicCard';
@@ -24,16 +21,12 @@ import {
   FileDown,
   Upload,
   Sparkles,
-  Sliders,
   FolderDown,
   BookOpen,
-  X,
-  Settings,
   Layers,
   Scroll,
   ChevronsUp,
   ChevronsDown,
-  Edit2,
 } from 'lucide-react';
 
 export default function App() {
@@ -53,7 +46,6 @@ export default function App() {
     deleteCustomArmor,
   } = useCharacterStore();
 
-  const { scale: uiScale, setScale: setUiScale, resetZoom } = useUiScale();
   const { currentUser } = useUserStore();
 
   // Navigation tab state
@@ -88,8 +80,6 @@ export default function App() {
   const [levelUpCharacter, setLevelUpCharacter] = useState<Character | null>(null);
   const [grimoireCharacter, setGrimoireCharacter] = useState<Character | null>(null);
   const [pdfImportModalOpen, setPdfImportModalOpen] = useState(false);
-  const [uiScaleModalOpen, setUiScaleModalOpen] = useState(false);
-  const [settingsMenuOpen, setSettingsMenuOpen] = useState(false);
 
   // Quick HP adjustments on cards
   const [quickDamageId, setQuickDamageId] = useState<string | null>(null);
@@ -390,7 +380,7 @@ export default function App() {
           backgroundColor: '#180e07',
         }}
       >
-        {/* Upper Shelf: Dragon Crest + Fantasy Lettering on Left, Cartouche & Settings on Right */}
+        {/* Upper Shelf: Majestic Dragon Crest + Fantasy Name Centered */}
         <div
           className={`w-full transition-all duration-300 ease-in-out ${
             isHeaderCollapsed
@@ -398,156 +388,33 @@ export default function App() {
               : 'max-h-[500px] opacity-100 relative z-30 overflow-visible'
           }`}
         >
-          <div className="w-full max-w-[1480px] mx-auto px-4 sm:px-6 py-2 sm:py-2.5 flex flex-wrap items-center justify-between gap-3">
-          {/* Left: Majestic Dragon Logo + Fantasy Name */}
-          <div className="flex items-center gap-3 sm:gap-4 shrink-0">
-            <img
-              src="/assets/ui/logo_minimalist_mythweaver.png"
-              alt="Mythweaver Dragon Crest"
-              className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-contain drop-shadow-[0_4px_24px_rgba(255,200,80,0.7)] shrink-0 transition-transform duration-300 hover:scale-105"
-            />
-            <div className="flex flex-col justify-center">
-              <span
-                className="text-2xl sm:text-3xl md:text-4xl font-black tracking-widest uppercase select-none leading-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)]"
-                style={{
-                  fontFamily: "'Cinzel Decorative', 'Cinzel', serif",
-                  background: 'linear-gradient(180deg, #fff9e6 0%, #dfbe7e 40%, #b88c32 75%, #7a581e 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.9)) drop-shadow(0 0 16px rgba(223,190,126,0.45))',
-                }}
-              >
-                Mythweaver
-              </span>
-              <span className="text-[11px] sm:text-xs font-fantasy tracking-[0.25em] text-[#a89279] uppercase mt-1">
-                Forja de Héroes 5e <span className="text-[#ffd56b] font-semibold lowercase">v2.0 • Standalone</span>
-              </span>
+          <div className="w-full max-w-[1480px] mx-auto px-4 sm:px-6 py-2.5 sm:py-3.5 flex items-center justify-center">
+            {/* Centered Dragon Logo + Fantasy Name */}
+            <div className="flex items-center gap-3.5 sm:gap-4.5 shrink-0 select-none">
+              <img
+                src="/assets/ui/logo_minimalist_mythweaver.png"
+                alt="Mythweaver Dragon Crest"
+                className="w-16 h-16 sm:w-20 sm:h-20 md:w-22 md:h-22 object-contain drop-shadow-[0_4px_24px_rgba(255,200,80,0.7)] shrink-0 transition-transform duration-300 hover:scale-105"
+              />
+              <div className="flex flex-col justify-center text-left">
+                <span
+                  className="text-2xl sm:text-3xl md:text-4xl font-black tracking-widest uppercase leading-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)]"
+                  style={{
+                    fontFamily: "'Cinzel Decorative', 'Cinzel', serif",
+                    background: 'linear-gradient(180deg, #fff9e6 0%, #dfbe7e 40%, #b88c32 75%, #7a581e 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.9)) drop-shadow(0 0 16px rgba(223,190,126,0.45))',
+                  }}
+                >
+                  Mythweaver
+                </span>
+                <span className="text-[11px] sm:text-xs font-fantasy tracking-[0.25em] text-[#a89279] uppercase mt-1">
+                  Forja de Héroes 5e <span className="text-[#ffd56b] font-semibold lowercase">v2.0 • Standalone</span>
+                </span>
+              </div>
             </div>
           </div>
-
-          {/* Right: Consolidated Settings Gear */}
-          <div className="flex items-center gap-3 sm:gap-4 ml-auto">
-            {/* Consolidated Settings Gear (⚙️) Button */}
-            <div className="relative z-50">
-              <button
-                type="button"
-                onClick={() => setSettingsMenuOpen(!settingsMenuOpen)}
-                className="relative flex items-center justify-center w-10 h-10 transition-transform duration-150 cursor-pointer active:scale-95 group shrink-0"
-                title="Ajustes del Portal (Escala de Interfaz)"
-                aria-label="Ajustes del Portal"
-              >
-                <img
-                  src={
-                    settingsMenuOpen
-                      ? '/assets/ui/btn_header_action_active.png'
-                      : '/assets/ui/btn_header_action_normal.png'
-                  }
-                  alt=""
-                  className="absolute inset-0 w-full h-full object-contain filter drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)] group-hover:brightness-110 pointer-events-none select-none"
-                />
-                <Settings
-                  className={`relative z-10 w-4 h-4 transition-transform duration-300 ${
-                    settingsMenuOpen
-                      ? 'text-[#2e1906] rotate-90 scale-110'
-                      : 'text-[#dfbe7e] group-hover:text-[#ffd56b] group-hover:rotate-45'
-                  }`}
-                />
-              </button>
-
-              {/* Settings Dropdown Popover Plaque */}
-              {settingsMenuOpen && (
-                <>
-                  <div
-                    className="fixed inset-0 z-40"
-                    onClick={() => setSettingsMenuOpen(false)}
-                  />
-                  <div
-                    className="absolute right-0 top-12 z-50 w-72 p-4 transition-all animate-in fade-in zoom-in-95 duration-150"
-                    style={{
-                      backgroundImage: 'url(/assets/ui/bg_ajustes_portal_frame.png)',
-                      backgroundSize: '100% 100%',
-                      backgroundRepeat: 'no-repeat',
-                      backgroundColor: 'transparent',
-                      filter: 'drop-shadow(0 12px 28px rgba(0, 0, 0, 0.9))',
-                    }}
-                  >
-                    <div className="space-y-3 pt-1">
-                      {/* Popover Header: Perfectly Centered Title */}
-                      <div className="relative flex items-center justify-center pb-2 border-b border-[#dfbe7e]/25">
-                        <span className="font-fantasy font-bold text-xs uppercase tracking-wider text-[#ffd56b] drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] text-center">
-                          Ajustes del Portal
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => setSettingsMenuOpen(false)}
-                          className="absolute right-0 top-1/2 -translate-y-1/2 -mt-1 text-[#a89279] hover:text-[#fdfaf3] p-1 rounded hover:bg-[#3d2717]/60 transition cursor-pointer"
-                          aria-label="Cerrar ajustes"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-
-                      {/* Zoom / Scale Config */}
-                      <div className="space-y-1.5 px-1 pb-1">
-                        <div className="flex items-center justify-between text-xs text-[#c0ad97] px-1.5">
-                          <span className="flex items-center gap-1.5 font-fantasy">
-                            <Sliders className="w-3.5 h-3.5 text-[#dfbe7e]" /> Escala de Vista
-                          </span>
-                          <span className="font-mono text-[#ffd56b] font-bold">
-                            {Math.round(uiScale * 100)}%
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-center gap-1.5">
-                          {[0.8, 0.9, 1.0, 1.1, 1.25].map((val) => {
-                            const isSel = Math.round(uiScale * 100) === Math.round(val * 100);
-                            return (
-                              <button
-                                key={val}
-                                type="button"
-                                onClick={() => setUiScale(val)}
-                                className="relative flex items-center justify-center w-[34px] h-[34px] transition-transform cursor-pointer active:scale-95 group shrink-0"
-                                title={`Escala ${Math.round(val * 100)}%`}
-                              >
-                                <img
-                                  src={
-                                    isSel
-                                      ? '/assets/ui/btn_scale_mini_active.png'
-                                      : '/assets/ui/btn_scale_mini_normal.png'
-                                  }
-                                  alt=""
-                                  className="absolute inset-0 w-full h-full object-contain filter drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)] group-hover:brightness-110 pointer-events-none select-none"
-                                />
-                                <span
-                                  className={`relative z-10 font-mono text-[10px] ${
-                                    isSel
-                                      ? 'text-[#1b1008] font-black'
-                                      : 'text-[#dfbe7e] font-bold group-hover:text-[#ffd56b]'
-                                  }`}
-                                >
-                                  {Math.round(val * 100)}%
-                                </span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setUiScaleModalOpen(true);
-                            setSettingsMenuOpen(false);
-                          }}
-                          className="w-full text-center text-[10.5px] text-[#dfbe7e] hover:text-[#ffd56b] hover:underline pt-0.5 cursor-pointer font-fantasy"
-                        >
-                          Ajuste fino de interfaz...
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
         </div>
 
         {/* Sculpted Console Navigation Bar */}
@@ -560,8 +427,9 @@ export default function App() {
             backgroundSize: '550px auto',
           }}
         >
-          <div className="w-full max-w-[1480px] mx-auto px-4 sm:px-6 flex items-center justify-between gap-2 py-1">
-            <div className="flex items-center gap-2">
+          <div className="w-full max-w-[1480px] mx-auto px-4 sm:px-6 relative flex items-center justify-center py-1">
+            {/* Center Navigation Buttons */}
+            <div className="flex items-center justify-center gap-2.5 sm:gap-3 flex-wrap">
               {/* Tab 1: Mis Aventureros */}
               <button
                 type="button"
@@ -577,7 +445,7 @@ export default function App() {
                   minWidth: '190px',
                   height: '40px',
                 }}
-                className={`flex items-center justify-center gap-2 px-4 transition cursor-pointer select-none ${
+                className={`flex items-center justify-center gap-2 px-4 transition cursor-pointer select-none active:scale-95 ${
                   currentTab === 'characters'
                     ? 'text-[#2e1906] font-extrabold'
                     : 'text-[#dfbe7e] font-bold hover:text-[#fff6db] hover:brightness-110'
@@ -602,7 +470,7 @@ export default function App() {
                   minWidth: '220px',
                   height: '40px',
                 }}
-                className={`flex items-center justify-center gap-2 px-4 transition cursor-pointer select-none ${
+                className={`flex items-center justify-center gap-2 px-4 transition cursor-pointer select-none active:scale-95 ${
                   currentTab === 'compendium'
                     ? 'text-[#2e1906] font-extrabold'
                     : 'text-[#dfbe7e] font-bold hover:text-[#fff6db] hover:brightness-110'
@@ -614,24 +482,26 @@ export default function App() {
             </div>
 
             {/* Right: Collapse / Expand Button with Forged Button Frame */}
-            <button
-              type="button"
-              onClick={toggleHeaderCollapsed}
-              className="relative flex items-center justify-center w-10 h-10 transition-transform duration-150 cursor-pointer active:scale-95 group shrink-0"
-              title={isHeaderCollapsed ? "Expandir panel superior" : "Colapsar panel superior"}
-              aria-label={isHeaderCollapsed ? "Expandir panel superior" : "Colapsar panel superior"}
-            >
-              <img
-                src="/assets/ui/btn_header_action_normal.png"
-                alt=""
-                className="absolute inset-0 w-full h-full object-contain filter drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)] group-hover:brightness-110 transition select-none"
-              />
-              {isHeaderCollapsed ? (
-                <ChevronsDown className="relative z-10 w-5 h-5 text-[#dfbe7e] group-hover:text-[#ffd56b] group-hover:translate-y-0.5 transition-transform" />
-              ) : (
-                <ChevronsUp className="relative z-10 w-5 h-5 text-[#dfbe7e] group-hover:text-[#ffd56b] group-hover:-translate-y-0.5 transition-transform" />
-              )}
-            </button>
+            <div className="absolute right-4 sm:right-6 flex items-center">
+              <button
+                type="button"
+                onClick={toggleHeaderCollapsed}
+                className="relative flex items-center justify-center w-10 h-10 transition-transform duration-150 cursor-pointer active:scale-95 group shrink-0"
+                title={isHeaderCollapsed ? "Expandir panel superior" : "Colapsar panel superior"}
+                aria-label={isHeaderCollapsed ? "Expandir panel superior" : "Colapsar panel superior"}
+              >
+                <img
+                  src="/assets/ui/btn_header_action_normal.png"
+                  alt=""
+                  className="absolute inset-0 w-full h-full object-contain filter drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)] group-hover:brightness-110 transition select-none"
+                />
+                {isHeaderCollapsed ? (
+                  <ChevronsDown className="relative z-10 w-5 h-5 text-[#dfbe7e] group-hover:text-[#ffd56b] group-hover:translate-y-0.5 transition-transform" />
+                ) : (
+                  <ChevronsUp className="relative z-10 w-5 h-5 text-[#dfbe7e] group-hover:text-[#ffd56b] group-hover:-translate-y-0.5 transition-transform" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -1014,18 +884,7 @@ export default function App() {
         />
       )}
 
-      {/* 7. UI Scale Fine-Tune Modal */}
-      {uiScaleModalOpen && (
-        <UiScaleConfiguratorModal
-          isOpen={uiScaleModalOpen}
-          scale={uiScale}
-          onSetScale={setUiScale}
-          onResetScale={resetZoom}
-          onClose={() => setUiScaleModalOpen(false)}
-        />
-      )}
-
-      {/* 8. Themed Notification Alert Modal */}
+      {/* 7. Themed Notification Alert Modal */}
       <ThemedNotificationModal
         isOpen={themedAlert.isOpen}
         onClose={() => setThemedAlert((prev) => ({ ...prev, isOpen: false }))}
