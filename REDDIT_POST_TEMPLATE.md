@@ -24,6 +24,7 @@ Most character builders out there either lock options behind paywalls, require c
 - **24 Fantasy Avatar Frames**: Customize your character's portrait with frames ranging from royal gold filigree to dwarven forge, volcanic magma, glacial ice, and eldritch void.
 - **Direct Official PDF Export**: Generates and downloads the official 3-page editable D&D 5e Character Sheet in PDF format with all fields filled in.
 - **Interactive Live Sheet**: Live alchemical HP vial, armor shield, initiative tracker, and spell slots tracker with short/long rest resets.
+- **5e Compendium & Custom Weapon Forge**: Look up official classes, archetypes, races, feats, spells, and magic items, plus a built-in weapon and armor forge to craft your own homebrew weapons with custom damage dice and properties!
 - **100% Privacy & Zero Server Costs**: Your characters live in your browser's local storage. You can backup or share any character as `.json` or import from saved PDFs.
 
 ### 🔗 Links:
@@ -50,6 +51,7 @@ Les comparto una herramienta que armé para la comunidad: **MythWeaver: Forja de
 - **Asistente de creación en 9 pasos**: Raza, Clase, Atributos (con animación de tirada 4d6 poliédrica interactiva), 99 trasfondos oficiales con riquezas y equipos canónicos, conjuros y dotes.
 - **24 marcos de retrato temáticos**: Oro imperial, forja enana, nigromancia, elemental de fuego/hielo, bosque feérico, etc.
 - **Hoja interactiva en vivo**: Contador de vida, espacios de conjuros y tiradas de ataque.
+- **Compendio 5e Canónico & Forja de Armas**: Consultá clases, subclases, razas, dotes, conjuros y objetos mágicos, además de una herramienta para crear y personalizar tus propias armas y armaduras con dados de daño y propiedades especiales.
 - **Exportación directa a Hoja Oficial en PDF (3 páginas)**: Te genera y descarga el PDF oficial editable con todos los datos calculados listo para imprimir o jugar en digital.
 - **Sin cuentas ni publicidad**: Las fichas quedan guardadas en tu navegador y podés exportarlas o importarlas en `.json` cuando quieras.
 

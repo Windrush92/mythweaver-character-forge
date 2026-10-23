@@ -58,6 +58,12 @@ A diferencia de otras plataformas comerciales, **no requiere registro, no pide e
 
 ---
 
+### 📖 5. Compendio Canónico 5e & Herramienta para Forjar Armas y Armaduras
+* **Base de Datos Canónica**: Consulta clases 1-20, subclases, razas, los 99 trasfondos, grimorio oficial con filtros por escuela/clase/nivel, dotes, objetos mágicos, condiciones y reglas tácticas oficiales.
+* **Herramienta para Forjar Armas & Armaduras**: Crea tus propias armas mágicas o equipo personalizado con categoría (simple/marcial), dados de daño, tipo de daño elemental, propiedades (*Sutil, Versátil, Pesada, Alcance, etc.*), bonos mágicos (+1, +2, +3) y descripción. Las armas creadas se guardan en tu navegador y quedan listas para inspeccionar en el compendio o equipar en tus fichas de personaje.
+
+---
+
 ## 🚀 Inicio Rápido (Local)
 
 Requisitos previos: [Node.js](https://nodejs.org/) (versión 18 o superior).
