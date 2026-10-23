@@ -1,6 +1,7 @@
 import React, { useState, useRef, useMemo } from 'react';
 import { Character } from './types';
 import { useCharacterStore } from './hooks/useCharacterStore';
+import { useUserStore } from './hooks/useUserStore';
 import { useUiScale } from './hooks/useUiScale';
 import { useUiSkin } from './hooks/useUiSkin';
 import { CharacterCreatorModal } from './components/CharacterCreatorModal';
@@ -33,6 +34,7 @@ import {
   Scroll,
   ChevronsUp,
   ChevronsDown,
+  Edit2,
 } from 'lucide-react';
 
 export default function App() {
@@ -54,6 +56,11 @@ export default function App() {
 
   const { scale: uiScale, setScale: setUiScale, resetZoom } = useUiScale();
   const { skin, setSkin } = useUiSkin();
+  const { currentUser, setUsername } = useUserStore();
+
+  // Player name editing in header cartouche
+  const [isEditingPlayerName, setIsEditingPlayerName] = useState(false);
+  const [tempPlayerName, setTempPlayerName] = useState(currentUser.username);
 
   // Navigation tab state
   const [currentTab, setCurrentTab] = useState<'characters' | 'compendium'>('characters');
@@ -427,27 +434,92 @@ export default function App() {
 
           {/* Right: User Identity Cartouche & Consolidated Settings Gear */}
           <div className="flex items-center gap-3 sm:gap-4 ml-auto">
-            {/* User Account / Identity Display - Heraldic Plaque Cartouche */}
-            <div className="relative h-10 flex items-center shrink-0">
-              <img
-                src="/assets/ui/badge_user_identity_cartouche.png"
-                alt=""
-                className="h-full w-auto object-contain filter drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)] pointer-events-none select-none"
-              />
-              {/* Medallion Socket (Circular frame on the left) */}
-              <div className="absolute left-[3.5%] w-[21%] top-0 bottom-0 flex items-center justify-center pointer-events-none">
-                <Sparkles className="w-3.5 h-3.5 text-[#ffd56b] drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]" />
-              </div>
-              {/* Nameplate text container (Main plaque surface) */}
-              <div className="absolute left-[24%] right-[5%] top-0 bottom-0 flex items-center justify-center pointer-events-none">
-                <span className="text-xs font-fantasy font-bold text-[#ffd56b] flex items-center gap-1 whitespace-nowrap">
-                  <span className="text-[#a89279] text-[10px] uppercase tracking-wider font-semibold">
-                    Modo:
-                  </span>
-                  <span className="text-[#f5eee2] drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]">
-                    Local & Offline
-                  </span>
-                </span>
+            {/* User Account / Player Identity Display - Auto-adjusting 3-Part Heraldic Cartouche */}
+            <div className="relative flex items-center shrink-0">
+              <div
+                onClick={() => {
+                  if (!isEditingPlayerName) {
+                    setTempPlayerName(currentUser.username);
+                    setIsEditingPlayerName(true);
+                  }
+                }}
+                className="relative h-10 flex items-center shrink-0 filter drop-shadow-[0_2px_6px_rgba(0,0,0,0.85)] select-none transition-all duration-150 cursor-pointer group hover:brightness-110"
+                title="Haz clic para cambiar tu nombre de jugador"
+              >
+                {/* 1. Left Rosette Cap */}
+                <div className="relative h-10 shrink-0">
+                  <img
+                    src="/assets/ui/cartouche_cap_left.png"
+                    alt=""
+                    className="h-10 w-auto object-contain pointer-events-none -mr-[1px]"
+                  />
+                  {/* Miniature Sparkles inside Rosette */}
+                  <div className="absolute left-[20%] top-0 bottom-0 w-6 flex items-center justify-center pointer-events-none">
+                    <Sparkles className="w-3.5 h-3.5 text-[#ffd56b] drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]" />
+                  </div>
+                </div>
+
+                {/* 2. Middle Body - Auto-stretches cleanly to the player's name */}
+                <div
+                  style={{
+                    backgroundImage: 'url(/assets/ui/cartouche_mid.png)',
+                    backgroundSize: 'auto 100%',
+                    backgroundRepeat: 'repeat-x',
+                  }}
+                  className="h-10 flex items-center px-1.5 -mx-[1px]"
+                >
+                  <div className="flex items-center gap-1.5 whitespace-nowrap">
+                    <span className="text-[#a89279] text-[10px] uppercase tracking-wider font-semibold">
+                      Jugador:
+                    </span>
+
+                    {isEditingPlayerName ? (
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          const trimmed = tempPlayerName.trim() || 'Aventurero';
+                          setUsername(trimmed);
+                          setIsEditingPlayerName(false);
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex items-center"
+                      >
+                        <input
+                          type="text"
+                          autoFocus
+                          value={tempPlayerName}
+                          onChange={(e) => setTempPlayerName(e.target.value)}
+                          onBlur={() => {
+                            const trimmed = tempPlayerName.trim() || 'Aventurero';
+                            setUsername(trimmed);
+                            setIsEditingPlayerName(false);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Escape') {
+                              setIsEditingPlayerName(false);
+                            }
+                          }}
+                          maxLength={24}
+                          className="bg-[#120a05]/90 text-xs font-fantasy font-bold text-[#ffd56b] border border-[#d4af37]/60 rounded px-1.5 py-0.5 outline-none shadow-inner w-28"
+                        />
+                      </form>
+                    ) : (
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs font-fantasy font-bold text-[#f5eee2] drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] group-hover:text-[#ffd56b] transition">
+                          {currentUser.username}
+                        </span>
+                        <Edit2 className="w-2.5 h-2.5 text-[#a89279] opacity-0 group-hover:opacity-100 transition-opacity ml-0.5" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* 3. Right Ornate Bracket Cap */}
+                <img
+                  src="/assets/ui/cartouche_cap_right.png"
+                  alt=""
+                  className="h-10 w-auto object-contain pointer-events-none -ml-[1px] shrink-0"
+                />
               </div>
             </div>
 
