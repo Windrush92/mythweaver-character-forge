@@ -1,0 +1,40 @@
+<svg width="48" height="44" viewBox="0 0 48 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gilded gold gradient -->
+    <linearGradient id="goldActive" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffd56b"/>
+      <stop offset="30%" stop-color="#dfbe7e"/>
+      <stop offset="70%" stop-color="#b88c32"/>
+      <stop offset="100%" stop-color="#805b1c"/>
+    </linearGradient>
+    <!-- Bright highlight border -->
+    <linearGradient id="brightGoldBorder" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#fff2cc"/>
+      <stop offset="50%" stop-color="#ffd56b"/>
+      <stop offset="100%" stop-color="#c59b27"/>
+    </linearGradient>
+    <filter id="activeGlow" x="-6" y="-4" width="60" height="52" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-color="#b88c32" flood-opacity="0.8"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#ffd56b" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#activeGlow)">
+    <!-- Bookmark plaque with arrow / bookmark notch pointing right -->
+    <path d="M4 4C4 2.89543 4.89543 2 6 2H38L45 22L38 42H6C4.89543 42 4 41.1046 4 40V4Z" 
+          fill="url(#goldActive)" 
+          stroke="url(#brightGoldBorder)" 
+          stroke-width="1.8"/>
+    
+    <!-- Inner glowing rim -->
+    <path d="M7 5.5H36.5L42.5 22L36.5 38.5H7V5.5Z" 
+          fill="none" 
+          stroke="#fff5d9" 
+          stroke-width="0.75" 
+          stroke-opacity="0.85"/>
+
+    <!-- Left side binding rivets with golden shine -->
+    <circle cx="7" cy="7" r="1.5" fill="#fff2cc" stroke="#664410" stroke-width="0.5"/>
+    <circle cx="7" cy="37" r="1.5" fill="#fff2cc" stroke="#664410" stroke-width="0.5"/>
+  </g>
+</svg>

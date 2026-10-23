@@ -1,0 +1,947 @@
+{
+  "campaigns": [
+    {
+      "id": "camp-motor-alma",
+      "name": "Motor Alma y Sangre",
+      "description": "Campaña techno-fantasía donde la magia antigua y la ingeniería cibernética colisionan. Enfrentamientos contra androides de combate y misterios del Código Anciano.",
+      "dmName": "Pablo",
+      "createdAt": "2026-10-05T14:17:04.191Z",
+      "worldMapUrl": "/vault/maps/MAPA_ELORIA_COMPLETO.webp",
+      "worldMapPins": [
+        {
+          "id": "pin-party-motor",
+          "x": 46.5,
+          "y": 48.2,
+          "title": "Posición de la Party 🧭",
+          "description": "Dario, Elías, Kara, Talia, Micaela y Lucio infiltrados en el sector exterior.",
+          "type": "party",
+          "color": "#eab308"
+        },
+        {
+          "id": "pin-laboratorio",
+          "x": 52,
+          "y": 42,
+          "title": "Laboratorio de Autómatas",
+          "description": "Instalación donde se ensamblaron los Robo Asesinos y Robo Magos.",
+          "type": "dungeon",
+          "color": "#ef4444"
+        },
+        {
+          "id": "pin-base-aerea",
+          "x": 40,
+          "y": 60,
+          "title": "Base Aérea Cyberpunk",
+          "description": "Pista de aterrizaje fortificada custodiada por robots prototipo.",
+          "type": "city",
+          "color": "#3b82f6"
+        }
+      ],
+      "notes": "Lore Principal de la Campaña:\n- El Inhibidor y la obtención del código anciano.\n- Enemigos encontrados: Robo Asesino, Robo Bárbaro, Robo Clérigo, Robo Mago, Robo Warlock.\n- Aliados / NPCs: Arthur Aving, Elena, Lila, Liligus, Malakar, Qu, F410P4 y Dinosapiens Mago."
+    },
+    {
+      "id": "camp-hielo-quebrado",
+      "name": "02: El Susurro en el Hielo Quebrado",
+      "description": "Aventura en la fría posta del Cuerno Quebrado. Una aberración gélida acecha bajo las grietas de la bodega congelada.",
+      "dmName": "Pablo",
+      "createdAt": "2026-10-05T14:17:04.194Z",
+      "worldMapUrl": "/vault/maps/exterior_posta.jpg",
+      "worldMapPins": [
+        {
+          "id": "pin-posta",
+          "x": 50,
+          "y": 50,
+          "title": "La Posta del Cuerno Quebrado 🧭",
+          "description": "Refugio en la tormenta de nieve. Administrado por Vann y su perro Colmillo.",
+          "type": "party",
+          "color": "#eab308"
+        },
+        {
+          "id": "pin-bodega",
+          "x": 55,
+          "y": 65,
+          "title": "La Bodega & Grieta Glacial",
+          "description": "Lugar donde emergen las Larvas de Escarcha y la Aberración de Savia Gélida.",
+          "type": "dungeon",
+          "color": "#ef4444"
+        }
+      ],
+      "notes": "Acto 1: La Posada del Cuerno Quebrado.\nActo 2: El Grito a Medianoche.\nActo 3: El Descenso a la Bodega Helada (Larvas de Escarcha).\nActo 4: El Clímax en la Caverna Helada (Aberración de Savia Gélida con Escudo Quebradizo y Aura Glacial)."
+    },
+    {
+      "id": "camp-corazon-savia",
+      "name": "Corazón de Savia (Eloria)",
+      "description": "En las profundidades del Raigal Profundo y el pueblo de Grisvado, la Herida Negra y el meteorito de cristal oscuro alteran el equilibrio del bosque.",
+      "dmName": "Pablo",
+      "createdAt": "2026-10-05T14:17:04.194Z",
+      "worldMapUrl": "/vault/maps/MAPA_ELORIA_COMPLETO.webp",
+      "worldMapPins": [
+        {
+          "id": "pin-grisvado",
+          "x": 48,
+          "y": 54,
+          "title": "Grisvado - Pueblo al borde del bosque 🧭",
+          "description": "La Posada El Brote Dorado. Punto neurálgico antes de internarse en el Raigal.",
+          "type": "party",
+          "color": "#eab308"
+        },
+        {
+          "id": "pin-valneria-nieve",
+          "x": 35,
+          "y": 20,
+          "title": "Ciudadela de Nieve (Valneria)",
+          "description": "Fortaleza sobre glaciar en movimiento. Magos del hielo.",
+          "type": "city",
+          "color": "#3b82f6"
+        },
+        {
+          "id": "pin-cumbres-heladas",
+          "x": 30,
+          "y": 28,
+          "title": "Cumbres Heladas",
+          "description": "Ciudades enanas excavadas en roca.",
+          "type": "dungeon",
+          "color": "#ef4444"
+        },
+        {
+          "id": "pin-desierto-sythar",
+          "x": 65,
+          "y": 60,
+          "title": "Desierto de Sythar (Xelara)",
+          "description": "Vastas arenas azotadas por tormentas mágicas.",
+          "type": "hazard",
+          "color": "#f97316"
+        },
+        {
+          "id": "pin-selva-umbaluz",
+          "x": 72,
+          "y": 70,
+          "title": "Selva de Umbaluz (Xelara)",
+          "description": "Vegetación fosforescente y ruinas del Templo del Crepúsculo.",
+          "type": "dungeon",
+          "color": "#10b981"
+        },
+        {
+          "id": "pin-mar-cristal",
+          "x": 20,
+          "y": 75,
+          "title": "Mar de Cristal & Archipiélago (Yldros)",
+          "description": "Mil islas y la legendaria Isla Perdida de Thalassos.",
+          "type": "city",
+          "color": "#3b82f6"
+        }
+      ],
+      "notes": "Pruebas del Dios Ombú:\n1. El camino sin retorno.\n2. El sacrificio de la laguna.\n3. El equilibrio del bosque.\nEl Concilio de la Enmienda y Severin Rael."
+    },
+    {
+      "id": "camp-walpurgisnacht",
+      "name": "01: Walpurgisnacht",
+      "description": "Los sucesos misteriosos y el epílogo del incidente de Durholt.",
+      "dmName": "Pablo",
+      "createdAt": "2026-10-05T14:17:04.194Z",
+      "worldMapUrl": "/vault/maps/MAPA_ELORIA_COMPLETO.webp",
+      "worldMapPins": [
+        {
+          "id": "pin-durholt",
+          "x": 45,
+          "y": 48,
+          "title": "Durholt",
+          "description": "Lugar del incidente sobrenatural de Walpurgisnacht.",
+          "type": "party",
+          "color": "#eab308"
+        }
+      ],
+      "notes": "Epílogo del incidente de Durholt tras liberar el raigal."
+    }
+  ],
+  "activeCampaignId": "camp-motor-alma",
+  "characters": [
+    {
+      "id": "char-dario-ashfall",
+      "campaignId": "camp-motor-alma",
+      "name": "Dario Ashfall",
+      "playerName": "Martín",
+      "race": "Humano",
+      "class": "Paladín (Soldado)",
+      "level": 5,
+      "maxHp": 47,
+      "currentHp": 47,
+      "tempHp": 0,
+      "ac": 20,
+      "initiativeBonus": 1,
+      "speed": "30 ft.",
+      "passivePerception": 15,
+      "stats": {
+        "str": 18,
+        "dex": 12,
+        "con": 16,
+        "int": 10,
+        "wis": 14,
+        "cha": 18
+      },
+      "savingThrows": [
+        "Fuerza +7",
+        "Constitución +6",
+        "Carisma +7",
+        "Sabiduría +5"
+      ],
+      "skills": [
+        "Atletismo +7",
+        "Intimidación +7",
+        "Percepción +5",
+        "Supervivencia +5"
+      ],
+      "attacks": [
+        {
+          "id": "att-dario-1",
+          "name": "Espada Larga (Longsword)",
+          "bonus": "+7",
+          "damage": "1d8+4",
+          "type": "Cortante"
+        },
+        {
+          "id": "att-dario-2",
+          "name": "Jabalina",
+          "bonus": "+7",
+          "damage": "1d6+4",
+          "type": "Perforante"
+        }
+      ],
+      "notes": "Castigo Divino (Divine Smite), Sentido Divino, Imposición de Manos (25 HP pool). Trasfondo: Soldado."
+    },
+    {
+      "id": "char-elias-ravenshade",
+      "campaignId": "camp-motor-alma",
+      "name": "Elías Ravenshade",
+      "playerName": "Nico",
+      "race": "Humano",
+      "class": "Hechicero (Magia Salvaje)",
+      "level": 4,
+      "maxHp": 28,
+      "currentHp": 28,
+      "tempHp": 0,
+      "ac": 14,
+      "initiativeBonus": 2,
+      "speed": "30 ft.",
+      "passivePerception": 12,
+      "stats": {
+        "str": 8,
+        "dex": 14,
+        "con": 14,
+        "int": 14,
+        "wis": 12,
+        "cha": 18
+      },
+      "savingThrows": [
+        "Constitución +4",
+        "Carisma +6"
+      ],
+      "skills": [
+        "Arcana +4",
+        "Investigación +4",
+        "Persuasión +6"
+      ],
+      "attacks": [
+        {
+          "id": "att-elias-1",
+          "name": "Rayo de Fuego",
+          "bonus": "+6",
+          "damage": "1d10",
+          "type": "Fuego"
+        },
+        {
+          "id": "att-elias-2",
+          "name": "Bastón del Mago",
+          "bonus": "+3",
+          "damage": "1d6-1",
+          "type": "Contundente"
+        }
+      ],
+      "notes": "Vestimenta del Caos Arcano, Bastón de Defensa. Impregnado de magia salvaje por experimento."
+    },
+    {
+      "id": "char-kara-shadowstrike",
+      "campaignId": "camp-motor-alma",
+      "name": "Kara Shadowstrike",
+      "playerName": "Sofía",
+      "race": "Humana",
+      "class": "Monje (Camino de la Sombra)",
+      "level": 4,
+      "maxHp": 32,
+      "currentHp": 32,
+      "tempHp": 0,
+      "ac": 16,
+      "initiativeBonus": 3,
+      "speed": "40 ft.",
+      "passivePerception": 14,
+      "stats": {
+        "str": 10,
+        "dex": 17,
+        "con": 14,
+        "int": 10,
+        "wis": 16,
+        "cha": 10
+      },
+      "savingThrows": [
+        "Fuerza +2",
+        "Destreza +5"
+      ],
+      "skills": [
+        "Acrobacias +5",
+        "Sigilo +5",
+        "Percepción +5",
+        "Supervivencia +5"
+      ],
+      "attacks": [
+        {
+          "id": "att-kara-1",
+          "name": "Sable Láser",
+          "bonus": "+5",
+          "damage": "1d8+3 (o 1d10)",
+          "type": "Energía Radiante"
+        },
+        {
+          "id": "att-kara-2",
+          "name": "Golpe Desarmado",
+          "bonus": "+5",
+          "damage": "1d4+3",
+          "type": "Contundente"
+        }
+      ],
+      "notes": "Deflexión de proyectiles con sable láser (1d10+DES+lvl). Paciencia y concentración ermitaña."
+    },
+    {
+      "id": "char-talia-ironfist",
+      "campaignId": "camp-motor-alma",
+      "name": "Talia Ironfist",
+      "playerName": "Lucía",
+      "race": "Humana",
+      "class": "Bárbara (Berserker)",
+      "level": 4,
+      "maxHp": 45,
+      "currentHp": 45,
+      "tempHp": 0,
+      "ac": 15,
+      "initiativeBonus": 2,
+      "speed": "40 ft.",
+      "passivePerception": 12,
+      "stats": {
+        "str": 18,
+        "dex": 14,
+        "con": 16,
+        "int": 8,
+        "wis": 10,
+        "cha": 10
+      },
+      "savingThrows": [
+        "Fuerza +6",
+        "Constitución +5"
+      ],
+      "skills": [
+        "Atletismo +6",
+        "Intimidación +2",
+        "Supervivencia +2"
+      ],
+      "attacks": [
+        {
+          "id": "att-talia-1",
+          "name": "Hacha Energética de Talia",
+          "bonus": "+6",
+          "damage": "1d12+4 corte + 1d6 energía",
+          "type": "Cortante/Energía"
+        }
+      ],
+      "notes": "Hacha Energética con Desbordamiento de Poder (4d6 extra) y Pulso de Impacto (DC 15 Derribo). Furia activa."
+    },
+    {
+      "id": "char-micaela-windrider",
+      "campaignId": "camp-motor-alma",
+      "name": "Micaela Windrider",
+      "playerName": "Camila",
+      "race": "Humana",
+      "class": "Clériga (Vida / Sanación)",
+      "level": 4,
+      "maxHp": 31,
+      "currentHp": 31,
+      "tempHp": 0,
+      "ac": 18,
+      "initiativeBonus": 1,
+      "speed": "30 ft.",
+      "passivePerception": 15,
+      "stats": {
+        "str": 12,
+        "dex": 12,
+        "con": 14,
+        "int": 10,
+        "wis": 18,
+        "cha": 14
+      },
+      "savingThrows": [
+        "Sabiduría +6",
+        "Carisma +4"
+      ],
+      "skills": [
+        "Medicina +6",
+        "Persuasión +4",
+        "Religión +2"
+      ],
+      "attacks": [
+        {
+          "id": "att-mic-1",
+          "name": "Maza Ligera",
+          "bonus": "+3",
+          "damage": "1d6+1",
+          "type": "Contundente"
+        },
+        {
+          "id": "att-mic-2",
+          "name": "Llama Sagrada",
+          "bonus": "Salv. DES DC 14",
+          "damage": "1d8",
+          "type": "Radiante"
+        }
+      ],
+      "notes": "Refugio de los Fieles. Canalizar Divinidad: Preservar la Vida. Compasiva y devota."
+    },
+    {
+      "id": "char-lucio-blackwood",
+      "campaignId": "camp-motor-alma",
+      "name": "Lucio Blackwood",
+      "playerName": "Esteban",
+      "race": "Humano",
+      "class": "Pícaro (Infiltrador)",
+      "level": 4,
+      "maxHp": 30,
+      "currentHp": 30,
+      "tempHp": 0,
+      "ac": 15,
+      "initiativeBonus": 4,
+      "speed": "30 ft.",
+      "passivePerception": 16,
+      "stats": {
+        "str": 10,
+        "dex": 18,
+        "con": 12,
+        "int": 12,
+        "wis": 14,
+        "cha": 12
+      },
+      "savingThrows": [
+        "Destreza +6",
+        "Inteligencia +3"
+      ],
+      "skills": [
+        "Sigilo +8",
+        "Juego de Manos +6",
+        "Percepción +6",
+        "Engaño +3"
+      ],
+      "attacks": [
+        {
+          "id": "att-lucio-1",
+          "name": "Daga Táctica",
+          "bonus": "+6",
+          "damage": "1d4+4 + 2d6 Furtivo",
+          "type": "Perforante"
+        },
+        {
+          "id": "att-lucio-2",
+          "name": "Ballesta Ligera",
+          "bonus": "+6",
+          "damage": "1d8+4 + 2d6 Furtivo",
+          "type": "Perforante"
+        }
+      ],
+      "notes": "Experto en operaciones encubiertas en callejones y sótanos. Ataque furtivo 2d6."
+    }
+  ],
+  "monsters": [
+    {
+      "id": "mon-aberraci-n-de-savia-g-lida",
+      "campaignId": "camp-hielo-quebrado",
+      "name": "Aberración de Savia Gélida",
+      "size": "Medium",
+      "type": "aberration",
+      "subtype": "",
+      "alignment": "neutral evil",
+      "ac": 13,
+      "acDescription": "",
+      "hp": 38,
+      "hitDice": "5d8 + 15",
+      "speed": "30 ft., climb 30 ft.",
+      "stats": {
+        "str": 15,
+        "dex": 12,
+        "con": 16,
+        "int": 4,
+        "wis": 12,
+        "cha": 5
+      },
+      "damageResistances": "bludgeoning, piercing, and slashing from nonmagical attacks",
+      "damageImmunities": "cold, poison",
+      "conditionImmunities": "paralyzed, poisoned, exhaustion",
+      "senses": "blindsight 60 ft., passive Perception 11",
+      "languages": "—",
+      "cr": "2",
+      "xp": 450,
+      "traits": [
+        {
+          "name": "Escudo de Hielo Quebradizo",
+          "desc": "La primera vez en cada ronda que la aberración reciba daño de Fuego, su coraza se resquebraja: su CA se reduce a 11 y pierde sus resistencias a daño físico hasta el final de su siguiente turno."
+        },
+        {
+          "name": "Aura Glacial",
+          "desc": "Cualquier criatura que empiece su turno a 5 pies de la aberración sufre 2 (1d4) puntos de daño por frío debido al contacto térmico."
+        },
+        {
+          "name": "Vínculo con el Cristal Oscuro",
+          "desc": "Mientras la aberración se encuentre a 10 pies o menos del nido de cristales oscuros, tiene ventaja en las tiradas de salvación contra ser derribada, aturdida o empujada."
+        }
+      ],
+      "actions": [
+        {
+          "name": "Multiataque",
+          "desc": "La criatura realiza dos ataques: uno con su Golpe de Zarza y uno con su Mordisco Helado."
+        },
+        {
+          "name": "Golpe de Zarza",
+          "desc": "Ataque de arma cuerpo a cuerpo: +4 al impacto, alcance 10 pies, un objetivo. Impacto: 6 (1d8 + 2) de daño cortante más 2 (1d4) de daño por frío."
+        },
+        {
+          "name": "Mordisco Helado",
+          "desc": "Ataque de arma cuerpo a cuerpo: +4 al impacto, alcance 5 pies, un objetivo. Impacto: 5 (1d6 + 2) de daño perforante más 2 (1d4) de daño por frío. Si el objetivo es una criatura, su velocidad se reduce en 10 pies hasta el final de su próximo turno."
+        },
+        {
+          "name": "Exhalación de Escarcha (Recarga 5-6)",
+          "desc": "La criatura exhala una ráfaga glacial en un cono de 15 pies. Cada criatura en el área debe realizar una Tirada de Salvación de Constitución CD 12, sufriendo 9 (2d8) puntos de daño por frío si falla, o la mitad si tiene éxito."
+        }
+      ],
+      "bonusActions": [],
+      "reactions": [],
+      "source": "El Susurro en el Hielo Quebrado"
+    },
+    {
+      "id": "mon-larva-de-escarcha",
+      "campaignId": "camp-hielo-quebrado",
+      "name": "Larva de Escarcha",
+      "size": "Tiny",
+      "type": "monstrosity",
+      "subtype": "",
+      "alignment": "neutral evil",
+      "ac": 11,
+      "acDescription": "",
+      "hp": 6,
+      "hitDice": "2d4 + 1",
+      "speed": "20 ft., climb 20 ft.",
+      "stats": {
+        "str": 6,
+        "dex": 13,
+        "con": 12,
+        "int": 2,
+        "wis": 10,
+        "cha": 3
+      },
+      "damageResistances": "",
+      "damageImmunities": "cold, poison",
+      "conditionImmunities": "",
+      "senses": "blindsight 30 ft., passive Perception 10",
+      "languages": "—",
+      "cr": "1/8",
+      "xp": 25,
+      "traits": [],
+      "actions": [
+        {
+          "name": "Mordisco Gélido",
+          "desc": "Ataque de arma cuerpo a cuerpo: +3 al impacto, alcance 5 pies, un objetivo. Impacto: 3 (1d4 + 1) de daño perforante más 1 de daño por frío."
+        }
+      ],
+      "bonusActions": [],
+      "reactions": [],
+      "source": "El Susurro en el Hielo Quebrado"
+    },
+    {
+      "id": "mon-colmillo",
+      "campaignId": "camp-hielo-quebrado",
+      "name": "Colmillo",
+      "size": "Medium",
+      "type": "beast",
+      "subtype": "",
+      "alignment": "unaligned",
+      "ac": 12,
+      "acDescription": "",
+      "hp": 15,
+      "hitDice": "2d8 + 6",
+      "speed": "40 ft.",
+      "stats": {
+        "str": 14,
+        "dex": 14,
+        "con": 15,
+        "int": 3,
+        "wis": 13,
+        "cha": 7
+      },
+      "damageResistances": "",
+      "damageImmunities": "",
+      "conditionImmunities": "",
+      "senses": "passive Perception 13",
+      "languages": "—",
+      "cr": "1/4",
+      "xp": 50,
+      "traits": [
+        {
+          "name": "Oído y Olfato Agudos",
+          "desc": "Colmillo tiene ventaja en las pruebas de Sabiduría (Percepción) que dependan del oído o del olfato."
+        },
+        {
+          "name": "Sexto Sentido Antinatural",
+          "desc": "Colmillo percibe la presencia de anomalías y frío sobrenatural a menos de 60 pies, gruñendo en dirección a la fuente."
+        }
+      ],
+      "actions": [
+        {
+          "name": "Mordisco",
+          "desc": "Ataque de arma cuerpo a cuerpo: +4 al impacto, alcance 5 pies, un objetivo. Impacto: 5 (1d6 + 2) de daño perforante. Si el objetivo es una criatura, debe superar una tirada de salvación de Fuerza CD 12 o ser derribada (Prone)."
+        }
+      ],
+      "bonusActions": [],
+      "reactions": [],
+      "source": "El Susurro en el Hielo Quebrado"
+    },
+    {
+      "id": "mon-robo-asesino",
+      "campaignId": "camp-motor-alma",
+      "name": "Robo Asesino",
+      "size": "Medium",
+      "type": "Constructo (Robot)",
+      "subtype": "autómata de combate",
+      "alignment": "Neutral Evil",
+      "ac": 17,
+      "acDescription": "Armadura Ligera con Mejoras",
+      "hp": 85,
+      "hitDice": "10d8 + 40",
+      "speed": "40 pies",
+      "stats": {
+        "str": 14,
+        "dex": 20,
+        "con": 18,
+        "int": 16,
+        "wis": 14,
+        "cha": 12
+      },
+      "saves": "Destreza +9, Inteligencia +7",
+      "skills": "",
+      "damageResistances": "Daño cortante, psíquico.",
+      "damageImmunities": "Veneno",
+      "conditionImmunities": "Envenenado, Agotamiento",
+      "senses": "Visión en la oscuridad 60 pies, Percepción pasiva 12",
+      "languages": "Común, Binario Arcano",
+      "cr": "4",
+      "xp": 1100,
+      "traits": [
+        {
+          "name": "Sneak Attack:",
+          "desc": "Si el Robo-Assassin tiene ventaja en una tirada de ataque, añade (4d6) de daño extra."
+        },
+        {
+          "name": "Invisibility Cloak (Recarga 4-6):",
+          "desc": "El Robo-Assassin se vuelve invisible hasta que ataque o reciba daño."
+        },
+        {
+          "name": "Deadly Precision:",
+          "desc": "Si el Robo-Assassin falla un ataque, puede gastar su reacción para volver a tirar el dado, pero debe usar el segundo resultado."
+        }
+      ],
+      "actions": [
+        {
+          "name": "Cuchillas Retráctiles:",
+          "desc": "+9 al ataque, alcance 5 pies, un objetivo. Impacto: 18 (3d6 + 5) de daño cortante más 10 (3d6) de daño de energía si ataca con ventaja."
+        }
+      ],
+      "bonusActions": [],
+      "reactions": [],
+      "source": "Motor Alma y Sangre"
+    },
+    {
+      "id": "mon-robo-barbaro",
+      "campaignId": "camp-motor-alma",
+      "name": "Robo Barbaro",
+      "size": "Medium",
+      "type": "Constructo (Robot)",
+      "subtype": "autómata de combate",
+      "alignment": "Neutral Evil",
+      "ac": 16,
+      "acDescription": "Armadura de Placas",
+      "hp": 112,
+      "hitDice": "12d10 + 48",
+      "speed": "40 pies",
+      "stats": {
+        "str": 20,
+        "dex": 14,
+        "con": 18,
+        "int": 8,
+        "wis": 10,
+        "cha": 10
+      },
+      "saves": "- **Fuerza +9, Constitución +8**",
+      "skills": "Percepción pasiva:",
+      "damageResistances": "Daño cortante, perforante y contundente no mágico.",
+      "damageImmunities": "Veneno",
+      "conditionImmunities": "Envenenado, Agotamiento",
+      "senses": "Visión en la oscuridad 60 pies, Percepción pasiva 12",
+      "languages": "Común, Binario Arcano",
+      "cr": "5",
+      "xp": 1800,
+      "traits": [
+        {
+          "name": "Rage Protocol (Recarga 5-6):",
+          "desc": "Como acción de bonificación, el Robo-Barbarian entra en modo de furia, lo que le da ventaja en tiradas de ataque y daño con armas cuerpo a cuerpo y resistencia al daño contundente, cortante, y perforante durante 1 minuto."
+        },
+        {
+          "name": "Unstoppable:",
+          "desc": "Si el Robo-Barbarian recibe daño que lo reduce a 0 puntos de golpe, puede realizar una tirada de Constitución (DC 10). Si tiene éxito, recupera 20 puntos de golpe y sigue combatiendo."
+        }
+      ],
+      "actions": [
+        {
+          "name": "Ataque Frenético:",
+          "desc": "_Multiataque_ — El Robo-Barbarian realiza tres ataques con su Hacha Energética."
+        },
+        {
+          "name": "Hacha Energética:",
+          "desc": "+9 al ataque, alcance 5 pies, un objetivo. Impacto: (2d8 + 5) de daño cortante más (1d10) de daño de energía."
+        }
+      ],
+      "bonusActions": [],
+      "reactions": [],
+      "source": "Motor Alma y Sangre"
+    },
+    {
+      "id": "mon-robo-clerigo",
+      "campaignId": "camp-motor-alma",
+      "name": "Robo Clerigo",
+      "size": "Medium",
+      "type": "Constructo (Robot)",
+      "subtype": "autómata de combate",
+      "alignment": "Neutral Evil",
+      "ac": 18,
+      "acDescription": "Armadura Completa",
+      "hp": 95,
+      "hitDice": "10d8 + 40",
+      "speed": "30 pies",
+      "stats": {
+        "str": 16,
+        "dex": 10,
+        "con": 18,
+        "int": 14,
+        "wis": 20,
+        "cha": 12
+      },
+      "saves": "Sabiduría +9, Constitución +8",
+      "skills": "Percepción pasiva:",
+      "damageResistances": "Daño radiante, necrótico.",
+      "damageImmunities": "Veneno",
+      "conditionImmunities": "Envenenado, Agotamiento",
+      "senses": "Visión en la oscuridad 60 pies, Percepción pasiva 12",
+      "languages": "Común, Binario Arcano",
+      "cr": "4",
+      "xp": 1100,
+      "traits": [
+        {
+          "name": "Aura of Protection:",
+          "desc": "Todos los aliados a 10 pies del Robo-Cleric tienen un bono de +2 a las tiradas de salvación."
+        },
+        {
+          "name": "Healing Surge (Recarga 5-6):",
+          "desc": "El Robo-Cleric emite una onda de energía sanadora, restaurando 20 puntos de golpe a sí mismo y a todos los aliados dentro de un radio de 20 pies."
+        }
+      ],
+      "actions": [
+        {
+          "name": "Maza Sagrada:",
+          "desc": "+7 al ataque, alcance 5 pies, un objetivo. Impacto: 8 (1d8 + 4) de daño contundente más 4 (1d8) de daño radiante."
+        },
+        {
+          "name": "Protocolo de Conjuros",
+          "desc": "(CD de Hechizo 17, +9 al ataque de hechizos) • - **Nivel 3 (3/día cada uno):** _Curar heridas, Infligir heridas_ • - **Nivel 5 (2/día cada uno):** _Disipar el bien y el mal, Arma espiritual_"
+        }
+      ],
+      "bonusActions": [],
+      "reactions": [],
+      "source": "Motor Alma y Sangre"
+    },
+    {
+      "id": "mon-robo-mago",
+      "campaignId": "camp-motor-alma",
+      "name": "Robo Mago",
+      "size": "Medium",
+      "type": "Constructo (Robot)",
+      "subtype": "autómata de combate",
+      "alignment": "Neutral Evil",
+      "ac": 15,
+      "acDescription": "Armadura de Energía",
+      "hp": 68,
+      "hitDice": "8d8 + 32",
+      "speed": "30 pies",
+      "stats": {
+        "str": 8,
+        "dex": 14,
+        "con": 18,
+        "int": 20,
+        "wis": 12,
+        "cha": 14
+      },
+      "saves": "Inteligencia +9, Sabiduría +5",
+      "skills": "Arcana +9, Percepción pasiva:",
+      "damageResistances": "Daño de energía, psíquico.",
+      "damageImmunities": "Veneno",
+      "conditionImmunities": "Envenenado, Agotamiento",
+      "senses": "Visión en la oscuridad 60 pies, Percepción pasiva 12",
+      "languages": "Común, Binario Arcano",
+      "cr": "3",
+      "xp": 700,
+      "traits": [
+        {
+          "name": "Energy Shield (Recarga 5-6):",
+          "desc": "Como reacción, el Robo-Mage puede desplegar un escudo de energía que le da +5 a la CA hasta el inicio de su próximo turno."
+        },
+        {
+          "name": "Overload (1/día):",
+          "desc": "El Robo-Mage puede sobrecargar sus circuitos, lanzando una versión potenciada de cualquier hechizo de nivel 5 o inferior, infligiendo el máximo daño posible."
+        }
+      ],
+      "actions": [
+        {
+          "name": "Rayo de Energía:",
+          "desc": "+9 al ataque, alcance 120 pies, un objetivo. Impacto: 22 (4d8 + 5) de daño de energía."
+        },
+        {
+          "name": "Protocolo de Conjuros",
+          "desc": "(CD de Hechizo 17, +9 al ataque de hechizos) • - **Cantrips:** _Mano de Mago, Prestidigitación, Rayo de Escarcha_ • - **Nivel 1 (4/día):** _Misil mágico, Escudo_ • - **Nivel 3 (3/día):** _Relámpago, Contrahechizo_ • - **Nivel 5 (2/día):** _Bola de fuego, Teletransporte_"
+        }
+      ],
+      "bonusActions": [],
+      "reactions": [],
+      "source": "Motor Alma y Sangre"
+    },
+    {
+      "id": "mon-robo-warlock",
+      "campaignId": "camp-motor-alma",
+      "name": "Robo Warlock",
+      "size": "Medium",
+      "type": "Constructo (Robot)",
+      "subtype": "autómata de combate",
+      "alignment": "Neutral Evil",
+      "ac": 16,
+      "acDescription": "Armadura de Energía",
+      "hp": 75,
+      "hitDice": "9d8 + 27",
+      "speed": "30 pies",
+      "stats": {
+        "str": 10,
+        "dex": 14,
+        "con": 16,
+        "int": 12,
+        "wis": 10,
+        "cha": 20
+      },
+      "saves": "Constitución +7, Carisma +9",
+      "skills": "Arcana +8, Intimidación +9, Percepción pasiva:",
+      "damageResistances": "Daño necrótico, fuerza.",
+      "damageImmunities": "Veneno",
+      "conditionImmunities": "Envenenado, Agotamiento",
+      "senses": "Visión en la oscuridad 60 pies, Percepción pasiva 12",
+      "languages": "Común, Binario Arcano",
+      "cr": "3",
+      "xp": 700,
+      "traits": [
+        {
+          "name": "Dark Pact (Recarga 5-6):",
+          "desc": "El Robo-Warlock puede invocar el poder de su pacto, restaurando 25 puntos de golpe y lanzando _Toque Vampírico_ como acción de bonificación."
+        },
+        {
+          "name": "Hellfire Rebuke:",
+          "desc": "Como reacción, cuando es atacado, el Robo-Warlock puede lanzar _Reprensión Infernal_ como acción de respuesta."
+        }
+      ],
+      "actions": [
+        {
+          "name": "Eldritch Blast",
+          "desc": "Ataque de combate o arma energética."
+        },
+        {
+          "name": "Protocolo de Conjuros",
+          "desc": "(CD de Hechizo 17, +9 al ataque de hechizos) • - **Cantrips:** _Rayo de Escarcha, Mano de Mago_ • - **Nivel 3 (3/día):** _Maleficio, Rayo de Enfermedad_ • - **Nivel 5 (2/día):** _Toque Vampírico"
+        }
+      ],
+      "bonusActions": [],
+      "reactions": [],
+      "source": "Motor Alma y Sangre"
+    }
+  ],
+  "encounters": [
+    {
+      "id": "enc-asalto-automatas",
+      "campaignId": "camp-motor-alma",
+      "name": "Emboscada de Escuadrón Mecánico",
+      "description": "Un Robo Asesino apoyado por un Robo Mago y un Robo Bárbaro atacan a la party.",
+      "enemies": [
+        {
+          "monsterId": "mon-robo-barbaro",
+          "count": 1
+        },
+        {
+          "monsterId": "mon-robo-asesino",
+          "count": 1
+        },
+        {
+          "monsterId": "mon-robo-mago",
+          "count": 1
+        }
+      ],
+      "difficulty": "Deadly",
+      "totalXp": 2500,
+      "adjustedXp": 5000,
+      "status": "planned"
+    },
+    {
+      "id": "enc-duo-oscuro",
+      "campaignId": "camp-motor-alma",
+      "name": "Pacto de Sangre y Metal",
+      "description": "Robo Warlock y Robo Clérigo protegiendo la terminal del inhibidor.",
+      "enemies": [
+        {
+          "monsterId": "mon-robo-warlock",
+          "count": 1
+        },
+        {
+          "monsterId": "mon-robo-clerigo",
+          "count": 1
+        }
+      ],
+      "difficulty": "Hard",
+      "totalXp": 1800,
+      "adjustedXp": 2700,
+      "status": "planned"
+    },
+    {
+      "id": "enc-climax-hielo",
+      "campaignId": "camp-hielo-quebrado",
+      "name": "El Clímax en la Caverna Glacial",
+      "description": "La temible Aberración de Savia Gélida custodiada por 3 Larvas de Escarcha.",
+      "enemies": [
+        {
+          "monsterId": "mon-aberraci-n-de-savia-g-lida",
+          "count": 1
+        },
+        {
+          "monsterId": "mon-larva-de-escarcha",
+          "count": 3
+        }
+      ],
+      "difficulty": "Hard",
+      "totalXp": 525,
+      "adjustedXp": 1050,
+      "status": "planned"
+    }
+  ],
+  "exportedAt": "2026-10-05T14:17:04.194Z"
+}

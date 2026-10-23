@@ -1,0 +1,258 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-parchment: #f6efe3;
+    --bg-parchment-card: #fbf8f2;
+    --bg-parchment-inner: #f2e9dc;
+    --text-ink-dark: #2a221b;
+    --text-ink-muted: #6e5c4a;
+    --accent-gold: #b88c32;
+    --accent-gold-hover: #cfa344;
+    --accent-crimson: #a8423d;
+    --accent-forest: #3e6b48;
+    --accent-sapphire: #2d5a82;
+    --accent-arcane: #5a3d75;
+    --border-parchment: #dbcab6;
+    --border-highlight: #c5af95;
+    --header-leather: #282019;
+  }
+
+  body, html[data-skin="pathfinder-gothic"] body {
+    background-color: #1b1008;
+    background-image: linear-gradient(rgba(20, 12, 7, 0.3), rgba(20, 12, 7, 0.3)), url('/assets/backgrounds/bg_mahogany_table.jpg');
+    background-repeat: repeat;
+    background-attachment: fixed;
+    background-size: auto, 700px auto;
+    color: #f4ecd8;
+    font-family: 'Georgia', 'Cambria', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, .font-fantasy {
+    font-family: 'Cinzel', 'Georgia', serif;
+    letter-spacing: 0.03em;
+  }
+}
+
+/* Pathfinder 2e Modular 9-Slice Panel Frame */
+.pathfinder-9slice-panel {
+  border: 12px solid transparent;
+  border-image-source: url('/assets/ui/panel_border_9slice.svg');
+  border-image-slice: 16 fill;
+  border-image-repeat: repeat;
+  box-shadow: 0 6px 18px rgba(35, 20, 10, 0.25);
+}
+
+/* Custom Soft Antique Scrollbars */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: #ede3d3;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c2b097;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8947a;
+}
+
+/* Statblock classic fantasy styling */
+.dnd-statblock {
+  background: #fdf6e2;
+  color: #58180d;
+  font-family: 'Georgia', serif;
+  box-shadow: 0 4px 15px rgba(40, 25, 10, 0.25);
+  border-top: 5px solid #c29947;
+  border-bottom: 5px solid #c29947;
+}
+
+.dnd-statblock h2 {
+  font-family: 'Cinzel', 'Georgia', serif;
+  color: #6a1a0f;
+}
+
+.dnd-statblock hr {
+  border-color: #8c281a;
+}
+
+/* Active Turn Pulse */
+@keyframes pulse-turn-fantasy {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(184, 140, 50, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(184, 140, 50, 0);
+  }
+}
+
+.active-turn-ring {
+  animation: pulse-turn-fantasy 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+/* Tactical Panel Soft Parchment Styling */
+.tactical-panel {
+  background-color: #fbf7ef;
+  border: 1px solid #d8c7b2;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 12px rgba(60, 45, 30, 0.08);
+}
+
+.tactical-panel-inner {
+  background-color: #f3eae0;
+  border: 1px solid #cfbeaa;
+}
+
+/* Tutorial Guiado - Fantasy Grimoire Theme Overrides */
+@import "driver.js/dist/driver.css";
+
+.driver-popover {
+  background-color: #201710 !important;
+  color: #f7f2ea !important;
+  border: 2px solid #c59b27 !important;
+  border-radius: 14px !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85), 0 0 25px rgba(197, 155, 39, 0.3) !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+  max-width: 440px !important;
+  padding: 18px 20px !important;
+}
+
+.driver-popover-title {
+  color: #f2cb6b !important;
+  font-family: 'Cinzel', 'Georgia', serif !important;
+  font-weight: bold !important;
+  font-size: 14.5px !important;
+  letter-spacing: 0.03em !important;
+  border-bottom: 1px solid #5a4325 !important;
+  padding-bottom: 8px !important;
+  margin-bottom: 12px !important;
+}
+
+.driver-popover-description {
+  color: #e8dcd0 !important;
+  font-size: 12.5px !important;
+  line-height: 1.65 !important;
+}
+
+.driver-popover-description p {
+  margin-bottom: 8px !important;
+}
+
+.driver-popover-description p:last-child {
+  margin-bottom: 0 !important;
+}
+
+.driver-popover-description strong {
+  color: #ffdf94 !important;
+}
+
+.driver-popover-description code {
+  background: #3a2c1f !important;
+  color: #e6b84d !important;
+  padding: 1px 4px !important;
+  border-radius: 4px !important;
+  font-size: 11px !important;
+}
+
+.driver-callout {
+  margin-top: 10px !important;
+  padding: 9px 12px !important;
+  border-radius: 8px !important;
+  background: rgba(197, 155, 39, 0.15) !important;
+  border: 1px solid rgba(197, 155, 39, 0.45) !important;
+  color: #fce7b2 !important;
+  font-size: 12px !important;
+  line-height: 1.5 !important;
+}
+
+.driver-callout-success {
+  margin-top: 10px !important;
+  padding: 9px 12px !important;
+  border-radius: 8px !important;
+  background: rgba(46, 125, 50, 0.22) !important;
+  border: 1px solid rgba(74, 222, 128, 0.45) !important;
+  color: #bbf7d0 !important;
+  font-size: 12px !important;
+  line-height: 1.5 !important;
+}
+
+.driver-popover-footer {
+  margin-top: 14px !important;
+  padding-top: 10px !important;
+  border-top: 1px solid #3d2c1c !important;
+}
+
+.driver-popover-footer button {
+  background: #3a2c1f !important;
+  color: #d4ab59 !important;
+  border: 1px solid #5a4325 !important;
+  border-radius: 8px !important;
+  padding: 6px 14px !important;
+  font-size: 11.5px !important;
+  font-weight: bold !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.driver-popover-footer button:hover {
+  background: #4d3a28 !important;
+  color: #ffffff !important;
+}
+
+.driver-popover-footer .driver-popover-next-btn {
+  background: linear-gradient(to right, #8c672b, #b88c32) !important;
+  color: #ffffff !important;
+  border: 1px solid #c59b27 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45) !important;
+}
+
+.driver-popover-footer .driver-popover-next-btn:hover {
+  background: linear-gradient(to right, #a07632, #c99a38) !important;
+}
+
+.driver-popover-progress-text {
+  color: #baa792 !important;
+  font-size: 11.5px !important;
+  font-family: monospace !important;
+  font-weight: bold !important;
+}
+
+.driver-popover-close-btn {
+  color: #baa792 !important;
+}
+.driver-popover-close-btn:hover {
+  color: #ffffff !important;
+}
+
+.driver-popover-arrow-side-top {
+  border-top-color: #201710 !important;
+}
+.driver-popover-arrow-side-bottom {
+  border-bottom-color: #201710 !important;
+}
+.driver-popover-arrow-side-left {
+  border-left-color: #201710 !important;
+}
+.driver-popover-arrow-side-right {
+  border-right-color: #201710 !important;
+}
+
+/* Ensure active elements are fully interactive during tour */
+.driver-active .driver-active-element {
+  position: relative !important;
+  z-index: 1000000001 !important;
+  pointer-events: auto !important;
+}
+
+.driver-active .driver-active-element * {
+  pointer-events: auto !important;
+}

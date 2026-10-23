@@ -1,0 +1,55 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Bronze gradient for corner brackets -->
+    <linearGradient id="bronzeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#dfbe7e"/>
+      <stop offset="35%" stop-color="#b88c32"/>
+      <stop offset="70%" stop-color="#73521d"/>
+      <stop offset="100%" stop-color="#3b270a"/>
+    </linearGradient>
+    <!-- Border line gradient -->
+    <linearGradient id="borderGradH" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#8c672b"/>
+      <stop offset="50%" stop-color="#c59b27"/>
+      <stop offset="100%" stop-color="#8c672b"/>
+    </linearGradient>
+    <linearGradient id="borderGradV" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#8c672b"/>
+      <stop offset="50%" stop-color="#c59b27"/>
+      <stop offset="100%" stop-color="#8c672b"/>
+    </linearGradient>
+    <!-- Subtle parchment fill -->
+    <radialGradient id="innerGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fdf9f0" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#ede1ca" stop-opacity="0.9"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background container fill -->
+  <rect x="2" y="2" width="60" height="60" rx="3" fill="url(#innerGlow)" stroke="#52391e" stroke-width="1"/>
+
+  <!-- Inner delicate filigree border -->
+  <rect x="5" y="5" width="54" height="54" rx="2" fill="none" stroke="#b88c32" stroke-width="0.75" stroke-opacity="0.6" stroke-dasharray="3 1"/>
+
+  <!-- Top-Left Corner Bracket -->
+  <path d="M2 14V5C2 3.34315 3.34315 2 5 2H14L11 5H5V11L2 14Z" fill="url(#bronzeGrad)"/>
+  <circle cx="6" cy="6" r="1.5" fill="#ffd56b" stroke="#3b270a" stroke-width="0.5"/>
+
+  <!-- Top-Right Corner Bracket -->
+  <path d="M62 14V5C62 3.34315 60.6569 2 59 2H50L53 5H59V11L62 14Z" fill="url(#bronzeGrad)"/>
+  <circle cx="58" cy="6" r="1.5" fill="#ffd56b" stroke="#3b270a" stroke-width="0.5"/>
+
+  <!-- Bottom-Left Corner Bracket -->
+  <path d="M2 50V59C2 60.6569 3.34315 62 5 62H14L11 59H5V53L2 50Z" fill="url(#bronzeGrad)"/>
+  <circle cx="6" cy="58" r="1.5" fill="#ffd56b" stroke="#3b270a" stroke-width="0.5"/>
+
+  <!-- Bottom-Right Corner Bracket -->
+  <path d="M62 50V59C62 60.6569 60.6569 62 59 62H50L53 59H59V53L62 50Z" fill="url(#bronzeGrad)"/>
+  <circle cx="58" cy="58" r="1.5" fill="#ffd56b" stroke="#3b270a" stroke-width="0.5"/>
+
+  <!-- Diamond accents at middle of edges -->
+  <polygon points="32,2 34,4 32,6 30,4" fill="url(#bronzeGrad)"/>
+  <polygon points="32,58 34,60 32,62 30,60" fill="url(#bronzeGrad)"/>
+  <polygon points="2,32 4,30 6,32 4,34" fill="url(#bronzeGrad)"/>
+  <polygon points="58,32 60,30 62,32 60,34" fill="url(#bronzeGrad)"/>
+</svg>
