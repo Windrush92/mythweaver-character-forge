@@ -346,12 +346,14 @@ export default function App() {
 
   return (
     <div
-      className="min-h-screen flex flex-col text-[#f7f2ea] select-none"
+      className="min-h-screen text-[#f4ecd8] flex flex-col font-sans select-none selection:bg-[#b88c32] selection:text-[#fdfaf3]"
       style={{
         backgroundImage:
-          'linear-gradient(rgba(14, 10, 7, 0.94), rgba(10, 7, 5, 0.98)), url(/assets/backgrounds/bg_mahogany_table.jpg)',
+          'linear-gradient(rgba(20, 12, 7, 0.30), rgba(20, 12, 7, 0.30)), url(/assets/backgrounds/bg_mahogany_table.jpg)',
         backgroundRepeat: 'repeat',
-        backgroundColor: '#0e0a07',
+        backgroundAttachment: 'fixed',
+        backgroundSize: '700px auto',
+        backgroundColor: '#1b1008',
       }}
     >
       {/* ========================================================= */}
@@ -569,8 +571,9 @@ export default function App() {
           className="w-full relative z-20 border-t border-[#4a3622]/60 shadow-[0_6px_20px_rgba(0,0,0,0.85)]"
           style={{
             backgroundImage:
-              'linear-gradient(rgba(24, 15, 9, 0.75), rgba(16, 10, 6, 0.85)), url(/assets/backgrounds/bg_mahogany_table.jpg)',
+              'linear-gradient(rgba(24, 15, 9, 0.50), rgba(16, 10, 6, 0.65)), url(/assets/backgrounds/bg_mahogany_table.jpg)',
             backgroundRepeat: 'repeat',
+            backgroundSize: '550px auto',
           }}
         >
           <div className="w-full max-w-[1480px] mx-auto px-4 sm:px-6">
