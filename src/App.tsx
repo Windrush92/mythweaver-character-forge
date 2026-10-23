@@ -776,6 +776,28 @@ export default function App() {
       </main>
 
       {/* ========================================================= */}
+      {/* FOOTER & AUTHORSHIP DISCLAIMER                            */}
+      {/* ========================================================= */}
+      <footer className="w-full mt-auto py-6 px-4 text-center border-t border-[#4a3622]/50 bg-gradient-to-b from-[#140b06]/80 to-[#0a0503]/95 backdrop-blur-xs select-none relative z-10">
+        <div className="max-w-4xl mx-auto space-y-1.5 font-serif">
+          <p className="text-xs sm:text-sm font-fantasy tracking-wider text-[#dfbe7e] font-bold">
+            MythWeaver: Forja de Héroes 5e • Desarrollado por{' '}
+            <a
+              href="https://github.com/Windrush92"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#ffd56b] hover:text-white underline decoration-[#8c672b] underline-offset-4 transition"
+            >
+              Windrush92 (Pablo Gómez)
+            </a>
+          </p>
+          <p className="text-[10.5px] sm:text-[11px] text-[#9c8974] leading-relaxed max-w-2xl mx-auto">
+            Compatible con D&amp;D 5ª Edición (SRD 5.1). Proyecto independiente de código abierto, no oficial y no afiliado con Wizards of the Coast LLC.
+          </p>
+        </div>
+      </footer>
+
+      {/* ========================================================= */}
       {/* MODALS                                                    */}
       {/* ========================================================= */}
 
