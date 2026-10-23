@@ -10,6 +10,11 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+dist-app
+release
+--win32-x64
+*.tmp
+*.zip
 *.local
 
 # Editor directories and files
