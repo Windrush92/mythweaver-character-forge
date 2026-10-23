@@ -1475,7 +1475,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
       className="relative px-3 sm:px-3.5 py-1.5 min-h-[28px] flex items-center justify-center gap-1.5 bg-no-repeat transition-transform duration-150 hover:scale-105 active:scale-95 cursor-pointer select-none shrink-0 drop-shadow-[0_2px_4px_rgba(0,0,0,0.85)]"
       style={{
         backgroundImage: `url(${
-          opts.active ? '/assets/ui/sheet_small_btn_active.png' : '/assets/ui/sheet_small_btn.png'
+          opts.active ? './assets/ui/sheet_small_btn_active.png' : './assets/ui/sheet_small_btn.png'
         })`,
         backgroundSize: '100% 100%',
       }}
@@ -1505,7 +1505,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
         {/* Seamless Non-Stretching 3-Slice Background Layer */}
         <div className="absolute inset-0 flex items-stretch pointer-events-none z-0 overflow-hidden rounded-md">
           <img
-            src="/assets/ui/sheet_header_left.png"
+            src="./assets/ui/sheet_header_left.png"
             alt=""
             draggable={false}
             style={{ aspectRatio: '142 / 228' }}
@@ -1514,12 +1514,12 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
           <div
             className="flex-1 h-full bg-no-repeat -mx-[1px]"
             style={{
-              backgroundImage: 'url(/assets/ui/sheet_header_center.png)',
+              backgroundImage: 'url(./assets/ui/sheet_header_center.png)',
               backgroundSize: '100% 100%',
             }}
           />
           <img
-            src="/assets/ui/sheet_header_right.png"
+            src="./assets/ui/sheet_header_right.png"
             alt=""
             draggable={false}
             style={{ aspectRatio: '142 / 228' }}
@@ -1632,7 +1632,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                   active: inspiration,
                   icon: (
                     <img
-                      src="/assets/ui/wax_seal_red.png"
+                      src="./assets/ui/wax_seal_red.png"
                       alt=""
                       className={`w-3.5 h-3.5 object-contain ${
                         inspiration ? 'scale-110' : 'opacity-75 grayscale'
@@ -1657,7 +1657,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                 </div>
                 <div className="relative w-12 h-13 my-0.5 flex items-center justify-center group-hover:scale-105 transition-transform">
                   <img
-                    src="/assets/ui/badge_shield_ac.png"
+                    src="./assets/ui/badge_shield_ac.png"
                     alt="CA"
                     draggable={false}
                     className="absolute inset-0 w-full h-full object-contain pointer-events-none drop-shadow-[0_4px_6px_rgba(0,0,0,0.55)]"
@@ -1688,7 +1688,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                 </div>
                 <div className="relative w-12 h-12 my-0.5 flex items-center justify-center group-hover:scale-105 transition-transform">
                   <img
-                    src="/assets/ui/coin_stat_medallion.png"
+                    src="./assets/ui/coin_stat_medallion.png"
                     alt="Iniciativa"
                     draggable={false}
                     className="absolute inset-0 w-full h-full object-contain pointer-events-none drop-shadow-[0_4px_6px_rgba(0,0,0,0.55)]"
@@ -1713,7 +1713,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                 </div>
                 <div className="relative w-12 h-12 my-0.5 flex flex-col items-center justify-center group-hover:scale-105 transition-transform">
                   <img
-                    src="/assets/ui/coin_stat_medallion.png"
+                    src="./assets/ui/coin_stat_medallion.png"
                     alt="Velocidad"
                     draggable={false}
                     className="absolute inset-0 w-full h-full object-contain pointer-events-none drop-shadow-[0_4px_6px_rgba(0,0,0,0.55)]"
@@ -1741,7 +1741,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                 </div>
                 <div className="relative w-12 h-12 my-0.5 flex items-center justify-center group-hover:scale-105 transition-transform">
                   <img
-                    src="/assets/ui/coin_stat_medallion.png"
+                    src="./assets/ui/coin_stat_medallion.png"
                     alt="Competencia"
                     draggable={false}
                     className="absolute inset-0 w-full h-full object-contain pointer-events-none drop-shadow-[0_4px_6px_rgba(0,0,0,0.55)]"
@@ -1816,7 +1816,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
               <div className="relative w-full flex items-center select-none py-1 drop-shadow-[0_3px_6px_rgba(0,0,0,0.45)]">
                 {/* Left Forged Bronze Vial Cap */}
                 <img
-                  src="/assets/ui/hp_vial_cap_left.png"
+                  src="./assets/ui/hp_vial_cap_left.png"
                   alt=""
                   draggable={false}
                   className="h-7 sm:h-8 w-auto object-contain shrink-0 z-20 pointer-events-none select-none -mr-2.5"
@@ -1846,7 +1846,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
 
                   {/* Transparent Alchemical Crystal Glass Cylinder Overlay (Specular Glare & Rim Shadows) */}
                   <img
-                    src="/assets/ui/hp_vial_glass_center.png"
+                    src="./assets/ui/hp_vial_glass_center.png"
                     alt=""
                     draggable={false}
                     className="absolute inset-0 w-full h-full object-fill pointer-events-none z-10 opacity-90 mix-blend-screen"
@@ -1856,7 +1856,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
 
                 {/* Right Forged Bronze Vial Cap */}
                 <img
-                  src="/assets/ui/hp_vial_cap_right.png"
+                  src="./assets/ui/hp_vial_cap_right.png"
                   alt=""
                   draggable={false}
                   className="h-7 sm:h-8 w-auto object-contain shrink-0 z-20 pointer-events-none select-none -ml-2.5"
@@ -1966,7 +1966,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                       title="Clic para editar Vida Temporal"
                     >
                       <img
-                        src="/assets/ui/badge_frame_mini.png"
+                        src="./assets/ui/badge_frame_mini.png"
                         alt=""
                         draggable={false}
                         className="absolute inset-0 w-full h-full object-fill pointer-events-none drop-shadow-xs"
@@ -1985,7 +1985,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                   </span>
                   <div className="relative px-3.5 py-1 min-w-[70px] min-h-[26px] flex items-center justify-center">
                     <img
-                      src="/assets/ui/badge_frame_mini.png"
+                      src="./assets/ui/badge_frame_mini.png"
                       alt=""
                       draggable={false}
                       className="absolute inset-0 w-full h-full object-fill pointer-events-none drop-shadow-xs"
@@ -2021,7 +2021,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                         title={`Éxito ${idx + 1}: ${isActive ? 'Activo (clic para alternar)' : 'Vacío'}`}
                       >
                         <img
-                          src={isActive ? '/assets/ui/death_save_success.png' : '/assets/ui/death_save_socket.png'}
+                          src={isActive ? './assets/ui/death_save_success.png' : './assets/ui/death_save_socket.png'}
                           alt=""
                           className={`w-5 h-5 object-contain ${
                             isActive ? 'drop-shadow-[0_2px_5px_rgba(255,213,107,0.55)]' : 'opacity-65'
@@ -2048,7 +2048,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                         title={`Fallo ${idx + 1}: ${isActive ? 'Activo (clic para alternar)' : 'Vacío'}`}
                       >
                         <img
-                          src={isActive ? '/assets/ui/death_save_failure.png' : '/assets/ui/death_save_socket.png'}
+                          src={isActive ? './assets/ui/death_save_failure.png' : './assets/ui/death_save_socket.png'}
                           alt=""
                           className={`w-5 h-5 object-contain ${
                             isActive ? 'drop-shadow-[0_2px_5px_rgba(197,61,39,0.6)]' : 'opacity-65'
@@ -2139,8 +2139,8 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                                     <img
                                       src={
                                         isAvailable
-                                          ? '/assets/ui/token_resource_active.png'
-                                          : '/assets/ui/token_resource_spent.png'
+                                          ? './assets/ui/token_resource_active.png'
+                                          : './assets/ui/token_resource_spent.png'
                                       }
                                       alt=""
                                       className={`w-5 h-5 sm:w-5.5 sm:h-5.5 object-contain ${
@@ -2253,7 +2253,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                     >
                       <div className="relative w-12 h-12 sm:w-13 sm:h-13 flex items-center justify-center group-hover/stat:scale-105 transition-transform">
                         <img
-                          src="/assets/ui/coin_stat_medallion.png"
+                          src="./assets/ui/coin_stat_medallion.png"
                           alt={info.short}
                           draggable={false}
                           className="absolute inset-0 w-full h-full object-contain pointer-events-none drop-shadow-[0_4px_6px_rgba(0,0,0,0.55)]"
@@ -6583,7 +6583,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                 </div>
                 <div className="relative w-13 h-13 my-0.5 flex items-center justify-center">
                   <img
-                    src="/assets/ui/coin_stat_medallion.png"
+                    src="./assets/ui/coin_stat_medallion.png"
                     alt=""
                     draggable={false}
                     className="absolute inset-0 w-full h-full object-contain pointer-events-none drop-shadow-[0_3px_5px_rgba(0,0,0,0.55)]"
@@ -6603,7 +6603,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                 </div>
                 <div className="relative w-13 h-13 my-0.5 flex items-center justify-center">
                   <img
-                    src="/assets/ui/coin_stat_medallion.png"
+                    src="./assets/ui/coin_stat_medallion.png"
                     alt=""
                     draggable={false}
                     className="absolute inset-0 w-full h-full object-contain pointer-events-none drop-shadow-[0_3px_5px_rgba(0,0,0,0.55)]"
@@ -6630,7 +6630,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                 </div>
                 <div className="relative w-13 h-13 my-0.5 flex items-center justify-center group-hover:scale-105 transition-transform">
                   <img
-                    src="/assets/ui/coin_stat_medallion.png"
+                    src="./assets/ui/coin_stat_medallion.png"
                     alt=""
                     draggable={false}
                     className="absolute inset-0 w-full h-full object-contain pointer-events-none drop-shadow-[0_3px_5px_rgba(0,0,0,0.55)]"
@@ -7494,7 +7494,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                 </div>
                 <div className="relative w-13 h-13 mt-1 flex items-center justify-center">
                   <img
-                    src="/assets/ui/coin_stat_medallion.png"
+                    src="./assets/ui/coin_stat_medallion.png"
                     alt=""
                     draggable={false}
                     className="absolute inset-0 w-full h-full object-contain pointer-events-none drop-shadow-[0_3px_5px_rgba(0,0,0,0.55)]"
@@ -7516,7 +7516,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                 </div>
                 <div className="relative w-13 h-13 mt-1 flex items-center justify-center">
                   <img
-                    src="/assets/ui/coin_stat_medallion.png"
+                    src="./assets/ui/coin_stat_medallion.png"
                     alt=""
                     draggable={false}
                     className="absolute inset-0 w-full h-full object-contain pointer-events-none drop-shadow-[0_3px_5px_rgba(0,0,0,0.55)]"
@@ -7540,7 +7540,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                 </div>
                 <div className="relative w-13 h-13 mt-1 flex items-center justify-center">
                   <img
-                    src="/assets/ui/coin_stat_medallion.png"
+                    src="./assets/ui/coin_stat_medallion.png"
                     alt=""
                     draggable={false}
                     className="absolute inset-0 w-full h-full object-contain pointer-events-none drop-shadow-[0_3px_5px_rgba(0,0,0,0.55)]"
@@ -7778,7 +7778,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
         <div className="relative w-full flex items-center justify-center z-30 pointer-events-none select-none shrink-0 -mb-3 sm:-mb-4">
           {/* Left Forged Metal & Amber Gem Finial */}
           <img
-            src="/assets/ui/scroll_roller_left.png"
+            src="./assets/ui/scroll_roller_left.png"
             alt=""
             draggable={false}
             className="h-9 sm:h-11 md:h-13 w-auto object-contain shrink-0 drop-shadow-[0_12px_18px_rgba(0,0,0,0.9)]"
@@ -7788,7 +7788,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
           <div
             className="h-9 sm:h-11 md:h-13 flex-1 -mx-1.5 bg-no-repeat transition-transform duration-75 ease-out origin-center"
             style={{
-              backgroundImage: 'url(/assets/ui/scroll_roller_center.png)',
+              backgroundImage: 'url(./assets/ui/scroll_roller_center.png)',
               backgroundSize: '100% 100%',
               transform: `scaleY(${topRollerScaleY.toFixed(3)})`,
               filter: 'drop-shadow(0 12px 16px rgba(0,0,0,0.85))',
@@ -7797,7 +7797,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
 
           {/* Right Forged Metal & Amber Gem Finial */}
           <img
-            src="/assets/ui/scroll_roller_right.png"
+            src="./assets/ui/scroll_roller_right.png"
             alt=""
             draggable={false}
             className="h-9 sm:h-11 md:h-13 w-auto object-contain shrink-0 drop-shadow-[0_12px_18px_rgba(0,0,0,0.9)]"
@@ -7820,7 +7820,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
         <div
           className="relative w-[calc(100%-1.2rem)] sm:w-[calc(100%-3rem)] md:w-[calc(100%-4.5rem)] flex-1 flex flex-col overflow-hidden z-20 shadow-[0_20px_50px_rgba(0,0,0,0.95)]"
           style={{
-            backgroundImage: 'url(/assets/ui/scroll_papyrus_tile.png)',
+            backgroundImage: 'url(./assets/ui/scroll_papyrus_tile.png)',
             backgroundRepeat: 'repeat-y',
             backgroundSize: '100% auto',
             // Synchronize papyrus texture and notched side edges with vertical scroll so it physically winds into the rollers!
@@ -7841,7 +7841,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
             {/* Seamless Non-Stretching 3-Slice Forged Bronze Background Layer */}
             <div className="absolute inset-0 flex items-stretch pointer-events-none z-0 overflow-hidden rounded-lg">
               <img
-                src="/assets/ui/sheet_header_left.png"
+                src="./assets/ui/sheet_header_left.png"
                 alt=""
                 draggable={false}
                 style={{ aspectRatio: '142 / 228' }}
@@ -7850,12 +7850,12 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
               <div
                 className="flex-1 h-full bg-no-repeat -mx-[1px]"
                 style={{
-                  backgroundImage: 'url(/assets/ui/sheet_header_center.png)',
+                  backgroundImage: 'url(./assets/ui/sheet_header_center.png)',
                   backgroundSize: '100% 100%',
                 }}
               />
               <img
-                src="/assets/ui/sheet_header_right.png"
+                src="./assets/ui/sheet_header_right.png"
                 alt=""
                 draggable={false}
                 style={{ aspectRatio: '142 / 228' }}
@@ -7872,7 +7872,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                   title={`Nivel ${charData.level}`}
                 >
                   <img
-                    src="/assets/ui/coin_stat_medallion.png"
+                    src="./assets/ui/coin_stat_medallion.png"
                     alt=""
                     draggable={false}
                     className="absolute inset-0 w-full h-full object-contain pointer-events-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
@@ -7969,7 +7969,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                       title={`${btn.label}: ${btn.desc}`}
                       className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center bg-no-repeat transition-transform duration-150 hover:scale-110 active:scale-95 cursor-pointer disabled:opacity-50 drop-shadow-[0_3px_6px_rgba(0,0,0,0.85)]"
                       style={{
-                        backgroundImage: 'url(/assets/ui/sheet_icon_btn.png)',
+                        backgroundImage: 'url(./assets/ui/sheet_icon_btn.png)',
                         backgroundSize: '100% 100%',
                       }}
                     >
@@ -8015,7 +8015,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
         <div className="relative w-full flex items-center justify-center z-30 pointer-events-none select-none shrink-0 -mt-3 sm:-mt-4">
           {/* Left Forged Metal & Amber Gem Finial */}
           <img
-            src="/assets/ui/scroll_roller_left.png"
+            src="./assets/ui/scroll_roller_left.png"
             alt=""
             draggable={false}
             className="h-9 sm:h-11 md:h-13 w-auto object-contain shrink-0 scale-y-[-1] drop-shadow-[0_-10px_18px_rgba(0,0,0,0.9)]"
@@ -8025,7 +8025,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
           <div
             className="h-9 sm:h-11 md:h-13 flex-1 -mx-1.5 bg-no-repeat transition-transform duration-75 ease-out origin-center"
             style={{
-              backgroundImage: 'url(/assets/ui/scroll_roller_center.png)',
+              backgroundImage: 'url(./assets/ui/scroll_roller_center.png)',
               backgroundSize: '100% 100%',
               transform: `scaleY(-${bottomRollerScaleY.toFixed(3)})`,
               filter: 'drop-shadow(0 -10px 16px rgba(0,0,0,0.85))',
@@ -8034,7 +8034,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
 
           {/* Right Forged Metal & Amber Gem Finial */}
           <img
-            src="/assets/ui/scroll_roller_right.png"
+            src="./assets/ui/scroll_roller_right.png"
             alt=""
             draggable={false}
             className="h-9 sm:h-11 md:h-13 w-auto object-contain shrink-0 scale-y-[-1] drop-shadow-[0_-10px_18px_rgba(0,0,0,0.9)]"

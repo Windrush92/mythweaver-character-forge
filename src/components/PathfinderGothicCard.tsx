@@ -129,7 +129,7 @@ export const PathfinderGothicCard: React.FC<PathfinderGothicCardProps> = ({
     <div
       className="relative flex flex-col justify-between transition-transform duration-300 hover:-translate-y-1 group"
       style={{
-        backgroundImage: 'url(/assets/backgrounds/card_parchment_compact.png)',
+        backgroundImage: 'url(./assets/backgrounds/card_parchment_compact.png)',
         backgroundSize: '100% 100%',
         backgroundRepeat: 'no-repeat',
         backgroundColor: 'transparent',
@@ -254,7 +254,7 @@ export const PathfinderGothicCard: React.FC<PathfinderGothicCardProps> = ({
                       onClick={() => onOpenCustomSheet(char)}
                       className="relative flex-1 h-9 px-3 transition-all duration-150 hover:brightness-110 active:scale-98 cursor-pointer flex items-center justify-center select-none filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] group"
                       style={{
-                        backgroundImage: 'url(/assets/ui/btn_hoja_heroe.png)',
+                        backgroundImage: 'url(./assets/ui/btn_hoja_heroe.png)',
                         backgroundSize: '100% 100%',
                         backgroundRepeat: 'no-repeat',
                         backgroundColor: 'transparent',
@@ -278,7 +278,7 @@ export const PathfinderGothicCard: React.FC<PathfinderGothicCardProps> = ({
                     onClick={() => setLevelUpCharacter(char)}
                     className="relative h-9 px-3.5 shrink-0 transition-all duration-150 hover:brightness-115 active:scale-98 cursor-pointer flex items-center justify-center select-none filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] group"
                     style={{
-                      backgroundImage: 'url(/assets/ui/btn_level_up.png)',
+                      backgroundImage: 'url(./assets/ui/btn_level_up.png)',
                       backgroundSize: '100% 100%',
                       backgroundRepeat: 'no-repeat',
                       backgroundColor: 'transparent',
@@ -310,7 +310,7 @@ export const PathfinderGothicCard: React.FC<PathfinderGothicCardProps> = ({
                 className="relative w-9 h-10 shrink-0 flex items-center justify-center filter drop-shadow-[0_3px_5px_rgba(0,0,0,0.5)]"
               >
                 <img
-                  src="/assets/ui/badge_shield_ac.png"
+                  src="./assets/ui/badge_shield_ac.png"
                   alt=""
                   draggable={false}
                   className="absolute inset-0 w-full h-full object-contain pointer-events-none"
@@ -331,7 +331,7 @@ export const PathfinderGothicCard: React.FC<PathfinderGothicCardProps> = ({
                 className="relative w-9 h-9 shrink-0 flex items-center justify-center filter drop-shadow-[0_3px_5px_rgba(0,0,0,0.5)]"
               >
                 <img
-                  src="/assets/ui/coin_stat_medallion.png"
+                  src="./assets/ui/coin_stat_medallion.png"
                   alt=""
                   draggable={false}
                   className="absolute inset-0 w-full h-full object-contain pointer-events-none"
@@ -352,7 +352,7 @@ export const PathfinderGothicCard: React.FC<PathfinderGothicCardProps> = ({
                 className="relative w-9 h-9 shrink-0 flex items-center justify-center filter drop-shadow-[0_3px_5px_rgba(0,0,0,0.5)]"
               >
                 <img
-                  src="/assets/ui/coin_stat_medallion.png"
+                  src="./assets/ui/coin_stat_medallion.png"
                   alt=""
                   draggable={false}
                   className="absolute inset-0 w-full h-full object-contain pointer-events-none"
@@ -413,7 +413,7 @@ export const PathfinderGothicCard: React.FC<PathfinderGothicCardProps> = ({
               <div className="relative w-full my-1 flex items-center select-none drop-shadow-[0_3px_5px_rgba(0,0,0,0.45)]">
                 {/* Left Forged Bronze Vial Cap */}
                 <img
-                  src="/assets/ui/hp_vial_cap_left.png"
+                  src="./assets/ui/hp_vial_cap_left.png"
                   alt=""
                   draggable={false}
                   className="h-6 w-auto object-contain shrink-0 z-20 pointer-events-none select-none -mr-2"
@@ -441,7 +441,7 @@ export const PathfinderGothicCard: React.FC<PathfinderGothicCardProps> = ({
 
                   {/* Transparent Alchemical Crystal Glass Cylinder Overlay */}
                   <img
-                    src="/assets/ui/hp_vial_glass_center.png"
+                    src="./assets/ui/hp_vial_glass_center.png"
                     alt=""
                     draggable={false}
                     className="absolute inset-0 w-full h-full object-fill pointer-events-none z-10 opacity-90 mix-blend-screen"
@@ -451,7 +451,7 @@ export const PathfinderGothicCard: React.FC<PathfinderGothicCardProps> = ({
 
                 {/* Right Forged Bronze Vial Cap */}
                 <img
-                  src="/assets/ui/hp_vial_cap_right.png"
+                  src="./assets/ui/hp_vial_cap_right.png"
                   alt=""
                   draggable={false}
                   className="h-6 w-auto object-contain shrink-0 z-20 pointer-events-none select-none -ml-2"
@@ -591,7 +591,7 @@ export const PathfinderGothicCard: React.FC<PathfinderGothicCardProps> = ({
                     style={{ aspectRatio: '1 / 1' }}
                   >
                     <img
-                      src="/assets/ui/coin_stat_medallion.png"
+                      src="./assets/ui/coin_stat_medallion.png"
                       alt=""
                       draggable={false}
                       className="absolute inset-0 w-full h-full object-contain pointer-events-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.45)]"

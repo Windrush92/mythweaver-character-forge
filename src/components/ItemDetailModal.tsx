@@ -48,7 +48,7 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
   } else if (armor || isShield) {
     badgeSrc = getArmorBadgeAsset(itemName, armor?.category || 'shield');
   } else {
-    badgeSrc = '/assets/ui/coin_stat_medallion.png';
+    badgeSrc = './assets/ui/coin_stat_medallion.png';
   }
 
   // Category labels

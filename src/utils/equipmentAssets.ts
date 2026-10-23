@@ -7,19 +7,19 @@ export type WeaponBadgeType = 'sword' | 'axe' | 'mace' | 'spear' | 'bow' | 'unar
 export type ArmorBadgeType = 'light' | 'medium' | 'heavy' | 'shield';
 
 export const WEAPON_BADGE_ASSETS: Record<WeaponBadgeType, string> = {
-  sword: '/assets/ui/badge_weapon_sword.png',
-  axe: '/assets/ui/badge_weapon_axe.png',
-  mace: '/assets/ui/badge_weapon_mace.png',
-  spear: '/assets/ui/badge_weapon_spear.png',
-  bow: '/assets/ui/badge_weapon_bow.png',
-  unarmed: '/assets/ui/badge_weapon_unarmed.png',
+  sword: './assets/ui/badge_weapon_sword.png',
+  axe: './assets/ui/badge_weapon_axe.png',
+  mace: './assets/ui/badge_weapon_mace.png',
+  spear: './assets/ui/badge_weapon_spear.png',
+  bow: './assets/ui/badge_weapon_bow.png',
+  unarmed: './assets/ui/badge_weapon_unarmed.png',
 };
 
 export const ARMOR_BADGE_ASSETS: Record<ArmorBadgeType, string> = {
-  light: '/assets/ui/badge_armor_light.png',
-  medium: '/assets/ui/badge_armor_medium.png',
-  heavy: '/assets/ui/badge_armor_heavy.png',
-  shield: '/assets/ui/badge_armor_shield.png',
+  light: './assets/ui/badge_armor_light.png',
+  medium: './assets/ui/badge_armor_medium.png',
+  heavy: './assets/ui/badge_armor_heavy.png',
+  shield: './assets/ui/badge_armor_shield.png',
 };
 
 /**

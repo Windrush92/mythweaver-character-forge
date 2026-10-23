@@ -290,7 +290,7 @@ const SPELL_CHECKBOX_PAIRS: Record<string, string> = {
  */
 export async function exportCharacterToOfficialPdf(
   character: Character,
-  templateUrl = '/templates/Hoja_de_Personaje_Editable.pdf'
+  templateUrl = './templates/Hoja_de_Personaje_Editable.pdf'
 ): Promise<void> {
   // 1. Fetch template binary data
   const response = await fetch(templateUrl);
@@ -302,8 +302,8 @@ export async function exportCharacterToOfficialPdf(
   // 2. Open PDF with pdfjsLib
   const loadingTask = pdfjsLib.getDocument({
     data: new Uint8Array(arrayBuffer),
-    standardFontDataUrl: '/standard_fonts/',
-    cMapUrl: '/cmaps/',
+    standardFontDataUrl: './standard_fonts/',
+    cMapUrl: './cmaps/',
     cMapPacked: true,
   });
   const doc = await loadingTask.promise;

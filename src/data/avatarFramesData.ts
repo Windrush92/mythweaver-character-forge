@@ -41,7 +41,7 @@ export const AVATAR_FRAME_DEFINITIONS: AvatarFrameDefinition[] = [
     accentGradient: 'from-[#7f1d1d] via-[#ea580c] to-[#7f1d1d]',
     cornerIcon: '🔥',
     description: 'Recuadro circular fino forjado en obsidiana volcánica con lenguas de fuego vivo carmesí y ascuas doradas que rodean el retrato.',
-    assetUrl: '/assets/frames/frame_element_fire.png',
+    assetUrl: './assets/frames/frame_element_fire.png',
   },
 
   // FUEGO (CUADRADO)
@@ -61,7 +61,7 @@ export const AVATAR_FRAME_DEFINITIONS: AvatarFrameDefinition[] = [
     accentGradient: 'from-[#9a3412] via-[#f59e0b] to-[#9a3412]',
     cornerIcon: '🌋',
     description: 'Recuadro cuadrado fino de bloques de basalto volcánico con fisuras ardientes de magma líquido que brillan con calor puro.',
-    assetUrl: '/assets/frames/frame_element_magma.png',
+    assetUrl: './assets/frames/frame_element_magma.png',
   },
 
   // AGUA (REDONDO)
@@ -81,7 +81,7 @@ export const AVATAR_FRAME_DEFINITIONS: AvatarFrameDefinition[] = [
     accentGradient: 'from-[#0369a1] via-[#38bdf8] to-[#0369a1]',
     cornerIcon: '❄️',
     description: 'Borde circular fino con finos remolinos marinos de agua pura y agujas de hielo zafiro que destellan con la luz.',
-    assetUrl: '/assets/frames/frame_element_water.png',
+    assetUrl: './assets/frames/frame_element_water.png',
   },
 
   // AGUA (CUADRADO)
@@ -101,7 +101,7 @@ export const AVATAR_FRAME_DEFINITIONS: AvatarFrameDefinition[] = [
     accentGradient: 'from-[#075985] via-[#0284c7] to-[#075985]',
     cornerIcon: '🌊',
     description: 'Recuadro cuadrado fino con arabescos de olas de alta mar en tonos zafiro y cian bioluminiscente de las fosas abisales.',
-    assetUrl: '/assets/frames/frame_element_ocean_abyss.png',
+    assetUrl: './assets/frames/frame_element_ocean_abyss.png',
   },
 
   // HIELO (CUADRADO)
@@ -121,7 +121,7 @@ export const AVATAR_FRAME_DEFINITIONS: AvatarFrameDefinition[] = [
     accentGradient: 'from-[#0284c7] via-[#7dd3fc] to-[#0284c7]',
     cornerIcon: '❄️',
     description: 'Recuadro cuadrado fino forjado en hielo azulado perpetuo con pequeñas estalactitas que descienden en las esquinas.',
-    assetUrl: '/assets/frames/frame_element_frost_blizzard.png',
+    assetUrl: './assets/frames/frame_element_frost_blizzard.png',
   },
 
   // TIERRA (CUADRADO)
@@ -141,7 +141,7 @@ export const AVATAR_FRAME_DEFINITIONS: AvatarFrameDefinition[] = [
     accentGradient: 'from-[#3f6212] via-[#84cc16] to-[#3f6212]',
     cornerIcon: '🌿',
     description: 'Recuadro cuadrado fino de bloques de granito rúnico pulido con esquinas biseladas y pequeños toques de musgo vivo de bosque antiguo.',
-    assetUrl: '/assets/frames/frame_element_earth.png',
+    assetUrl: './assets/frames/frame_element_earth.png',
   },
 
   // TIERRA (REDONDO)
@@ -161,7 +161,7 @@ export const AVATAR_FRAME_DEFINITIONS: AvatarFrameDefinition[] = [
     accentGradient: 'from-[#047857] via-[#10b981] to-[#047857]',
     cornerIcon: '✨',
     description: 'Recuadro circular fino con incrustaciones de cristales de cuarzo y vetas de esmeralda natural extraídas del corazón de la tierra.',
-    assetUrl: '/assets/frames/frame_element_geode_crystal.png',
+    assetUrl: './assets/frames/frame_element_geode_crystal.png',
   },
 
   // AIRE (REDONDO)
@@ -181,7 +181,7 @@ export const AVATAR_FRAME_DEFINITIONS: AvatarFrameDefinition[] = [
     accentGradient: 'from-[#475569] via-[#cbd5e1] to-[#475569]',
     cornerIcon: '🪶',
     description: 'Recuadro circular fino envuelto en sutiles filamentos de viento transparente y brisa celestial aeromántica.',
-    assetUrl: '/assets/frames/frame_element_air.png',
+    assetUrl: './assets/frames/frame_element_air.png',
   },
 
   // AIRE (CUADRADO)
@@ -201,7 +201,7 @@ export const AVATAR_FRAME_DEFINITIONS: AvatarFrameDefinition[] = [
     accentGradient: 'from-[#475569] via-[#94a3b8] to-[#475569]',
     cornerIcon: '🌪️',
     description: 'Recuadro cuadrado fino tejido con cintas de vendaval huracanado en plata pálida que bailan en las esquinas.',
-    assetUrl: '/assets/frames/frame_element_cyclone.png',
+    assetUrl: './assets/frames/frame_element_cyclone.png',
   },
 
   // TRUENO (CUADRADO)
@@ -221,7 +221,7 @@ export const AVATAR_FRAME_DEFINITIONS: AvatarFrameDefinition[] = [
     accentGradient: 'from-[#1d4ed8] via-[#60a5fa] to-[#1d4ed8]',
     cornerIcon: '⚡',
     description: 'Recuadro cuadrado fino de acero cobalto forjado en la tormenta, recorrido por arcos de relámpago azul y remaches galvanizados.',
-    assetUrl: '/assets/frames/frame_element_thunder.png',
+    assetUrl: './assets/frames/frame_element_thunder.png',
   },
 
   // TRUENO (REDONDO)
@@ -241,7 +241,7 @@ export const AVATAR_FRAME_DEFINITIONS: AvatarFrameDefinition[] = [
     accentGradient: 'from-[#b45309] via-[#facc15] to-[#b45309]',
     cornerIcon: '⚡',
     description: 'Recuadro circular fino bañado en energía solar y rayos voltaicos dorados que destellan con el poder de una tempestad divina.',
-    assetUrl: '/assets/frames/frame_element_sunstorm.png',
+    assetUrl: './assets/frames/frame_element_sunstorm.png',
   },
 
   // =========================================================================
@@ -265,7 +265,7 @@ export const AVATAR_FRAME_DEFINITIONS: AvatarFrameDefinition[] = [
     accentGradient: 'from-[#44403c] via-[#a8a29e] to-[#44403c]',
     cornerIcon: '🛡️',
     description: 'Recuadro cuadrado fino de acero bruñido martillado a mano con refuerzo de remaches en las esquinas, limpio y marcial.',
-    assetUrl: '/assets/frames/frame_forge_iron.png',
+    assetUrl: './assets/frames/frame_forge_iron.png',
   },
 
   // FORJA ENANA (REDONDO)
@@ -285,7 +285,7 @@ export const AVATAR_FRAME_DEFINITIONS: AvatarFrameDefinition[] = [
     accentGradient: 'from-[#854d0e] via-[#eab308] to-[#854d0e]',
     cornerIcon: '⛏️',
     description: 'Recuadro circular fino con biseles de metal templado y finas runas enanas de poder cinceladas en oro alrededor del retrato.',
-    assetUrl: '/assets/frames/frame_forge_dwarven.png',
+    assetUrl: './assets/frames/frame_forge_dwarven.png',
   },
 
   // FORJA DE MITRIL (REDONDO)
@@ -305,7 +305,7 @@ export const AVATAR_FRAME_DEFINITIONS: AvatarFrameDefinition[] = [
     accentGradient: 'from-[#475569] via-[#cbd5e1] to-[#475569]',
     cornerIcon: '🗡️',
     description: 'Recuadro circular fino de auténtico mitril élfico de acabado celestial, ligero pero irrompible, con finos grabados florales.',
-    assetUrl: '/assets/frames/frame_forge_mithril.png',
+    assetUrl: './assets/frames/frame_forge_mithril.png',
   },
 
   // ARMAZÓN DE PLACAS (CUADRADO)
@@ -325,7 +325,7 @@ export const AVATAR_FRAME_DEFINITIONS: AvatarFrameDefinition[] = [
     accentGradient: 'from-[#57534e] via-[#d6d3d1] to-[#57534e]',
     cornerIcon: '🛡️',
     description: 'Recuadro cuadrado fino con el aspecto de una coraza de placas de caballero paladín, pulida como un espejo y remachada.',
-    assetUrl: '/assets/frames/frame_forge_plate_armor.png',
+    assetUrl: './assets/frames/frame_forge_plate_armor.png',
   },
 
   // =========================================================================
@@ -349,7 +349,7 @@ export const AVATAR_FRAME_DEFINITIONS: AvatarFrameDefinition[] = [
     accentGradient: 'from-[#7f1d1d] via-[#dc2626] to-[#7f1d1d]',
     cornerIcon: '🩸',
     description: 'Recuadro circular fino de piedra abisal oscura con cuernos demoníacos estilizados y destellos de fuego carmesí en el borde.',
-    assetUrl: '/assets/frames/frame_dark_demonic.png',
+    assetUrl: './assets/frames/frame_dark_demonic.png',
   },
 
   // CRÁNEO GÓTICO (CUADRADO)
@@ -369,7 +369,7 @@ export const AVATAR_FRAME_DEFINITIONS: AvatarFrameDefinition[] = [
     accentGradient: 'from-[#27272a] via-[#71717a] to-[#27272a]',
     cornerIcon: '💀',
     description: 'Recuadro cuadrado fino con esquineros de calaveras esculpidas en hierro oscuro y calados arquitectónicos góticos.',
-    assetUrl: '/assets/frames/frame_gothic_skull.png',
+    assetUrl: './assets/frames/frame_gothic_skull.png',
   },
 
   // PACTO DE SANGRE (CUADRADO)
@@ -389,7 +389,7 @@ export const AVATAR_FRAME_DEFINITIONS: AvatarFrameDefinition[] = [
     accentGradient: 'from-[#7f1d1d] via-[#ef4444] to-[#7f1d1d]',
     cornerIcon: '🗡️',
     description: 'Recuadro cuadrado fino forjado para brujos y caballeros de sangre, con glifos rojos brillantes que laten como un corazón oscuro.',
-    assetUrl: '/assets/frames/frame_dark_blood_runes.png',
+    assetUrl: './assets/frames/frame_dark_blood_runes.png',
   },
 
   // VACÍO ELDRITCH (REDONDO)
@@ -409,7 +409,7 @@ export const AVATAR_FRAME_DEFINITIONS: AvatarFrameDefinition[] = [
     accentGradient: 'from-[#581c87] via-[#9333ea] to-[#581c87]',
     cornerIcon: '🌌',
     description: 'Recuadro circular fino rodeado de sombras cósmicas y zarcillos de energía abisal púrpura venidos de más allá de las estrellas.',
-    assetUrl: '/assets/frames/frame_dark_eldritch_void.png',
+    assetUrl: './assets/frames/frame_dark_eldritch_void.png',
   },
 
   // =========================================================================
@@ -433,7 +433,7 @@ export const AVATAR_FRAME_DEFINITIONS: AvatarFrameDefinition[] = [
     accentGradient: 'from-[#6d28d9] via-[#c084fc] to-[#6d28d9]',
     cornerIcon: '🔮',
     description: 'Recuadro circular fino con anillos concéntricos trazados en filigrana astral de amatista y oro con glifos estelares flotantes.',
-    assetUrl: '/assets/frames/frame_arcane_astral.png',
+    assetUrl: './assets/frames/frame_arcane_astral.png',
   },
 
   // BOSQUE FEÉRICO (CUADRADO)
@@ -453,7 +453,7 @@ export const AVATAR_FRAME_DEFINITIONS: AvatarFrameDefinition[] = [
     accentGradient: 'from-[#047857] via-[#34d399] to-[#047857]',
     cornerIcon: '🍃',
     description: 'Recuadro cuadrado fino tejido con ramas vivas de oro suave, pequeñas hojas de esmeralda y destellos de polen feérico.',
-    assetUrl: '/assets/frames/frame_nature_fae.png',
+    assetUrl: './assets/frames/frame_nature_fae.png',
   },
 
   // TOMO DE CONJURADOR (CUADRADO)
@@ -473,7 +473,7 @@ export const AVATAR_FRAME_DEFINITIONS: AvatarFrameDefinition[] = [
     accentGradient: 'from-[#78350f] via-[#d97706] to-[#78350f]',
     cornerIcon: '📜',
     description: 'Recuadro cuadrado fino con esquineros protectores de latón dorado labrado, idéntico a las cantoneras de un grimorio de archimago.',
-    assetUrl: '/assets/frames/frame_arcane_spellbook.png',
+    assetUrl: './assets/frames/frame_arcane_spellbook.png',
   },
 
   // =========================================================================
@@ -497,7 +497,7 @@ export const AVATAR_FRAME_DEFINITIONS: AvatarFrameDefinition[] = [
     accentGradient: 'from-[#a16207] via-[#facc15] to-[#a16207]',
     cornerIcon: '👑',
     description: 'Recuadro circular fino con delicada filigrana áurea, biselado de orfebrería imperial y pequeñas gemas ceremoniales.',
-    assetUrl: '/assets/frames/frame_royal_gold.png',
+    assetUrl: './assets/frames/frame_royal_gold.png',
   },
 
   // EMPERADOR DRAGÓN (REDONDO)
@@ -517,7 +517,7 @@ export const AVATAR_FRAME_DEFINITIONS: AvatarFrameDefinition[] = [
     accentGradient: 'from-[#92400e] via-[#f59e0b] to-[#92400e]',
     cornerIcon: '🐲',
     description: 'Recuadro circular fino coronado con motivos de dragón imperial y escamas de oro fundido que abrazan el avatar con orgullo.',
-    assetUrl: '/assets/frames/frame_noble_dragon_emperor.png',
+    assetUrl: './assets/frames/frame_noble_dragon_emperor.png',
   },
 
   // =========================================================================

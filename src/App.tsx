@@ -360,7 +360,7 @@ export default function App() {
       className="min-h-screen text-[#f4ecd8] flex flex-col font-sans select-none selection:bg-[#b88c32] selection:text-[#fdfaf3]"
       style={{
         backgroundImage:
-          'linear-gradient(rgba(20, 12, 7, 0.30), rgba(20, 12, 7, 0.30)), url(/assets/backgrounds/bg_mahogany_table.jpg)',
+          'linear-gradient(rgba(20, 12, 7, 0.30), rgba(20, 12, 7, 0.30)), url(./assets/backgrounds/bg_mahogany_table.jpg)',
         backgroundRepeat: 'repeat',
         backgroundAttachment: 'fixed',
         backgroundSize: '700px auto',
@@ -374,7 +374,7 @@ export default function App() {
         className="sticky top-0 z-40 border-t-[3px] border-[#4a3d31] border-b border-[#8c672b]/70 shadow-2xl text-[#f5eee2]"
         style={{
           backgroundImage:
-            'linear-gradient(rgba(24, 15, 9, 0.7), rgba(16, 10, 6, 0.82)), url(/assets/backgrounds/bg_mahogany_table.jpg)',
+            'linear-gradient(rgba(24, 15, 9, 0.7), rgba(16, 10, 6, 0.82)), url(./assets/backgrounds/bg_mahogany_table.jpg)',
           backgroundRepeat: 'repeat',
           backgroundSize: '550px auto',
           backgroundColor: '#180e07',
@@ -392,7 +392,7 @@ export default function App() {
             {/* Centered Dragon Logo + Fantasy Name */}
             <div className="flex items-center gap-3.5 sm:gap-4.5 shrink-0 select-none">
               <img
-                src="/assets/ui/logo_minimalist_mythweaver.png"
+                src="./assets/ui/logo_minimalist_mythweaver.png"
                 alt="Mythweaver Dragon Crest"
                 className="w-16 h-16 sm:w-20 sm:h-20 md:w-22 md:h-22 object-contain drop-shadow-[0_4px_24px_rgba(255,200,80,0.7)] shrink-0 transition-transform duration-300 hover:scale-105"
               />
@@ -422,7 +422,7 @@ export default function App() {
           className="w-full relative z-20 border-t border-[#4a3622]/60 shadow-[0_6px_20px_rgba(0,0,0,0.85)]"
           style={{
             backgroundImage:
-              'linear-gradient(rgba(24, 15, 9, 0.50), rgba(16, 10, 6, 0.65)), url(/assets/backgrounds/bg_mahogany_table.jpg)',
+              'linear-gradient(rgba(24, 15, 9, 0.50), rgba(16, 10, 6, 0.65)), url(./assets/backgrounds/bg_mahogany_table.jpg)',
             backgroundRepeat: 'repeat',
             backgroundSize: '550px auto',
           }}
@@ -437,8 +437,8 @@ export default function App() {
                 style={{
                   backgroundImage:
                     currentTab === 'characters'
-                      ? 'url(/assets/ui/btn_nav_active.png)'
-                      : 'url(/assets/ui/btn_nav_normal.png)',
+                      ? 'url(./assets/ui/btn_nav_active.png)'
+                      : 'url(./assets/ui/btn_nav_normal.png)',
                   backgroundSize: '100% 100%',
                   backgroundRepeat: 'no-repeat',
                   backgroundColor: 'transparent',
@@ -462,8 +462,8 @@ export default function App() {
                 style={{
                   backgroundImage:
                     currentTab === 'compendium'
-                      ? 'url(/assets/ui/btn_nav_active.png)'
-                      : 'url(/assets/ui/btn_nav_normal.png)',
+                      ? 'url(./assets/ui/btn_nav_active.png)'
+                      : 'url(./assets/ui/btn_nav_normal.png)',
                   backgroundSize: '100% 100%',
                   backgroundRepeat: 'no-repeat',
                   backgroundColor: 'transparent',
@@ -491,7 +491,7 @@ export default function App() {
                 aria-label={isHeaderCollapsed ? "Expandir panel superior" : "Colapsar panel superior"}
               >
                 <img
-                  src="/assets/ui/btn_header_action_normal.png"
+                  src="./assets/ui/btn_header_action_normal.png"
                   alt=""
                   className="absolute inset-0 w-full h-full object-contain filter drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)] group-hover:brightness-110 transition select-none"
                 />
@@ -531,7 +531,7 @@ export default function App() {
                   type="button"
                   onClick={handleLoadSampleHero}
                   style={{
-                    backgroundImage: 'url(/assets/ui/btn_nav_normal.png)',
+                    backgroundImage: 'url(./assets/ui/btn_nav_normal.png)',
                     backgroundSize: '100% 100%',
                     backgroundRepeat: 'no-repeat',
                     backgroundColor: 'transparent',
@@ -549,7 +549,7 @@ export default function App() {
                     type="button"
                     onClick={exportAllJson}
                     style={{
-                      backgroundImage: 'url(/assets/ui/btn_nav_normal.png)',
+                      backgroundImage: 'url(./assets/ui/btn_nav_normal.png)',
                       backgroundSize: '100% 100%',
                       backgroundRepeat: 'no-repeat',
                       backgroundColor: 'transparent',
@@ -567,7 +567,7 @@ export default function App() {
                   type="button"
                   onClick={() => jsonFileInputRef.current?.click()}
                   style={{
-                    backgroundImage: 'url(/assets/ui/btn_nav_normal.png)',
+                    backgroundImage: 'url(./assets/ui/btn_nav_normal.png)',
                     backgroundSize: '100% 100%',
                     backgroundRepeat: 'no-repeat',
                     backgroundColor: 'transparent',
@@ -591,7 +591,7 @@ export default function App() {
                   type="button"
                   onClick={() => setPdfImportModalOpen(true)}
                   style={{
-                    backgroundImage: 'url(/assets/ui/btn_nav_normal.png)',
+                    backgroundImage: 'url(./assets/ui/btn_nav_normal.png)',
                     backgroundSize: '100% 100%',
                     backgroundRepeat: 'no-repeat',
                     backgroundColor: 'transparent',
@@ -608,7 +608,7 @@ export default function App() {
                   type="button"
                   onClick={handleOpenNewCharacter}
                   style={{
-                    backgroundImage: 'url(/assets/ui/btn_nav_active.png)',
+                    backgroundImage: 'url(./assets/ui/btn_nav_active.png)',
                     backgroundSize: '100% 100%',
                     backgroundRepeat: 'no-repeat',
                     backgroundColor: 'transparent',
@@ -672,12 +672,12 @@ export default function App() {
                 className="relative rounded-2xl border-2 border-[#8c672b]/60 p-8 sm:p-12 text-center shadow-2xl flex flex-col items-center justify-center gap-4 overflow-hidden"
                 style={{
                   backgroundImage:
-                    'linear-gradient(rgba(24, 15, 9, 0.94), rgba(16, 10, 6, 0.98)), url(/assets/backgrounds/bg_mahogany_table.jpg)',
+                    'linear-gradient(rgba(24, 15, 9, 0.94), rgba(16, 10, 6, 0.98)), url(./assets/backgrounds/bg_mahogany_table.jpg)',
                   backgroundColor: '#180e07',
                 }}
               >
                 <img
-                  src="/assets/ui/logo_minimalist_mythweaver.png"
+                  src="./assets/ui/logo_minimalist_mythweaver.png"
                   alt=""
                   className="w-24 h-24 object-contain opacity-75 drop-shadow-[0_4px_16px_rgba(255,200,80,0.4)]"
                 />
@@ -699,7 +699,7 @@ export default function App() {
                     type="button"
                     onClick={handleOpenNewCharacter}
                     style={{
-                      backgroundImage: 'url(/assets/ui/btn_nav_active.png)',
+                      backgroundImage: 'url(./assets/ui/btn_nav_active.png)',
                       backgroundSize: '100% 100%',
                       backgroundRepeat: 'no-repeat',
                       backgroundColor: 'transparent',
@@ -714,7 +714,7 @@ export default function App() {
                     type="button"
                     onClick={handleLoadSampleHero}
                     style={{
-                      backgroundImage: 'url(/assets/ui/btn_nav_normal.png)',
+                      backgroundImage: 'url(./assets/ui/btn_nav_normal.png)',
                       backgroundSize: '100% 100%',
                       backgroundRepeat: 'no-repeat',
                       backgroundColor: 'transparent',

@@ -7,7 +7,7 @@ export const DEFAULT_CAMPAIGNS: Campaign[] = [
     "description": "Campaña techno-fantasía donde la magia antigua y la ingeniería cibernética colisionan. Enfrentamientos contra androides de combate y misterios del Código Anciano.",
     "dmName": "Pablo",
     "createdAt": "2026-10-05T14:17:04.191Z",
-    "worldMapUrl": "/vault/maps/MAPA_ELORIA_COMPLETO.webp",
+    "worldMapUrl": "./vault/maps/MAPA_ELORIA_COMPLETO.webp",
     "worldMapPins": [
       {
         "id": "pin-party-motor",
@@ -49,7 +49,7 @@ export const DEFAULT_CAMPAIGNS: Campaign[] = [
     "description": "Aventura en la fría posta del Cuerno Quebrado. Una aberración gélida acecha bajo las grietas de la bodega congelada.",
     "dmName": "Pablo",
     "createdAt": "2026-10-05T14:17:04.194Z",
-    "worldMapUrl": "/vault/maps/exterior_posta.jpg",
+    "worldMapUrl": "./vault/maps/exterior_posta.jpg",
     "worldMapPins": [
       {
         "id": "pin-posta",
@@ -82,7 +82,7 @@ export const DEFAULT_CAMPAIGNS: Campaign[] = [
     "description": "En las profundidades del Raigal Profundo y el pueblo de Grisvado, la Herida Negra y el meteorito de cristal oscuro alteran el equilibrio del bosque.",
     "dmName": "Pablo",
     "createdAt": "2026-10-05T14:17:04.194Z",
-    "worldMapUrl": "/vault/maps/MAPA_ELORIA_COMPLETO.webp",
+    "worldMapUrl": "./vault/maps/MAPA_ELORIA_COMPLETO.webp",
     "worldMapPins": [
       {
         "id": "pin-grisvado",
@@ -151,7 +151,7 @@ export const DEFAULT_CAMPAIGNS: Campaign[] = [
     "description": "Los sucesos misteriosos y el epílogo del incidente de Durholt.",
     "dmName": "Pablo",
     "createdAt": "2026-10-05T14:17:04.194Z",
-    "worldMapUrl": "/vault/maps/MAPA_ELORIA_COMPLETO.webp",
+    "worldMapUrl": "./vault/maps/MAPA_ELORIA_COMPLETO.webp",
     "worldMapPins": [
       {
         "id": "pin-durholt",

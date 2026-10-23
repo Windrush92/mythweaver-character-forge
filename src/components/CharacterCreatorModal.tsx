@@ -2412,7 +2412,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
           id="creator-tour-header"
           className="border-b border-[#8c672b]/70 px-3 sm:px-4 py-1.5 sm:py-2 flex items-center justify-between gap-2 shadow-sm shrink-0 text-[#f7f2ea]"
           style={{
-            backgroundImage: 'linear-gradient(rgba(24, 15, 9, 0.78), rgba(16, 10, 6, 0.88)), url(/assets/backgrounds/bg_mahogany_table.jpg)',
+            backgroundImage: 'linear-gradient(rgba(24, 15, 9, 0.78), rgba(16, 10, 6, 0.88)), url(./assets/backgrounds/bg_mahogany_table.jpg)',
             backgroundRepeat: 'repeat',
             backgroundSize: '550px auto',
             backgroundColor: '#1a1009',
@@ -2421,7 +2421,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
           {/* Left: Mythweaver Dragon Emblem + Title + Progress */}
           <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
             <img
-              src="/assets/ui/logo_minimalist_mythweaver.png"
+              src="./assets/ui/logo_minimalist_mythweaver.png"
               alt="Mythweaver"
               className="w-7 h-7 sm:w-8 sm:h-8 object-contain drop-shadow-[0_2px_8px_rgba(255,200,80,0.6)] shrink-0"
             />
@@ -2538,7 +2538,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
         <div
           className="flex-1 w-full relative flex items-stretch justify-center p-1 sm:p-1.5 gap-2 lg:gap-3 overflow-hidden select-none"
           style={{
-            backgroundImage: `url('/assets/creador_de_pj/mesa_quebracho_puro.png')`,
+            backgroundImage: `url('./assets/creador_de_pj/mesa_quebracho_puro.png')`,
             backgroundSize: '100% 100%',
             backgroundPosition: 'center',
             backgroundColor: '#160d07',
@@ -2627,7 +2627,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                         stepContentContainerRef.current?.scrollTo({ top: 0, behavior: 'instant' });
                       }}
                       style={{
-                        backgroundImage: `url(${isCurrent ? '/assets/creador_de_pj/senalador_activo.png' : '/assets/creador_de_pj/senalador_inactivo.png'})`,
+                        backgroundImage: `url(${isCurrent ? './assets/creador_de_pj/senalador_activo.png' : './assets/creador_de_pj/senalador_inactivo.png'})`,
                         backgroundSize: '100% 100%',
                         backgroundRepeat: 'no-repeat',
                       }}
@@ -2748,11 +2748,11 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
             </nav>
 
             {/* THE PARCHMENT SHEET BODY (Creation Step Content & Forms) */}
-            <div className="relative flex-1 h-full flex flex-col rounded-2xl overflow-hidden shadow-[0_18px_40px_rgba(0,0,0,0.75),0_6px_16px_rgba(0,0,0,0.5)] border border-[#a67c3b]/50 bg-[#fbf7ee] bg-[url('/assets/ui/parchment_clean_texture.png')] bg-repeat z-10">
+            <div className="relative flex-1 h-full flex flex-col rounded-2xl overflow-hidden shadow-[0_18px_40px_rgba(0,0,0,0.75),0_6px_16px_rgba(0,0,0,0.5)] border border-[#a67c3b]/50 bg-[#fbf7ee] bg-[url('./assets/ui/parchment_clean_texture.png')] bg-repeat z-10">
             {/* Mini-HUD moved to top bar to maximize parchment space */}
 
             {/* Step Body (Scrollable Parchment Folio) */}
-            <div ref={stepContentContainerRef} className="flex-1 overflow-y-auto p-1.5 sm:p-2 pl-6 sm:pl-8 space-y-1.5 bg-[#fbf7ee] bg-[url('/assets/ui/parchment_clean_texture.png')] bg-repeat shadow-inner">
+            <div ref={stepContentContainerRef} className="flex-1 overflow-y-auto p-1.5 sm:p-2 pl-6 sm:pl-8 space-y-1.5 bg-[#fbf7ee] bg-[url('./assets/ui/parchment_clean_texture.png')] bg-repeat shadow-inner">
 
               {/* ----------------------------------------------------- */}
               {/* STEP 1: IDENTITY & ROLEPLAY */}
@@ -8009,7 +8009,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
             <div
               className="py-1.5 sm:py-2 px-3 sm:px-5 border-t border-[#8c672b]/80 flex items-center justify-between shrink-0 text-[#f7f2ea] shadow-md gap-2 flex-nowrap"
               style={{
-                backgroundImage: 'linear-gradient(rgba(24, 15, 9, 0.88), rgba(16, 10, 6, 0.95)), url(/assets/backgrounds/bg_mahogany_table.jpg)',
+                backgroundImage: 'linear-gradient(rgba(24, 15, 9, 0.88), rgba(16, 10, 6, 0.95)), url(./assets/backgrounds/bg_mahogany_table.jpg)',
                 backgroundColor: '#1a1009',
               }}
             >
@@ -8084,13 +8084,13 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
             className="w-72 sm:w-80 md:w-84 lg:w-92 xl:w-[390px] shrink-0 h-full flex flex-col relative z-10 animate-fadeIn"
           >
             {/* Pristine Parchment Folio Card (No scroll rollers, matching the table theme) */}
-            <div className="relative flex-1 h-full flex flex-col rounded-2xl overflow-hidden shadow-[0_18px_40px_rgba(0,0,0,0.8),0_4px_12px_rgba(0,0,0,0.5)] border border-[#a67c3b]/60 bg-[#fbf7ee] bg-[url('/assets/ui/parchment_clean_texture.png')] bg-repeat">
+            <div className="relative flex-1 h-full flex flex-col rounded-2xl overflow-hidden shadow-[0_18px_40px_rgba(0,0,0,0.8),0_4px_12px_rgba(0,0,0,0.5)] border border-[#a67c3b]/60 bg-[#fbf7ee] bg-[url('./assets/ui/parchment_clean_texture.png')] bg-repeat">
               
               {/* Sleek Top Leather & Bronze Header with Collapse Button */}
               <div
                 className="h-8 sm:h-9 w-full shrink-0 flex items-center justify-between px-3 shadow-xs border-b border-[#8c672b]/70 text-[#f7f2ea]"
                 style={{
-                  backgroundImage: 'linear-gradient(rgba(24, 15, 9, 0.85), rgba(16, 10, 6, 0.92)), url(/assets/backgrounds/bg_mahogany_table.jpg)',
+                  backgroundImage: 'linear-gradient(rgba(24, 15, 9, 0.85), rgba(16, 10, 6, 0.92)), url(./assets/backgrounds/bg_mahogany_table.jpg)',
                   backgroundRepeat: 'repeat',
                   backgroundColor: '#1a1009',
                 }}
@@ -8243,7 +8243,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       <span className="text-[8.5px] uppercase font-bold text-[#6b472e] tracking-wider mb-0.5">Armadura</span>
                       <div className="relative w-9 h-10 shrink-0 flex items-center justify-center filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.45)]">
                         <img
-                          src="/assets/ui/badge_shield_ac.png"
+                          src="./assets/ui/badge_shield_ac.png"
                           alt="CA"
                           draggable={false}
                           className="absolute inset-0 w-full h-full object-contain pointer-events-none"
@@ -8260,7 +8260,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       <span className="text-[8.5px] uppercase font-bold text-[#6b472e] tracking-wider mb-0.5">Iniciativa</span>
                       <div className="relative w-9 h-9 shrink-0 flex items-center justify-center filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.45)]">
                         <img
-                          src="/assets/ui/coin_stat_medallion.png"
+                          src="./assets/ui/coin_stat_medallion.png"
                           alt="Iniciativa"
                           draggable={false}
                           className="absolute inset-0 w-full h-full object-contain pointer-events-none"
@@ -8279,7 +8279,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       <span className="text-[8.5px] uppercase font-bold text-[#6b472e] tracking-wider mb-0.5">Percep.</span>
                       <div className="relative w-9 h-9 shrink-0 flex items-center justify-center filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.45)]">
                         <img
-                          src="/assets/ui/coin_stat_medallion.png"
+                          src="./assets/ui/coin_stat_medallion.png"
                           alt="Percepción Pasiva"
                           draggable={false}
                           className="absolute inset-0 w-full h-full object-contain pointer-events-none"
@@ -8296,7 +8296,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       <span className="text-[8.5px] uppercase font-bold text-[#6b472e] tracking-wider mb-0.5">Comp.</span>
                       <div className="relative w-9 h-9 shrink-0 flex items-center justify-center filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.45)]">
                         <img
-                          src="/assets/ui/coin_stat_medallion.png"
+                          src="./assets/ui/coin_stat_medallion.png"
                           alt="Competencia"
                           draggable={false}
                           className="absolute inset-0 w-full h-full object-contain pointer-events-none"
@@ -8323,7 +8323,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
 
                     <div className="relative w-full flex items-center select-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.45)]">
                       <img
-                        src="/assets/ui/hp_vial_cap_left.png"
+                        src="./assets/ui/hp_vial_cap_left.png"
                         alt=""
                         draggable={false}
                         className="h-6 w-auto object-contain shrink-0 z-20 pointer-events-none select-none -mr-2"
@@ -8337,7 +8337,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                           }}
                         />
                         <img
-                          src="/assets/ui/hp_vial_glass_center.png"
+                          src="./assets/ui/hp_vial_glass_center.png"
                           alt=""
                           draggable={false}
                           className="absolute inset-0 w-full h-full object-fill pointer-events-none z-10 opacity-90 mix-blend-screen"
@@ -8345,7 +8345,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                         <div className="absolute inset-0 pointer-events-none z-10 shadow-[inset_0_1.5px_2.5px_rgba(255,255,255,0.35),inset_0_-2.5px_4px_rgba(0,0,0,0.75)]" />
                       </div>
                       <img
-                        src="/assets/ui/hp_vial_cap_right.png"
+                        src="./assets/ui/hp_vial_cap_right.png"
                         alt=""
                         draggable={false}
                         className="h-6 w-auto object-contain shrink-0 z-20 pointer-events-none select-none -ml-2"
@@ -8385,7 +8385,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             </span>
                             <div className="relative w-11 h-11 my-0.5 flex items-center justify-center">
                               <img
-                                src="/assets/ui/coin_stat_medallion.png"
+                                src="./assets/ui/coin_stat_medallion.png"
                                 alt=""
                                 draggable={false}
                                 className="absolute inset-0 w-full h-full object-contain pointer-events-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]"
@@ -8447,16 +8447,16 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                         equippedAttacks.map((att, i) => {
                           const lower = att.name.toLowerCase();
                           const badge = lower.includes('hacha') || lower.includes('axe')
-                            ? '/assets/ui/badge_weapon_axe.png'
+                            ? './assets/ui/badge_weapon_axe.png'
                             : lower.includes('arco') || lower.includes('ballesta') || lower.includes('bow') || lower.includes('crossbow') || lower.includes('honda')
-                            ? '/assets/ui/badge_weapon_bow.png'
+                            ? './assets/ui/badge_weapon_bow.png'
                             : lower.includes('lanza') || lower.includes('spear') || lower.includes('pica') || lower.includes('alabarda') || lower.includes('tridente')
-                            ? '/assets/ui/badge_weapon_spear.png'
+                            ? './assets/ui/badge_weapon_spear.png'
                             : lower.includes('maza') || lower.includes('martillo') || lower.includes('mace') || lower.includes('hammer') || lower.includes('porra')
-                            ? '/assets/ui/badge_weapon_mace.png'
+                            ? './assets/ui/badge_weapon_mace.png'
                             : lower.includes('desarmado') || lower.includes('puño')
-                            ? '/assets/ui/badge_weapon_unarmed.png'
-                            : '/assets/ui/badge_weapon_sword.png';
+                            ? './assets/ui/badge_weapon_unarmed.png'
+                            : './assets/ui/badge_weapon_sword.png';
 
                           return (
                             <div
