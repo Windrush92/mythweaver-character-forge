@@ -135,7 +135,6 @@ import {
 } from 'lucide-react';
 import { exportCharacterToOfficialPdf } from '../utils/pdfCharacterExporter';
 import { SkillTooltip } from './SkillTooltip';
-import { startCharacterCreatorTutorial, TutorialContext } from '../utils/characterCreatorTutorial';
 
 interface DiceRollResult {
   dice: number[];
@@ -558,23 +557,6 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
       }
     }
   };
-
-  const [isTutorialMenuOpen, setIsTutorialMenuOpen] = useState(false);
-  const tutorialMenuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (tutorialMenuRef.current && !tutorialMenuRef.current.contains(e.target as Node)) {
-        setIsTutorialMenuOpen(false);
-      }
-    };
-    if (isTutorialMenuOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isTutorialMenuOpen]);
 
   // Active Wikidot entities (nullable when not selected)
   const raceCounts = useMemo(() => {
@@ -2389,62 +2371,6 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
     }
   };
 
-  const tutorialContext = useMemo<TutorialContext>(() => ({
-    currentStep: currentStep as TutorialContext['currentStep'],
-    characterLevel,
-    activeRace,
-    activeSubrace,
-    selectedRaceId,
-    selectedSubraceId,
-    raceAnyCount,
-    hasBonusRacialSkills:
-      (selectedRaceId === 'humano' && selectedSubraceId === 'humano-variante') ||
-      selectedRaceId === 'semielfo' ||
-      selectedRaceId === 'kenku' ||
-      selectedRaceId === 'cambiaformas' ||
-      selectedRaceId === 'leonin',
-    hasRacialMagic: racialSpellcastingInfo.hasRacialMagic,
-    activeBackground,
-    activeClass,
-    activeSubclass,
-    subclassUnlockLevel,
-    isSubclassUnlocked,
-    isCaster,
-    hasTacticalFeatures,
-    hasExpertise: expertiseConfig.allowedCount > 0,
-    hasFightingStyle:
-      ['guerrero', 'paladin', 'explorador'].includes(activeClass?.id || '') && hasTacticalFeatures,
-    pendingDecisionsCount: pendingCreationDecisions.length,
-    hasBackgroundBonusFeat: !!activeBackground?.bonusFeatId,
-    hasBackgroundTools: !!activeBackground?.toolChoices,
-    hasBackgroundLanguages:
-      ((activeBackground?.languagesCount && activeBackground.languagesCount > 0) ||
-        (activeBackground?.fixedLanguages && activeBackground.fixedLanguages.length > 0)) ||
-      false,
-    hasBackgroundTrinkets: !!(
-      activeBackground?.equipmentChoices && activeBackground.equipmentChoices.length > 0
-    ),
-    hasBackgroundSkillChoices: !!activeBackground?.skillChoices,
-  }), [
-    currentStep,
-    characterLevel,
-    activeRace,
-    activeSubrace,
-    selectedRaceId,
-    selectedSubraceId,
-    raceAnyCount,
-    racialSpellcastingInfo.hasRacialMagic,
-    activeBackground,
-    activeClass,
-    activeSubclass,
-    subclassUnlockLevel,
-    isSubclassUnlocked,
-    isCaster,
-    hasTacticalFeatures,
-    expertiseConfig.allowedCount,
-    pendingCreationDecisions.length,
-  ]);
-
   const closeAllOverlayModals = () => {
     setIsBackgroundPickerMaximized(false);
     setIsRacePickerMaximized(false);
@@ -2454,17 +2380,6 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
     setInspectingCompendium(null);
     setInspectingSpell(null);
     setInspectingFeat(null);
-  };
-
-  const handleStartTutorial = (mode: 'full' | 'step') => {
-    setIsTutorialMenuOpen(false);
-    closeAllOverlayModals();
-    startCharacterCreatorTutorial(
-      tutorialContext,
-      (stepId) => setCurrentStep(stepId as CreatorStep),
-      mode,
-      closeAllOverlayModals
-    );
   };
 
   const handleConfirmBackground = () => {
@@ -2600,59 +2515,6 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
               <Scroll className="w-3.5 h-3.5 text-[#dfbe7e]" />
               <span className="hidden sm:inline">{isSidebarOpen ? 'Ocultar Hoja' : 'Ver Hoja'}</span>
             </button>
-
-            {/* Tutorial Dropdown Plaque */}
-            <div className="relative" ref={tutorialMenuRef}>
-              <button
-                type="button"
-                onClick={() => setIsTutorialMenuOpen((prev) => !prev)}
-                className="px-2.5 py-1 sm:py-1.5 rounded-lg text-xs font-fantasy font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm bg-gradient-to-r from-[#3b174a] to-[#261033] hover:from-[#4d1f61] hover:to-[#351647] text-[#e8c8fa] border border-[#8c4ba8]/60 hover:text-white active:scale-95"
-                title="Menú de tutorial interactivo paso a paso"
-              >
-                <span>🎓</span>
-                <span className="hidden md:inline">Tutorial</span>
-                <ChevronDown className={`w-3 h-3 text-[#d2a3ea] transition-transform ${isTutorialMenuOpen ? 'rotate-180' : ''}`} />
-              </button>
-
-              {isTutorialMenuOpen && (
-                <div className="absolute right-0 top-full mt-1.5 w-64 bg-[#20150d] border-2 border-[#b88c32] rounded-xl shadow-2xl z-50 p-2 space-y-1.5 font-serif animate-fadeIn">
-                  <div className="px-2 py-1 border-b border-[#5a4325] text-left">
-                    <span className="text-[10px] font-fantasy uppercase tracking-wider text-[#d4af59] font-bold block">
-                      Guía Interactiva 5e
-                    </span>
-                    <span className="text-[11px] text-[#e8dcd0]">
-                      Elige el tipo de recorrido:
-                    </span>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => handleStartTutorial('full')}
-                    className="w-full text-left p-2 rounded-lg bg-[#2e1d13] hover:bg-[#422919] text-[#f7f2ea] border border-[#5a4325] transition cursor-pointer flex flex-col gap-0.5 group"
-                  >
-                    <span className="font-fantasy font-bold text-xs text-[#f2cb6b] group-hover:text-white flex items-center gap-1.5">
-                      🧭 Recorrido Completo (1 al 9)
-                    </span>
-                    <span className="text-[10.5px] text-[#d6c4aa] opacity-90 leading-tight">
-                      Guía paso a paso desde la identidad hasta la exportación a PDF.
-                    </span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleStartTutorial('step')}
-                    className="w-full text-left p-2 rounded-lg bg-[#2e1d13] hover:bg-[#422919] text-[#f7f2ea] border border-[#5a4325] transition cursor-pointer flex flex-col gap-0.5 group"
-                  >
-                    <span className="font-fantasy font-bold text-xs text-[#f2cb6b] group-hover:text-white flex items-center gap-1.5">
-                      🎯 Guía de este Paso Actual
-                    </span>
-                    <span className="text-[10.5px] text-[#d6c4aa] opacity-90 leading-tight">
-                      Explica sólo las opciones y subdecisiones de la pestaña activa.
-                    </span>
-                  </button>
-                </div>
-              )}
-            </div>
 
             <button
               onClick={handleAttemptClose}
@@ -2903,13 +2765,6 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       <Info className="w-3.5 h-3.5 text-[#8c672b] shrink-0" />
                       <span className="truncate"><strong>Paso 1: Identidad & Apariencia</strong> — Define nombre, nivel, retrato y alineamiento.</span>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => handleStartTutorial('full')}
-                      className="text-[10.5px] text-[#8c672b] hover:text-[#5c4a35] font-fantasy font-bold flex items-center gap-1 cursor-pointer shrink-0"
-                    >
-                      <Sparkles className="w-3 h-3 text-[#c59b27]" /> Tutorial Guiado
-                    </button>
                   </div>
 
                   {/* Character, Player Name & Character Level - High Density */}
