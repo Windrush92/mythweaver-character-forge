@@ -20,7 +20,6 @@ import {
   Plus,
   FileDown,
   Upload,
-  Sparkles,
   FolderDown,
   BookOpen,
   Layers,
@@ -293,68 +292,6 @@ export default function App() {
     reader.readAsText(file);
   };
 
-  const handleLoadSampleHero = () => {
-    const sampleChar: Character = {
-      id: 'sample-' + Date.now(),
-      campaignId: 'standalone',
-      name: 'Valeros del Alba',
-      playerName: 'Aventurero',
-      race: 'Humano',
-      class: 'Guerrero',
-      subclass: 'Campeón',
-      background: 'Soldado',
-      alignment: 'Legal Bueno',
-      level: 3,
-      maxHp: 28,
-      currentHp: 28,
-      tempHp: 0,
-      ac: 18,
-      initiativeBonus: 1,
-      speed: '30 pies',
-      passivePerception: 12,
-      stats: { str: 16, dex: 12, con: 15, int: 10, wis: 13, cha: 9 },
-      savingThrows: ['str', 'con'],
-      skills: ['Atletismo', 'Intimidación', 'Percepción', 'Supervivencia'],
-      avatarUrl: '',
-      avatarFrame: 'frame-forge-iron',
-      gold: 25,
-      silver: 10,
-      copper: 0,
-      platinum: 0,
-      inventory: ['Cota de Malla', 'Espada Larga', 'Escudo', 'Ballesta Ligera', '20 Virotes', 'Mochila de Explorador'],
-      equippedItems: ['Cota de Malla', 'Espada Larga', 'Escudo'],
-      attacks: [
-        {
-          id: 'atk-1',
-          name: 'Espada Larga',
-          bonus: '+5',
-          damage: '1d8 + 3',
-          type: 'Cortante',
-        },
-        {
-          id: 'atk-2',
-          name: 'Ballesta Ligera',
-          bonus: '+3',
-          damage: '1d8 + 1',
-          type: 'Perforante',
-        },
-      ],
-      languages: ['Común', 'Élfico'],
-      isDraft: false,
-      lastSavedAt: new Date().toISOString(),
-      creatorState: {
-        currentStep: 'review',
-        characterName: 'Valeros del Alba',
-        playerName: 'Aventurero',
-        selectedRaceId: 'human',
-        selectedClassId: 'fighter',
-        selectedBackgroundId: 'soldier',
-        characterLevel: 3,
-      } as any,
-    };
-    saveCharacter(sampleChar);
-  };
-
   return (
     <div
       className="min-h-screen text-[#f4ecd8] flex flex-col font-sans select-none selection:bg-[#b88c32] selection:text-[#fdfaf3]"
@@ -526,23 +463,6 @@ export default function App() {
 
               {/* Action Buttons with Sculpted Assets */}
               <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap sm:flex-nowrap shrink-0 justify-center">
-                {/* Héroe de Ejemplo */}
-                <button
-                  type="button"
-                  onClick={handleLoadSampleHero}
-                  style={{
-                    backgroundImage: 'url(./assets/ui/btn_nav_normal.png)',
-                    backgroundSize: '100% 100%',
-                    backgroundRepeat: 'no-repeat',
-                    backgroundColor: 'transparent',
-                  }}
-                  className="flex items-center justify-center gap-1.5 px-3 h-9 text-[11px] sm:text-xs font-fantasy font-bold text-[#dfbe7e] hover:text-[#fff6db] hover:brightness-110 active:scale-95 transition cursor-pointer drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)] select-none whitespace-nowrap"
-                  title="Cargar un aventurero de ejemplo preconstruido"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-[#ffd56b]" />
-                  <span>Héroe de Ejemplo</span>
-                </button>
-
                 {/* Respaldo Completo JSON */}
                 {characters.length > 0 && (
                   <button
@@ -558,7 +478,7 @@ export default function App() {
                     title="Descargar copia de seguridad con todos los personajes en .json"
                   >
                     <FolderDown className="w-3.5 h-3.5 text-[#dfbe7e]" />
-                    <span>Respaldo ({characters.length})</span>
+                    <span>Exportar ({characters.length})</span>
                   </button>
                 )}
 
@@ -690,7 +610,7 @@ export default function App() {
                   </h3>
                   <p className="text-xs text-[#c4aa82] leading-relaxed">
                     No tienes aventureros en esta categoría. Puedes forjar un nuevo personaje desde cero con el
-                    asistente de 9 pasos, cargar un héroe de ejemplo o importar una hoja en PDF o JSON.
+                    asistente de 9 pasos o importar una hoja en PDF o JSON.
                   </p>
                 </div>
 
@@ -708,21 +628,6 @@ export default function App() {
                   >
                     <Plus className="w-4 h-4 stroke-[3]" />
                     <span>Crear Primer Personaje</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleLoadSampleHero}
-                    style={{
-                      backgroundImage: 'url(./assets/ui/btn_nav_normal.png)',
-                      backgroundSize: '100% 100%',
-                      backgroundRepeat: 'no-repeat',
-                      backgroundColor: 'transparent',
-                    }}
-                    className="flex items-center justify-center gap-2 px-5 h-10 text-xs font-fantasy font-bold text-[#dfbe7e] hover:text-[#fff6db] hover:brightness-110 active:scale-95 transition cursor-pointer select-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)]"
-                  >
-                    <Sparkles className="w-4 h-4 text-[#ffd56b]" />
-                    <span>Cargar Héroe de Ejemplo</span>
                   </button>
                 </div>
               </div>
