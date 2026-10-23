@@ -31,6 +31,8 @@ import {
   Settings,
   Layers,
   Scroll,
+  ChevronsUp,
+  ChevronsDown,
 } from 'lucide-react';
 
 export default function App() {
@@ -55,6 +57,25 @@ export default function App() {
 
   // Navigation tab state
   const [currentTab, setCurrentTab] = useState<'characters' | 'compendium'>('characters');
+
+  // Header collapsed state
+  const [isHeaderCollapsed, setIsHeaderCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem('mythweaver_header_collapsed') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const toggleHeaderCollapsed = () => {
+    setIsHeaderCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('mythweaver_header_collapsed', String(next));
+      } catch {}
+      return next;
+    });
+  };
 
   // Status Filter: all / completed / drafts
   const [statusFilter, setStatusFilter] = useState<'all' | 'completed' | 'drafts'>('all');
@@ -370,7 +391,14 @@ export default function App() {
         }}
       >
         {/* Upper Shelf: Dragon Crest + Fantasy Lettering on Left, Cartouche & Settings on Right */}
-        <div className="w-full max-w-[1480px] mx-auto px-4 sm:px-6 py-2 sm:py-2.5 flex flex-wrap items-center justify-between gap-3">
+        <div
+          className={`w-full transition-all duration-300 ease-in-out ${
+            isHeaderCollapsed
+              ? 'max-h-0 opacity-0 py-0 pointer-events-none overflow-hidden'
+              : 'max-h-[500px] opacity-100 relative z-30 overflow-visible'
+          }`}
+        >
+          <div className="w-full max-w-[1480px] mx-auto px-4 sm:px-6 py-2 sm:py-2.5 flex flex-wrap items-center justify-between gap-3">
           {/* Left: Majestic Dragon Logo + Fantasy Name */}
           <div className="flex items-center gap-3 sm:gap-4 shrink-0">
             <img
@@ -565,6 +593,7 @@ export default function App() {
             </div>
           </div>
         </div>
+        </div>
 
         {/* Sculpted Console Navigation Bar */}
         <div
@@ -576,8 +605,8 @@ export default function App() {
             backgroundSize: '550px auto',
           }}
         >
-          <div className="w-full max-w-[1480px] mx-auto px-4 sm:px-6">
-            <div className="flex items-center justify-center sm:justify-start gap-2 py-1">
+          <div className="w-full max-w-[1480px] mx-auto px-4 sm:px-6 flex items-center justify-between gap-2 py-1">
+            <div className="flex items-center gap-2">
               {/* Tab 1: Mis Aventureros */}
               <button
                 type="button"
@@ -590,7 +619,7 @@ export default function App() {
                   backgroundSize: '100% 100%',
                   backgroundRepeat: 'no-repeat',
                   backgroundColor: 'transparent',
-                  minWidth: '200px',
+                  minWidth: '190px',
                   height: '40px',
                 }}
                 className={`flex items-center justify-center gap-2 px-4 transition cursor-pointer select-none ${
@@ -628,6 +657,26 @@ export default function App() {
                 <span>Compendio 5e & Armería</span>
               </button>
             </div>
+
+            {/* Right: Collapse / Expand Button with Forged Button Frame */}
+            <button
+              type="button"
+              onClick={toggleHeaderCollapsed}
+              className="relative flex items-center justify-center w-10 h-10 transition-transform duration-150 cursor-pointer active:scale-95 group shrink-0"
+              title={isHeaderCollapsed ? "Expandir panel superior" : "Colapsar panel superior"}
+              aria-label={isHeaderCollapsed ? "Expandir panel superior" : "Colapsar panel superior"}
+            >
+              <img
+                src="/assets/ui/btn_header_action_normal.png"
+                alt=""
+                className="absolute inset-0 w-full h-full object-contain filter drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)] group-hover:brightness-110 transition select-none"
+              />
+              {isHeaderCollapsed ? (
+                <ChevronsDown className="relative z-10 w-5 h-5 text-[#dfbe7e] group-hover:text-[#ffd56b] group-hover:translate-y-0.5 transition-transform" />
+              ) : (
+                <ChevronsUp className="relative z-10 w-5 h-5 text-[#dfbe7e] group-hover:text-[#ffd56b] group-hover:-translate-y-0.5 transition-transform" />
+              )}
+            </button>
           </div>
         </div>
       </header>
@@ -648,9 +697,6 @@ export default function App() {
                 >
                   Códice de Aventureros
                 </h2>
-                <span className="text-[11px] font-mono text-[#a89279] ml-2 hidden sm:inline">
-                  • Almacenamiento Local Privado • $0 Servidores
-                </span>
               </div>
 
               {/* Action Buttons with Sculpted Assets */}
@@ -751,50 +797,48 @@ export default function App() {
               </div>
             </div>
 
-            {/* Status Filter Pills: Todos / Completos / Borradores */}
-            <div className="flex flex-wrap items-center justify-between gap-3 px-1">
-              <div className="flex items-center gap-1 bg-[#26170e] border border-[#523724] p-0.5 rounded-lg">
-                <button
-                  type="button"
-                  onClick={() => setStatusFilter('all')}
-                  className={`px-3 py-1 rounded text-xs font-fantasy font-bold transition cursor-pointer ${
-                    statusFilter === 'all'
-                      ? 'bg-[#6b472e] text-white shadow-xs border border-[#8c5e31]'
-                      : 'text-[#c2ab95] hover:text-[#f7eee2]'
-                  }`}
-                >
-                  Todos ({characters.length})
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setStatusFilter('completed')}
-                  className={`px-3 py-1 rounded text-xs font-fantasy font-bold transition cursor-pointer ${
-                    statusFilter === 'completed'
-                      ? 'bg-[#214a2c] text-white shadow-xs border border-[#3b734b]'
-                      : 'text-[#c2ab95] hover:text-[#f7eee2]'
-                  }`}
-                >
-                  Completos ({completedCharacters.length})
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setStatusFilter('drafts')}
-                  className={`px-3 py-1 rounded text-xs font-fantasy font-bold transition flex items-center gap-1.5 cursor-pointer ${
-                    statusFilter === 'drafts'
-                      ? 'bg-[#8c3514] text-white shadow-xs border border-[#b84a1c]'
-                      : 'text-[#d97c52] hover:text-[#f7a581]'
-                  }`}
-                >
-                  <span>Borradores</span>
-                  <span className="px-1.5 py-0.2 rounded-full bg-[#421d10] text-[#ffd8b8] text-[10px] font-mono font-bold">
-                    {draftCharacters.length}
-                  </span>
-                </button>
-              </div>
+            {/* Status Filter Buttons: Discreet, elegant antique leather & bronze tabs */}
+            <div className="flex items-center gap-1.5 px-1 py-0.5">
+              <button
+                type="button"
+                onClick={() => setStatusFilter('all')}
+                className={`px-3 py-1 rounded-md text-[11px] sm:text-xs font-fantasy tracking-wider uppercase transition-all cursor-pointer flex items-center gap-1.5 ${
+                  statusFilter === 'all'
+                    ? 'bg-[#3d2716] text-[#ffd56b] font-bold border border-[#8c672b] shadow-[0_2px_4px_rgba(0,0,0,0.6)]'
+                    : 'text-[#a89279] hover:text-[#f5eee2] hover:bg-[#26170d]/60 border border-transparent'
+                }`}
+              >
+                <span>Todos</span>
+                <span className="text-[10px] font-mono opacity-80">({characters.length})</span>
+              </button>
 
-              <span className="text-[11px] font-mono text-[#a89279]">
-                {displayedCharacters.length} héroe{displayedCharacters.length === 1 ? '' : 's'} en el códice
-              </span>
+              <button
+                type="button"
+                onClick={() => setStatusFilter('completed')}
+                className={`px-3 py-1 rounded-md text-[11px] sm:text-xs font-fantasy tracking-wider uppercase transition-all cursor-pointer flex items-center gap-1.5 ${
+                  statusFilter === 'completed'
+                    ? 'bg-[#3d2716] text-[#ffd56b] font-bold border border-[#8c672b] shadow-[0_2px_4px_rgba(0,0,0,0.6)]'
+                    : 'text-[#a89279] hover:text-[#f5eee2] hover:bg-[#26170d]/60 border border-transparent'
+                }`}
+              >
+                <span>Completos</span>
+                <span className="text-[10px] font-mono opacity-80">({completedCharacters.length})</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setStatusFilter('drafts')}
+                className={`px-3 py-1 rounded-md text-[11px] sm:text-xs font-fantasy tracking-wider uppercase transition-all cursor-pointer flex items-center gap-1.5 ${
+                  statusFilter === 'drafts'
+                    ? 'bg-[#4a2414] text-[#ffb088] font-bold border border-[#b84a1c] shadow-[0_2px_4px_rgba(0,0,0,0.6)]'
+                    : 'text-[#a89279] hover:text-[#f5eee2] hover:bg-[#26170d]/60 border border-transparent'
+                }`}
+              >
+                <span>Borradores</span>
+                <span className={`text-[10px] font-mono ${draftCharacters.length > 0 ? 'text-[#ffb088] font-bold' : 'opacity-80'}`}>
+                  ({draftCharacters.length})
+                </span>
+              </button>
             </div>
 
             {/* Character Cards Grid or Empty State */}
