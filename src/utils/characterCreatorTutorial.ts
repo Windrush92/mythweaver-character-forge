@@ -56,11 +56,14 @@ export interface TutorialStepDef {
 function waitForElementReady(
   selector: string,
   fallbackSelector?: string,
-  timeoutMs: number = 2200
+  timeoutMs: number = 2000
 ): Promise<string> {
   return new Promise((resolve) => {
     if (document.querySelector(selector)) {
       return resolve(selector);
+    }
+    if (fallbackSelector && document.querySelector(fallbackSelector)) {
+      return resolve(fallbackSelector);
     }
 
     const startTime = Date.now();
@@ -80,14 +83,14 @@ function waitForElementReady(
         }
         return resolve(selector);
       }
-    }, 40);
+    }, 30);
   });
 }
 
 /**
  * Generates the complete, context-aware sequence of tutorial steps.
- * When mode === 'step', generates only the steps relevant to ctx.currentStep and its active subdecisions.
- * When mode === 'full', generates the comprehensive journey across all 9 creation steps.
+ * Covers every main decision and every sub-decision (skills, tools, languages,
+ * trinkets d100, subraces, flex points, subclasses, fighting styles, etc.).
  */
 export function generateDynamicTutorialSteps(
   ctx: TutorialContext,
@@ -187,83 +190,72 @@ export function generateDynamicTutorialSteps(
       title: '5. Elige tu Raza & Linaje Ancestral',
       descriptionHtml:
         '<p>Tu raza define tu especie fantástica, tamaño, velocidad de movimiento, sentidos como <em>Visión en la Oscuridad</em> y bonificaciones directas a tus atributos (+2 / +1).</p>' +
-        '<div style="margin: 6px 0 8px 0; font-size: 11.5px; opacity: 0.95; line-height: 1.5; background: rgba(0,0,0,0.22); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(214,196,170,0.25);">' +
-        '🔍 <strong>¡Maximiza el Catálogo para ver todas las razas!</strong><br/>' +
-        'Pulsa el botón <strong>Maximizar Catálogo</strong> para explorar el compendio a <strong>pantalla completa</strong> con más de 30 razas y subrazas oficiales ilustradas.' +
-        '</div>' +
-        '<div class="driver-callout">👉 <strong>Tu turno:</strong> Selecciona una raza. Al hacerlo se desplegarán inmediatamente sus subdecisiones (subrazas, puntos flexibles y magia innata).</div>',
+        '<p style="font-size: 11.5px; opacity: 0.9;">Puedes filtrar por categorías (<strong>Comunes, Exóticas, Monstruosas, Planares</strong>) o usar el buscador superior.</p>' +
+        '<div class="driver-callout">👉 <strong>Tu turno:</strong> Haz clic en una raza. Al seleccionarla, se desplegarán inmediatamente en esta misma hoja sus subrazas, puntos libres y rasgos ancestrales.</div>',
       side: 'top',
       align: 'center',
     });
 
-    if (ctx.activeRace?.subraces && ctx.activeRace.subraces.length > 0) {
-      steps.push({
-        element: '#creator-race-subraces',
-        fallbackElement: '#creator-race-traits',
-        tabId: 'race',
-        badge: 'Subdecisión',
-        title: `Subraza / Linaje Específico (${ctx.activeRace.name})`,
-        descriptionHtml:
-          `<p>El linaje de <strong>${ctx.activeRace.name}</strong> se ramifica en diversas culturas y ramas biológicas con poderes únicos.</p>` +
-          '<p style="font-size: 11.5px; opacity: 0.9;">Por ejemplo, un <em>Alto Elfo</em> conoce trucos arcanos adicionales, mientras que un <em>Elfo de los Bosques</em> se mueve con mayor rapidez y sigilo.</p>' +
-          '<div class="driver-callout">👉 <strong>Tu turno:</strong> Elige tu subraza favorita para desbloquear sus rasgos hereditarios.</div>',
-        side: 'top',
-        align: 'center',
-      });
-    }
+    steps.push({
+      element: '#creator-race-subraces',
+      fallbackElement: '#creator-race-traits',
+      tabId: 'race',
+      badge: 'Subdecisión: Subraza',
+      title: `6. Subraza / Linaje Específico ${ctx.activeRace ? `(${ctx.activeRace.name})` : ''}`,
+      descriptionHtml:
+        '<p>Muchos linajes (Elfos, Enanos, Gnomos, Medianos, etc.) se ramifican en culturas y subespecies con dotes únicas.</p>' +
+        '<p style="font-size: 11.5px; opacity: 0.9;">Por ejemplo, un <em>Alto Elfo</em> conoce trucos arcanos adicionales, mientras que un <em>Elfo de los Bosques</em> gana velocidad y camuflaje natural.</p>' +
+        '<div class="driver-callout">👉 <strong>Tu turno:</strong> Si tu raza posee subrazas disponibles, selecciona tu linaje favorito para sumar sus rasgos.</div>',
+      side: 'top',
+      align: 'center',
+    });
 
-    if (ctx.raceAnyCount > 0) {
-      steps.push({
-        element: '#creator-race-flexible',
-        fallbackElement: '#creator-race-traits',
-        tabId: 'race',
-        badge: 'Subdecisión',
-        title: `Puntos Flexibles de Característica (+${ctx.raceAnyCount})`,
-        descriptionHtml:
-          `<p>Tu linaje te concede <strong>+${ctx.raceAnyCount} punto${ctx.raceAnyCount > 1 ? 's' : ''} libre${ctx.raceAnyCount > 1 ? 's' : ''}</strong> para potenciar las características que prefieras.</p>` +
-          '<div class="driver-callout">👉 <strong>Tu turno:</strong> Pulsa sobre las características que quieras aumentar en +1 para asignarlos.</div>',
-        side: 'top',
-        align: 'center',
-      });
-    }
+    steps.push({
+      element: '#creator-race-flexible',
+      fallbackElement: '#creator-race-traits',
+      tabId: 'race',
+      badge: 'Subdecisión: Atributos',
+      title: `7. Puntos Flexibles de Característica ${ctx.raceAnyCount > 0 ? `(+${ctx.raceAnyCount})` : ''}`,
+      descriptionHtml:
+        '<p>Linajes adaptables (como el Medio Elfo o el Humano Variante) conceden <strong>puntos libres</strong> para sumar a las características que prefieras potenciar.</p>' +
+        '<div class="driver-callout">👉 Si tu linaje otorga puntos libres, pulsa sobre las características que desees aumentar.</div>',
+      side: 'top',
+      align: 'center',
+    });
 
-    if (ctx.hasBonusRacialSkills) {
-      steps.push({
-        element: '#creator-race-bonus-skills',
-        fallbackElement: '#creator-race-traits',
-        tabId: 'race',
-        badge: 'Subdecisión',
-        title: `Competencias de Habilidad Gratuitas (${ctx.activeRace?.name || 'Raza'})`,
-        descriptionHtml:
-          '<p>Tu linaje te permite dominar habilidades adicionales a tu libre elección.</p>' +
-          '<div class="driver-callout">👉 <strong>Tu turno:</strong> Marca las habilidades que deseas dominar como talento racial.</div>',
-        side: 'top',
-        align: 'center',
-      });
-    }
+    steps.push({
+      element: '#creator-race-bonus-skills',
+      fallbackElement: '#creator-race-traits',
+      tabId: 'race',
+      badge: 'Subdecisión: Habilidades',
+      title: '8. Competencias de Habilidad Raciales Gratuitas',
+      descriptionHtml:
+        '<p>Ciertas culturas ancestrales (Semielfos, Kenku, Cambiaformas) permiten elegir talentos de habilidad adicionales a tu libre elección.</p>' +
+        '<div class="driver-callout">👉 Marca las habilidades que deseas dominar como talento innato.</div>',
+      side: 'top',
+      align: 'center',
+    });
 
-    if (ctx.hasRacialMagic) {
-      steps.push({
-        element: '#creator-racial-spells-panel',
-        fallbackElement: '#creator-race-traits',
-        tabId: 'race',
-        badge: 'Magia Innata',
-        title: 'Magia Innata Ancestral & Dones Arcanos',
-        descriptionHtml:
-          '<p>Tu linaje despierta poderes sobrenaturales de nacimiento que <strong>no gastan ranuras de conjuro</strong> ni cuentan contra el límite de tu clase.</p>' +
-          '<p style="font-size: 11.5px; opacity: 0.9;">Aquí podrás seleccionar tu truco racial extra (si aplica) y definir tu característica de aptitud de lanzamiento mental (**Inteligencia, Sabiduría o Carisma**).</p>' +
-          '<div class="driver-callout">👉 <strong>Revisa:</strong> Los conjuros innatos figuran en tu grimorio y calculan su CD de salvación oficial en vivo.</div>',
-        side: 'top',
-        align: 'center',
-      });
-    }
+    steps.push({
+      element: '#creator-racial-spells-panel',
+      fallbackElement: '#creator-race-traits',
+      tabId: 'race',
+      badge: 'Magia Innata',
+      title: '9. Magia Innata Ancestral & Dones Arcanos',
+      descriptionHtml:
+        '<p>Poderes sobrenaturales hereditarios (como la Taumaturgia de los Tiflin o las Fulerías de los Drow). <strong>No consumen ranuras de conjuro</strong> ni cuentan contra el límite de tu clase.</p>' +
+        '<p style="font-size: 11.5px; opacity: 0.9;">Aquí podrás seleccionar tu truco racial extra (si aplica) y definir tu característica de aptitud de lanzamiento mental (<strong>Inteligencia, Sabiduría o Carisma</strong>).</p>' +
+        '<div class="driver-callout">👉 Revisa tus hechizos innatos calculados con su CD oficial en vivo.</div>',
+      side: 'top',
+      align: 'center',
+    });
 
     steps.push({
       element: '#creator-race-traits',
       fallbackElement: '#step-tab-race-content',
       tabId: 'race',
-      badge: 'Rasgos',
-      title: 'Dones y Rasgos Raciales Heredados',
+      badge: 'Rasgos Heredados',
+      title: '10. Dones y Rasgos Raciales Heredados',
       descriptionHtml:
         '<p>Aquí se resumen todas las resistencias elementales, sentidos místicos e inmunidades biológicas de tu linaje.</p>' +
         '<div class="driver-callout">👉 Una vez elegida tu raza y subdecisiones, avanza a tu Trasfondo.</div>',
@@ -281,106 +273,95 @@ export function generateDynamicTutorialSteps(
       fallbackElement: '#step-tab-background-content',
       tabId: 'background',
       badge: 'Trasfondo Base',
-      title: '6. Catálogo de Trasfondos (99 Oficiales)',
+      title: '11. Catálogo de Trasfondos (99 Oficiales)',
       descriptionHtml:
-        '<p>Tu ocupación previa a la vida de aventurero (Acólito, Soldado, Criminal, Erudito, Forastero, etc.).</p>' +
-        '<p style="font-size: 11.5px; opacity: 0.9;">Otorga <strong>2 competencias de habilidad</strong>, idiomas, herramientas de oficio, oro inicial y un rasgo narrativo único para interactuar con el mundo.</p>' +
-        '<div style="margin: 6px 0 8px 0; font-size: 11.5px; opacity: 0.95; line-height: 1.5; background: rgba(0,0,0,0.22); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(214,196,170,0.25);">' +
-        '📜 <strong>¡Maximiza el Catálogo para explorar los 99 trasfondos!</strong><br/>' +
-        'Usa el botón <strong>Maximizar Catálogo</strong> para filtrarlos por ambientación (Aventureros de la Costa de la Espada, Ravenloft, Dragonlance, Reinos Olvidados).' +
-        '</div>' +
-        '<div class="driver-callout">👉 <strong>Tu turno:</strong> Elige tu trasfondo para desplegar sus opciones de idiomas y herramientas.</div>',
+        '<p>Tu ocupación previa a la vida de aventurero (Acólito, Soldado, Criminal, Erudito, Forastero, Huérfano, etc.).</p>' +
+        '<p style="font-size: 11.5px; opacity: 0.9;">Otorga <strong>2 competencias de habilidad</strong>, idiomas, herramientas de trabajo, oro inicial y un rasgo narrativo único para interactuar con el mundo.</p>' +
+        '<div class="driver-callout">👉 <strong>Tu turno:</strong> Haz clic en una tarjeta de trasfondo. Al elegirlo, se desplegarán inmediatamente aquí abajo en la hoja todas sus opciones de configuración (habilidades, herramientas, idiomas y baratijas d100).</div>',
       side: 'top',
       align: 'center',
     });
 
-    if (ctx.hasBackgroundSkillChoices) {
-      steps.push({
-        element: '#creator-background-skill-choices',
-        fallbackElement: '#step-tab-background-content',
-        tabId: 'background',
-        badge: 'Subdecisión',
-        title: 'Elección de Habilidades de Trasfondo',
-        descriptionHtml:
-          '<p>Este trasfondo te permite elegir competencias entre varias opciones canónicas de las reglas oficiales de 5e.</p>' +
-          '<div class="driver-callout">👉 <strong>Tu turno:</strong> Marca las habilidades requeridas hasta completar el cupo.</div>',
-        side: 'top',
-        align: 'center',
-      });
-    }
+    steps.push({
+      element: '#creator-background-skill-choices',
+      fallbackElement: '#creator-background-subdecisions',
+      tabId: 'background',
+      badge: 'Subdecisión: Habilidades',
+      title: '12. Elección de Habilidades de Trasfondo',
+      descriptionHtml:
+        '<p>Cada trasfondo otorga <strong>2 competencias de habilidad</strong> clave. Si el trasfondo concede habilidades fijas, figurarán ya asignadas a tu hoja.</p>' +
+        '<p style="font-size: 11.5px; opacity: 0.9;">Si el trasfondo ofrece una lista para elegir (como en <em>Feylost</em> o <em>Investigador</em>), márcalas en este panel para asignarlas.</p>' +
+        '<div class="driver-callout">👉 Marca tus habilidades de trasfondo requeridas.</div>',
+      side: 'top',
+      align: 'center',
+    });
 
-    if (ctx.hasBackgroundTools) {
-      steps.push({
-        element: '#creator-background-tools',
-        fallbackElement: '#step-tab-background-content',
-        tabId: 'background',
-        badge: 'Subdecisión',
-        title: 'Competencia en Herramientas o Instrumentos',
-        descriptionHtml:
-          '<p>Tu trasfondo te otorga maestría en útiles de trabajo (herramientas de ladrón, kits de disfraz, alquimia) o instrumentos musicales.</p>' +
-          '<p style="font-size: 11.5px; opacity: 0.9;">Puedes elegir entre las opciones canónicas o escribir un instrumento o herramienta personalizada en el casillero inferior.</p>' +
-          '<div class="driver-callout">👉 <strong>Tu turno:</strong> Marca tus herramientas o añade una personalizada.</div>',
-        side: 'top',
-        align: 'center',
-      });
-    }
+    steps.push({
+      element: '#creator-background-tools',
+      fallbackElement: '#creator-background-subdecisions',
+      tabId: 'background',
+      badge: 'Subdecisión: Herramientas',
+      title: '13. Competencia en Herramientas o Instrumentos',
+      descriptionHtml:
+        '<p>Tu trasfondo te otorga maestría en útiles de trabajo (herramientas de ladrón, kits de disfraz, venenos, alquimia, cartas de navegación) o instrumentos musicales.</p>' +
+        '<p style="font-size: 11.5px; opacity: 0.9;">Puedes marcar las opciones canónicas que ofrece el manual o escribir una <strong>herramienta personalizada</strong> en el casillero inferior.</p>' +
+        '<div class="driver-callout">👉 Selecciona tus herramientas o introduce una adaptada a tu historia.</div>',
+      side: 'top',
+      align: 'center',
+    });
 
-    if (ctx.hasBackgroundTrinkets) {
-      steps.push({
-        element: '#creator-background-trinkets',
-        fallbackElement: '#step-tab-background-content',
-        tabId: 'background',
-        badge: 'Subdecisión 🎲',
-        title: 'Baratijas, Evidencias y Objetos Especiales',
-        descriptionHtml:
-          '<p>Objetos con misterio narrativo ligados a tu pasado (una carta ensangrentada, una moneda que no para de rodar, etc.).</p>' +
-          '<div class="driver-callout">👉 <strong>Tu turno:</strong> Pulsa el botón <strong>🎲 Tirar 1d100</strong> para sortear un objeto en la tabla oficial (Horror, Feérica o Común), o escribe tu propia reliquia.</div>',
-        side: 'top',
-        align: 'center',
-      });
-    }
+    steps.push({
+      element: '#creator-background-languages',
+      fallbackElement: '#creator-background-subdecisions',
+      tabId: 'background',
+      badge: 'Subdecisión: Idiomas',
+      title: '14. Idiomas Adicionales de Trasfondo',
+      descriptionHtml:
+        '<p>Las lenguas aprendidas durante tus andanzas. El sistema respeta las reglas oficiales de D&D 5e:</p>' +
+        '<p style="margin: 4px 0 6px 0; font-size: 11.5px; opacity: 0.9;">• <strong>Idiomas Fijos:</strong> Lenguas obligatorias del trasfondo.<br/>• <strong>Lenguas Restringidas:</strong> Elección histórica (ej: Silvano o Élfico).<br/>• <strong>Ranuras Exóticas:</strong> Lenguas arcanas (Abisal, Celestial, Habla Profunda, Dracónico).<br/>• <strong>Innatos por Raza:</strong> Tus lenguas nativas están protegidas y no consumen ranuras.</p>' +
+        '<div class="driver-callout">👉 Marca los idiomas que habla tu aventurero o escribe un dialecto propio.</div>',
+      side: 'top',
+      align: 'center',
+    });
 
-    if (ctx.hasBackgroundLanguages) {
-      steps.push({
-        element: '#creator-background-languages',
-        fallbackElement: '#step-tab-background-content',
-        tabId: 'background',
-        badge: 'Subdecisión',
-        title: 'Idiomas Adicionales de Trasfondo',
-        descriptionHtml:
-          '<p>Las lenguas aprendidas durante tus andanzas. El sistema respeta las reglas oficiales de D&D 5e:</p>' +
-          '<p style="margin: 4px 0 6px 0; font-size: 11.5px; opacity: 0.9;">• <strong>Idiomas Fijos:</strong> Lenguas obligatorias del trasfondo.<br/>• <strong>Lenguas Restringidas:</strong> Selección entre opciones históricas (ej: Silvano/Élfico).<br/>• <strong>Ranuras Exóticas:</strong> Lenguas arcanas u oscuras (Abisal, Celestial, Habla Profunda, Dracónico).<br/>• <strong>Innatos por Raza:</strong> Tus idiomas nativos figuran protegidos y no consumen ranuras.</p>' +
-          '<div class="driver-callout">👉 <strong>Tu turno:</strong> Elige las lenguas que domina tu aventurero.</div>',
-        side: 'top',
-        align: 'center',
-      });
-    }
+    steps.push({
+      element: '#creator-background-trinkets',
+      fallbackElement: '#creator-background-subdecisions',
+      tabId: 'background',
+      badge: 'Subdecisión: 🎲 d100',
+      title: '15. Baratijas y Evidencias con Tirador de Dados (🎲 1d100)',
+      descriptionHtml:
+        '<p>Objetos con misterio narrativo ligados a tu pasado (una carta sellada con cera negra, una moneda que no para de rodar, una reliquia feérica...).</p>' +
+        '<p style="font-size: 11.5px; opacity: 0.9;">El creador cuenta con las <strong>tablas oficiales d100 completas</strong> (Horror Gótico, Feérica y Común).</p>' +
+        '<div class="driver-callout">👉 <strong>¡Tira el dado!</strong> Pulsa el botón <strong>🎲 Tirar 1d100</strong> para sortear tu baratija al azar, o elige una de la lista desplegable.</div>',
+      side: 'top',
+      align: 'center',
+    });
 
-    if (ctx.hasBackgroundBonusFeat) {
-      steps.push({
-        element: '#creator-background-bonus-feat',
-        fallbackElement: '#step-tab-background-content',
-        tabId: 'background',
-        badge: 'Dote Gratuita',
-        title: 'Dote Oficial Otorgada por Trasfondo',
-        descriptionHtml:
-          '<p>Algunos trasfondos de fuentes oficiales avanzadas otorgan una <strong>Dote Gratuita a Nivel 1</strong> (como Golpe de los Gigantes o Modelador de Runas).</p>' +
-          '<div class="driver-callout">👉 <strong>Tu turno:</strong> Selecciona aquí tu subelección táctica (ej: tipo de golpe elemental o runa consagrada).</div>',
-        side: 'top',
-        align: 'center',
-      });
-    }
+    steps.push({
+      element: '#creator-background-bonus-feat',
+      fallbackElement: '#creator-background-subdecisions',
+      tabId: 'background',
+      badge: 'Dote Gratuita',
+      title: '16. Dote Oficial Otorgada por Trasfondo',
+      descriptionHtml:
+        '<p>Ciertos trasfondos de fuentes oficiales avanzadas (Dragonlance, Planescape, Gigantes) otorgan una <strong>Dote Gratuita a Nivel 1</strong>.</p>' +
+        '<p style="font-size: 11.5px; opacity: 0.9;">Si tu trasfondo incluye este beneficio, verás aquí su panel táctico para elegir sus opciones (ej: tipo de golpe o runa consagrada).</p>' +
+        '<div class="driver-callout">👉 Configura la dote si está disponible en tu trasfondo.</div>',
+      side: 'top',
+      align: 'center',
+    });
 
     steps.push({
       element: '#creator-identity-roleplay-box',
       fallbackElement: '#step-tab-background-content',
       tabId: 'background',
       badge: 'Pilares de Rol',
-      title: '7. Personalidad, Ideales, Vínculos y Defectos',
+      title: '17. Personalidad, Ideales, Vínculos y Defectos',
       descriptionHtml:
         '<p>Los 4 pilares psicológicos que dan vida a tu personaje en la mesa de juego:</p>' +
-        '<p style="margin: 4px 0 8px 0; font-size: 11.5px; opacity: 0.9;">• <strong>Rasgos:</strong> Manías, gestos y hábitos cotidianos.<br/>• <strong>Ideales:</strong> Los principios éticos por los que daría la vida.<br/>• <strong>Vínculos:</strong> Su gente, juramentos o lugares sagrados.<br/>• <strong>Defectos:</strong> Sus tentaciones, miedos o debilidades morales.</p>' +
-        '<div class="driver-callout">👉 <strong>Tu turno:</strong> Pulsa el botón <strong>🎲🎲 Tirar Todo con Dados</strong> para sortearlos automáticamente de las tablas oficiales de 5e, o escribe los tuyos.</div>',
+        '<p style="margin: 4px 0 8px 0; font-size: 11.5px; opacity: 0.9;">• <strong>Rasgos:</strong> Manías, gestos y hábitos cotidianos.<br/>• <strong>Ideales:</strong> Principios éticos por los que daría la vida.<br/>• <strong>Vínculos:</strong> Su gente, juramentos o lugares sagrados.<br/>• <strong>Defectos:</strong> Sus tentaciones, vicios o debilidades morales.</p>' +
+        '<div class="driver-callout">👉 <strong>¡Tira con dados!</strong> Pulsa el botón <strong>🎲🎲 Tirar Todo con Dados</strong> para sortearlos automáticamente de las tablas oficiales de tu trasfondo, o redacta tus propios matices interpretativos.</div>',
       side: 'top',
       align: 'center',
     });
@@ -390,7 +371,7 @@ export function generateDynamicTutorialSteps(
       fallbackElement: '#step-tab-background-content',
       tabId: 'background',
       badge: 'Historia',
-      title: '8. Historia y Pasado del Aventurero (Backstory)',
+      title: '18. Historia y Pasado del Aventurero (Backstory)',
       descriptionHtml:
         '<p>¿Quién era tu héroe antes de tomar la espada o el grimorio? ¿Quiénes fueron sus mentores? ¿Qué tragedia o ambición lo impulsó a emprender aventuras?</p>' +
         '<div class="driver-callout">👉 <strong>Tu turno:</strong> Redacta los puntos clave de su historia para que tu Dungeon Master pueda incorporarlos a la campaña.</div>',
@@ -408,10 +389,10 @@ export function generateDynamicTutorialSteps(
       fallbackElement: '#step-tab-class-content',
       tabId: 'class',
       badge: 'Clase Base',
-      title: '9. Clase de Aventurero & Vocación Heroica',
+      title: '19. Clase de Aventurero & Vocación Heroica',
       descriptionHtml:
         '<p>Tu profesión marcial o mística (Guerrero, Pícaro, Mago, Clérigo, Bárbaro, Paladín, Brujo, etc.).</p>' +
-        '<p style="font-size: 11.5px; opacity: 0.9;">Determina tu <strong>Dado de Golpe</strong> (salud por nivel), tus competencias en armas y armaduras, tiradas de salvación y poderes tácticos.</p>' +
+        '<p style="font-size: 11.5px; opacity: 0.9;">Determina tu <strong>Dado de Golpe</strong> (salud por nivel), competencias en armas y armaduras, tiradas de salvación y poderes tácticos.</p>' +
         '<div class="driver-callout">👉 <strong>Tu turno:</strong> Haz clic en la clase deseada para desplegar sus habilidades, arquetipos y rasgos de combate.</div>',
       side: 'top',
       align: 'center',
@@ -422,7 +403,7 @@ export function generateDynamicTutorialSteps(
       fallbackElement: '#step-tab-class-content',
       tabId: 'class',
       badge: 'Competencias',
-      title: '10. Habilidades Entrenadas de Clase',
+      title: '20. Habilidades Entrenadas de Clase',
       descriptionHtml:
         '<p>Las áreas de pericia táctica de tu clase. <strong>Pasa el cursor sobre cualquier habilidad</strong> para leer su tooltip oficial de aplicación en el juego.</p>' +
         '<div class="driver-callout">👉 <strong>Tu turno:</strong> Marca las habilidades hasta completar el cupo requerido por tu clase.</div>',
@@ -430,80 +411,67 @@ export function generateDynamicTutorialSteps(
       align: 'center',
     });
 
-    if (ctx.activeClass?.subclasses && ctx.activeClass.subclasses.length > 0) {
-      const isUnlocked = ctx.isSubclassUnlocked;
-      const unlockLevel = ctx.subclassUnlockLevel;
-      steps.push({
-        element: '#creator-class-subclass',
-        fallbackElement: '#creator-class-skills',
-        tabId: 'class',
-        badge: isUnlocked ? 'Subclase Disponible' : `Desbloquea a Nv ${unlockLevel}`,
-        title: `11. Subclase / Especialización (${ctx.activeClass.subclassesName})`,
-        descriptionHtml: isUnlocked
-          ? `<p>A nivel ${ctx.characterLevel}, tu <strong>${ctx.activeClass.name}</strong> consagra su senda definitiva (ej: <em>Campeón, Maestro de Batalla, Dominio Divino, Círculo de la Luna</em>).</p>` +
-            `<p style="font-size: 11.5px; opacity: 0.9;">Hay <strong>${ctx.activeClass.subclasses.length} sendas oficiales</strong> disponibles en el compendio con descripciones completas.</p>` +
-            '<div class="driver-callout">👉 <strong>Tu turno:</strong> Pulsa el botón <strong>"Elegir Subclase"</strong> para abrir el selector y elegir tu arquetipo.</div>'
-          : `<p>En las reglas de D&D 5e, la especialización de <strong>${ctx.activeClass.name}</strong> se elige al alcanzar el <strong>Nivel ${unlockLevel}</strong>.</p>` +
-            `<p style="font-size: 11.5px; opacity: 0.9;">Actualmente tu personaje es Nivel ${ctx.characterLevel}. Puedes pulsar el botón <em>"Explorar Subclases"</em> para curiosear previamente todas las sendas y planificar su futuro.</p>` +
-            '<div class="driver-callout">👉 <strong>Consejo:</strong> Si quieres elegirla ahora, sube tu nivel a ' + unlockLevel + ' en el Paso 1.</div>',
-        side: 'top',
-        align: 'center',
-      });
-    }
+    steps.push({
+      element: '#creator-class-subclass',
+      fallbackElement: '#creator-class-skills',
+      tabId: 'class',
+      badge: ctx.isSubclassUnlocked ? 'Subclase Disponible' : `Desbloquea a Nv ${ctx.subclassUnlockLevel || 3}`,
+      title: `21. Subclase / Especialización Heroica ${ctx.activeClass ? `(${ctx.activeClass.subclassesName})` : ''}`,
+      descriptionHtml:
+        `<p>La especialización definitiva de tu vocación (ej: <em>Campeón, Maestro de Batalla, Dominio de la Vida, Escuela de Evocación</em>).</p>` +
+        `<p style="font-size: 11.5px; opacity: 0.9;">En las reglas oficiales de 5e, la subclase se desbloquea a Nivel 1 (Clérigo, Brujo, Hechicero), Nivel 2 (Mago, Druida) o Nivel 3 (Guerrero, Pícaro, Paladín, Explorador, Bárbaro, Bardo, Monje).</p>` +
+        '<div class="driver-callout">👉 Pulsa <strong>"Elegir Subclase"</strong> o <strong>"Explorar Subclases"</strong> para abrir el selector con descripciones completas.</div>',
+      side: 'top',
+      align: 'center',
+    });
 
-    if (ctx.hasExpertise) {
-      steps.push({
-        element: '#creator-class-expertise',
-        fallbackElement: '#creator-class-skills',
-        tabId: 'class',
-        badge: 'Subdecisión ⭐',
-        title: 'Pericia / Expertise (Doble Competencia x2)',
-        descriptionHtml:
-          '<p>El rasgo distintivo de los Pícaros (a Nivel 1) y Bardos (a Nivel 3):</p>' +
-          `<p style="font-size: 11.5px; opacity: 0.9;">Tu bonificador de competencia se <strong>duplica (+${(Math.floor((ctx.characterLevel - 1) / 4) + 2) * 2} en lugar de +${Math.floor((ctx.characterLevel - 1) / 4) + 2})</strong> en las pruebas de las habilidades elegidas.</p>` +
-          '<div class="driver-callout">👉 <strong>Tu turno:</strong> Selecciona las habilidades en las que tu aventurero será un maestro legendario.</div>',
-        side: 'top',
-        align: 'center',
-      });
-    }
+    steps.push({
+      element: '#creator-class-expertise',
+      fallbackElement: '#creator-class-skills',
+      tabId: 'class',
+      badge: 'Subdecisión: Pericia',
+      title: '22. Pericia / Expertise (Doble Competencia x2)',
+      descriptionHtml:
+        '<p>El rasgo distintivo de los Pícaros (Nivel 1) y Bardos (Nivel 3):</p>' +
+        `<p style="font-size: 11.5px; opacity: 0.9;">Tu bonificador de competencia se <strong>duplica (+${(Math.floor((ctx.characterLevel - 1) / 4) + 2) * 2} en lugar de +${Math.floor((ctx.characterLevel - 1) / 4) + 2})</strong> en las pruebas de las habilidades elegidas.</p>` +
+        '<div class="driver-callout">👉 Si tu clase posee Pericia, selecciona las habilidades en las que tu aventurero será legendario.</div>',
+      side: 'top',
+      align: 'center',
+    });
 
-    if (ctx.hasFightingStyle) {
-      steps.push({
-        element: '#creator-class-fighting-style',
-        fallbackElement: '#creator-class-skills',
-        tabId: 'class',
-        badge: 'Subdecisión ⚔️',
-        title: 'Estilo de Combate (Fighting Style)',
-        descriptionHtml:
-          '<p>Tu postura marcial en el campo de batalla (Guerrero, Paladín, Explorador):</p>' +
-          '<p style="margin: 4px 0 6px 0; font-size: 11.5px; opacity: 0.9;">• <strong>Defensa:</strong> +1 a la Clase de Armadura (CA) con armadura puesta.<br/>• <strong>Duelo:</strong> +2 al daño al empuñar una sola arma cuerpo a cuerpo.<br/>• <strong>Arquería:</strong> +2 a todas las tiradas de ataque a distancia.<br/>• <strong>Armas a Dos Manos:</strong> Repite 1s y 2s en los dados de daño.</p>' +
-          '<div class="driver-callout">👉 <strong>Tu turno:</strong> Haz clic sobre la carta de estilo de combate que mejor complemente tus armas.</div>',
-        side: 'top',
-        align: 'center',
-      });
-    }
+    steps.push({
+      element: '#creator-class-fighting-style',
+      fallbackElement: '#creator-class-skills',
+      tabId: 'class',
+      badge: 'Subdecisión: Combate',
+      title: '23. Estilo de Combate (Fighting Style)',
+      descriptionHtml:
+        '<p>Tu postura marcial en el campo de batalla (Guerrero, Paladín, Explorador):</p>' +
+        '<p style="margin: 4px 0 6px 0; font-size: 11.5px; opacity: 0.9;">• <strong>Defensa:</strong> +1 a la Clase de Armadura (CA) con armadura puesta.<br/>• <strong>Duelo:</strong> +2 al daño al empuñar una sola arma cuerpo a cuerpo.<br/>• <strong>Arquería:</strong> +2 a todas las tiradas de ataque a distancia.<br/>• <strong>Armas a Dos Manos:</strong> Repite 1s y 2s en los dados de daño.</p>' +
+        '<div class="driver-callout">👉 Haz clic sobre la carta de estilo de combate que mejor complemente tus armas.</div>',
+      side: 'top',
+      align: 'center',
+    });
 
-    if (ctx.pendingDecisionsCount > 0) {
-      steps.push({
-        element: '#creator-class-decisions',
-        fallbackElement: '#creator-class-skills',
-        tabId: 'class',
-        badge: 'Subdecisión',
-        title: 'Decisiones Tácticas de Clase',
-        descriptionHtml:
-          '<p>Poderes modulares específicos de tu clase y arquetipo (ej: <em>Invocaciones Sobrenaturales del Brujo, Maniobras de Maniobrista, Disciplinas de Ki del Monje, Metamagia del Hechicero</em>).</p>' +
-          '<div class="driver-callout">👉 <strong>Tu turno:</strong> Marca las opciones requeridas. Usa el botón del <strong>Ojito 👁️</strong> para leer la descripción completa de cada maniobra o poder.</div>',
-        side: 'top',
-        align: 'center',
-      });
-    }
+    steps.push({
+      element: '#creator-class-decisions',
+      fallbackElement: '#creator-class-skills',
+      tabId: 'class',
+      badge: 'Decisiones Tácticas',
+      title: '24. Decisiones Tácticas Modulares de Clase',
+      descriptionHtml:
+        '<p>Poderes modulares específicos de tu clase y arquetipo (ej: <em>Invocaciones Sobrenaturales del Brujo, Maniobras de Combate del Maestro de Batalla, Disciplinas de Ki del Monje, Metamagia del Hechicero</em>).</p>' +
+        '<div class="driver-callout">👉 Marca tus opciones tácticas. Usa el botón del <strong>Ojito 👁️</strong> para leer la descripción completa de cada maniobra o poder.</div>',
+      side: 'top',
+      align: 'center',
+    });
 
     steps.push({
       element: '#creator-class-progression',
-      fallbackElement: '#step-tab-class-content',
+      fallbackElement: '#creator-class-skills',
       tabId: 'class',
       badge: 'Niveles 1-20',
-      title: 'Progresión Nivel a Nivel (1 a 20)',
+      title: '25. Progresión y Rasgos Activos de Nivel',
       descriptionHtml:
         '<p>Consulta la cronología completa de rasgos que desbloqueará tu héroe en cada nivel de su carrera aventurera.</p>' +
         '<div class="driver-callout">👉 Puedes alternar entre <em>"Hasta Nivel Actual"</em> o <em>"Ver Todos (1-20)"</em> para leer las reglas de cada rasgo.</div>',
@@ -521,7 +489,7 @@ export function generateDynamicTutorialSteps(
       fallbackElement: '#step-tab-abilities-content',
       tabId: 'abilities',
       badge: 'Métodos 5e',
-      title: '12. Método de Puntuaciones (Los 6 Atributos)',
+      title: '26. Método de Puntuaciones (Los 6 Atributos)',
       descriptionHtml:
         '<p>Tus 6 atributos fundamentales (<strong>FUE, DES, CON, INT, SAB, CAR</strong>). Tienes 3 métodos oficiales:</p>' +
         '<p style="margin: 4px 0 6px 0; font-size: 11.5px; opacity: 0.9;">• <strong>Lanzador Virtual:</strong> Tira 4d6 descartando el menor seis veces con animaciones.<br/>• <strong>Dados Físicos:</strong> Escribe los resultados de tu mesa de juego real.<br/>• <strong>Matriz Estándar:</strong> Los valores canónicos oficiales (15, 14, 13, 12, 10, 8).</p>' +
@@ -531,24 +499,11 @@ export function generateDynamicTutorialSteps(
     });
 
     steps.push({
-      element: '#creator-abilities-assignment-grid',
+      element: '#creator-abilities-targets',
       fallbackElement: '#step-tab-abilities-content',
       tabId: 'abilities',
-      badge: 'Bandeja',
-      title: '13. Bandeja de Dados y Valores Disponibles',
-      descriptionHtml:
-        '<p>Aquí descansan los 6 valores numéricos listos para ser asignados a tus estadísticas del héroe.</p>' +
-        '<div class="driver-callout">👉 Puedes <strong>arrastrarlos con el ratón (Drag & Drop)</strong> o hacer clic sobre un número y luego en la característica receptora abajo.</div>',
-      side: 'top',
-      align: 'center',
-    });
-
-    steps.push({
-      element: '#creator-abilities-targets',
-      fallbackElement: '#creator-abilities-assignment-grid',
-      tabId: 'abilities',
-      badge: 'Asignación Drag & Drop',
-      title: '14. Asignación a las 6 Características',
+      badge: 'Asignación 6 Atributos',
+      title: '27. Asignación a las 6 Características & Modificadores',
       descriptionHtml:
         '<p>Distribuye tus números con sabiduría:</p>' +
         '<p style="margin: 4px 0 6px 0; font-size: 11.5px; opacity: 0.9;">• Asigna tu valor más alto a la <strong>característica recomendada</strong> para tu clase (destacada en dorado).<br/>• Una buena <strong>Constitución</strong> aumentará tus Puntos de Golpe iniciales y por nivel.<br/>• Los bonificadores raciales (+2 / +1) se sumarán de inmediato al resultado final.</p>' +
@@ -567,7 +522,7 @@ export function generateDynamicTutorialSteps(
       fallbackElement: '#step-tab-asi_feats-content',
       tabId: 'asi_feats',
       badge: 'Modificadores',
-      title: '15. Resumen de Atributos y Modificadores',
+      title: '28. Resumen de Atributos y Modificadores',
       descriptionHtml:
         '<p>Revisa la suma final de tus características: <em>Base + Raza + Dotes</em>.</p>' +
         '<p style="font-size: 11.5px; opacity: 0.9;">El número grande en negrita (+1, +2, +3...) es tu <strong>Modificador de Característica</strong>, la cifra decisiva que sumarás a tus tiradas de d20 durante todas tus partidas.</p>' +
@@ -581,7 +536,7 @@ export function generateDynamicTutorialSteps(
       fallbackElement: '#creator-asi-feat-section',
       tabId: 'asi_feats',
       badge: 'Regla de Mesa',
-      title: '16. Regla Opcional: Dote Inicial Gratuita a Nivel 1',
+      title: '29. Regla Opcional: Dote Inicial Gratuita a Nivel 1',
       descriptionHtml:
         '<p>En las reglas oficiales de 5e estándar, las Dotes se adquieren a partir de Nivel 4 en lugar del Aumento de Características (ASI).</p>' +
         '<p style="font-size: 11.5px; opacity: 0.9;">Sin embargo, muchas mesas de juego y campañas modernas aplican la regla casera de otorgar <strong>1 dote heroica inicial a nivel 1</strong> para personalizar al personaje desde el comienzo.</p>' +
@@ -595,7 +550,7 @@ export function generateDynamicTutorialSteps(
       fallbackElement: '#step-tab-asi_feats-content',
       tabId: 'asi_feats',
       badge: 'Dotes Heroicas',
-      title: '17. Catálogo Oficial de Dotes Heroicas',
+      title: '30. Catálogo Oficial de Dotes Heroicas',
       descriptionHtml:
         '<p>Las Dotes otorgan ventajas marciales, reflejos o facultades místicas (ej: <em>Tirador Preciso, Alerta, Maestro en Armas Pesadas, Robusto</em>).</p>' +
         '<div class="driver-callout">👉 Explora el compendio y selecciona las dotes que coincidan con la evolución heroica de tu aventurero.</div>',
@@ -614,7 +569,7 @@ export function generateDynamicTutorialSteps(
         fallbackElement: '#step-tab-spells-content',
         tabId: 'spells',
         badge: 'Grimorio',
-        title: '18. Capacidad de Conjuración de tu Clase',
+        title: '31. Capacidad de Conjuración de tu Clase',
         descriptionHtml:
           '<p>Tu clase y nivel calculan de manera automática tus límites oficiales de D&D 5e:</p>' +
           '<p style="margin: 4px 0 6px 0; font-size: 11.5px; opacity: 0.9;">• <strong>Trucos (Nivel 0):</strong> Magia a voluntad que puedes lanzar sin gastar ranuras.<br/>• <strong>Conjuros Preparados / Grimorio:</strong> Hechizos potentes que consumen tus espacios diarios.</p>' +
@@ -628,7 +583,7 @@ export function generateDynamicTutorialSteps(
         fallbackElement: '#step-tab-spells-content',
         tabId: 'spells',
         badge: 'Nivel 0',
-        title: '19. Trucos de Magia (Cantrips)',
+        title: '32. Trucos de Magia (Cantrips)',
         descriptionHtml:
           '<p>Tus encantamientos básicos más fiables en combate y exploración (ej: <em>Rayo de Fuego, Ilusión Menor, Guía, Descarga de Ébano</em>).</p>' +
           '<div class="driver-callout">👉 <strong>Tu turno:</strong> Haz clic sobre las cartas de truco para agregarlos a tu repertorio.</div>',
@@ -641,23 +596,10 @@ export function generateDynamicTutorialSteps(
         fallbackElement: '#step-tab-spells-content',
         tabId: 'spells',
         badge: 'Nivel 1+',
-        title: '20. Hechizos con Espacio de Conjuro',
+        title: '33. Hechizos con Espacio de Conjuro',
         descriptionHtml:
           '<p>Conjuros organizados por niveles y escuelas de magia (ej: <em>Proyectil Mágico, Curar Heridas, Escudo, Armadura de Agathys</em>).</p>' +
-          '<div class="driver-callout">👉 Haz clic para preparar tus hechizos. Puedes usar el botón <strong>"Maximizar"</strong> para ver todo el grimorio en pantalla completa.</div>',
-        side: 'top',
-        align: 'center',
-      });
-
-      steps.push({
-        element: '#creator-spell-maximize-btn',
-        fallbackElement: '#step-tab-spells-content',
-        tabId: 'spells',
-        badge: 'Pantalla Completa',
-        title: '21. Selector de Conjuros Maximizado',
-        descriptionHtml:
-          '<p>Abre el códice completo de conjuros con filtros avanzados por escuela de magia, rituales y concentración.</p>' +
-          '<div class="driver-callout">👉 Pulsa <strong>Maximizar</strong> siempre que necesites leer detenidamente las descripciones completas.</div>',
+          '<div class="driver-callout">👉 Haz clic para preparar tus hechizos. Puedes usar el buscador o filtrar por nivel en este panel.</div>',
         side: 'top',
         align: 'center',
       });
@@ -667,7 +609,7 @@ export function generateDynamicTutorialSteps(
         fallbackElement: '#step-tab-spells-content',
         tabId: 'spells',
         badge: 'Magia Innata',
-        title: '18. Magia Innata de Linaje Racial',
+        title: '31. Magia Innata de Linaje Racial',
         descriptionHtml:
           '<p>Aunque tu clase sea marcial pura, tu linaje racial te otorga facultades mágicas innatas.</p>' +
           '<p style="font-size: 11.5px; opacity: 0.9;">Tu <strong>CD de salvación de conjuros</strong> y tu <strong>bono de ataque mágico</strong> se calculan de forma automática usando tu aptitud de linaje.</p>' +
@@ -681,7 +623,7 @@ export function generateDynamicTutorialSteps(
         fallbackElement: '#step-tab-spells-content',
         tabId: 'spells',
         badge: 'Vía Marcial',
-        title: '18. Vía Marcial: El Acero y la Táctica',
+        title: '31. Vía Marcial: El Acero y la Táctica',
         descriptionHtml:
           `<p>Tu personaje (<strong>${ctx.activeRace?.name || 'Aventurero'} ${ctx.activeClass?.name || 'Guerrero'}</strong>) no canaliza la urdimbre mágica.</p>` +
           '<p style="font-size: 11.5px; opacity: 0.9;">Tu verdadera fuerza radica en tus armas, tu armadura pesada, tus reflejos atléticos y tu disciplina táctica.</p>' +
@@ -701,7 +643,7 @@ export function generateDynamicTutorialSteps(
       fallbackElement: '#step-tab-equipment-content',
       tabId: 'equipment',
       badge: 'Paquetes Tácticos',
-      title: '22. Paquetes de Equipamiento Inicial (A vs B)',
+      title: '34. Paquetes de Equipamiento Inicial (A vs B)',
       descriptionHtml:
         '<p>Selecciona tus armas iniciales, armaduras y equipo de campaña según las opciones oficiales del Manual del Jugador para tu clase.</p>' +
         '<div class="driver-callout">👉 <strong>Tu turno:</strong> Elige entre las opciones A o B de cada grupo. Si una opción permite un arma a tu elección, pulsa <strong>"Cambiar Arma..."</strong> para elegir del compendio.</div>',
@@ -714,7 +656,7 @@ export function generateDynamicTutorialSteps(
       fallbackElement: '#step-tab-equipment-content',
       tabId: 'equipment',
       badge: 'Oro & Riqueza',
-      title: '23. Riqueza Inicial y Equipo Fijo',
+      title: '35. Riqueza Inicial y Equipo Fijo',
       descriptionHtml:
         '<p>Tu monedero de monedas de oro (po) iniciales calculadas según tu trasfondo y las pertenencias básicas concedidas por tu oficio.</p>' +
         '<div class="driver-callout">👉 Tus monedas se incorporarán a tu inventario activo al guardar al aventurero.</div>',
@@ -727,7 +669,7 @@ export function generateDynamicTutorialSteps(
       fallbackElement: '#step-tab-equipment-content',
       tabId: 'equipment',
       badge: 'Equipar en Vivo 🛡️',
-      title: '24. Armas, Armaduras y Escudos en Tiempo Real',
+      title: '36. Armas, Armaduras y Escudos en Tiempo Real',
       descriptionHtml:
         '<p>El arsenal de tu aventurero forjado con sus insignias metálicas de equipo.</p>' +
         '<p style="font-size: 11.5px; opacity: 0.9;">Haz clic en cualquier objeto para <strong>Equiparlo o Desequiparlo</strong>. Por ejemplo, al equipar un escudo, tu <strong>Clase de Armadura (CA) aumentará en +2</strong> de forma inmediata en la ficha lateral.</p>' +
@@ -746,7 +688,7 @@ export function generateDynamicTutorialSteps(
       fallbackElement: '#step-tab-review-content',
       tabId: 'review',
       badge: 'Dossier',
-      title: '25. Ficha Definitiva y Estadísticas del Héroe',
+      title: '37. Ficha Definitiva y Estadísticas del Héroe',
       descriptionHtml:
         '<p>¡Tu aventurero ha cobrado vida! Revisa su ficha consolidada con todas las métricas de D&D 5e calculadas:</p>' +
         '<p style="margin: 4px 0 6px 0; font-size: 11.5px; opacity: 0.9;">• <strong>Puntos de Golpe (PG)</strong> y Clase de Armadura (CA).<br/>• <strong>Bono de Iniciativa</strong> y Percepción Pasiva.<br/>• <strong>Las 18 habilidades de 5e</strong> con sus bonificadores finales (incluyendo pericias y trasfondo).<br/>• Lista de ataques, dotes y rasgos activos.</p>' +
@@ -757,28 +699,48 @@ export function generateDynamicTutorialSteps(
 
     steps.push({
       element: '#creator-review-export-banner',
-      fallbackElement: '#step-tab-review-content',
+      fallbackElement: '#creator-review-dossier',
       tabId: 'review',
-      badge: 'PDF Oficial',
-      title: '26. Exportar a Hoja Oficial de D&D 5e (PDF)',
+      badge: 'PDF Oficial 5e',
+      title: '38. Exportar a Hoja Oficial de D&D 5e',
       descriptionHtml:
-        '<p>Pulsa el botón <strong>"Exportar Hoja Oficial (PDF)"</strong> para descargar la planilla rellenable oficial de 3 páginas de Wizards of the Coast con todos los datos de tu personaje ya completados.</p>' +
-        '<div class="driver-callout">👉 Ideal para imprimir en papel o compartir con tu Dungeon Master antes de la sesión.</div>',
+        '<p>Descarga la <strong>Hoja de Personaje Oficial de D&D 5e</strong> en formato PDF vectorial de tres páginas con campos rellenables y tipografía canónica, o imprime tu ficha directamente para tu mesa física.</p>' +
+        '<div class="driver-callout">👉 Pulsa <strong>"Exportar Hoja Oficial (PDF)"</strong> para descargarla lista para imprimir o compartir con tu DM.</div>',
       side: 'bottom',
-      align: 'start',
+      align: 'center',
     });
 
     steps.push({
       element: '#creator-final-save-btn',
-      fallbackElement: '#step-tab-review-content',
+      fallbackElement: '#creator-review-dossier',
       tabId: 'review',
-      badge: '¡Listo! 🎲',
-      title: '27. ¡Forjar y Guardar Aventurero!',
+      badge: 'Guardar Héroe',
+      title: '39. Guardar Personaje en "Mis Aventureros"',
       descriptionHtml:
-        '<p>Guarda a tu personaje en el compendio de la campaña para comenzar a jugar de inmediato.</p>' +
-        '<div class="driver-callout-success">🎲 <strong>¡Pulsa en ¡Forjar Personaje! y que los dados favorezcan tus hazañas!</strong></div>',
+        '<p>Al pulsar este botón, tu aventurero se guardará de forma permanente en tu base de datos local y en la nube.</p>' +
+        '<p style="font-size: 11.5px; opacity: 0.9;">Podrás gestionarlo, subirlo de nivel (+1), equiparle nuevos objetos mágicos y usarlo en tus sesiones de juego.</p>' +
+        '<div class="driver-callout-success">🎲 ¡Felicidades! Tu personaje está listo para iniciar la aventura. Pulsa <strong>Guardar Personaje</strong> para finalizar.</div>',
       side: 'top',
-      align: 'end',
+      align: 'center',
+    });
+  }
+
+  // -------------------------------------------------------------
+  // SIDEBAR EN VIVO (Persistente)
+  // -------------------------------------------------------------
+  if (mode === 'full') {
+    steps.push({
+      element: '#creator-sidebar',
+      fallbackElement: '#creator-tour-header',
+      tabId: ctx.currentStep,
+      badge: 'Ficha en Vivo',
+      title: '40. Hoja de Personaje en Vivo (Tiempo Real)',
+      descriptionHtml:
+        '<p>Este panel pergamino flotante actualiza tus estadísticas de forma instantánea ante cada decisión que tomas:</p>' +
+        '<p style="margin: 4px 0 6px 0; font-size: 11.5px; opacity: 0.9;">• <strong>CA, PG, Iniciativa y Percepción Pasiva</strong> en medallas de forja metálica.<br/>• Frasco de Puntos de Golpe en vidrio alquímico con tapón de bronce.<br/>• Modificadores de Fuerza, Destreza, Constitución, Inteligencia, Sabiduría y Carisma.<br/>• Armas activas con sus bonos de ataque y daño en vivo.</p>' +
+        '<div class="driver-callout">👉 Puedes desplegarlo u ocultarlo en cualquier momento con el botón <strong>"Ver Hoja / Ocultar Hoja"</strong> del encabezado superior.</div>',
+      side: 'left',
+      align: 'center',
     });
   }
 
@@ -792,8 +754,12 @@ export function generateDynamicTutorialSteps(
 export function startCharacterCreatorTutorial(
   context: TutorialContext,
   onNavigateStep?: (stepId: CreatorStepName) => void,
-  mode: 'full' | 'step' = 'full'
+  mode: 'full' | 'step' = 'full',
+  onCloseModals?: () => void
 ) {
+  // Always close any open popup modals before launching tutorial so Driver is never mislocated
+  onCloseModals?.();
+
   const stepDefs = generateDynamicTutorialSteps(context, mode);
 
   if (stepDefs.length === 0) {
@@ -807,13 +773,31 @@ export function startCharacterCreatorTutorial(
   }
 
   const driverSteps: DriveStep[] = stepDefs.map((def, idx) => ({
-    element: def.element,
+    element: () => {
+      // Dynamic element resolution: checks target, fallback, or tab container
+      const primary = document.querySelector(def.element);
+      if (primary && primary instanceof HTMLElement && primary.offsetParent !== null) {
+        return primary;
+      }
+      if (primary) return primary;
+
+      if (def.fallbackElement) {
+        const fallback = document.querySelector(def.fallbackElement);
+        if (fallback) return fallback;
+      }
+
+      const tabContainer = document.querySelector(`#step-tab-${def.tabId}-content`);
+      if (tabContainer) return tabContainer;
+
+      return document.querySelector('#creator-tour-header') || document.body;
+    },
     popover: {
       title: `${def.badge ? `<span style="font-size:10px;text-transform:uppercase;background:#8c672b;color:#fff;padding:2px 6px;border-radius:4px;margin-right:6px;font-family:monospace;font-weight:bold;">${def.badge}</span>` : ''}${def.title}`,
       description: def.descriptionHtml,
       side: def.side || 'top',
       align: def.align || 'center',
       onNextClick: async (_el, _step, { driver: d }) => {
+        onCloseModals?.();
         const nextIdx = idx + 1;
         if (nextIdx >= stepDefs.length) {
           d.destroy();
@@ -832,6 +816,7 @@ export function startCharacterCreatorTutorial(
         }
       },
       onPrevClick: async (_el, _step, { driver: d }) => {
+        onCloseModals?.();
         const prevIdx = idx - 1;
         if (prevIdx < 0) return;
 
@@ -846,6 +831,7 @@ export function startCharacterCreatorTutorial(
       },
     },
     onHighlightStarted: (element) => {
+      onCloseModals?.();
       if (element && element instanceof HTMLElement) {
         element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }

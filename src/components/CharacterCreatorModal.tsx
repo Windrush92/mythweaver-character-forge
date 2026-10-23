@@ -2445,6 +2445,48 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
     pendingCreationDecisions.length,
   ]);
 
+  const closeAllOverlayModals = () => {
+    setIsBackgroundPickerMaximized(false);
+    setIsRacePickerMaximized(false);
+    setIsFeatPickerMaximized(false);
+    setIsSubclassPickerModalOpen(false);
+    setIsWeaponPickerOpen(false);
+    setInspectingCompendium(null);
+    setInspectingSpell(null);
+    setInspectingFeat(null);
+  };
+
+  const handleStartTutorial = (mode: 'full' | 'step') => {
+    setIsTutorialMenuOpen(false);
+    closeAllOverlayModals();
+    startCharacterCreatorTutorial(
+      tutorialContext,
+      (stepId) => setCurrentStep(stepId as CreatorStep),
+      mode,
+      closeAllOverlayModals
+    );
+  };
+
+  const handleConfirmBackground = () => {
+    setIsBackgroundPickerMaximized(false);
+    setTimeout(() => {
+      const el = document.querySelector('#creator-background-subdecisions');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 80);
+  };
+
+  const handleConfirmRace = () => {
+    setIsRacePickerMaximized(false);
+    setTimeout(() => {
+      const el = document.querySelector('#creator-race-traits');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 80);
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex flex-col w-screen h-screen overflow-hidden bg-[#100905] animate-fadeIn font-serif text-[#2c241b]">
       {/* Outer Container Filling Full Screen */}
@@ -2585,10 +2627,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
 
                   <button
                     type="button"
-                    onClick={() => {
-                      setIsTutorialMenuOpen(false);
-                      startCharacterCreatorTutorial(tutorialContext, (stepId) => setCurrentStep(stepId as CreatorStep), 'full');
-                    }}
+                    onClick={() => handleStartTutorial('full')}
                     className="w-full text-left p-2 rounded-lg bg-[#2e1d13] hover:bg-[#422919] text-[#f7f2ea] border border-[#5a4325] transition cursor-pointer flex flex-col gap-0.5 group"
                   >
                     <span className="font-fantasy font-bold text-xs text-[#f2cb6b] group-hover:text-white flex items-center gap-1.5">
@@ -2601,10 +2640,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
 
                   <button
                     type="button"
-                    onClick={() => {
-                      setIsTutorialMenuOpen(false);
-                      startCharacterCreatorTutorial(tutorialContext, (stepId) => setCurrentStep(stepId as CreatorStep), 'step');
-                    }}
+                    onClick={() => handleStartTutorial('step')}
                     className="w-full text-left p-2 rounded-lg bg-[#2e1d13] hover:bg-[#422919] text-[#f7f2ea] border border-[#5a4325] transition cursor-pointer flex flex-col gap-0.5 group"
                   >
                     <span className="font-fantasy font-bold text-xs text-[#f2cb6b] group-hover:text-white flex items-center gap-1.5">
@@ -2869,7 +2905,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                     </div>
                     <button
                       type="button"
-                      onClick={() => startCharacterCreatorTutorial(tutorialContext, (stepId) => setCurrentStep(stepId as CreatorStep), 'full')}
+                      onClick={() => handleStartTutorial('full')}
                       className="text-[10.5px] text-[#8c672b] hover:text-[#5c4a35] font-fantasy font-bold flex items-center gap-1 cursor-pointer shrink-0"
                     >
                       <Sparkles className="w-3 h-3 text-[#c59b27]" /> Tutorial Guiado
@@ -5255,7 +5291,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
 
                   {/* Selected Background Feature Details & Interactive Choices */}
                   {activeBackground ? (
-                    <div className="space-y-4">
+                    <div id="creator-background-subdecisions" className="space-y-4">
                       {/* Background Header Summary Banner */}
                       <div className="p-4 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                         <div>
@@ -6389,7 +6425,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       </div>
                     </div>
                   ) : (
-                    <div className="p-4 bg-[#f5ede0] rounded-xl border border-dashed border-[#d6c4aa] text-center text-xs text-[#7a6448]">
+                    <div id="creator-background-subdecisions" className="p-4 bg-[#f5ede0] rounded-xl border border-dashed border-[#d6c4aa] text-center text-xs text-[#7a6448]">
                       Selecciona un trasfondo arriba para ver su rasgo especial y equipo sugerido.
                     </div>
                   )}
@@ -9344,6 +9380,50 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   })}
               </div>
             </div>
+
+            {/* Bottom Floating Action Bar for Selected Race */}
+            <div className="bg-[#ede1ce] border-t-2 border-[#b88c32] p-3 px-6 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0 shadow-xl">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#8c672b] text-white flex items-center justify-center font-fantasy font-bold text-lg shadow-inner shrink-0">
+                  {activeRace ? '✓' : '👤'}
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-fantasy font-bold text-[#4a361c] uppercase tracking-wide flex items-center gap-2">
+                    <span>Raza Seleccionada:</span>
+                    <span className="text-[#8c672b] font-black">{activeRace?.name || 'Ninguna (haz clic en una tarjeta)'}</span>
+                  </div>
+                  <div className="text-[11px] text-[#7a6448] truncate">
+                    {activeRace ? (
+                      <span>
+                        <strong>Subrazas:</strong> {activeRace.subraces && activeRace.subraces.length > 0 ? `${activeRace.subraces.length} disponibles` : 'Sin subrazas'}
+                        {' • '}
+                        <strong>Velocidad:</strong> {activeRace.speed} pies
+                        {' • '}
+                        <strong>Tamaño:</strong> {activeRace.size}
+                      </span>
+                    ) : (
+                      'Haz clic en cualquier carta de raza para seleccionarla y configurar sus opciones.'
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleConfirmRace}
+                  disabled={!activeRace}
+                  className={`px-5 py-2.5 rounded-xl border-2 font-fantasy font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-md transition cursor-pointer ${
+                    activeRace
+                      ? 'bg-gradient-to-r from-[#8c672b] to-[#6e5020] hover:from-[#785723] hover:to-[#573e17] text-white border-[#8c672b]'
+                      : 'bg-[#d6c4aa] text-[#7a6448] border-[#c4b094] opacity-60 cursor-not-allowed'
+                  }`}
+                >
+                  <Check className="w-4 h-4 text-[#ffd56b]" />
+                  <span>Confirmar y Configurar Linaje y Rasgos →</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -9666,6 +9746,50 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   );
                 })
               )}
+            </div>
+
+            {/* Bottom Floating Action Bar for Selected Background */}
+            <div className="bg-[#ede1ce] border-t-2 border-[#b88c32] p-3 px-6 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0 shadow-xl">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#8c672b] text-white flex items-center justify-center font-fantasy font-bold text-lg shadow-inner shrink-0">
+                  {activeBackground ? '✓' : '📜'}
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-fantasy font-bold text-[#4a361c] uppercase tracking-wide flex items-center gap-2">
+                    <span>Trasfondo Seleccionado:</span>
+                    <span className="text-[#8c672b] font-black">{activeBackground?.name || 'Ninguno (haz clic en una tarjeta)'}</span>
+                  </div>
+                  <div className="text-[11px] text-[#7a6448] truncate">
+                    {activeBackground ? (
+                      <span>
+                        <strong>Habilidades:</strong> {activeBackground.skillProficiencies && activeBackground.skillProficiencies.length > 0 ? activeBackground.skillProficiencies.join(', ') : (activeBackground.skillChoices ? `${activeBackground.skillChoices.count} a elegir` : 'Ninguna')}
+                        {' • '}
+                        <strong>Herramientas:</strong> {activeBackground.toolProficiencies && activeBackground.toolProficiencies.length > 0 ? activeBackground.toolProficiencies.join(', ') : (activeBackground.toolChoices ? `${activeBackground.toolChoices.count} a elegir` : 'Ninguna')}
+                        {' • '}
+                        <strong>Idiomas:</strong> {activeBackground.languagesCount ? `+${activeBackground.languagesCount}` : (activeBackground.fixedLanguages ? activeBackground.fixedLanguages.join(', ') : 'Racial')}
+                      </span>
+                    ) : (
+                      'Haz clic en cualquier carta de trasfondo para seleccionarlo y configurar sus herramientas e idiomas.'
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleConfirmBackground}
+                  disabled={!activeBackground}
+                  className={`px-5 py-2.5 rounded-xl border-2 font-fantasy font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-md transition cursor-pointer ${
+                    activeBackground
+                      ? 'bg-gradient-to-r from-[#8c672b] to-[#6e5020] hover:from-[#785723] hover:to-[#573e17] text-white border-[#8c672b]'
+                      : 'bg-[#d6c4aa] text-[#7a6448] border-[#c4b094] opacity-60 cursor-not-allowed'
+                  }`}
+                >
+                  <Check className="w-4 h-4 text-[#ffd56b]" />
+                  <span>Confirmar y Configurar Herramientas, Idiomas y Rasgos →</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
