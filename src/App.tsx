@@ -331,6 +331,7 @@ export default function App() {
               <img
                 src="./assets/ui/logo_minimalist_mythweaver.png"
                 alt="Mythweaver Dragon Crest"
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
                 className="w-16 h-16 sm:w-20 sm:h-20 md:w-22 md:h-22 object-contain drop-shadow-[0_4px_24px_rgba(255,200,80,0.7)] shrink-0 transition-transform duration-300 hover:scale-105"
               />
               <div className="flex flex-col justify-center text-left">
@@ -423,15 +424,15 @@ export default function App() {
               <button
                 type="button"
                 onClick={toggleHeaderCollapsed}
-                className="relative flex items-center justify-center w-10 h-10 transition-transform duration-150 cursor-pointer active:scale-95 group shrink-0"
+                style={{
+                  backgroundImage: 'url(./assets/ui/btn_header_action_normal.png)',
+                  backgroundSize: '100% 100%',
+                  backgroundRepeat: 'no-repeat',
+                }}
+                className="relative flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-b from-[#2e1d10] via-[#1a0f07] to-[#100804] border border-[#8c672b]/80 hover:border-[#ffd56b] shadow-[inset_0_1px_1px_rgba(255,213,107,0.35),0_2px_8px_rgba(0,0,0,0.8)] transition-all duration-150 cursor-pointer active:scale-95 group shrink-0"
                 title={isHeaderCollapsed ? "Expandir panel superior" : "Colapsar panel superior"}
                 aria-label={isHeaderCollapsed ? "Expandir panel superior" : "Colapsar panel superior"}
               >
-                <img
-                  src="./assets/ui/btn_header_action_normal.png"
-                  alt=""
-                  className="absolute inset-0 w-full h-full object-contain filter drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)] group-hover:brightness-110 transition select-none"
-                />
                 {isHeaderCollapsed ? (
                   <ChevronsDown className="relative z-10 w-5 h-5 text-[#dfbe7e] group-hover:text-[#ffd56b] group-hover:translate-y-0.5 transition-transform" />
                 ) : (
@@ -599,6 +600,7 @@ export default function App() {
                 <img
                   src="./assets/ui/logo_minimalist_mythweaver.png"
                   alt=""
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
                   className="w-24 h-24 object-contain opacity-75 drop-shadow-[0_4px_16px_rgba(255,200,80,0.4)]"
                 />
                 <div className="max-w-md space-y-1">
