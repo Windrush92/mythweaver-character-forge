@@ -521,7 +521,7 @@ export const ClassSheetModal: React.FC<ClassSheetModalProps> = ({
   const preparedLimitExceeded =
     isCaster &&
     (spellcastingLimits.casterType === 'prepared'
-      ? leveledPreparedList.length > spellcastingLimits.maxPreparedOrKnown
+      ? leveledPreparedList.length > (spellcastingLimits.maxPrepared ?? spellcastingLimits.maxPreparedOrKnown)
       : leveledKnownList.length > spellcastingLimits.maxPreparedOrKnown);
 
   // Toggle prepared status for a spell (racial spells are always innately prepared)

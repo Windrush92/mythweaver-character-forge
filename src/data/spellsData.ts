@@ -5,6 +5,7 @@ export interface SpellcastingLimits {
   casterType: 'prepared' | 'known' | 'none';
   maxCantrips: number;
   maxPreparedOrKnown: number;
+  maxPrepared?: number;
   spellbookTotal?: number;
   abilityUsed: 'int' | 'wis' | 'cha';
   abilityMod: number;
@@ -13830,13 +13831,18 @@ export function getSpellcastingLimits(
 
   const getMod = (score: number = 10) => Math.floor((score - 10) / 2);
 
+  let maxPrepared: number | undefined = undefined;
+
   if (c.includes('mago') || c.includes('wizard')) {
     abilityUsed = 'int';
     casterType = 'prepared';
     maxCantrips = level >= 10 ? 5 : level >= 4 ? 4 : 3;
     const mod = getMod(abilityScores?.int);
-    maxPreparedOrKnown = Math.max(1, mod + level);
+    const dailyPrepared = Math.max(1, mod + level);
     spellbookTotal = 6 + (level - 1) * 2;
+    // Capacidad oficial del Grimorio (6 a nv 1, 8 a nv 2, 10 a nv 3, etc.)
+    maxPreparedOrKnown = spellbookTotal;
+    maxPrepared = dailyPrepared;
   } else if (c.includes('clérigo') || c.includes('clerigo') || c.includes('cleric')) {
     abilityUsed = 'wis';
     casterType = 'prepared';
@@ -13890,7 +13896,9 @@ export function getSpellcastingLimits(
   const abilityMod = getMod(abilityScores?.[abilityUsed]);
 
   let explanation = '';
-  if (casterType === 'prepared') {
+  if (spellbookTotal && maxPrepared !== undefined) {
+    explanation = `${className}: ${spellbookTotal} conjuros en tu Grimorio (${level === 1 ? '6 a nivel 1' : `6 iniciales + ${(level - 1) * 2} por nivel ${level}`}). Preparas ${maxPrepared} diarios para combate (${abilityUsed.toUpperCase()} ${abilityMod >= 0 ? '+' : ''}${abilityMod} + nivel).`;
+  } else if (casterType === 'prepared') {
     explanation = `${className} prepara conjuros diariamente: modificador de ${abilityUsed.toUpperCase()} (${abilityMod >= 0 ? '+' : ''}${abilityMod}) + nivel de clase. Total: ${maxPreparedOrKnown} conjuros preparados.`;
     if (spellbookTotal) {
       explanation += ` Grimorio inicial: ${spellbookTotal} conjuros registrados.`;
@@ -13904,6 +13912,7 @@ export function getSpellcastingLimits(
     casterType,
     maxCantrips,
     maxPreparedOrKnown,
+    maxPrepared,
     spellbookTotal,
     abilityUsed,
     abilityMod,

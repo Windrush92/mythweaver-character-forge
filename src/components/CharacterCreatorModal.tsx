@@ -2186,6 +2186,19 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
 
     // Combine selectedSpells with spells granted by class decisions (Pacto del Tomo, Clérigo Naturaleza/Arcano, Bardo Secretos Mágicos)
     let combinedSpells = [...selectedSpells];
+
+    // Para Mago: dejar preparados los primeros N según límite diario (maxPrepared) y el resto en el grimorio
+    if (spellLimits.maxPrepared && spellLimits.spellbookTotal) {
+      let prepCount = 0;
+      combinedSpells = combinedSpells.map((s) => {
+        if (s.level === 0 || s.isRacial) return { ...s, prepared: true };
+        if (prepCount < (spellLimits.maxPrepared || 5)) {
+          prepCount++;
+          return { ...s, prepared: true };
+        }
+        return { ...s, prepared: false };
+      });
+    }
     const decisionSpellKeys = [
       'pactTomeCantrips',
       'clericNatureCantrip',
@@ -7175,7 +7188,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             ? 'bg-amber-100 text-amber-900 border-amber-400'
                             : 'bg-white text-[#4a361c] border-[#d6c4aa]'
                         }`}>
-                          {isSpanish ? 'Grimorio / Repertorio:' : 'Spellbook / Repertoire:'} {selectedLeveledCount} / {spellLimits.maxPreparedOrKnown}
+                          {isSpanish ? (spellLimits.spellbookTotal ? 'Grimorio:' : 'Grimorio / Repertorio:') : (spellLimits.spellbookTotal ? 'Spellbook:' : 'Spellbook / Repertoire:')} {selectedLeveledCount} / {spellLimits.maxPreparedOrKnown}{spellLimits.maxPrepared ? ` (${isSpanish ? 'prepara' : 'prepares'} ${spellLimits.maxPrepared} ${isSpanish ? 'diarios' : 'daily'})` : ''}
                         </span>
                       </div>
                     </div>
@@ -9385,7 +9398,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       ? 'bg-amber-500 text-black border-amber-300'
                       : 'bg-[#1c150e] text-[#f5ebd7] border-[#8c672b]'
                   }`}>
-                    {isSpanish ? 'Grimorio:' : 'Spellbook:'} {selectedLeveledCount} / {spellLimits.maxPreparedOrKnown}
+                    {isSpanish ? (spellLimits.spellbookTotal ? 'Grimorio:' : 'Grimorio:') : (spellLimits.spellbookTotal ? 'Spellbook:' : 'Spellbook:')} {selectedLeveledCount} / {spellLimits.maxPreparedOrKnown}{spellLimits.maxPrepared ? ` (${isSpanish ? 'prepara' : 'prepares'} ${spellLimits.maxPrepared} ${isSpanish ? 'diarios' : 'daily'})` : ''}
                   </span>
                 </div>
                 <button
