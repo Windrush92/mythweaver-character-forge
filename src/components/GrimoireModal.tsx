@@ -1,6 +1,13 @@
 import React, { useState } from 'react';
 import { Character, Spell, CharacterSpellSlots, SpellSlotLevel } from '../types';
-import { OFFICIAL_SPELLS_COMPENDIUM } from '../data/spellsData';
+import { OFFICIAL_SPELLS_COMPENDIUM, findSpellByNameOrAlias } from '../data/spellsData';
+import { useLanguageStore } from '../hooks/useLanguageStore';
+import {
+  translateDndTitle,
+  translateSpellSchool,
+  translateSpellMeta,
+  translateDndText,
+} from '../utils/dndEnglishTranslator';
 import {
   BookOpen,
   Sparkles,
@@ -42,13 +49,29 @@ export const GrimoireModal: React.FC<GrimoireModalProps> = ({
   onClose,
   onLogSpellCast,
 }) => {
+  const { isSpanish, t } = useLanguageStore();
+
   // Ensure spellSlots and spells exist on character
   const slots: CharacterSpellSlots = {
     ...DEFAULT_SLOTS,
     ...(character.spellSlots || {}),
   };
 
-  const characterSpells: Spell[] = character.spells || [];
+  const characterSpells: Spell[] = (character.spells || []).map((s) => {
+    if (s.descriptionEn && s.castingTimeEn) return s;
+    const canonical = findSpellByNameOrAlias(s.id || s.nameEn || s.name);
+    if (!canonical) return s;
+    return {
+      ...s,
+      nameEn: s.nameEn || canonical.nameEn,
+      castingTimeEn: s.castingTimeEn || canonical.castingTimeEn,
+      rangeEn: s.rangeEn || canonical.rangeEn,
+      componentsEn: s.componentsEn || canonical.componentsEn,
+      durationEn: s.durationEn || canonical.durationEn,
+      descriptionEn: s.descriptionEn || canonical.descriptionEn,
+      higherLevelsEn: s.higherLevelsEn || canonical.higherLevelsEn,
+    };
+  });
 
   const [activeTab, setActiveTab] = useState<'prepared' | 'known' | 'compendium'>('prepared');
   const [selectedSpell, setSelectedSpell] = useState<Spell | null>(null);
@@ -176,14 +199,14 @@ export const GrimoireModal: React.FC<GrimoireModalProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-xl font-bold font-fantasy text-[#f5ebd7] tracking-wider drop-shadow">
-                  Grimorio Mágico: {character.name}
+                  {t('Grimorio Mágico', 'Arcane Grimoire')}: {character.name}
                 </h2>
                 <span className="text-[11px] font-mono uppercase bg-[#18110b] text-[#d4ab59] px-2 py-0.5 rounded border border-[#543825]">
-                  {character.class} Nivel {character.level}
+                  {isSpanish ? character.class : translateDndTitle(character.class)} {t('Nivel', 'Level')} {character.level}
                 </span>
               </div>
               <p className="text-xs text-[#a69986] hidden sm:block">
-                Libro de conjuros arcanos, fórmulas de preparación y espacios de magia disponibles.
+                {t('Libro de conjuros arcanos, fórmulas de preparación y espacios de magia disponibles.', 'Arcane spellbook, preparation formulas, and available spell slots.')}
               </p>
             </div>
           </div>
@@ -191,10 +214,10 @@ export const GrimoireModal: React.FC<GrimoireModalProps> = ({
           <div className="flex items-center gap-3">
             {/* Quick Spell Save DC & Attack Bonus Badge */}
             <div className="hidden md:flex items-center gap-2 bg-[#19120c] px-3 py-1.5 rounded-lg border border-[#543825] text-xs">
-              <span className="text-[#a69986]">CD Salvación:</span>
+              <span className="text-[#a69986]">{t('CD Salvación:', 'Save DC:')}</span>
               <strong className="text-[#d4ab59] font-mono text-sm">{spellSaveDc}</strong>
               <span className="text-[#543825]">|</span>
-              <span className="text-[#a69986]">Ataque:</span>
+              <span className="text-[#a69986]">{t('Ataque:', 'Spell Attack:')}</span>
               <strong className="text-[#86b5e0] font-mono text-sm">+{spellAttackBonus}</strong>
             </div>
 
@@ -218,7 +241,7 @@ export const GrimoireModal: React.FC<GrimoireModalProps> = ({
                   : 'text-[#a69986] hover:text-[#f5ebd7] hover:bg-[#342217]'
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5" /> Hechizos Preparados & Slots ({preparedSpells.length})
+              <Sparkles className="w-3.5 h-3.5" /> {t('Hechizos Preparados & Slots', 'Prepared Spells & Slots')} ({preparedSpells.length})
             </button>
             <button
               onClick={() => setActiveTab('known')}
@@ -228,7 +251,7 @@ export const GrimoireModal: React.FC<GrimoireModalProps> = ({
                   : 'text-[#a69986] hover:text-[#f5ebd7] hover:bg-[#342217]'
               }`}
             >
-              <BookOpen className="w-3.5 h-3.5" /> Libro de Conjuros ({characterSpells.length})
+              <BookOpen className="w-3.5 h-3.5" /> {t('Libro de Conjuros', 'Spellbook')} ({characterSpells.length})
             </button>
             <button
               onClick={() => setActiveTab('compendium')}
@@ -238,16 +261,16 @@ export const GrimoireModal: React.FC<GrimoireModalProps> = ({
                   : 'text-[#a69986] hover:text-[#f5ebd7] hover:bg-[#342217]'
               }`}
             >
-              <Plus className="w-3.5 h-3.5 text-[#86b5e0]" /> Añadir del Compendio Oficial
+              <Plus className="w-3.5 h-3.5 text-[#86b5e0]" /> {t('Añadir del Compendio Oficial', 'Add from Official Compendium')}
             </button>
           </div>
 
           <button
             onClick={handleLongRest}
             className="flex items-center gap-1 px-3 py-1 bg-[#19120c] hover:bg-[#2c1d14] text-[#d4ab59] hover:text-white rounded border border-[#543825] transition"
-            title="Recuperar todos los espacios de conjuro gastados"
+            title={t('Recuperar todos los espacios de conjuro gastados', 'Recover all expended spell slots')}
           >
-            <Moon className="w-3.5 h-3.5 text-[#86b5e0]" /> Descanso Largo
+            <Moon className="w-3.5 h-3.5 text-[#86b5e0]" /> {t('Descanso Largo', 'Long Rest')}
           </button>
         </div>
 
@@ -260,9 +283,9 @@ export const GrimoireModal: React.FC<GrimoireModalProps> = ({
               <div className="lg:col-span-4 bg-[#ede2c8] border-r-2 border-[#d9c7a2] p-5 overflow-y-auto space-y-4">
                 <div className="flex items-center justify-between border-b border-[#c8b389] pb-2">
                   <h3 className="font-fantasy font-bold text-base text-[#4a2e1b] flex items-center gap-2">
-                    <Zap className="w-4 h-4 text-[#8a5b28]" /> Espacios de Magia (Slots)
+                    <Zap className="w-4 h-4 text-[#8a5b28]" /> {t('Espacios de Magia (Slots)', 'Spell Slots')}
                   </h3>
-                  <span className="text-[10px] text-[#705036] italic">Haz clic para gastar/recuperar</span>
+                  <span className="text-[10px] text-[#705036] italic">{t('Haz clic para gastar/recuperar', 'Click to spend/recover')}</span>
                 </div>
 
                 {/* Spell Slots 1 to 9 */}
@@ -279,10 +302,10 @@ export const GrimoireModal: React.FC<GrimoireModalProps> = ({
                       >
                         <div>
                           <div className="text-xs font-fantasy font-bold text-[#3a2012]">
-                            Nivel {lvl}
+                            {t('Nivel', 'Level')} {lvl}
                           </div>
                           <span className="text-[10px] text-[#705036]">
-                            Disponibles: {levelData.max - levelData.used} / {levelData.max}
+                            {t('Disponibles:', 'Available:')} {levelData.max - levelData.used} / {levelData.max}
                           </span>
                         </div>
 
@@ -294,7 +317,7 @@ export const GrimoireModal: React.FC<GrimoireModalProps> = ({
                               <button
                                 key={idx}
                                 onClick={() => toggleSlotUsed(slotKey, idx)}
-                                title={isUsed ? 'Recuperar este espacio' : 'Gastar este espacio de conjuro'}
+                                title={isUsed ? t('Recuperar este espacio', 'Recover this slot') : t('Gastar este espacio de conjuro', 'Expend this spell slot')}
                                 className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition transform hover:scale-115 ${
                                   isUsed
                                     ? 'bg-[#8c7e6c] border-[#5e5345] opacity-50 shadow-inner'
@@ -312,14 +335,14 @@ export const GrimoireModal: React.FC<GrimoireModalProps> = ({
 
                   {Object.values(slots).every((s) => s.max === 0) && (
                     <div className="p-4 bg-[#fbf6ea] rounded-lg border border-[#d9c7a2] text-center text-xs text-[#705036]">
-                      Este personaje aún no tiene espacios de magia configurados.
+                      {t('Este personaje aún no tiene espacios de magia configurados.', 'This character does not have spell slots configured yet.')}
                     </div>
                   )}
                 </div>
 
                 {/* Spellcasting Rules helper note */}
                 <div className="p-3 bg-[#f5ecda] rounded-lg border border-[#d9c7a2] text-[11px] text-[#5e4129] leading-relaxed">
-                  <strong>Regla de Preparación:</strong> Un mago prepara una cantidad de conjuros igual a su modificador de Inteligencia + su nivel de mago (mínimo 1). Los trucos no requieren preparación.
+                  <strong>{t('Regla de Preparación:', 'Preparation Rule:')}</strong> {t('Un mago prepara una cantidad de conjuros igual a su modificador de Inteligencia + su nivel de mago (mínimo 1). Los trucos no requieren preparación.', 'A spellcaster prepares a number of spells equal to their spellcasting ability modifier + level (minimum 1). Cantrips do not require preparation.')}
                 </div>
               </div>
 
@@ -328,17 +351,17 @@ export const GrimoireModal: React.FC<GrimoireModalProps> = ({
                 <div className="flex items-center justify-between border-b-2 border-[#d9c7a2] pb-3">
                   <div>
                     <h3 className="font-fantasy font-bold text-lg text-[#3a2012]">
-                      Conjuros Listos para el Combate
+                      {t('Conjuros Listos para el Combate', 'Spells Ready for Combat')}
                     </h3>
                     <p className="text-xs text-[#705036]">
-                      {preparedSpells.length} conjuros preparados actualmente.
+                      {preparedSpells.length} {t('conjuros preparados actualmente.', 'spells currently prepared.')}
                     </p>
                   </div>
                   <button
                     onClick={() => setActiveTab('known')}
                     className="px-3 py-1.5 bg-[#452b1b] hover:bg-[#5e3c27] text-[#f5ebd7] text-xs font-fantasy rounded-lg shadow transition flex items-center gap-1.5"
                   >
-                    <BookOpen className="w-3.5 h-3.5" /> Gestionar Preparados
+                    <BookOpen className="w-3.5 h-3.5" /> {t('Gestionar Preparados', 'Manage Prepared Spells')}
                   </button>
                 </div>
 
@@ -348,6 +371,8 @@ export const GrimoireModal: React.FC<GrimoireModalProps> = ({
                     const isSelected = selectedSpell?.id === spell.id;
                     const slotKey = `lvl${spell.level}` as keyof CharacterSpellSlots;
                     const canCast = spell.level === 0 || (slots[slotKey] && slots[slotKey].used < slots[slotKey].max);
+                    const displayName = isSpanish ? spell.name : (spell.nameEn || translateDndTitle(spell.name));
+                    const displaySchool = isSpanish ? spell.school : translateSpellSchool(spell.school);
 
                     return (
                       <div
@@ -363,15 +388,15 @@ export const GrimoireModal: React.FC<GrimoireModalProps> = ({
                           <div className="flex items-start justify-between gap-2">
                             <div>
                               <h4 className="font-fantasy font-bold text-base text-[#2e170c]">
-                                {spell.name}
-                                {spell.nameEn && spell.nameEn.toLowerCase() !== spell.name.toLowerCase() && (
+                                {displayName}
+                                {isSpanish && spell.nameEn && spell.nameEn.toLowerCase() !== spell.name.toLowerCase() && (
                                   <span className="text-xs font-serif font-normal italic text-[#8a5b28] ml-1.5">
                                     ({spell.nameEn})
                                   </span>
                                 )}
                               </h4>
                               <span className="text-[11px] text-[#705036] italic">
-                                {spell.level === 0 ? 'Truco' : `Nivel ${spell.level}`} • {spell.school}
+                                {spell.level === 0 ? t('Truco', 'Cantrip') : `${t('Nivel', 'Level')} ${spell.level}`} • {displaySchool}
                               </span>
                             </div>
 
@@ -382,14 +407,14 @@ export const GrimoireModal: React.FC<GrimoireModalProps> = ({
                                   : 'bg-[#e0edf7] text-[#1e4e79] border-[#8cbbe0]'
                               }`}
                             >
-                              {spell.level === 0 ? 'Truco' : `Nv ${spell.level}`}
+                              {spell.level === 0 ? t('Truco', 'Cantrip') : `${t('Nv', 'Lv')} ${spell.level}`}
                             </span>
                           </div>
 
                           <div className="mt-2 text-xs text-[#4d331e] space-y-0.5">
-                            <div><strong className="text-[#301b0f]">Tiempo:</strong> {spell.castingTime}</div>
-                            <div><strong className="text-[#301b0f]">Alcance:</strong> {spell.range}</div>
-                            <div><strong className="text-[#301b0f]">Duración:</strong> {spell.duration}</div>
+                            <div><strong className="text-[#301b0f]">{t('Tiempo:', 'Time:')}</strong> {isSpanish ? spell.castingTime : (spell.castingTimeEn || translateSpellMeta(spell.castingTime))}</div>
+                            <div><strong className="text-[#301b0f]">{t('Alcance:', 'Range:')}</strong> {isSpanish ? spell.range : (spell.rangeEn || translateSpellMeta(spell.range))}</div>
+                            <div><strong className="text-[#301b0f]">{t('Duración:', 'Duration:')}</strong> {isSpanish ? spell.duration : (spell.durationEn || translateSpellMeta(spell.duration))}</div>
                           </div>
                         </div>
 
@@ -403,12 +428,12 @@ export const GrimoireModal: React.FC<GrimoireModalProps> = ({
                             disabled={!canCast}
                             className="px-3 py-1 bg-[#8a5b28] hover:bg-[#70461c] disabled:opacity-40 text-white rounded text-xs font-fantasy font-bold shadow-sm transition flex items-center gap-1"
                           >
-                            <Zap className="w-3.5 h-3.5" /> Lanzar Hechizo
+                            <Zap className="w-3.5 h-3.5" /> {t('Lanzar Hechizo', 'Cast Spell')}
                           </button>
 
                           {spell.isRacial ? (
-                            <span className="text-[11px] text-purple-700 font-bold italic" title={`Concedido por tu linaje (${spell.racialOrigin || 'Raza'})`}>
-                              ✨ Innato ({spell.racialOrigin || 'Raza'})
+                            <span className="text-[11px] text-purple-700 font-bold italic" title={`${t('Concedido por tu linaje', 'Granted by your lineage')} (${spell.racialOrigin || (isSpanish ? 'Raza' : 'Race')})`}>
+                              ✨ {t('Innato', 'Innate')} ({spell.racialOrigin || (isSpanish ? 'Raza' : 'Race')})
                             </span>
                           ) : spell.level > 0 ? (
                             <button
@@ -418,7 +443,7 @@ export const GrimoireModal: React.FC<GrimoireModalProps> = ({
                               }}
                               className="text-[11px] text-[#8c281a] hover:underline"
                             >
-                              Despreparar
+                              {t('Despreparar', 'Unprepare')}
                             </button>
                           ) : null}
                         </div>
@@ -429,8 +454,8 @@ export const GrimoireModal: React.FC<GrimoireModalProps> = ({
                   {preparedSpells.length === 0 && (
                     <div className="col-span-2 p-12 text-center bg-[#faf3e3] rounded-xl border border-dashed border-[#d9c7a2] text-[#705036]">
                       <Sparkles className="w-8 h-8 mx-auto mb-2 text-[#b0966b]" />
-                      <p className="font-fantasy font-semibold">No tienes hechizos preparados.</p>
-                      <p className="text-xs mt-1">Ve a la pestaña de "Libro de Conjuros" para preparar los hechizos que usarás hoy.</p>
+                      <p className="font-fantasy font-semibold">{t('No tienes hechizos preparados.', 'You have no prepared spells.')}</p>
+                      <p className="text-xs mt-1">{t('Ve a la pestaña de "Libro de Conjuros" para preparar los hechizos que usarás hoy.', 'Go to the "Spellbook" tab to prepare the spells you will use today.')}</p>
                     </div>
                   )}
                 </div>
@@ -447,7 +472,7 @@ export const GrimoireModal: React.FC<GrimoireModalProps> = ({
                   <Search className="w-4 h-4 text-[#8a5b28] absolute left-3 top-2.5" />
                   <input
                     type="text"
-                    placeholder="Buscar hechizo por nombre o efecto..."
+                    placeholder={t('Buscar hechizo por nombre o efecto...', 'Search spells by name or effect...')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full bg-[#fbf6ea] border border-[#c8b389] rounded-lg pl-9 pr-3 py-1.5 text-xs text-[#2c1d12] placeholder-[#8c7457] focus:outline-none focus:border-[#8a5b28]"
@@ -460,14 +485,14 @@ export const GrimoireModal: React.FC<GrimoireModalProps> = ({
                     onChange={(e) => setFilterLevel(e.target.value)}
                     className="bg-[#fbf6ea] border border-[#c8b389] rounded-md px-2.5 py-1 text-xs text-[#2c1d12]"
                   >
-                    <option value="all">Todos los Niveles</option>
-                    <option value="0">Trucos (Cantrips)</option>
-                    <option value="1">Nivel 1</option>
-                    <option value="2">Nivel 2</option>
-                    <option value="3">Nivel 3</option>
-                    <option value="4">Nivel 4</option>
-                    <option value="5">Nivel 5</option>
-                    <option value="6">Nivel 6+</option>
+                    <option value="all">{t('Todos los Niveles', 'All Levels')}</option>
+                    <option value="0">{t('Trucos (Cantrips)', 'Cantrips')}</option>
+                    <option value="1">{t('Nivel 1', 'Level 1')}</option>
+                    <option value="2">{t('Nivel 2', 'Level 2')}</option>
+                    <option value="3">{t('Nivel 3', 'Level 3')}</option>
+                    <option value="4">{t('Nivel 4', 'Level 4')}</option>
+                    <option value="5">{t('Nivel 5', 'Level 5')}</option>
+                    <option value="6">{t('Nivel 6+', 'Level 6+')}</option>
                   </select>
 
                   <select
@@ -475,15 +500,15 @@ export const GrimoireModal: React.FC<GrimoireModalProps> = ({
                     onChange={(e) => setFilterSchool(e.target.value)}
                     className="bg-[#fbf6ea] border border-[#c8b389] rounded-md px-2.5 py-1 text-xs text-[#2c1d12]"
                   >
-                    <option value="all">Todas las Escuelas</option>
-                    <option value="abjuración">Abjuración</option>
-                    <option value="conjuración">Conjuración</option>
-                    <option value="adivinación">Adivinación</option>
-                    <option value="encantamiento">Encantamiento</option>
-                    <option value="evocación">Evocación</option>
-                    <option value="ilusión">Ilusión</option>
-                    <option value="nigromancia">Nigromancia</option>
-                    <option value="transmutación">Transmutación</option>
+                    <option value="all">{t('Todas las Escuelas', 'All Schools')}</option>
+                    <option value="abjuración">{t('Abjuración', 'Abjuration')}</option>
+                    <option value="conjuración">{t('Conjuración', 'Conjuration')}</option>
+                    <option value="adivinación">{t('Adivinación', 'Divination')}</option>
+                    <option value="encantamiento">{t('Encantamiento', 'Enchantment')}</option>
+                    <option value="evocación">{t('Evocación', 'Evocation')}</option>
+                    <option value="ilusión">{t('Ilusión', 'Illusion')}</option>
+                    <option value="nigromancia">{t('Nigromancia', 'Necromancy')}</option>
+                    <option value="transmutación">{t('Transmutación', 'Transmutation')}</option>
                   </select>
                 </div>
               </div>
@@ -492,6 +517,8 @@ export const GrimoireModal: React.FC<GrimoireModalProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {filteredKnownSpells.map((spell) => {
                   const isPrepared = spell.level === 0 || spell.prepared;
+                  const displayName = isSpanish ? spell.name : (spell.nameEn || translateDndTitle(spell.name));
+                  const displaySchool = isSpanish ? spell.school : translateSpellSchool(spell.school);
 
                   return (
                     <div
@@ -506,33 +533,33 @@ export const GrimoireModal: React.FC<GrimoireModalProps> = ({
                       <div>
                         <div className="flex items-center justify-between">
                           <h4 className="font-fantasy font-bold text-sm text-[#2e170c] truncate">
-                            {spell.name}
-                            {spell.nameEn && spell.nameEn.toLowerCase() !== spell.name.toLowerCase() && (
+                            {displayName}
+                            {isSpanish && spell.nameEn && spell.nameEn.toLowerCase() !== spell.name.toLowerCase() && (
                               <span className="text-[11px] font-serif font-normal italic text-[#8a5b28] ml-1">
                                 ({spell.nameEn})
                               </span>
                             )}
                           </h4>
                           <span className="text-[10px] font-mono uppercase bg-[#ede2c8] text-[#5e4129] px-1.5 py-0.5 rounded border border-[#d9c7a2]">
-                            {spell.level === 0 ? 'Truco' : `Nv ${spell.level}`}
+                            {spell.level === 0 ? t('Truco', 'Cantrip') : `${t('Nv', 'Lv')} ${spell.level}`}
                           </span>
                         </div>
 
                         <div className="text-[11px] text-[#705036] mt-0.5">
-                          {spell.school} • {spell.castingTime}
+                          {displaySchool} • {isSpanish ? spell.castingTime : (spell.castingTimeEn || translateSpellMeta(spell.castingTime))}
                         </div>
                         <p className="text-xs text-[#4d331e] mt-2 line-clamp-2 leading-relaxed">
-                          {spell.description}
+                          {isSpanish ? spell.description : (spell.descriptionEn || translateDndText(spell.description))}
                         </p>
                       </div>
 
                       <div className="mt-3 pt-2 border-t border-[#e2d0a8] flex items-center justify-between">
                         {spell.isRacial ? (
-                          <span className="text-[10px] bg-purple-100 text-purple-900 border border-purple-300 px-1.5 py-0.5 rounded font-mono font-bold" title={`Concedido por tu linaje (${spell.racialOrigin || 'Raza'})`}>
-                            ✨ Innato ({spell.racialOrigin || 'Raza'})
+                          <span className="text-[10px] bg-purple-100 text-purple-900 border border-purple-300 px-1.5 py-0.5 rounded font-mono font-bold" title={`${t('Concedido por tu linaje', 'Granted by your lineage')} (${spell.racialOrigin || (isSpanish ? 'Raza' : 'Race')})`}>
+                            ✨ {t('Innato', 'Innate')} ({spell.racialOrigin || (isSpanish ? 'Raza' : 'Race')})
                           </span>
                         ) : spell.level === 0 ? (
-                          <span className="text-[10px] text-[#2b591b] font-bold">Siempre Preparado ✓</span>
+                          <span className="text-[10px] text-[#2b591b] font-bold">{t('Siempre Preparado ✓', 'Always Prepared ✓')}</span>
                         ) : (
                           <button
                             onClick={(e) => {
@@ -546,7 +573,7 @@ export const GrimoireModal: React.FC<GrimoireModalProps> = ({
                             }`}
                           >
                             {isPrepared ? <Check className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
-                            {isPrepared ? 'Preparado' : 'Preparar'}
+                            {isPrepared ? t('Preparado', 'Prepared') : t('Preparar', 'Prepare')}
                           </button>
                         )}
 
@@ -557,7 +584,7 @@ export const GrimoireModal: React.FC<GrimoireModalProps> = ({
                               handleRemoveSpell(spell.id);
                             }}
                             className="p-1 text-[#8c281a] hover:bg-[#ebdcb2] rounded cursor-pointer"
-                            title="Eliminar de mi libro"
+                            title={t('Eliminar de mi libro', 'Remove from my spellbook')}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -569,7 +596,7 @@ export const GrimoireModal: React.FC<GrimoireModalProps> = ({
 
                 {filteredKnownSpells.length === 0 && (
                   <div className="col-span-3 p-12 text-center bg-[#fbf6ea] rounded-xl border border-dashed border-[#d9c7a2] text-[#705036]">
-                    No se encontraron hechizos con los filtros actuales.
+                    {t('No se encontraron hechizos con los filtros actuales.', 'No spells found with the current filters.')}
                   </div>
                 )}
               </div>
@@ -584,7 +611,7 @@ export const GrimoireModal: React.FC<GrimoireModalProps> = ({
                   <Search className="w-4 h-4 text-[#8a5b28] absolute left-3 top-2.5" />
                   <input
                     type="text"
-                    placeholder="Buscar en el compendio oficial de D&D 5e (ej. Bola de Fuego, Escudo, Trucos)..."
+                    placeholder={t('Buscar en el compendio oficial de D&D 5e (ej. Bola de Fuego, Escudo, Trucos)...', 'Search official D&D 5e compendium (e.g. Fireball, Shield, Cantrips)...')}
                     value={compendiumSearch}
                     onChange={(e) => setCompendiumSearch(e.target.value)}
                     className="w-full bg-[#fbf6ea] border border-[#c8b389] rounded-lg pl-9 pr-3 py-1.5 text-xs text-[#2c1d12] placeholder-[#8c7457] focus:outline-none focus:border-[#8a5b28]"
@@ -595,6 +622,8 @@ export const GrimoireModal: React.FC<GrimoireModalProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {filteredCompendium.map((spell) => {
                   const alreadyInBook = characterSpells.some((s) => s.name.toLowerCase() === spell.name.toLowerCase());
+                  const displayName = isSpanish ? spell.name : (spell.nameEn || translateDndTitle(spell.name));
+                  const displaySchool = isSpanish ? spell.school : translateSpellSchool(spell.school);
 
                   return (
                     <div
@@ -605,17 +634,17 @@ export const GrimoireModal: React.FC<GrimoireModalProps> = ({
                       <div>
                         <div className="flex items-center justify-between">
                           <h4 className="font-fantasy font-bold text-sm text-[#2e170c]">
-                            {spell.name}
+                            {displayName}
                           </h4>
                           <span className="text-[10px] font-mono bg-[#ede2c8] text-[#5e4129] px-1.5 py-0.5 rounded border border-[#d9c7a2]">
-                            {spell.level === 0 ? 'Truco' : `Nv ${spell.level}`}
+                            {spell.level === 0 ? t('Truco', 'Cantrip') : `${t('Nv', 'Lv')} ${spell.level}`}
                           </span>
                         </div>
                         <div className="text-[11px] text-[#705036] mt-0.5">
-                          {spell.school} • {spell.castingTime}
+                          {displaySchool} • {isSpanish ? spell.castingTime : (spell.castingTimeEn || translateSpellMeta(spell.castingTime))}
                         </div>
                         <p className="text-xs text-[#4d331e] mt-2 line-clamp-3 leading-relaxed">
-                          {spell.description}
+                          {isSpanish ? spell.description : (spell.descriptionEn || translateDndText(spell.description))}
                         </p>
                       </div>
 
@@ -629,7 +658,7 @@ export const GrimoireModal: React.FC<GrimoireModalProps> = ({
                           className="px-2.5 py-1 bg-[#8a5b28] hover:bg-[#70461c] disabled:opacity-50 text-white rounded text-xs font-fantasy font-bold shadow-sm transition flex items-center gap-1"
                         >
                           {alreadyInBook ? <Check className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
-                          {alreadyInBook ? 'En el libro' : 'Copiar al Libro'}
+                          {alreadyInBook ? t('En el libro', 'In Spellbook') : t('Copiar al Libro', 'Add to Spellbook')}
                         </button>
                       </div>
                     </div>
@@ -653,25 +682,25 @@ export const GrimoireModal: React.FC<GrimoireModalProps> = ({
 
               <div className="border-b-2 border-[#8a5b28] pb-2">
                 <h3 className="font-fantasy font-bold text-2xl text-[#2e170c]">
-                  {selectedSpell.name}
+                  {isSpanish ? selectedSpell.name : (selectedSpell.nameEn || translateDndTitle(selectedSpell.name))}
                 </h3>
                 <p className="text-xs italic text-[#705036]">
-                  {selectedSpell.level === 0 ? 'Truco' : `Conjuro de Nivel ${selectedSpell.level}`} ({selectedSpell.school})
+                  {selectedSpell.level === 0 ? t('Truco', 'Cantrip') : `${t('Conjuro de Nivel', 'Level')} ${selectedSpell.level} ${t('', 'Spell')}`} ({isSpanish ? selectedSpell.school : translateSpellSchool(selectedSpell.school)})
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-2 text-xs bg-[#ede2c8] p-3 rounded-lg border border-[#d9c7a2]">
-                <div><strong className="text-[#301b0f]">Tiempo de lanzamiento:</strong> {selectedSpell.castingTime}</div>
-                <div><strong className="text-[#301b0f]">Alcance:</strong> {selectedSpell.range}</div>
-                <div><strong className="text-[#301b0f]">Componentes:</strong> {selectedSpell.components}</div>
-                <div><strong className="text-[#301b0f]">Duración:</strong> {selectedSpell.duration}</div>
+                <div><strong className="text-[#301b0f]">{t('Tiempo de lanzamiento:', 'Casting Time:')}</strong> {isSpanish ? selectedSpell.castingTime : (selectedSpell.castingTimeEn || translateSpellMeta(selectedSpell.castingTime))}</div>
+                <div><strong className="text-[#301b0f]">{t('Alcance:', 'Range:')}</strong> {isSpanish ? selectedSpell.range : (selectedSpell.rangeEn || translateSpellMeta(selectedSpell.range))}</div>
+                <div><strong className="text-[#301b0f]">{t('Componentes:', 'Components:')}</strong> {isSpanish ? selectedSpell.components : (selectedSpell.componentsEn || translateSpellMeta(selectedSpell.components))}</div>
+                <div><strong className="text-[#301b0f]">{t('Duración:', 'Duration:')}</strong> {isSpanish ? selectedSpell.duration : (selectedSpell.durationEn || translateSpellMeta(selectedSpell.duration))}</div>
               </div>
 
               <div className="text-xs text-[#3a2012] leading-relaxed space-y-2">
-                <p className="whitespace-pre-line">{selectedSpell.description}</p>
+                <p className="whitespace-pre-line">{isSpanish ? selectedSpell.description : (selectedSpell.descriptionEn || translateDndText(selectedSpell.description))}</p>
                 {selectedSpell.higherLevels && (
                   <div className="pt-2 border-t border-[#d9c7a2] text-[11px] text-[#5e4129]">
-                    <strong>A Niveles Superiores:</strong> {selectedSpell.higherLevels}
+                    <strong>{t('A Niveles Superiores:', 'At Higher Levels:')}</strong> {isSpanish ? selectedSpell.higherLevels : (selectedSpell.higherLevelsEn || translateDndText(selectedSpell.higherLevels))}
                   </div>
                 )}
               </div>
@@ -684,7 +713,7 @@ export const GrimoireModal: React.FC<GrimoireModalProps> = ({
                   }}
                   className="px-4 py-2 bg-[#8a5b28] hover:bg-[#70461c] text-white font-fantasy font-bold rounded-lg text-xs shadow-md transition flex items-center gap-1.5"
                 >
-                  <Zap className="w-4 h-4" /> Lanzar Hechizo Ahora
+                  <Zap className="w-4 h-4" /> {t('Lanzar Hechizo Ahora', 'Cast Spell Now')}
                 </button>
               </div>
             </div>

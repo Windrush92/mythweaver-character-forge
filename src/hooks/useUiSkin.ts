@@ -5,9 +5,12 @@ export type UiSkin = 'classic' | 'pathfinder-gothic' | 'dnd-beyond-dark' | 'shad
 export interface SkinOption {
   id: UiSkin;
   name: string;
+  nameEn?: string;
   subtitle: string;
+  subtitleEn?: string;
   icon: string;
   badge: string;
+  badgeEn?: string;
   isAvailable: boolean;
 }
 
@@ -15,33 +18,45 @@ export const SKIN_OPTIONS: SkinOption[] = [
   {
     id: 'pathfinder-gothic',
     name: 'Forja Mítica (Mesa Oscura)',
+    nameEn: 'Mythic Forge (Dark Tabletop)',
     subtitle: 'Mesa de caoba noble, dossiers de pergamino, sellos de cera y medallones de bronce',
+    subtitleEn: 'Noble mahogany tabletop, parchment dossiers, wax seals and forged bronze medallions',
     icon: '🛡️',
     badge: 'Predeterminado',
+    badgeEn: 'Default',
     isAvailable: true,
   },
   {
     id: 'classic',
     name: 'Pergamino Dorado Clásico',
+    nameEn: 'Classic Golden Parchment',
     subtitle: 'Diseño original con paleta suave de papel de pergamino claro',
+    subtitleEn: 'Original theme with soft warm palette of light aged parchment',
     icon: '✨',
     badge: 'Clásico',
+    badgeEn: 'Classic',
     isAvailable: true,
   },
   {
     id: 'dnd-beyond-dark',
     name: 'Cripta Arcana & Obsidiana',
+    nameEn: 'Arcane Crypt & Obsidian',
     subtitle: 'Obsidiana profunda, runas violetas, gemas de rubí y marcos en relieve 3D',
+    subtitleEn: 'Deep obsidian, violet runes, ruby gems and 3D relief frames',
     icon: '🔮',
     badge: 'En Desarrollo (WIP)',
+    badgeEn: 'In Development (WIP)',
     isAvailable: false,
   },
   {
     id: 'shadowdark-grim',
     name: 'Taberna Clásica & Mazmorra',
+    nameEn: 'Classic Tavern & Dungeon',
     subtitle: 'Piedra de calabozo, madera rústica a tinta, hierro forjado y antorchas',
+    subtitleEn: 'Dungeon flagstones, inked rustic timber, wrought iron and torches',
     icon: '🗡️',
     badge: 'En Desarrollo (WIP)',
+    badgeEn: 'In Development (WIP)',
     isAvailable: false,
   },
 ];

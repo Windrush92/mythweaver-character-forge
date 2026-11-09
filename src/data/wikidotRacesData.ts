@@ -19,6 +19,8 @@ export interface RacialSpellcastingConfig {
 }
 
 export interface WikidotSubrace {
+  nameEn?: string;
+  descriptionEn?: string;
   id: string;
   name: string;
   description: string;
@@ -40,6 +42,9 @@ export interface WikidotSubrace {
 export type WikidotRaceCategory = 'Común' | 'Exótica' | 'Monstruosa' | 'Planar';
 
 export interface WikidotRace {
+  nameEn?: string;
+  categoryEn?: string;
+  descriptionEn?: string;
   id: string;
   name: string;
   category?: WikidotRaceCategory;
@@ -67,6 +72,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "humano",
     "name": "Humano",
+    "nameEn": "Human",
+    "categoryEn": "Common",
+    "descriptionEn": "Humans are the most adaptable, diverse, and ambitious people among the common races. Whatever drives them, humans are the innovators, the achievers, and the pioneers of the worlds.",
     "category": "Común",
     "description": "Los humanos son la más adaptable, diversa y ambiciosa de las razas comunes. Sus aspiraciones van desde la forja de imperios hasta la maestría de artes arcanas universales.",
     "speed": "30 pies",
@@ -91,6 +99,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "humano-estandar",
         "name": "Humano Estándar (PHB)",
+        "nameEn": "Standard Human (PHB)",
+        "descriptionEn": "The versatile classic human: balanced across all physical and mental faculties.",
         "description": "La estirpe clásica y generalista de la humanidad: equilibrada en todas sus facultades físicas y mentales.",
         "replacesBaseBonuses": true,
         "abilityScoreBonuses": {
@@ -115,6 +125,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "humano-variante",
         "name": "Humano (Variante - PHB)",
+        "nameEn": "Variant Human (PHB)",
+        "descriptionEn": "Specialized from their early days with an innate feat and versatile skill training.",
         "description": "Especializado y curtido en un área particular desde sus inicios gracias a su talento y enfoque extraordinario.",
         "replacesBaseBonuses": true,
         "abilityScoreBonuses": {
@@ -138,6 +150,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "humano-marca-hallazgo",
         "name": "Marca del Hallazgo (Mark of Finding - Eberron)",
+        "nameEn": "Mark of Finding Human (Eberron)",
+        "descriptionEn": "Honed senses and supernatural intuition for tracking and discovery.",
         "description": "Humanos tocados por el dragón con un don instintivo insuperable para rastrear presas, personas y objetos perdidos.",
         "replacesBaseBonuses": true,
         "abilityScoreBonuses": {
@@ -172,6 +186,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "humano-marca-manejo",
         "name": "Marca del Manejo (Mark of Handling - Eberron)",
+        "nameEn": "Mark of Handling Human (Eberron)",
+        "descriptionEn": "Primal kinship with beasts and monstrous creatures.",
         "description": "Vástagos de la Casa Vadalis con afinidad psíquica y empática con bestias, monturas y la vida salvaje.",
         "replacesBaseBonuses": true,
         "abilityScoreBonuses": {
@@ -206,6 +222,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "humano-marca-creacion",
         "name": "Marca de la Creación (Mark of Making - Eberron)",
+        "nameEn": "Mark of Making Human (Eberron)",
+        "descriptionEn": "Innate artisanal genius and arcane crafting aptitude.",
         "description": "Miembros de la Casa Cannith nacidos con el don innato de la forja, el artificio y la reparación mágica.",
         "replacesBaseBonuses": true,
         "abilityScoreBonuses": {
@@ -240,6 +258,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "humano-marca-pasaje",
         "name": "Marca del Pasaje (Mark of Passage - Eberron)",
+        "nameEn": "Mark of Passage Human (Eberron)",
+        "descriptionEn": "Gifted with rapid movement and spatial teleportation magic.",
         "description": "Herederos de la Casa Orien bendecidos con velocidad sobrenatural, teletransporte y agilidad en las rutas.",
         "replacesBaseBonuses": true,
         "abilityScoreBonuses": {
@@ -270,6 +290,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "humano-marca-centinela",
         "name": "Marca del Centinela (Mark of Sentinel - Eberron)",
+        "nameEn": "Mark of Sentinel Human (Eberron)",
+        "descriptionEn": "Vigilant protectors gifted with shield wards and warding magic.",
         "description": "Guardiães jurados de la Casa Deneith con el deber y la magia de interponerse entre el peligro y sus protegidos.",
         "replacesBaseBonuses": true,
         "abilityScoreBonuses": {
@@ -300,6 +322,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "humano-kessig",
         "name": "Humano de Kessig (Innistrad)",
+        "nameEn": "Kessig Human (Innistrad)",
+        "descriptionEn": "Hardy woodfolk and survivalists skilled in forest navigation.",
         "description": "Campesinos, leñadores y cazadores de las espesuras de Kessig, veloces y alertas contra bestias nocturnas.",
         "replacesBaseBonuses": true,
         "abilityScoreBonuses": {
@@ -320,6 +344,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "humano-gavony",
         "name": "Humano de Gavony (Innistrad)",
+        "nameEn": "Gavony Human (Innistrad)",
+        "descriptionEn": "Disciplined parish guardians and resolute town defenders.",
         "description": "La cuna de la guardia parroquial y los templos de Innistrad; robustos, disciplinados y guiados por la fe.",
         "replacesBaseBonuses": true,
         "abilityScoreBonuses": {
@@ -340,6 +366,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "humano-nephalia",
         "name": "Humano de Nephalia (Innistrad)",
+        "nameEn": "Nephalia Human (Innistrad)",
+        "descriptionEn": "Astute coastal merchants, smugglers, and alchemical scholars.",
         "description": "Navegantes, comerciantes y contrabandistas de ciudades portuarias cubiertas de bruma marina.",
         "replacesBaseBonuses": true,
         "abilityScoreBonuses": {
@@ -360,6 +388,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "humano-stensia",
         "name": "Humano de Stensia (Innistrad)",
+        "nameEn": "Stensia Human (Innistrad)",
+        "descriptionEn": "Grim mountain survivalists tempered by brooding crags.",
         "description": "Habitantes de cumbres rocosas y valles sombríos acechados por vampiros; duros como el granito.",
         "replacesBaseBonuses": true,
         "abilityScoreBonuses": {
@@ -382,6 +412,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "elfo",
     "name": "Elfo",
+    "nameEn": "Elf",
+    "categoryEn": "Common",
+    "descriptionEn": "Elves are a magical people of otherworldly grace, living in the world but not entirely part of it. They live in places of ethereal beauty, in the midst of ancient forests or in silvery spires.",
     "category": "Común",
     "description": "Criaturas mágicas de gracia sobrenatural que viven en el mundo terrenal con sentidos afilados y profunda afinidad con la magia ancestral.",
     "speed": "30 pies",
@@ -412,6 +445,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "alto-elfo",
         "name": "Alto Elfo (High Elf)",
+        "nameEn": "High Elf",
+        "descriptionEn": "Possess a keen mind and mastery of at least the basics of wizardry.",
         "description": "Poseen mentes agudas y dominio de los principios mágicos arcanos.",
         "abilityScoreBonuses": {
           "int": 1
@@ -436,6 +471,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "elfo-bosques",
         "name": "Elfo de los Bosques (Wood Elf)",
+        "nameEn": "Wood Elf",
+        "descriptionEn": "Keen senses and intuition with fleet feet carrying them stealthily through forest glades.",
         "description": "Rápidos y sigilosos habitantes de las selvas y arboledas antiguas.",
         "abilityScoreBonuses": {
           "wis": 1
@@ -454,6 +491,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "drow",
         "name": "Elfo Oscuro (Drow)",
+        "nameEn": "Drow (Dark Elf)",
+        "descriptionEn": "Descended from an earlier subrace of dark-skinned elves banished to the Underdark.",
         "description": "Habitantes del Inframundo (Underdark) adaptados a las sombras más densas.",
         "abilityScoreBonuses": {
           "cha": 1
@@ -496,6 +535,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "eladrin",
         "name": "Eladrin (Feywild)",
+        "nameEn": "Eladrin (Feywild)",
+        "descriptionEn": "Elves native to the Feywild who can channel seasonal magic and fey misty steps.",
         "description": "Criaturas de pura magia feérica ligadas a los estados de ánimo de las cuatro estaciones de las Tierras Salvajes de las Hadas.",
         "abilityScoreBonuses": {
           "cha": 1
@@ -516,6 +557,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "elfo-marino",
         "name": "Elfo Marino (Sea Elf)",
+        "nameEn": "Sea Elf",
+        "descriptionEn": "Aquatic elves who fell in love with wild ocean beauty and underwater realms.",
         "description": "Nacidos para habitar los arrecifes y las profundidades oceánicas en comunión con la fauna marina.",
         "abilityScoreBonuses": {
           "con": 1
@@ -538,6 +581,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "shadar-kai",
         "name": "Shadar-kai (Shadowfell)",
+        "nameEn": "Shadar-kai (Shadowfell)",
+        "descriptionEn": "Sworn to the Raven Queen, serving in the gloomy realm of the Shadowfell.",
         "description": "Elfos vinculados a los dominios sombríos de la Reina Cuervo en el Páramo Sombrío, curtidos en la muerte y el estoicismo.",
         "abilityScoreBonuses": {
           "con": 1
@@ -556,6 +601,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "elfo-palido",
         "name": "Elfo Pálido (Pallid Elf)",
+        "nameEn": "Pallid Elf",
+        "descriptionEn": "Reclusive elves from the Pallid Grove with uncanny insight and moon magic.",
         "description": "Místicos de tez de luna y ojos penetrantes bendecidos por la luz de la Sehanine en Exandria.",
         "abilityScoreBonuses": {
           "wis": 1
@@ -584,6 +631,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "elfo-astral",
         "name": "Elfo Astral (Astral Elf)",
+        "nameEn": "Astral Elf",
+        "descriptionEn": "Elves who ventured into the Astral Plane centuries ago, touched by starlight.",
         "description": "Viajeros eternos del Mar Astral imbuidos de la chispa cósmica de los cielos y luz estelar.",
         "abilityScoreBonuses": {
           "any": 1
@@ -608,6 +657,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "elfo-marca-sombra",
         "name": "Marca de la Sombra (Mark of Shadow - Eberron)",
+        "nameEn": "Mark of Shadow Elf (Eberron)",
+        "descriptionEn": "Spinning webs of illusion, weaving darkness, and mastering intrigue.",
         "description": "Elfos de la Casa Phiarlan y Thuranni con dominio innato del engaño visual, el sigilo y la magia de ilusión.",
         "abilityScoreBonuses": {
           "cha": 1
@@ -636,6 +687,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "elfo-avariel",
         "name": "Avariel (Elfo Alado - UA)",
+        "nameEn": "Avariel (Winged Elf)",
+        "descriptionEn": "Rare celestial-winged elves who soar across mountain winds.",
         "description": "Raros elfos alados de las altas cumbres con grandes alas emplumadas y espíritu libre.",
         "abilityScoreBonuses": {
           "dex": 1
@@ -650,6 +703,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "elfo-grugach",
         "name": "Grugach (Elfo Salvaje - UA)",
+        "nameEn": "Grugach (Wild Elf)",
+        "descriptionEn": "Reclusive, territorial forest hunters fiercely guarding ancestral woodlands.",
         "description": "Aislacionistas nómadas de las junglas primarias que desprecian a extraños y dominan la magia druídica.",
         "abilityScoreBonuses": {
           "str": 1
@@ -676,6 +731,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "enano",
     "name": "Enano (Dwarf)",
+    "nameEn": "Dwarf",
+    "categoryEn": "Common",
+    "descriptionEn": "Bold and hardy, dwarves are known as skilled warriors, miners, and workers of stone and metal. Their courage and endurance are easily a match for any of the larger folk.",
     "category": "Común",
     "description": "Fuertes, resistentes y tenaces, los enanos son maestros de la minería, la forja y la guerra subterránea.",
     "speed": "25 pies",
@@ -706,6 +764,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "enano-colinas",
         "name": "Enano de las Colinas (Hill Dwarf)",
+        "nameEn": "Hill Dwarf",
+        "descriptionEn": "Deep intuition, keen senses, and remarkable resilience granting bonus health.",
         "description": "Tienen sentidos agudos, intuición profunda y vitalidad prodigiosa.",
         "abilityScoreBonuses": {
           "wis": 1
@@ -720,6 +780,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "enano-montanas",
         "name": "Enano de las Montañas (Mountain Dwarf)",
+        "nameEn": "Mountain Dwarf",
+        "descriptionEn": "Strong, hardy warriors accustomed to rugged terrain and heavy armor.",
         "description": "Fuertes y robustos guerreros criados en ciudadelas escarpadas.",
         "abilityScoreBonuses": {
           "str": 2
@@ -734,6 +796,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "duergar",
         "name": "Duergar / Enano Gris (Underdark)",
+        "nameEn": "Duergar (Gray Dwarf)",
+        "descriptionEn": "Inhabitants of the subterranean Underdark possessing invisibility and size-growth.",
         "description": "Moradores de las profundidades subterráneas imbuidos de magia psiónica y sigilo de piedra.",
         "abilityScoreBonuses": {
           "str": 1
@@ -766,6 +830,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "enano-marca-custodia",
         "name": "Marca de la Custodia (Mark of Warding - Eberron)",
+        "nameEn": "Mark of Warding Dwarf (Eberron)",
+        "descriptionEn": "Masters of magical locks, security wards, and arcane bank vaults.",
         "description": "Miembros de la Casa Kundarak con magia protectora para sellar bóvedas, puertas y repeler intrusos.",
         "abilityScoreBonuses": {
           "int": 1
@@ -794,6 +860,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "enano-kaladesh",
         "name": "Enano de Kaladesh (Plane Shift)",
+        "nameEn": "Kaladesh Dwarf",
+        "descriptionEn": "Innovative artisans of aether-fueled filigree craft.",
         "description": "Arquitectos e ingenieros infatigables que construyen ingenios prodigiosos impulsados por éter.",
         "abilityScoreBonuses": {
           "wis": 1
@@ -814,6 +882,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "mediano",
     "name": "Mediano (Halfling)",
+    "nameEn": "Halfling",
+    "categoryEn": "Common",
+    "descriptionEn": "The diminutive halflings survive in a world full of larger creatures by avoiding notice or, barring that, avoiding offense. Affable and cheerful, they cherish the comforts of home.",
     "category": "Común",
     "description": "Un pueblo pequeño, alegre y hogareño cuya suerte legendaria los salva de los peligros más insospechados.",
     "speed": "25 pies",
@@ -844,6 +915,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "mediano-piesligeros",
         "name": "Piesligeros (Lightfoot)",
+        "nameEn": "Lightfoot Halfling",
+        "descriptionEn": "Naturally stealthy, capable of hiding easily behind larger companions.",
         "description": "Expertos en esconderse y pasar inadvertidos tras criaturas más grandes.",
         "abilityScoreBonuses": {
           "cha": 1
@@ -858,6 +931,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "mediano-fornido",
         "name": "Fornido (Stout)",
+        "nameEn": "Stout Halfling",
+        "descriptionEn": "Hardier folk said to have dwarven blood, possessing poison resistance.",
         "description": "Más robustos y con sangre enana en sus antepasados, resistentes al veneno.",
         "abilityScoreBonuses": {
           "con": 1
@@ -872,6 +947,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "mediano-fantasmal",
         "name": "Mediano Fantasmal (Ghostwise)",
+        "nameEn": "Ghostwise Halfling",
+        "descriptionEn": "Wild clan halflings gifted with silent telepathic speech.",
         "description": "Clanes esquivos y nómadas con una profunda conexión telepática ancestral.",
         "abilityScoreBonuses": {
           "wis": 1
@@ -886,6 +963,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "mediano-lotusden",
         "name": "Mediano Lotusden (Wildemount)",
+        "nameEn": "Lotusden Halfling",
+        "descriptionEn": "Deeply bonded with nature and forest druidic craft.",
         "description": "Habitantes de bosques indómitos que canalizan los secretos botánicos del bosque.",
         "abilityScoreBonuses": {
           "wis": 1
@@ -914,6 +993,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "mediano-marca-curacion",
         "name": "Marca de la Curación (Mark of Healing - Eberron)",
+        "nameEn": "Mark of Healing Halfling (Eberron)",
+        "descriptionEn": "Gifted with restorative touch and supernatural healing prowess.",
         "description": "Sanadores natos de la Casa Jorasco con dones restaurativos legendarios en tiempos de guerra.",
         "abilityScoreBonuses": {
           "wis": 1
@@ -942,6 +1023,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "mediano-marca-hospitalidad",
         "name": "Marca de la Hospitalidad (Mark of Hospitality - Eberron)",
+        "nameEn": "Mark of Hospitality Halfling (Eberron)",
+        "descriptionEn": "Brimming with soothing culinary and welcoming domestic wards.",
         "description": "Anfitriones insuperables de la Casa Ghallanda que infunden confort, refugio y bienestar.",
         "abilityScoreBonuses": {
           "cha": 1
@@ -972,6 +1055,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "tiflin",
     "name": "Tiflin (Tiefling)",
+    "nameEn": "Tiefling",
+    "categoryEn": "Common",
+    "descriptionEn": "To be greeted with stares and whispers, to suffer violence and insult on the street, to see mistrust and fear in every eye: this is the lot of the tiefling, bearing the mark of an ancient fiendish pact.",
     "category": "Común",
     "description": "Marcados por un linaje infernal derivado del pacto de sus antepasados, los tiflin portan cuernos, colas y un dominio innato de la magia arcana de los Nueve Infiernos.",
     "speed": "30 pies",
@@ -998,6 +1084,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "tiflin-asmodeus",
         "name": "Linaje de Asmodeus (Estándar)",
+        "nameEn": "Bloodline of Asmodeus",
+        "descriptionEn": "Commanding dark fire and thaumaturgy through Lord of the Nine Hells blood.",
         "description": "El linaje señorial de Nessus que comanda el fuego del orgullo y el engaño.",
         "abilityScoreBonuses": {
           "int": 1
@@ -1026,6 +1114,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "tiflin-baalzebul",
         "name": "Linaje de Baalzebul (Maladomini)",
+        "nameEn": "Bloodline of Baalzebul",
+        "descriptionEn": "Gifted with corrupting rot and rays of sickness.",
         "description": "Gobernantes de la decadencia y la corrupción que doblegan voluntades.",
         "abilityScoreBonuses": {
           "int": 1
@@ -1054,6 +1144,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "tiflin-dispater",
         "name": "Linaje de Dispater (Dis)",
+        "nameEn": "Bloodline of Dispater",
+        "descriptionEn": "Masters of subterfuge, whispers, and magical lockpicking.",
         "description": "Espías magistrales y carceleros de la ciudad de hierro de Dis.",
         "abilityScoreBonuses": {
           "dex": 1
@@ -1082,6 +1174,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "tiflin-fierna",
         "name": "Linaje de Fierna (Phlegethos)",
+        "nameEn": "Bloodline of Fierna",
+        "descriptionEn": "Seductive sway over emotions, charming and captivating others.",
         "description": "Maestros de la oratoria ardiente y la seducción apasionada.",
         "abilityScoreBonuses": {
           "wis": 1
@@ -1110,6 +1204,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "tiflin-glasya",
         "name": "Linaje de Glasya (Malbolge)",
+        "nameEn": "Bloodline of Glasya",
+        "descriptionEn": "Gifted with illusory disguises, stealth, and invisibility.",
         "description": "Rebeldes, ladrones y artistas del engaño de la prisión de Malbolge.",
         "abilityScoreBonuses": {
           "dex": 1
@@ -1138,6 +1234,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "tiflin-levistus",
         "name": "Linaje de Levistus (Stygia)",
+        "nameEn": "Bloodline of Levistus",
+        "descriptionEn": "Channelling Stygian frost and protective icy armor.",
         "description": "Supervivientes indomables del iceberg eterno de Stygia.",
         "abilityScoreBonuses": {
           "con": 1
@@ -1166,6 +1264,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "tiflin-mammon",
         "name": "Linaje de Mammon (Minauros)",
+        "nameEn": "Bloodline of Mammon",
+        "descriptionEn": "Innate grasp of trade magic, gold lust, and arcane appraisal.",
         "description": "Acarreadores de oro, codicia y artefactos valiosos de los pantanos de Minauros.",
         "abilityScoreBonuses": {
           "int": 1
@@ -1194,6 +1294,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "tiflin-mefistofeles",
         "name": "Linaje de Mefistófeles (Cania)",
+        "nameEn": "Bloodline of Mephistopheles",
+        "descriptionEn": "Prodigious arcane scholars wielding destructive flame spells.",
         "description": "Eruditos del fuego infernal y la magia pura del glaciar de Cania.",
         "abilityScoreBonuses": {
           "int": 1
@@ -1222,6 +1324,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "tiflin-zariel",
         "name": "Linaje de Zariel (Avernus)",
+        "nameEn": "Bloodline of Zariel",
+        "descriptionEn": "Martial hellfire smites forged in the vanguard of Avernus.",
         "description": "Guerreros implacables de la primera línea de la Guerra de la Sangre en Avernus.",
         "abilityScoreBonuses": {
           "str": 1
@@ -1250,6 +1354,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "tiflin-alado",
         "name": "Tiflin Alado (Feral / Winged)",
+        "nameEn": "Winged Tiefling",
+        "descriptionEn": "Possess leathery bat-like wings enabling swift flight.",
         "description": "Poseen grandes alas de murciélago curtidas en lugar de la magia innata infernal.",
         "abilityScoreBonuses": {
           "dex": 1
@@ -1264,6 +1370,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "tiflin-abisal",
         "name": "Tiflin Abisal (Abyssal - UA)",
+        "nameEn": "Abyssal Tiefling",
+        "descriptionEn": "Touched by chaotic demonic energy fluctuating across rests.",
         "description": "Tocados por el caos del Abismo en lugar de los Nueve Infiernos; mutables y resistentes.",
         "replacesBaseBonuses": true,
         "abilityScoreBonuses": {
@@ -1286,6 +1394,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "draconido",
     "name": "Dracónido (Dragonborn)",
+    "nameEn": "Dragonborn",
+    "categoryEn": "Common",
+    "descriptionEn": "Born of dragons, as their name proclaims, the dragonborn walk proudly through a world that greets them with fearful incomprehension. Shaped by draconic gods or the dragons themselves.",
     "category": "Común",
     "description": "Nacidos de los dragones, los dracónidos caminan con orgullo por el mundo con escamas brillantes, honor marcial y un arma de aliento elemental demoledora.",
     "speed": "30 pies",
@@ -1312,6 +1423,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "draco-rojo",
         "name": "Dracónido Rojo (Fuego)",
+        "nameEn": "Red Dragonborn (Fire)",
+        "descriptionEn": "Harness devastating cone of searing fire.",
         "description": "Aliento de Fuego (Cono de 15 pies, Salvación de Destreza). Resistencia al daño de Fuego.",
         "abilityScoreBonuses": {
           "cha": 1
@@ -1326,6 +1439,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "draco-azul",
         "name": "Dracónido Azul (Relámpago)",
+        "nameEn": "Blue Dragonborn (Lightning)",
+        "descriptionEn": "Unleash crackling line of electrical voltage.",
         "description": "Aliento de Relámpago (Línea de 30x5 pies, Salvación de Destreza). Resistencia al daño de Relámpago.",
         "abilityScoreBonuses": {
           "cha": 1
@@ -1340,6 +1455,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "draco-verde",
         "name": "Dracónido Verde (Veneno)",
+        "nameEn": "Green Dragonborn (Poison)",
+        "descriptionEn": "Exhale toxic noxious cloud with poison resistance.",
         "description": "Aliento de Veneno (Cono de 15 pies, Salvación de Constitución). Resistencia al daño de Veneno.",
         "abilityScoreBonuses": {
           "cha": 1
@@ -1354,6 +1471,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "draco-negro",
         "name": "Dracónido Negro (Ácido)",
+        "nameEn": "Black Dragonborn (Acid)",
+        "descriptionEn": "Spit sizzling caustic line of destructive acid.",
         "description": "Aliento de Ácido (Línea de 30x5 pies, Salvación de Destreza). Resistencia al daño de Ácido.",
         "abilityScoreBonuses": {
           "cha": 1
@@ -1368,6 +1487,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "draco-blanco",
         "name": "Dracónido Blanco (Frío)",
+        "nameEn": "White Dragonborn (Cold)",
+        "descriptionEn": "Breathe freezing cone of glacial rime.",
         "description": "Aliento de Frío (Cono de 15 pies, Salvación de Constitución). Resistencia al daño de Frío.",
         "abilityScoreBonuses": {
           "cha": 1
@@ -1382,6 +1503,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "draco-oro",
         "name": "Dracónido de Oro (Fuego Metálico)",
+        "nameEn": "Gold Dragonborn (Fire)",
+        "descriptionEn": "Noble metallic lineage exhaling radiant flame.",
         "description": "Aliento de Fuego (Cono de 15 pies, Salvación de Destreza). Resistencia al daño de Fuego.",
         "abilityScoreBonuses": {
           "cha": 1
@@ -1396,6 +1519,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "draco-plata",
         "name": "Dracónido de Plata (Frío Metálico)",
+        "nameEn": "Silver Dragonborn (Cold)",
+        "descriptionEn": "Majestic metallic lineage breathing paralyzing cold.",
         "description": "Aliento de Frío (Cono de 15 pies, Salvación de Constitución). Resistencia al daño de Frío.",
         "abilityScoreBonuses": {
           "cha": 1
@@ -1410,6 +1535,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "draco-bronce",
         "name": "Dracónido de Bronce (Relámpago Metálico)",
+        "nameEn": "Bronze Dragonborn (Lightning)",
+        "descriptionEn": "Coastal metallic lineage commanding lightning arcs.",
         "description": "Aliento de Relámpago (Línea de 30x5 pies, Salvación de Destreza). Resistencia al Relámpago.",
         "abilityScoreBonuses": {
           "cha": 1
@@ -1424,6 +1551,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "draco-cobre",
         "name": "Dracónido de Cobre (Ácido Metálico)",
+        "nameEn": "Copper Dragonborn (Acid)",
+        "descriptionEn": "Playful metallic lineage spitting corrosive acid.",
         "description": "Aliento de Ácido (Línea de 30x5 pies, Salvación de Destreza). Resistencia al Ácido.",
         "abilityScoreBonuses": {
           "cha": 1
@@ -1438,6 +1567,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "draco-oropel",
         "name": "Dracónido de Oropel / Latón (Fuego)",
+        "nameEn": "Brass Dragonborn (Fire)",
+        "descriptionEn": "Chatty metallic lineage unleashing fiery beams.",
         "description": "Aliento de Fuego (Línea de 30x5 pies, Salvación de Destreza). Resistencia al Fuego.",
         "abilityScoreBonuses": {
           "cha": 1
@@ -1452,6 +1583,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "draco-amatista",
         "name": "Dracónido de Amatista (Gema - Fuerza)",
+        "nameEn": "Amethyst Dragonborn (Force)",
+        "descriptionEn": "Gem lineage wielding telekinetic gravity and force pulses.",
         "description": "Aliento de Energía de Fuerza (Fizban). A nivel 5 puedes manifestar vuelo espectral por 1 minuto.",
         "abilityScoreBonuses": {
           "int": 1
@@ -1466,6 +1599,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "draco-cristal",
         "name": "Dracónido de Cristal (Gema - Radiante)",
+        "nameEn": "Crystal Dragonborn (Radiant)",
+        "descriptionEn": "Gem lineage dazzling foes with brilliant starlight.",
         "description": "Aliento de Luz Radiante cegadora (Fizban) y telepatía gema a 30 pies.",
         "abilityScoreBonuses": {
           "cha": 1
@@ -1480,6 +1615,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "draco-esmeralda",
         "name": "Dracónido de Esmeralda (Gema - Psíquico)",
+        "nameEn": "Emerald Dragonborn (Psychic)",
+        "descriptionEn": "Gem lineage disrupting minds with psychic resonance.",
         "description": "Aliento de Choque Psíquico (Fizban) y resistencia mental ante manipulaciones arcanas.",
         "abilityScoreBonuses": {
           "int": 1
@@ -1494,6 +1631,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "draco-zafiro",
         "name": "Dracónido de Zafiro (Gema - Trueno)",
+        "nameEn": "Sapphire Dragonborn (Thunder)",
+        "descriptionEn": "Gem lineage blasting foes with deafening sonic bursts.",
         "description": "Aliento de Onda de Trueno acústica ensordecedora (Fizban) y sentidos de estrategia militar.",
         "abilityScoreBonuses": {
           "wis": 1
@@ -1508,6 +1647,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "draco-topacio",
         "name": "Dracónido de Topacio (Gema - Necrótico)",
+        "nameEn": "Topaz Dragonborn (Necrotic)",
+        "descriptionEn": "Gem lineage withering vitality with entropy blasts.",
         "description": "Aliento de Descomposición Necrótica (Fizban) y comprensión del ciclo de vida y muerte.",
         "abilityScoreBonuses": {
           "wis": 1
@@ -1522,6 +1663,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "draco-ravenite",
         "name": "Dracónido Ravenite (Wildemount)",
+        "nameEn": "Ravenite Dragonborn (Wildemount)",
+        "descriptionEn": "Tailless martial dragonborn with fierce vengeful strikes.",
         "description": "Linaje sin cola ni aliento de Exandria que forjó reflejos combativos salvajes ante el dolor.",
         "abilityScoreBonuses": {
           "con": 1
@@ -1540,6 +1683,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "draco-draconiano",
         "name": "Dracónido Draconiano (Dragonlance)",
+        "nameEn": "Draconian (Dragonlance)",
+        "descriptionEn": "Engineered dragonborn with gliding wings and death throes.",
         "description": "Descendientes de la magia de Krynn con alas membranosas para planear.",
         "abilityScoreBonuses": {
           "con": 1
@@ -1556,6 +1701,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "semiorco",
     "name": "Semiorco (Half-Orc)",
+    "nameEn": "Half-Orc",
+    "categoryEn": "Common",
+    "descriptionEn": "Half-orcs' grayish pigmentation, sloping brows, jutting jaws, prominent teeth, and towering builds make their orcish heritage plain for all to see. Unstoppable endurance in battle.",
     "category": "Común",
     "description": "Combinan la resistencia física indómita y la furia orca con el ingenio y adaptabilidad humana.",
     "speed": "30 pies",
@@ -1587,6 +1735,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "semiorco-clasico",
         "name": "Semiorco Clásico (PHB)",
+        "nameEn": "Classic Half-Orc (PHB)",
+        "descriptionEn": "Relentless endurance and brutal critical strikes in combat.",
         "description": "La estirpe tradicional curtida en la frontera, forjada por el honor tribal y la supervivencia.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -1599,6 +1749,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "semiorco-marca-hallazgo",
         "name": "Marca del Hallazgo (Mark of Finding - Eberron)",
+        "nameEn": "Mark of Finding Half-Orc (Eberron)",
+        "descriptionEn": "Masterful hunters and trackers in Khorvaire.",
         "description": "Semiorcos de la Casa Tharashk con ojos místicos para rastrear tesoros, recompensas y criminales.",
         "replacesBaseBonuses": true,
         "abilityScoreBonuses": {
@@ -1631,6 +1783,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "semielfo",
     "name": "Semielfo (Half-Elf)",
+    "nameEn": "Half-Elf",
+    "categoryEn": "Common",
+    "descriptionEn": "Walking in two worlds but truly belonging to neither, half-elves combine what some say are the best qualities of their elf and human parents: human curiosity and elven grace.",
     "category": "Común",
     "description": "Caminan en dos mundos pero no pertenecen enteramente a ninguno. Curiosos, carismáticos y extraordinariamente adaptables.",
     "speed": "30 pies",
@@ -1659,6 +1814,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "semielfo-estandar",
         "name": "Semielfo Común (Versátil)",
+        "nameEn": "Standard Half-Elf",
+        "descriptionEn": "Skill versatility granting two bonus proficiencies.",
         "description": "La variante clásica dotada de una amplia adaptabilidad mundana.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -1671,6 +1828,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "semielfo-bosques",
         "name": "Linaje Elfo de los Bosques",
+        "nameEn": "Wood Elf Heritage",
+        "descriptionEn": "Fleet of foot with natural forest concealment.",
         "description": "Descendientes de los elfos silvanos con agilidad y sigilo en la maleza.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -1683,6 +1842,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "semielfo-alto",
         "name": "Linaje Alto Elfo",
+        "nameEn": "High Elf Heritage",
+        "descriptionEn": "Innate wizard cantrip from high elven lineage.",
         "description": "Herederos de la disciplina arcana de los altos elfos.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -1701,6 +1862,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "semielfo-drow",
         "name": "Linaje Drow (Oscuro)",
+        "nameEn": "Drow Heritage",
+        "descriptionEn": "Innate Drow magic (Dancing Lights and Faerie Fire).",
         "description": "Herederos de la magia crepuscular del Inframundo.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -1727,6 +1890,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "semielfo-acuatico",
         "name": "Linaje Elfo Acuático",
+        "nameEn": "Aquatic Elf Heritage",
+        "descriptionEn": "Natural swimming speed from aquatic ancestors.",
         "description": "Herederos de los elfos marinos capaces de nadar a gran velocidad.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -1739,6 +1904,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "semielfo-marca-deteccion",
         "name": "Marca de la Detección (Mark of Detection - Eberron)",
+        "nameEn": "Mark of Detection Half-Elf (Eberron)",
+        "descriptionEn": "Supernatural sight piercing illusions and uncovering lies.",
         "description": "Miembros de la Casa Medani con un sexto sentido infalible para discernir la verdad, engaños y peligros ocultos.",
         "replacesBaseBonuses": true,
         "abilityScoreBonuses": {
@@ -1769,6 +1936,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "semielfo-marca-tormenta",
         "name": "Marca de la Tormenta (Mark of Storm - Eberron)",
+        "nameEn": "Mark of Storm Half-Elf (Eberron)",
+        "descriptionEn": "Commanding wind and lightning on airships and gale seas.",
         "description": "Herederos de la Casa Lyrandar que dominan los cielos, las corrientes de aire y el clima marino.",
         "replacesBaseBonuses": true,
         "abilityScoreBonuses": {
@@ -1805,6 +1974,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "gnomo",
     "name": "Gnomo (Gnome)",
+    "nameEn": "Gnome",
+    "categoryEn": "Common",
+    "descriptionEn": "A constant hum of busy activity pervades the warrens and neighborhoods where gnomes form their close-knit communities. Driven by enthusiasm, inventiveness, and quick wit.",
     "category": "Común",
     "description": "Criaturas diminutas llenas de entusiasmo, inventiva y curiosidad implacable por el funcionamiento del cosmos.",
     "speed": "25 pies",
@@ -1827,6 +1999,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "gnomo-rocas",
         "name": "Gnomo de las Rocas (Rock Gnome)",
+        "nameEn": "Rock Gnome",
+        "descriptionEn": "Natural tinkerers with keen aptitude for mechanical clockwork devices.",
         "description": "Inventores natos y mecánicos arcanos apasionados.",
         "abilityScoreBonuses": {
           "con": 1
@@ -1845,6 +2019,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "gnomo-bosque",
         "name": "Gnomo del Bosque (Forest Gnome)",
+        "nameEn": "Forest Gnome",
+        "descriptionEn": "Innate illusion magic and communication with small beasts.",
         "description": "Tienen afinidad mágica con bestias pequeñas y dominan ilusiones sencillas.",
         "abilityScoreBonuses": {
           "dex": 1
@@ -1872,6 +2048,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "svirfneblin",
         "name": "Gnomo de las Profundidades (Svirfneblin)",
+        "nameEn": "Deep Gnome (Svirfneblin)",
+        "descriptionEn": "Subterranean survivalists blending seamlessly into Underdark stone.",
         "description": "Habitantes del Inframundo curtidos en la supervivencia subterránea y el sigilo entre piedras.",
         "abilityScoreBonuses": {
           "dex": 1
@@ -1890,6 +2068,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "gnomo-marca-escritura",
         "name": "Marca de la Escritura (Mark of Scribing - Eberron)",
+        "nameEn": "Mark of Scribing Gnome (Eberron)",
+        "descriptionEn": "Masters of mystical ciphers, translation, and communication spells.",
         "description": "Miembros de la Casa Sivis que comandan la comunicación a distancia, los pergaminos y los contratos arcanos.",
         "abilityScoreBonuses": {
           "cha": 1
@@ -1918,6 +2098,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "autognomo",
         "name": "Autognomo (Autognome - Spelljammer)",
+        "nameEn": "Autognome (Spelljammer)",
+        "descriptionEn": "Mechanical gnome constructs infused with life spark.",
         "description": "Autómatas mecánicos de latón y engranajes creados por gnomos de las rocas para explorar el espacio salvaje.",
         "abilityScoreBonuses": {
           "con": 1
@@ -1942,6 +2124,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "goblin",
     "name": "Goblin (Trasgo)",
+    "nameEn": "Goblin",
+    "categoryEn": "Monstrous",
+    "descriptionEn": "Goblins occupy an uneasy place in the world. As small, sneaky humanoids, they survive through cunning, numbers, and striking from the shadows.",
     "category": "Monstruosa",
     "description": "Pequeños, astutos y supervivientes natos que dominan la emboscada rápida y el escape escurridizo.",
     "speed": "30 pies",
@@ -1969,6 +2154,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "goblin-clasico",
         "name": "Goblin Clásico (Volo / MPMM)",
+        "nameEn": "Classic Goblin",
+        "descriptionEn": "Nimble escape and dealing extra damage to larger foes.",
         "description": "La estirpe montaraz y audaz curtida en cavernas y campamentos nómadas.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -1981,6 +2168,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "goblin-dankwood",
         "name": "Goblin Dankwood (Wildemount)",
+        "nameEn": "Dankwood Goblin",
+        "descriptionEn": "Forest foragers with innate animal empathy.",
         "description": "Goblins que habitan en los pantanos y arboledas profundas de Exandria en armonía con pequeñas alimañas.",
         "replacesBaseBonuses": true,
         "abilityScoreBonuses": {
@@ -1999,6 +2188,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "hobgoblin",
     "name": "Hobgoblin",
+    "nameEn": "Hobgoblin",
+    "categoryEn": "Monstrous",
+    "descriptionEn": "War horns sound, stones crack, and hobgoblins march into battle. Disciplined, militaristic, and fiercely proud of their martial heritage.",
     "category": "Monstruosa",
     "description": "Disciplinados soldados y estrategas de linaje trasgoide imbuidos de una rigurosa cultura marcial.",
     "speed": "30 pies",
@@ -2022,6 +2214,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "hobgoblin-marcial",
         "name": "Hobgoblin Marcial (Volo)",
+        "nameEn": "Martial Hobgoblin",
+        "descriptionEn": "Martial training and saving face bonuses.",
         "description": "La legión tradicional forjada en la disciplina de hierro de la legión.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -2034,6 +2228,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "hobgoblin-feerico",
         "name": "Hobgoblin de la Corte Feérica (MPMM)",
+        "nameEn": "Fey Gift Hobgoblin (MPMM)",
+        "descriptionEn": "Channelling fey hospitality and supportive combat auras.",
         "description": "Herederos de la magia cortesana del Feywild con dones de camaradería y auxilio táctico.",
         "replacesBaseBonuses": true,
         "abilityScoreBonuses": {
@@ -2056,6 +2252,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "bugbear",
     "name": "Bugbear (Osgo)",
+    "nameEn": "Bugbear",
+    "categoryEn": "Monstrous",
+    "descriptionEn": "Bugbears are born for battle and mayhem. Surviving through brute force and uncanny stealth, they surprise their prey with remarkable long-limbed reach.",
     "category": "Monstruosa",
     "description": "Depredadores corpulentos y sigilosos con extremidades desproporcionadamente largas capaces de golpear desde ángulos inesperados.",
     "speed": "30 pies",
@@ -2087,6 +2286,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "bugbear-clasico",
         "name": "Bugbear Clásico (Volo)",
+        "nameEn": "Classic Bugbear",
+        "descriptionEn": "Long limbs and surprise attack burst damage.",
         "description": "El merodeador tradicional de emboscadas cavernosas.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -2099,6 +2300,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "bugbear-feerico",
         "name": "Bugbear del Multiverso (MPMM)",
+        "nameEn": "Multiverse Bugbear (MPMM)",
+        "descriptionEn": "Fey ancestry and enhanced reach on all melee attacks.",
         "description": "Imbuido de la elasticidad sobrenatural y la protección mágica del Feywild.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -2113,6 +2316,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "kobold",
     "name": "Kobold",
+    "nameEn": "Kobold",
+    "categoryEn": "Monstrous",
+    "descriptionEn": "Small and reptilian, kobolds revere dragons and serve them as loyal tunnelers, trap-makers, and resource scavengers in deep caverns.",
     "category": "Monstruosa",
     "description": "Reptilianos pequeños y tramposos vinculados a los dragones que prosperan en túneles subterráneos mediante el trabajo en equipo.",
     "speed": "30 pies",
@@ -2135,6 +2341,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "kobold-clasico",
         "name": "Kobold Clásico (Volo)",
+        "nameEn": "Classic Kobold",
+        "descriptionEn": "Pack tactics and groveling distractions.",
         "description": "El cazador de túneles tradicional experto en pelear en jauría.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -2155,6 +2363,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "kobold-multiverso",
         "name": "Kobold del Multiverso (MPMM / Fizban)",
+        "nameEn": "Multiverse Kobold (MPMM)",
+        "descriptionEn": "Draconic roar and draconic sorcery cantrip.",
         "description": "Heredero del poder dracónico sin penalizaciones por luz solar.",
         "abilityScoreBonuses": {
           "con": 1
@@ -2181,6 +2391,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "orco",
     "name": "Orco (Orc)",
+    "nameEn": "Orc",
+    "categoryEn": "Monstrous",
+    "descriptionEn": "Orcs are aggressive, powerful warriors driven by their fierce gods. Blessed with incredible endurance and adrenaline-fueled rushes.",
     "category": "Monstruosa",
     "description": "Fieros guerreros bendecidos con una fuerza colosal y una resistencia indomable para asaltar el frente de combate.",
     "speed": "30 pies",
@@ -2212,6 +2425,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "orco-clasico",
         "name": "Orco Clásico (Volo / MPMM)",
+        "nameEn": "Classic Orc",
+        "descriptionEn": "Aggressive bonus-action dash toward enemies.",
         "description": "Los orgullosos guerreros con la bendición de resistencia salvaje de Gruumsh.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -2224,6 +2439,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "orco-eberron",
         "name": "Orco de Eberron (ERLW)",
+        "nameEn": "Eberron Orc",
+        "descriptionEn": "Spiritual guardians and primal wardens of the Shadow Marches.",
         "description": "Protectores de los Bosques Sombríos y guardianes de los sellos druídicos contra aberraciones.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -2236,6 +2453,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "orco-exandria",
         "name": "Orco de Exandria (Wildemount)",
+        "nameEn": "Exandria Orc",
+        "descriptionEn": "Proud warriors carrying relentless endurance and great carry capacity.",
         "description": "Vencedores de las estepas de Xhorhas que luchan por forjar su propio destino.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -2250,6 +2469,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "yuan-ti",
     "name": "Yuan-ti Sangre Pura (Pureblood)",
+    "nameEn": "Yuan-ti Pureblood",
+    "categoryEn": "Exotic",
+    "descriptionEn": "The serpent-blooded yuan-ti purebloods blend serpentine features with humanoid forms, boasting innate magic resistance and venom immunity.",
     "category": "Monstruosa",
     "description": "Humanoides serpentinos con sangre ofidia fría, maestros del engaño y poseedores de una temible resistencia mágica.",
     "speed": "30 pies",
@@ -2298,6 +2520,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "yuan-ti-clasico",
         "name": "Yuan-ti Sangre Pura Clásico (Volo)",
+        "nameEn": "Classic Pureblood",
+        "descriptionEn": "Poison immunity, magic resistance, and animal friendship with snakes.",
         "description": "La estirpe aristocrática tradicional totalmente inmune a cualquier toxina.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -2314,6 +2538,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "yuan-ti-multiverso",
         "name": "Yuan-ti del Multiverso (MPMM)",
+        "nameEn": "Multiverse Yuan-ti (MPMM)",
+        "descriptionEn": "Poison resistance and innate spellcasting.",
         "description": "Linaje modernizado con resiliencia toxica y sentidos ofidios.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -2328,6 +2554,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "hombre-lagarto",
     "name": "Hombre Lagarto (Lizardfolk)",
+    "nameEn": "Lizardfolk",
+    "categoryEn": "Monstrous",
+    "descriptionEn": "Lizardfolk possess an alien, dispassionate mindset. They view the world through survival and pragmatism, harvesting natural materials into shields and spears.",
     "category": "Monstruosa",
     "description": "Reptilianos pragmáticos que ven el mundo a través de la lente de la supervivencia, armados con escamas duras y mandíbulas feroces.",
     "speed": "30 pies (Nado 30 pies)",
@@ -2359,6 +2588,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "hombre-lagarto-clasico",
         "name": "Hombre Lagarto Clásico (Volo)",
+        "nameEn": "Classic Lizardfolk",
+        "descriptionEn": "Natural armor, hungry jaws bite, and artisanal bonecraft.",
         "description": "El artesano y cazador tradicional del pantano.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -2375,6 +2606,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "hombre-lagarto-chamanico",
         "name": "Hombre Lagarto Chamánico",
+        "nameEn": "Shamanic Lizardfolk",
+        "descriptionEn": "Primal swamp magic and reptilian resilience.",
         "description": "Comulgantes con los espíritus antiguos del lodo y las bestias acuáticas.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -2389,6 +2622,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "aasimar",
     "name": "Aasimar",
+    "nameEn": "Aasimar",
+    "categoryEn": "Exotic",
+    "descriptionEn": "Aasimar bear within their souls the light of the heavens. Descended from celestial touch, they carry divine purpose, holy radiance, and heavenly wrath.",
     "category": "Exótica",
     "description": "Portadores de la chispa de los planos celestiales superiores, guiados por sueños divinos y bendecidos con luz curativa.",
     "speed": "30 pies",
@@ -2429,6 +2665,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "aasimar-protector",
         "name": "Aasimar Protector",
+        "nameEn": "Protector Aasimar",
+        "descriptionEn": "Manifest incorporeal radiant wings to soar and smite evil.",
         "description": "Imbuidos del deber celestial de amparar a los débiles, despliegan alas de luz divina.",
         "abilityScoreBonuses": {
           "wis": 1
@@ -2443,6 +2681,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "aasimar-azote",
         "name": "Aasimar Azote (Scourge)",
+        "nameEn": "Scourge Aasimar",
+        "descriptionEn": "Radiate intense divine burning heat scorching everything around.",
         "description": "Arden con un fuego divino interno que amenaza con consumir todo a su paso para purgar el mal.",
         "abilityScoreBonuses": {
           "con": 1
@@ -2457,6 +2697,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "aasimar-caido",
         "name": "Aasimar Caído (Fallen)",
+        "nameEn": "Fallen Aasimar",
+        "descriptionEn": "Dark skeletal wings inspiring terror and dread in foes.",
         "description": "Aasimar cuya luz ha sido mancillada por la desesperación o un toque de sombras, alzando alas de hueso.",
         "abilityScoreBonuses": {
           "str": 1
@@ -2471,6 +2713,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "aasimar-guia-radiante",
         "name": "Aasimar Guía Radiante (MPMM)",
+        "nameEn": "Celestial Revelation Aasimar (MPMM)",
+        "descriptionEn": "Choose between radiant soul, radiant consumption, or necrotic shroud.",
         "description": "Canalizadores celestiales con revelación radiante adaptable a voluntad.",
         "abilityScoreBonuses": {
           "any": 1
@@ -2487,6 +2731,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "goliat",
     "name": "Goliat (Goliath)",
+    "nameEn": "Goliath",
+    "categoryEn": "Exotic",
+    "descriptionEn": "At the highest mountain peaks—far above the slopes where trees grow and where the air is thin—dwell the reclusive goliaths. Strong, competitive, and stalwart.",
     "category": "Exótica",
     "description": "Nacidos en las cumbres montañosas más gélidas, los goliat son gigantes entre los mortales con una resistencia hercúlea.",
     "speed": "30 pies",
@@ -2518,6 +2765,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "goliat-montana",
         "name": "Goliat de las Montañas (Clásico / Volo)",
+        "nameEn": "Mountain Goliath",
+        "descriptionEn": "Stone's endurance shrugging off fatal blows.",
         "description": "El linaje tradicional de las cumbres rocosas con piel de piedra impenetrable.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -2530,6 +2779,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "goliat-gigante-nubes",
         "name": "Linaje Gigante de las Nubes (Cloud Giant)",
+        "nameEn": "Cloud Giant Heritage",
+        "descriptionEn": "Slip through mists with subtle teleportation.",
         "description": "Bendecidos con la magia aérea y las nieblas de los gigantes de las nubes.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -2542,6 +2793,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "goliat-gigante-fuego",
         "name": "Linaje Gigante de Fuego (Fire Giant)",
+        "nameEn": "Fire Giant Heritage",
+        "descriptionEn": "Infuse attacks with burning forge fury.",
         "description": "Forjados con el calor ígneo de las entrañas volcánicas.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -2554,6 +2807,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "goliat-gigante-escarcha",
         "name": "Linaje Gigante de Escarcha (Frost Giant)",
+        "nameEn": "Frost Giant Heritage",
+        "descriptionEn": "Chill foes with freezing glacial strikes.",
         "description": "Descendientes de los glaciares eternos con un frío paralizante en sus golpes.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -2566,6 +2821,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "goliat-gigante-colinas",
         "name": "Linaje Gigante de las Colinas (Hill Giant)",
+        "nameEn": "Hill Giant Heritage",
+        "descriptionEn": "Knock opponents prone with crushing heft.",
         "description": "Goliat con un peso y masa corporal demoledora para derribar titanes.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -2578,6 +2835,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "goliat-gigante-tormenta",
         "name": "Linaje Gigante de la Tormenta (Storm Giant)",
+        "nameEn": "Storm Giant Heritage",
+        "descriptionEn": "Retaliate with crackling thunderbolts.",
         "description": "Conectados a los relámpagos y truenos de los picos celestes.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -2592,6 +2851,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "tabaxi",
     "name": "Tabaxi",
+    "nameEn": "Tabaxi",
+    "categoryEn": "Exotic",
+    "descriptionEn": "Hailing from strange and distant lands, wandering tabaxi are catlike humanoids driven by curiosity to collect interesting artifacts, tales, and wonder.",
     "category": "Exótica",
     "description": "Humanoides felinos curiosos y ágiles que viajan por el mundo en busca de secretos, conocimiento y artefactos raros.",
     "speed": "30 pies (Trepar 20 pies)",
@@ -2623,6 +2885,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "tabaxi-clasico",
         "name": "Tabaxi Clásico (Volo)",
+        "nameEn": "Classic Tabaxi",
+        "descriptionEn": "Feline agility and climbing claws.",
         "description": "El viajero felino tradicional de reflejos deslumbrantes.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -2635,6 +2899,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "tabaxi-multiverso",
         "name": "Tabaxi del Multiverso (MPMM)",
+        "nameEn": "Multiverse Tabaxi (MPMM)",
+        "descriptionEn": "Cat's claws slashing damage and sprint agility.",
         "description": "Garras mejoradas de 1d6 cortante y velocidad de trepar igual a la velocidad al caminar (30 pies).",
         "abilityScoreBonuses": {},
         "traits": [
@@ -2649,6 +2915,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "tortle",
     "name": "Tortle (Tortuga)",
+    "nameEn": "Tortle",
+    "categoryEn": "Exotic",
+    "descriptionEn": "What many tortles consider a simple life, others might see as a life of adventure. Tortles are born near sandy shores, walk with sturdy shells, and live peaceful lives.",
     "category": "Exótica",
     "description": "Nómadas pacíficos con un caparazón acorazado que cargan su hogar a cuestas y son temibles defensores cuando son provocados.",
     "speed": "30 pies",
@@ -2684,6 +2953,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "tortle-solitario",
         "name": "Tortle Solitario (Clásico)",
+        "nameEn": "Wandering Tortle",
+        "descriptionEn": "Natural armor shell and claw attacks.",
         "description": "Los filósofos ambulantes que recorren los caminos solos observando la vida.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -2696,6 +2967,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "tortle-costero",
         "name": "Tortle Costero",
+        "nameEn": "Coastal Tortle",
+        "descriptionEn": "Holding breath and swimming in tidal waters.",
         "description": "Habitantes de arrecifes y calas con conocimiento profundo de las mareas.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -2710,6 +2983,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "kenku",
     "name": "Kenku",
+    "nameEn": "Kenku",
+    "categoryEn": "Exotic",
+    "descriptionEn": "Haunted by an ancient crime that robbed them of their wings, the kenku wander the world as vagabonds and burglars who live at the fringes of human society, communicating through mimicry.",
     "category": "Exótica",
     "description": "Criaturas con aspecto de cuervo que perdieron sus alas y su voz original, ahora maestros del mimetismo y la falsificación.",
     "speed": "30 pies",
@@ -2740,6 +3016,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "kenku-clasico",
         "name": "Kenku Clásico (Volo)",
+        "nameEn": "Classic Kenku",
+        "descriptionEn": "Expert forgery and sound mimicry.",
         "description": "El astuto falsificador callejero tradicional.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -2752,6 +3030,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "kenku-multiverso",
         "name": "Kenku del Multiverso (MPMM)",
+        "nameEn": "Multiverse Kenku (MPMM)",
+        "descriptionEn": "Kenku recall granting advantage on skilled checks.",
         "description": "Kenku dotados con el recuerdo del maestro que les permite hablar y tener destellos de genialidad.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -2766,6 +3046,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "firbolg",
     "name": "Firbolg",
+    "nameEn": "Firbolg",
+    "categoryEn": "Exotic",
+    "descriptionEn": "Firbolg tribes cloister in remote forest strongholds, preferring to spend their days in quiet harmony with the woods. When provoked, firbolgs demonstrate formidable martial prowess.",
     "category": "Exótica",
     "description": "Gigantes amables de los bosques primigenios profundamente conectados con la fauna y la armonía de la naturaleza.",
     "speed": "30 pies",
@@ -2818,6 +3101,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "firbolg-bosque",
         "name": "Firbolg del Bosque Profundo (Clásico)",
+        "nameEn": "Classic Firbolg",
+        "descriptionEn": "Firbolg magic, hidden step invisibility, and speech of beast and leaf.",
         "description": "El guardián clásico de los bosques vírgenes.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -2830,6 +3115,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "firbolg-multiverso",
         "name": "Firbolg del Multiverso (MPMM)",
+        "nameEn": "Multiverse Firbolg (MPMM)",
+        "descriptionEn": "Bonus-action disguise self and hidden step.",
         "description": "Firbolgs con usos escalonados de Paso Oculto según el bonificador de competencia.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -2844,6 +3131,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "genasi",
     "name": "Genasi",
+    "nameEn": "Genasi",
+    "categoryEn": "Planar",
+    "descriptionEn": "Genasi inherit something of the majesty and might of their planar ancestors—elemental beings of Air, Earth, Fire, or Water, walking the mortal realms.",
     "category": "Exótica",
     "description": "Humanoides tocados por el poder puro de los cuatro planos elementales primordiales (Fuego, Agua, Aire y Tierra).",
     "speed": "30 pies",
@@ -2866,6 +3156,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "genasi-fuego",
         "name": "Genasi de Fuego",
+        "nameEn": "Fire Genasi",
+        "descriptionEn": "Darkvision, fire resistance, and produce flame cantrip.",
         "description": "Vástagos del Plano del Fuego, de piel carmesí o cenicienta y cabellos de brasas llameantes.",
         "abilityScoreBonuses": {
           "int": 1
@@ -2908,6 +3200,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "genasi-agua",
         "name": "Genasi de Agua",
+        "nameEn": "Water Genasi",
+        "descriptionEn": "Amphibious, swim speed, acid resistance, and create or destroy water.",
         "description": "Hijos de las olas y los torrentes, capaces de nadar como peces y respirar bajo el agua.",
         "abilityScoreBonuses": {
           "wis": 1
@@ -2954,6 +3248,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "genasi-aire",
         "name": "Genasi de Aire",
+        "nameEn": "Air Genasi",
+        "descriptionEn": "Unending breath, lightning resistance, and levitate.",
         "description": "Ligeros como la brisa y veloces como la tempestad, con cabellos en constante movimiento.",
         "abilityScoreBonuses": {
           "dex": 1
@@ -2996,6 +3292,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "genasi-tierra",
         "name": "Genasi de Tierra",
+        "nameEn": "Earth Genasi",
+        "descriptionEn": "Earth walk across difficult terrain and pass without trace.",
         "description": "Sólidos y pacientes como los peñascos milenarios, con piel similar a la arenisca o al granito.",
         "abilityScoreBonuses": {
           "str": 1
@@ -3032,6 +3330,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "triton",
     "name": "Tritón (Triton)",
+    "nameEn": "Triton",
+    "categoryEn": "Exotic",
+    "descriptionEn": "Originally from the Elemental Plane of Water, tritons settled in the ocean depths of the Material Plane, guarding the deep waters against aquatic monstrosities.",
     "category": "Exótica",
     "description": "Nobles guardianes de las profundidades oceánicas que protegen las fosas marinas contra los terrores abisales.",
     "speed": "30 pies (Nado 30 pies)",
@@ -3085,6 +3386,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "triton-profundo",
         "name": "Tritón de las Fosas (Clásico)",
+        "nameEn": "Classic Triton",
+        "descriptionEn": "Amphibious, swim speed, cold resistance, and aquatic control magic.",
         "description": "Los defensores de las trincheras marinas armados con tridentes.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -3097,6 +3400,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "triton-multiverso",
         "name": "Tritón del Multiverso (MPMM)",
+        "nameEn": "Multiverse Triton (MPMM)",
+        "descriptionEn": "Darkvision and innate aquatic spells.",
         "description": "Tritones con magia oceánica que puede lanzarse con ranuras de conjuro.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -3111,6 +3416,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "cambiaformas",
     "name": "Cambiaformas (Changeling)",
+    "nameEn": "Changeling",
+    "categoryEn": "Exotic",
+    "descriptionEn": "Changelings can alter their physical appearance with a thought. While many use this ability to deceive, some use it to explore different identities and cultures.",
     "category": "Exótica",
     "description": "Seres camaleónicos capaces de alterar su rostro, cuerpo y tono de voz a voluntad para mimetizarse entre cualquier pueblo.",
     "speed": "30 pies",
@@ -3138,6 +3446,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "cambiaformas-eberron",
         "name": "Cambiaformas de Eberron (ERLW)",
+        "nameEn": "Eberron Changeling",
+        "descriptionEn": "Shapechanger feature and dual social proficiencies.",
         "description": "La estirpe tradicional de Khorvaire vinculada al Dios Viajero.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -3150,6 +3460,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "cambiaformas-multiverso",
         "name": "Cambiaformas del Multiverso (MPMM)",
+        "nameEn": "Multiverse Changeling (MPMM)",
+        "descriptionEn": "Fey ancestry and seamless shapeshifting.",
         "description": "Seres que pueden alterar su tamaño entre Pequeño y Mediano al cambiar de forma.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -3164,6 +3476,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "forjado",
     "name": "Forjado de la Guerra (Warforged)",
+    "nameEn": "Warforged",
+    "categoryEn": "Exotic",
+    "descriptionEn": "Built as mindless automatons in the Last War, the warforged gained sentience and now seek their place in a world that no longer requires their martial service.",
     "category": "Exótica",
     "description": "Constructos vivientes de madera viva, acero y magia arcana forjados para el combate con una voluntad propia.",
     "speed": "30 pies",
@@ -3195,6 +3510,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "forjado-integrado",
         "name": "Forjado Integrado (Estándar ERLW)",
+        "nameEn": "Integrated Warforged",
+        "descriptionEn": "Integrated protection (+1 AC), specialized design, and constructed resilience.",
         "description": "El modelo balanceado y polivalente creado en los hornos de la Última Guerra.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -3207,6 +3524,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "forjado-juggernaut",
         "name": "Forjado Juggernaut (Coloso - Eberron UA)",
+        "nameEn": "Juggernaut Warforged",
+        "descriptionEn": "Heavy ironframe built for brutal siege warfare.",
         "description": "Construidos para asaltos de primera línea con placas blindadas densas y puños de hierro.",
         "replacesBaseBonuses": true,
         "abilityScoreBonuses": {
@@ -3227,6 +3546,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "forjado-skirmisher",
         "name": "Forjado Skirmisher (Hostigador - Eberron UA)",
+        "nameEn": "Skirmisher Warforged",
+        "descriptionEn": "Lightframe scout designed for rapid flanking.",
         "description": "Modelos esbeltos y veloces creados para labores de exploración y emboscada en la espesura.",
         "replacesBaseBonuses": true,
         "abilityScoreBonuses": {
@@ -3247,6 +3568,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "forjado-envoy",
         "name": "Forjado Envoy (Emisario - Eberron UA)",
+        "nameEn": "Envoy Warforged",
+        "descriptionEn": "Specialized diplomatic and artisanal construct.",
         "description": "Diseñados para funciones diplomáticas, médicas o de artificio especializado.",
         "replacesBaseBonuses": true,
         "abilityScoreBonuses": {
@@ -3269,6 +3592,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "aarakocra",
     "name": "Aarakocra",
+    "nameEn": "Aarakocra",
+    "categoryEn": "Exotic",
+    "descriptionEn": "Sequestered in high mountains atop tall trees, the aarakocra evoke awe and wonder as winged humanoids of the sky, patrolling the borders of the elemental planes.",
     "category": "Exótica",
     "description": "Gente ave originaria del Plano Elemental del Aire que surca los cielos con plumajes brillantes y garras afiladas.",
     "speed": "25 pies (Vuelo 50 pies)",
@@ -3293,6 +3619,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "aarakocra-clasico",
         "name": "Aarakocra Clásico (Elemental Evil)",
+        "nameEn": "Classic Aarakocra",
+        "descriptionEn": "50 ft flying speed while not wearing medium or heavy armor.",
         "description": "Vuelo a velocidad máxima de 50 pies en cielos abiertos.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -3305,6 +3633,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "aarakocra-multiverso",
         "name": "Aarakocra del Multiverso (MPMM)",
+        "nameEn": "Multiverse Aarakocra (MPMM)",
+        "descriptionEn": "Flying speed equal to walking speed and wind gust magic.",
         "description": "Conectados a la magia eólica con lanzamiento innato de vientos.",
         "replacesBaseBonuses": true,
         "abilityScoreBonuses": {
@@ -3333,6 +3663,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "hada",
     "name": "Hada (Fairy)",
+    "nameEn": "Fairy",
+    "categoryEn": "Planar",
+    "descriptionEn": "The Feywild is home to many fantastic peoples, including fairies. Infused with the magic of the Feywild, they possess insectile wings and playful fey glamour.",
     "category": "Exótica",
     "description": "Seres diminutos del Feywild con alas traslúcidas que infunden risas, travesuras y magia feérica.",
     "speed": "30 pies (Vuelo 30 pies)",
@@ -3384,6 +3717,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "hada-corte",
         "name": "Hada de la Corte Feérica (Witchlight)",
+        "nameEn": "Fey Court Fairy",
+        "descriptionEn": "Fey passage wings and fairy magic spells (Druidcraft, Faerie Fire, Enlarge/Reduce).",
         "description": "Nobles feéricos de las cortes de Seelie y Unseelie.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -3396,6 +3731,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "hada-silvestre",
         "name": "Hada Silvestre de los Claros",
+        "nameEn": "Sylvan Fairy",
+        "descriptionEn": "Wildwood sprite with subtle woodland illusions.",
         "description": "Hadas de arboledas y hongos que bailan con animales del bosque.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -3410,6 +3747,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "liebrelido",
     "name": "Liebrélido (Harengon)",
+    "nameEn": "Harengon",
+    "categoryEn": "Exotic",
+    "descriptionEn": "Harengons originated in the Feywild, where they spoke Sylvan and embodied the spirit of freedom and travel. They are bipedal rabbitfolk blessed with lucky footwork.",
     "category": "Exótica",
     "description": "Conejos humanoides del Feywild dotados de reflejos prodigiosos y una suerte saltarina para esquivar el peligro.",
     "speed": "30 pies",
@@ -3445,6 +3785,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "liebrelido-feerico",
         "name": "Liebrélido del Feywild (MPMM)",
+        "nameEn": "Feywild Harengon",
+        "descriptionEn": "Hare-trigger initiative, lucky footwork saves, and rabbit hop bonus action.",
         "description": "Viajeros de bosques encantados con gracia feérica.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -3457,6 +3799,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "liebrelido-madriguera",
         "name": "Liebrélido de las Madrigueras",
+        "nameEn": "Burrow Harengon",
+        "descriptionEn": "Tunnel scouts with keen hearing and nimble burrowing instinct.",
         "description": "Excavadores precavidos acostumbrados a construir refugios subterráneos.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -3471,6 +3815,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "centauro",
     "name": "Centauro (Centaur)",
+    "nameEn": "Centaur",
+    "categoryEn": "Exotic",
+    "descriptionEn": "Roaming the wild plains and ancient groves, centaurs combine the upper bodies of humanoids with the lower bodies of powerful horses. Natural chargers with thundering hooves.",
     "category": "Monstruosa",
     "description": "Nobles seres con torso humanoide y cuerpo inferior de caballo veloz que recorren las praderas con orgullo salvaje.",
     "speed": "40 pies",
@@ -3506,6 +3853,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "centauro-ravnica",
         "name": "Centauro de Ravnica / Theros",
+        "nameEn": "Ravnica / Theros Centaur",
+        "descriptionEn": "40 ft speed, charge hoof attack, equine build, and survivor instincts.",
         "description": "Pertenecientes a los clanes Gruul, Selesnya o de los valles de Theros.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -3518,6 +3867,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "centauro-multiverso",
         "name": "Centauro del Multiverso (MPMM)",
+        "nameEn": "Multiverse Centaur (MPMM)",
+        "descriptionEn": "Fey creature type, natural hooves, and charge attacks.",
         "description": "Pezuñas mejoradas que infligen 1d6 + Fuerza de daño contundente.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -3532,6 +3883,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "minotauro",
     "name": "Minotauro (Minotaur)",
+    "nameEn": "Minotaur",
+    "categoryEn": "Exotic",
+    "descriptionEn": "Minotaurs are barrel-chested humanoids with heads resembling horned bulls. Formidable warriors with devastating goring rushes and labyrinthine recall.",
     "category": "Monstruosa",
     "description": "Colosos con cabeza taurina criados en laberintos y batallas que cargan con una furia implacable contra sus enemigos.",
     "speed": "30 pies",
@@ -3563,6 +3917,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "minotauro-ravnica",
         "name": "Minotauro de Ravnica / Theros",
+        "nameEn": "Ravnica Minotaur",
+        "descriptionEn": "Horns gore attack, goring rush dash, and hammering horns bonus action.",
         "description": "Guerreros marciales de los batallones Boros o campeones de Akros.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -3575,6 +3931,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "minotauro-krynn",
         "name": "Minotauro de Krynn (Dragonlance)",
+        "nameEn": "Krynn Minotaur",
+        "descriptionEn": "Honor-bound seafaring gladiators from Dragonlance.",
         "description": "Navegantes orgullosos y marineros de la flota minotauro de Ansalon.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -3589,6 +3947,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "satiro",
     "name": "Sátiro (Satyr)",
+    "nameEn": "Satyr",
+    "categoryEn": "Planar",
+    "descriptionEn": "Satyrs are fey revelers of the wildlands, delighting in music, dance, celebration, and mischief with potent magic resistance and leaping goat legs.",
     "category": "Exótica",
     "description": "Criaturas con patas de cabra y cuernos del Feywild que celebran la vida, la música y poseen una formidable resistencia arcana.",
     "speed": "35 pies",
@@ -3628,6 +3989,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "satiro-theros",
         "name": "Sátiro Dionisíaco (Theros)",
+        "nameEn": "Theros Satyr",
+        "descriptionEn": "Ram attack, magic resistance, mirthful leaps, and reveler proficiency.",
         "description": "Devotos del dios del festejo Xenagos y la libertad silvestre.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -3640,6 +4003,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "satiro-feerico",
         "name": "Sátiro del Feywild (MPMM)",
+        "nameEn": "Feywild Satyr (MPMM)",
+        "descriptionEn": "Fey creature type, magic resistance, and celebratory song.",
         "description": "Viajeros eternos entre las cortes de las hadas con cabezazo reforzado a 1d6.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -3654,6 +4019,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "gith",
     "name": "Gith",
+    "nameEn": "Gith",
+    "categoryEn": "Planar",
+    "descriptionEn": "Once enslaved by mind flayers, the gith rebelled and split into two distinct factions: the astral-dwelling Githyanki and the monastic Githzerai.",
     "category": "Planar",
     "description": "Un antiguo pueblo que se rebeló contra el imperio de los azotamentes (Mind Flayers) y desarrolló formidables poderes psiónicos.",
     "speed": "30 pies",
@@ -3687,6 +4055,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "githyanki",
         "name": "Githyanki",
+        "nameEn": "Githyanki",
+        "descriptionEn": "Martial astral raiders wielding silver swords and astral psionics (Jump, Misty Step).",
         "description": "Conquistadores marciales del Plano Astral leales a la Reina Liche Vlaakith.",
         "abilityScoreBonuses": {
           "str": 2
@@ -3713,6 +4083,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "githzerai",
         "name": "Githzerai",
+        "nameEn": "Githzerai",
+        "descriptionEn": "Disciplined monastic sages dwelling in Limbo wielding mental shielding psionics.",
         "description": "Monjes ascéticos del Caos de Limbo que cultivan una férrea disciplina mental y calma imperturbable.",
         "abilityScoreBonuses": {
           "wis": 2
@@ -3741,6 +4113,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "shifter",
     "name": "Cambiante / Licántropo (Shifter)",
+    "nameEn": "Shifter",
+    "categoryEn": "Exotic",
+    "descriptionEn": "Shifters, sometimes called the weretouched, are humanoids with bestial aspects that can be unleashed in a momentary transformation known as shifting.",
     "category": "Exótica",
     "description": "Descendientes de licántropos en Eberron que manifiestan la ferocidad y agilidad de su herencia bestial en el combate.",
     "speed": "30 pies",
@@ -3762,6 +4137,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "shifter-beasthide",
         "name": "Piel de Bestia (Beasthide)",
+        "nameEn": "Beasthide Shifter",
+        "descriptionEn": "Tough and resilient, gaining temporary hit points and bonus AC while shifted.",
         "description": "Duros y tenaces como jabalíes o tejones de guerra.",
         "abilityScoreBonuses": {
           "con": 2,
@@ -3781,6 +4158,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "shifter-longtooth",
         "name": "Diente Largo (Longtooth)",
+        "nameEn": "Longtooth Shifter",
+        "descriptionEn": "Fierce predator manifesting savage fangs to bite as a bonus action.",
         "description": "Depredadores carnívoros con colmillos alargados y feroces.",
         "abilityScoreBonuses": {
           "str": 2
@@ -3799,6 +4178,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "shifter-swiftstride",
         "name": "Paso Veloz (Swiftstride)",
+        "nameEn": "Swiftstride Shifter",
+        "descriptionEn": "Graceful and quick, moving away reactively when an enemy closes in.",
         "description": "Rápidos y esquivos como felinos salvajes.",
         "abilityScoreBonuses": {
           "dex": 1,
@@ -3822,6 +4203,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "shifter-wildhunt",
         "name": "Caza Salvaje (Wildhunt)",
+        "nameEn": "Wildhunt Shifter",
+        "descriptionEn": "Innate tracker preventing nearby enemies from gaining advantage against you.",
         "description": "Rastreadores natos e intuitivos guiados por los sentidos de una manada.",
         "abilityScoreBonuses": {
           "wis": 2
@@ -3842,6 +4225,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "kalashtar",
     "name": "Kalashtar",
+    "nameEn": "Kalashtar",
+    "categoryEn": "Planar",
+    "descriptionEn": "The kalashtar are a compound race: bonded humanoids infused with otherworldly spirits of light from the plane of dreams, possessing telepathy and psychic resilience.",
     "category": "Exótica",
     "description": "Un pueblo pacífico nacido de la unión simbiótica entre humanos y espíritus quori del plano de los sueños.",
     "speed": "30 pies",
@@ -3877,6 +4263,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "kalashtar-luz",
         "name": "Kalashtar Il-Yannah (Sendero de la Luz)",
+        "nameEn": "Path of Light Kalashtar",
+        "descriptionEn": "Devout disciples of the dream spirit Il-Yannah.",
         "description": "Devotos de la Luz de Dal Quor dedicados a la meditación y defensa contra la Oscuridad Soñadora.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -3889,6 +4277,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "kalashtar-huerfano",
         "name": "Kalashtar Huérfano de Khorvaire",
+        "nameEn": "Orphan Kalashtar",
+        "descriptionEn": "Disconnected dream wanderers surviving in Khorvaire.",
         "description": "Crecidos lejos de los enclaves de Adar, curtidos en la supervivencia callejera.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -3903,6 +4293,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "leonin",
     "name": "Leonin",
+    "nameEn": "Leonin",
+    "categoryEn": "Exotic",
+    "descriptionEn": "The leonin are proud, noble lion-folk who wander the golden plains. Fierce protectors of their prides with a fearsome, thunderous roar.",
     "category": "Exótica",
     "description": "Nobles felinos humanoides orgullosos y feroces de las llanuras que cazan en manadas y rugen con fuerza atronadora.",
     "speed": "35 pies",
@@ -3934,6 +4327,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "leonin-llanuras",
         "name": "Leonin de las Llanuras (Theros)",
+        "nameEn": "Plains Leonin",
+        "descriptionEn": "35 ft speed, darkvision, claw attacks, and frightening roar.",
         "description": "Orgullosos centinelas de Oreskos que protegen a su manada.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -3946,6 +4341,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "leonin-cazador",
         "name": "Leonin Cazador Solitario",
+        "nameEn": "Hunter Leonin",
+        "descriptionEn": "Solitary stalkers attuned to scent and ambush.",
         "description": "Rastreadores solitarios que vagan por las estepas lejanas.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -3960,6 +4357,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "loxodon",
     "name": "Loxodon (Elefante)",
+    "nameEn": "Loxodon",
+    "categoryEn": "Exotic",
+    "descriptionEn": "Loxodons are humanoid elephants revered for their wisdom, serenity, stonecrafting patience, and powerful trunk dexterity.",
     "category": "Exótica",
     "description": "Humanoides paquidermos pacientes, leales e imponentes cuya serenidad solo es igualada por su fuerza física hercúlea.",
     "speed": "30 pies",
@@ -3995,6 +4395,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "loxodon-constructor",
         "name": "Loxodon Maestro Constructor (Ravnica)",
+        "nameEn": "Mason Loxodon",
+        "descriptionEn": "Natural armor (12 + Con), trunk grasping, and serene calm mind.",
         "description": "Arquitectos venerables de las ciudadelas y gremios de Ravnica.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -4007,6 +4409,8 @@ export const WIKIDOT_RACES: WikidotRace[] = [
       {
         "id": "loxodon-erudito",
         "name": "Loxodon Erudito de la Memoria",
+        "nameEn": "Chronicler Loxodon",
+        "descriptionEn": "Sacred memory keepers and deep history scholars.",
         "description": "Sabios que recuerdan generaciones enteras de canciones y relatos.",
         "abilityScoreBonuses": {},
         "traits": [
@@ -4021,6 +4425,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "kender",
     "name": "Kender (Dragonlance)",
+    "nameEn": "Kender",
+    "categoryEn": "Exotic",
+    "descriptionEn": "Originating on the world of Krynn, kender are diminutive folk blessed with supernatural fearlessness, boundless curiosity, and taunting quips.",
     "category": "Exótica",
     "description": "Gente pequeña, vivaz y curiosa de Krynn bendecida con una inmunidad legendaria al miedo y una tendencia insaciable a husmear bolsillos y provocar a sus enemigos.",
     "speed": "30 pies",
@@ -4052,6 +4459,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "owlin",
     "name": "Owlin (Gente Búho - Strixhaven)",
+    "nameEn": "Owlin",
+    "categoryEn": "Exotic",
+    "descriptionEn": "Distant kin of giant owls from the Feywild, owlin are feathered folk with silent flight, telescopic vision, and a scholarly demeanor.",
     "category": "Exótica",
     "description": "Humanoides con aspecto de búho descendientes del Feywild, caracterizados por su plumaje suave que amortigua el sonido y sus ojos telescópicos.",
     "speed": "30 pies (Vuelo 30 pies)",
@@ -4083,6 +4493,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "plasmoide",
     "name": "Plasmoide (Plasmoid - Spelljammer)",
+    "nameEn": "Plasmoid",
+    "categoryEn": "Planar",
+    "descriptionEn": "Plasmoids are amorphous beings of living protoplasm who can alter their shape, squeeze through tiny gaps, and extend pseudopods.",
     "category": "Planar",
     "description": "Criaturas ameboides de limo inteligente capaces de moldear su cuerpo viscoso para adoptar formas humanoides o deslizarse por aberturas diminutas.",
     "speed": "30 pies",
@@ -4118,6 +4531,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "thri-kreen",
     "name": "Thri-kreen (Spelljammer)",
+    "nameEn": "Thri-kreen",
+    "categoryEn": "Planar",
+    "descriptionEn": "Thri-kreen are mantis-like insectoid folk with chameleon carapaces, secondary arms, and telepathic communication.",
     "category": "Planar",
     "description": "Insectoides mantis cuadrímanos con exoesqueleto camaleónico, cuatro brazos funcionales y telepatía natural que nunca duermen.",
     "speed": "30 pies",
@@ -4153,6 +4569,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "grung",
     "name": "Grung (One Grung Above)",
+    "nameEn": "Grung",
+    "categoryEn": "Monstrous",
+    "descriptionEn": "Grungs are small, tree-dwelling frogfolk of the tropical jungles with toxic skin secretions, water dependency, and high leaping agility.",
     "category": "Monstruosa",
     "description": "Ranas humanoides arborícolas con piel de colores vivos que segregan toxinas paralizantes y saltan alturas increíbles entre las ramas.",
     "speed": "25 pies (Trepar 25 pies)",
@@ -4187,6 +4606,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "simic-hybrid",
     "name": "Híbrido Simic (Simic Hybrid - Ravnica)",
+    "nameEn": "Simic Hybrid",
+    "categoryEn": "Exotic",
+    "descriptionEn": "Created through biomantic cross-breeding on Ravnica, Simic hybrids incorporate animal adaptations such as gliding fins, carapace armor, or grappling appendages.",
     "category": "Planar",
     "description": "Humanos, elfos o vedalken alterados genéticamente por el Biomante Simic que combinan tejidos de animales marinos y anfibios.",
     "speed": "30 pies",
@@ -4214,6 +4636,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "giff",
     "name": "Giff (Spelljammer)",
+    "nameEn": "Giff",
+    "categoryEn": "Planar",
+    "descriptionEn": "Giff are tall, broad-shouldered hippo-folk who love military discipline, honor, heavy armaments, and devastating firearms.",
     "category": "Planar",
     "description": "Humanoides con aspecto de hipopótamo orgullosos de su código militar y su dominio sin igual de las armas de fuego y la artillería cósmica.",
     "speed": "30 pies (Nado 30 pies)",
@@ -4240,6 +4665,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "vedalken",
     "name": "Vedalken (Ravnica / Kaladesh)",
+    "nameEn": "Vedalken",
+    "categoryEn": "Planar",
+    "descriptionEn": "Blue-skinned humanoids who value rationality, cold logic, and perfection in all pursuits, possessing unmatched mental resilience.",
     "category": "Exótica",
     "description": "Seres de piel azulada fríos, metódicos y sumamente racionales que buscan la perfección teórica y práctica en todas las cosas.",
     "speed": "30 pies",
@@ -4271,6 +4699,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "hadozee",
     "name": "Hadozee (Spelljammer)",
+    "nameEn": "Hadozee",
+    "categoryEn": "Planar",
+    "descriptionEn": "Simian spacefarers known as winged baboons, hadozee have membranes connecting their limbs that allow them to glide gracefully between ship rigging.",
     "category": "Exótica",
     "description": "Simios alados nativos del Espacio Salvaje, conocidos por sus membranas de planeo que unen brazos y piernas, sus pies prensiles y su espíritu aventurero náutico.",
     "speed": "30 pies (Escalada 30 pies)",
@@ -4302,6 +4733,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "locathah",
     "name": "Locathah (Locathah Rising)",
+    "nameEn": "Locathah",
+    "categoryEn": "Exotic",
+    "descriptionEn": "Aquatic fishfolk who dwell along coastlines and reefs, known for their resilient scales and determination to survive against all odds.",
     "category": "Exótica",
     "description": "Criaturas humanoides con rasgos de pez resistentes y observadoras que habitan en las cálidas aguas costeras y en lechos oceánicos protegidos.",
     "speed": "30 pies (Nadar 30 pies)",
@@ -4337,6 +4771,9 @@ export const WIKIDOT_RACES: WikidotRace[] = [
   {
     "id": "verdan",
     "name": "Verdan (Acquisitions Incorporated)",
+    "nameEn": "Verdan",
+    "categoryEn": "Planar",
+    "descriptionEn": "Mutated by the chaos of the Underdark, verdan are goblinoid beings touched by the primal entity That-Which-Endures, possessing telepathy and mutating growth.",
     "category": "Exótica",
     "description": "Una raza en constante evolución mutagénica creada por el misterioso Caos de la Entidad que posee sangre negra, piel verdosa y un crecimiento físico espontáneo.",
     "speed": "30 pies",

@@ -1,0 +1,146 @@
+[
+  {
+    "id": "bg-2024-acolyte",
+    "slug": "acolyte",
+    "name": "Acolyte",
+    "rawHtml": "\n\n<p>Source: Player's Handbook</p>\n<p>You devoted yourself to service in a temple, either nestled in a town or secluded in a sacred grove. There you performed rites in honor of a god or pantheon. You served under a priest and studied religion. Thanks to your priest's instruction and your own devotion, you also learned how to channel a modicum of divine power in service to your place of worship and the people who prayed there.</p>\n<p><strong>Ability Scores:</strong> Intelligence, Wisdom, Charisma<br />\n<strong>Feat:</strong> <a href=\"/feat:magic-initiate\">Magic Initiate (Cleric)</a><br />\n<strong>Skill Proficiencies:</strong> Insight and Religion<br />\n<strong>Tool Proficiency:</strong> <a href=\"/equipment:tool\">Calligrapher's Supplies</a><br />\n<strong>Equipment:</strong> Choose A or B: (A) Calligrapher’s Supplies, Book (prayers), Holy Symbol, Parchment (10 sheets), Robe, 8 GP; or (B) 50 GP</p>\n",
+    "cleanText": "Source: Player's Handbook You devoted yourself to service in a temple, either nestled in a town or secluded in a sacred grove. There you performed rites in honor of a god or pantheon. You served under a priest and studied religion. Thanks to your priest's instruction and your own devotion, you also learned how to channel a modicum of divine power in service to your place of worship and the people who prayed there. Ability Scores: Intelligence, Wisdom, Charisma Feat: Magic Initiate (Cleric) Skill Proficiencies: Insight and Religion Tool Proficiency: Calligrapher's Supplies Equipment: Choose A or B: (A) Calligrapher’s Supplies, Book (prayers), Holy Symbol, Parchment (10 sheets), Robe, 8 GP; or (B) 50 GP",
+    "url": "https://dnd2024.wikidot.com/background:acolyte",
+    "edition": "5.5e"
+  },
+  {
+    "id": "bg-2024-artisan",
+    "slug": "artisan",
+    "name": "Artisan",
+    "rawHtml": "\n\n<p>Source: Player's Handbook</p>\n<p>You began mopping floors and scrubbing counters in an artisan’s workshop for a few coppers per day as soon as you were strong enough to carry a bucket. When you were old enough to apprentice, you learned to create basic crafts of your own, as well as how to sweet-talk the occasional demanding customer. Your trade has also given you a keen eye for detail.</p>\n<p><strong>Ability Scores:</strong> Strength, Dexterity, Intelligence<br />\n<strong>Feat:</strong> <a href=\"/feat:crafter\">Crafter</a><br />\n<strong>Skill Proficiencies:</strong> Investigation and Persuasion<br />\n<strong>Tool Proficiency:</strong> Choose one kind of <a href=\"/equipment:tool\">Artisan’s Tools</a><br />\n<strong>Equipment:</strong> Choose A or B: (A) Artisan's Tools (same as above), 2 Pouches, Traveler’s Clothes, 32 GP; or (B) 50 GP</p>\n",
+    "cleanText": "Source: Player's Handbook You began mopping floors and scrubbing counters in an artisan’s workshop for a few coppers per day as soon as you were strong enough to carry a bucket. When you were old enough to apprentice, you learned to create basic crafts of your own, as well as how to sweet-talk the occasional demanding customer. Your trade has also given you a keen eye for detail. Ability Scores: Strength, Dexterity, Intelligence Feat: Crafter Skill Proficiencies: Investigation and Persuasion Tool Proficiency: Choose one kind of Artisan’s Tools Equipment: Choose A or B: (A) Artisan's Tools (same as above), 2 Pouches, Traveler’s Clothes, 32 GP; or (B) 50 GP",
+    "url": "https://dnd2024.wikidot.com/background:artisan",
+    "edition": "5.5e"
+  },
+  {
+    "id": "bg-2024-charlatan",
+    "slug": "charlatan",
+    "name": "Charlatan",
+    "rawHtml": "\n\n<p>Source: Player's Handbook</p>\n<p>Once you were old enough to order an ale, you soon had a favorite stool in every tavern within ten miles of where you were born. As you traveled the circuit from public house to watering hole, you learned to prey on unfortunates who were in the market for a comforting lie or two—perhaps a sham potion or forged ancestry records.</p>\n<p><strong>Ability Scores:</strong> Dexterity, Constitution, Charisma<br />\n<strong>Feat:</strong> <a href=\"/feat:skilled\">Skilled</a><br />\n<strong>Skill Proficiencies:</strong> Deception and Sleight of Hand<br />\n<strong>Tool Proficiency:</strong> <a href=\"/equipment:tool\">Forgery Kit</a><br />\n<strong>Equipment:</strong> Choose A or B: (A) Forgery Kit, Costume, Fine Clothes, 15 GP; or (B) 50 GP</p>\n",
+    "cleanText": "Source: Player's Handbook Once you were old enough to order an ale, you soon had a favorite stool in every tavern within ten miles of where you were born. As you traveled the circuit from public house to watering hole, you learned to prey on unfortunates who were in the market for a comforting lie or two—perhaps a sham potion or forged ancestry records. Ability Scores: Dexterity, Constitution, Charisma Feat: Skilled Skill Proficiencies: Deception and Sleight of Hand Tool Proficiency: Forgery Kit Equipment: Choose A or B: (A) Forgery Kit, Costume, Fine Clothes, 15 GP; or (B) 50 GP",
+    "url": "https://dnd2024.wikidot.com/background:charlatan",
+    "edition": "5.5e"
+  },
+  {
+    "id": "bg-2024-criminal",
+    "slug": "criminal",
+    "name": "Criminal",
+    "rawHtml": "\n\n<p>Source: Player's Handbook</p>\n<p>You eked out a living in dark alleyways, cutting purses or burgling shops. Perhaps you were part of a small gang of like-minded wrongdoers who looked out for each other. Or maybe you were a lone wolf, fending for yourself against the local thieves' guild and more fearsome lawbreakers.</p>\n<p><strong>Ability Scores:</strong> Dexterity, Constitution, Intelligence<br />\n<strong>Feat:</strong> <a href=\"/feat:alert\">Alert</a><br />\n<strong>Skill Proficiencies:</strong> Sleight of Hand and Stealth<br />\n<strong>Tool Proficiency:</strong> <a href=\"/equipment:tool\">Thieves' Tools</a><br />\n<strong>Equipment:</strong> Choose A or B: (A) 2 Daggers, Thieves' Tools, Crowbar, 2 Pouches, Traveler's Clothes, 16 GP; or (B) 50 GP</p>\n",
+    "cleanText": "Source: Player's Handbook You eked out a living in dark alleyways, cutting purses or burgling shops. Perhaps you were part of a small gang of like-minded wrongdoers who looked out for each other. Or maybe you were a lone wolf, fending for yourself against the local thieves' guild and more fearsome lawbreakers. Ability Scores: Dexterity, Constitution, Intelligence Feat: Alert Skill Proficiencies: Sleight of Hand and Stealth Tool Proficiency: Thieves' Tools Equipment: Choose A or B: (A) 2 Daggers, Thieves' Tools, Crowbar, 2 Pouches, Traveler's Clothes, 16 GP; or (B) 50 GP",
+    "url": "https://dnd2024.wikidot.com/background:criminal",
+    "edition": "5.5e"
+  },
+  {
+    "id": "bg-2024-entertainer",
+    "slug": "entertainer",
+    "name": "Entertainer",
+    "rawHtml": "\n\n<p>Source: Player's Handbook</p>\n<p>You spent much of your youth following roving fairs and carnivals, performing odd jobs for musicians and acrobats in exchange for lessons. You may have learned how to walk a tightrope, how to play a lute in a distinct style, or how to recite poetry with impeccable diction. To this day, you thrive on applause and long for the stage.</p>\n<p><strong>Ability Scores:</strong> Strength, Dexterity, Charisma<br />\n<strong>Feat:</strong> <a href=\"/feat:musician\">Musician</a><br />\n<strong>Skill Proficiencies:</strong> Acrobatics and Performance<br />\n<strong>Tool Proficiency:</strong> Choose one kind of <a href=\"/equipment:tool\">Musical Instrument</a><br />\n<strong>Equipment:</strong> Choose A or B: (A) Musical Instrument (same as above), 2 Costumes, Mirror, Perfume, Traveler’s Clothes, 11 GP; or (B) 50 GP</p>\n",
+    "cleanText": "Source: Player's Handbook You spent much of your youth following roving fairs and carnivals, performing odd jobs for musicians and acrobats in exchange for lessons. You may have learned how to walk a tightrope, how to play a lute in a distinct style, or how to recite poetry with impeccable diction. To this day, you thrive on applause and long for the stage. Ability Scores: Strength, Dexterity, Charisma Feat: Musician Skill Proficiencies: Acrobatics and Performance Tool Proficiency: Choose one kind of Musical Instrument Equipment: Choose A or B: (A) Musical Instrument (same as above), 2 Costumes, Mirror, Perfume, Traveler’s Clothes, 11 GP; or (B) 50 GP",
+    "url": "https://dnd2024.wikidot.com/background:entertainer",
+    "edition": "5.5e"
+  },
+  {
+    "id": "bg-2024-farmer",
+    "slug": "farmer",
+    "name": "Farmer",
+    "rawHtml": "\n\n<p>Source: Player's Handbook</p>\n<p>You grew up close to the land. Years tending animals and cultivating the earth rewarded you with patience and good health. You have a keen appreciation for nature’s bounty alongside a healthy respect for nature's wrath.</p>\n<p><strong>Ability Scores:</strong> Strength, Constitution, Wisdom<br />\n<strong>Feat:</strong> <a href=\"/feat:tough\">Tough</a><br />\n<strong>Skill Proficiencies:</strong> Animal Handling and Nature<br />\n<strong>Tool Proficiency:</strong> <a href=\"/equipment:tool\">Carpenter's Tools</a><br />\n<strong>Equipment:</strong> Choose A or B: (A) Sickle, Carpenter's Tools, Healer's Kit, Iron Pot, Shovel, Traveler's Clothes, 30 GP; or (B) 50 GP</p>\n",
+    "cleanText": "Source: Player's Handbook You grew up close to the land. Years tending animals and cultivating the earth rewarded you with patience and good health. You have a keen appreciation for nature’s bounty alongside a healthy respect for nature's wrath. Ability Scores: Strength, Constitution, Wisdom Feat: Tough Skill Proficiencies: Animal Handling and Nature Tool Proficiency: Carpenter's Tools Equipment: Choose A or B: (A) Sickle, Carpenter's Tools, Healer's Kit, Iron Pot, Shovel, Traveler's Clothes, 30 GP; or (B) 50 GP",
+    "url": "https://dnd2024.wikidot.com/background:farmer",
+    "edition": "5.5e"
+  },
+  {
+    "id": "bg-2024-guard",
+    "slug": "guard",
+    "name": "Guard",
+    "rawHtml": "\n\n<p>Source: Player's Handbook</p>\n<p>Your feet ache when you remember the countless hours you spent at your post in the tower. You were trained to keep one eye looking outside the wall, watching for marauders sweeping from the nearby forest, and your other eye looking inside the wall, searching for cutpurses and troublemakers.</p>\n<p><strong>Ability Scores:</strong> Strength, Intelligence, Wisdom<br />\n<strong>Feat:</strong> <a href=\"/feat:alert\">Alert</a><br />\n<strong>Skill Proficiencies:</strong> Athletics and Perception<br />\n<strong>Tool Proficiency:</strong> Choose one kind of <a href=\"/equipment:tool\">Gaming Set</a><br />\n<strong>Equipment:</strong> Choose A or B: (A) Spear, Light Crossbow, 20 Bolts, Gaming Set (same as above), Hooded Lantern, Manacles, Quiver, Traveler’s Clothes, 12 GP; or (B) 50 GP</p>\n",
+    "cleanText": "Source: Player's Handbook Your feet ache when you remember the countless hours you spent at your post in the tower. You were trained to keep one eye looking outside the wall, watching for marauders sweeping from the nearby forest, and your other eye looking inside the wall, searching for cutpurses and troublemakers. Ability Scores: Strength, Intelligence, Wisdom Feat: Alert Skill Proficiencies: Athletics and Perception Tool Proficiency: Choose one kind of Gaming Set Equipment: Choose A or B: (A) Spear, Light Crossbow, 20 Bolts, Gaming Set (same as above), Hooded Lantern, Manacles, Quiver, Traveler’s Clothes, 12 GP; or (B) 50 GP",
+    "url": "https://dnd2024.wikidot.com/background:guard",
+    "edition": "5.5e"
+  },
+  {
+    "id": "bg-2024-guide",
+    "slug": "guide",
+    "name": "Guide",
+    "rawHtml": "\n\n<p>Source: Player's Handbook</p>\n<p>You came of age outdoors, far from settled lands. Your home was anywhere you chose to spread your bedroll. There are wonders in the wilderness— strange monsters, pristine forests and streams, overgrown ruins of great halls once trod by giants— and you learned to fend for yourself as you explored them. From time to time, you guided friendly nature priests who instructed you in the fundamentals of channeling the magic of the wild.</p>\n<p><strong>Ability Scores:</strong> Dexterity, Constitution, Wisdom<br />\n<strong>Feat:</strong> <a href=\"/feat:magic-initiate\">Magic Initiate (Druid)</a><br />\n<strong>Skill Proficiencies:</strong> Stealth and Survival<br />\n<strong>Tool Proficiency:</strong> <a href=\"/equipment:tool\">Cartographer's Tools</a><br />\n<strong>Equipment:</strong> Choose A or B: (A) Shortbow, 20 Arrows, Cartographer’s Tools, Bedroll, Quiver, Tent, Traveler's Clothes, 3 GP; or (B) 50 GP</p>\n",
+    "cleanText": "Source: Player's Handbook You came of age outdoors, far from settled lands. Your home was anywhere you chose to spread your bedroll. There are wonders in the wilderness— strange monsters, pristine forests and streams, overgrown ruins of great halls once trod by giants— and you learned to fend for yourself as you explored them. From time to time, you guided friendly nature priests who instructed you in the fundamentals of channeling the magic of the wild. Ability Scores: Dexterity, Constitution, Wisdom Feat: Magic Initiate (Druid) Skill Proficiencies: Stealth and Survival Tool Proficiency: Cartographer's Tools Equipment: Choose A or B: (A) Shortbow, 20 Arrows, Cartographer’s Tools, Bedroll, Quiver, Tent, Traveler's Clothes, 3 GP; or (B) 50 GP",
+    "url": "https://dnd2024.wikidot.com/background:guide",
+    "edition": "5.5e"
+  },
+  {
+    "id": "bg-2024-hermit",
+    "slug": "hermit",
+    "name": "Hermit",
+    "rawHtml": "\n\n<p>Source: Player's Handbook</p>\n<p>You spent your early years secluded in a hut or monastery located well beyond the outskirts of the nearest settlement. In those days, your only companions were the creatures of the forest and those who would occasionally visit to bring news of the outside world and supplies. The solitude allowed you to spend many hours pondering the mysteries of creation.</p>\n<p><strong>Ability Scores:</strong> Constitution, Wisdom, Charisma<br />\n<strong>Feat:</strong> <a href=\"/feat:healer\">Healer</a><br />\n<strong>Skill Proficiencies:</strong> Medicine and Religion<br />\n<strong>Tool Proficiency:</strong> <a href=\"/equipment:tool\">Herbalism Kit</a><br />\n<strong>Equipment:</strong> Choose A or B: (A) Quarterstaff, Herbalism Kit, Bedroll, Book (philosophy), Lamp, Oil (3 flasks), Traveler's Clothes, 16 GP; or (B) 50 GP</p>\n",
+    "cleanText": "Source: Player's Handbook You spent your early years secluded in a hut or monastery located well beyond the outskirts of the nearest settlement. In those days, your only companions were the creatures of the forest and those who would occasionally visit to bring news of the outside world and supplies. The solitude allowed you to spend many hours pondering the mysteries of creation. Ability Scores: Constitution, Wisdom, Charisma Feat: Healer Skill Proficiencies: Medicine and Religion Tool Proficiency: Herbalism Kit Equipment: Choose A or B: (A) Quarterstaff, Herbalism Kit, Bedroll, Book (philosophy), Lamp, Oil (3 flasks), Traveler's Clothes, 16 GP; or (B) 50 GP",
+    "url": "https://dnd2024.wikidot.com/background:hermit",
+    "edition": "5.5e"
+  },
+  {
+    "id": "bg-2024-merchant",
+    "slug": "merchant",
+    "name": "Merchant",
+    "rawHtml": "\n\n<p>Source: Player's Handbook</p>\n<p>You were apprenticed to a trader, caravan master, or shopkeeper, learning the fundamentals of commerce. You traveled broadly, and you earned a living by buying and selling the raw materials artisans need to practice their craft or finished works from such crafters. You might have transported goods from one place to another (by ship, wagon, or caravan) or bought them from traveling traders and sold them in your own shop.</p>\n<p><strong>Ability Scores:</strong> Constitution, Intelligence, Charisma<br />\n<strong>Feat:</strong> <a href=\"/feat:lucky\">Lucky</a><br />\n<strong>Skill Proficiencies:</strong> Animal Handling and Persuasion<br />\n<strong>Tool Proficiency:</strong> <a href=\"/equipment:tool\">Navigator's Tools</a><br />\n<strong>Equipment:</strong> Choose A or B: (A) Navigator’s Tools, 2 Pouches, Traveler's Clothes, 22 GP; or (B) 50 GP</p>\n",
+    "cleanText": "Source: Player's Handbook You were apprenticed to a trader, caravan master, or shopkeeper, learning the fundamentals of commerce. You traveled broadly, and you earned a living by buying and selling the raw materials artisans need to practice their craft or finished works from such crafters. You might have transported goods from one place to another (by ship, wagon, or caravan) or bought them from traveling traders and sold them in your own shop. Ability Scores: Constitution, Intelligence, Charisma Feat: Lucky Skill Proficiencies: Animal Handling and Persuasion Tool Proficiency: Navigator's Tools Equipment: Choose A or B: (A) Navigator’s Tools, 2 Pouches, Traveler's Clothes, 22 GP; or (B) 50 GP",
+    "url": "https://dnd2024.wikidot.com/background:merchant",
+    "edition": "5.5e"
+  },
+  {
+    "id": "bg-2024-noble",
+    "slug": "noble",
+    "name": "Noble",
+    "rawHtml": "\n\n<p>Source: Player's Handbook</p>\n<p>You were raised in a castle, surrounded by wealth, power, and privilege. Your family of minor aristocrats ensured that you received a first-class education, some of which you appreciated and some of which you resented. Your time in the castle, especially the many hours you spent observing your family at court, also taught you a great deal about leadership.</p>\n<p><strong>Ability Scores:</strong> Strength, Intelligence, Charisma<br />\n<strong>Feat:</strong> <a href=\"/feat:skilled\">Skilled</a><br />\n<strong>Skill Proficiencies:</strong> History and Persuasion<br />\n<strong>Tool Proficiency:</strong> Choose one kind of <a href=\"/equipment:tool\">Gaming Set</a><br />\n<strong>Equipment:</strong> Choose A or B: (A) Gaming Set (same as above), Fine Clothes, Perfume, 29 GP; or (B) 50 GP</p>\n",
+    "cleanText": "Source: Player's Handbook You were raised in a castle, surrounded by wealth, power, and privilege. Your family of minor aristocrats ensured that you received a first-class education, some of which you appreciated and some of which you resented. Your time in the castle, especially the many hours you spent observing your family at court, also taught you a great deal about leadership. Ability Scores: Strength, Intelligence, Charisma Feat: Skilled Skill Proficiencies: History and Persuasion Tool Proficiency: Choose one kind of Gaming Set Equipment: Choose A or B: (A) Gaming Set (same as above), Fine Clothes, Perfume, 29 GP; or (B) 50 GP",
+    "url": "https://dnd2024.wikidot.com/background:noble",
+    "edition": "5.5e"
+  },
+  {
+    "id": "bg-2024-sage",
+    "slug": "sage",
+    "name": "Sage",
+    "rawHtml": "\n\n<p>Source: Player's Handbook</p>\n<p>You spent your formative years traveling between manors and monasteries, performing various odd jobs and services in exchange for access to their libraries. You whiled away many a long evening studying books and scrolls, learning the lore of the multiverse - even the rudiments of magic - and your mind yearns for more.</p>\n<p><strong>Ability Scores:</strong> Constitution, Intelligence, Wisdom<br />\n<strong>Feat:</strong> <a href=\"/feat:magic-initiate\">Magic Initiate (Wizard)</a><br />\n<strong>Skill Proficiencies:</strong> Arcana and History<br />\n<strong>Tool Proficiency:</strong> <a href=\"/equipment:tool\">Calligrapher's Supplies</a><br />\n<strong>Equipment:</strong> Choose A or B: (A) Quarterstaff, Calligrapher's Supplies, Book (history), Parchment (8 sheets), Robe, 8 GP; or (B) 50 GP</p>\n",
+    "cleanText": "Source: Player's Handbook You spent your formative years traveling between manors and monasteries, performing various odd jobs and services in exchange for access to their libraries. You whiled away many a long evening studying books and scrolls, learning the lore of the multiverse - even the rudiments of magic - and your mind yearns for more. Ability Scores: Constitution, Intelligence, Wisdom Feat: Magic Initiate (Wizard) Skill Proficiencies: Arcana and History Tool Proficiency: Calligrapher's Supplies Equipment: Choose A or B: (A) Quarterstaff, Calligrapher's Supplies, Book (history), Parchment (8 sheets), Robe, 8 GP; or (B) 50 GP",
+    "url": "https://dnd2024.wikidot.com/background:sage",
+    "edition": "5.5e"
+  },
+  {
+    "id": "bg-2024-sailor",
+    "slug": "sailor",
+    "name": "Sailor",
+    "rawHtml": "\n\n<p>Source: Player's Handbook</p>\n<p>You lived as a seafarer, wind at your back and decks swaying beneath your feet. You've perched on barstools in more ports of call than you can remember, faced mighty storms, and swapped stories with folk who live beneath the waves.</p>\n<p><strong>Ability Scores:</strong> Strength, Dexterity, Wisdom<br />\n<strong>Feat:</strong> <a href=\"/feat:tavern-brawler\">Tavern Brawler</a><br />\n<strong>Skill Proficiencies:</strong> Acrobatics and Perception<br />\n<strong>Tool Proficiency:</strong> <a href=\"/equipment:tool\">Navigator's Tools</a><br />\n<strong>Equipment:</strong> Choose A or B: (A) Dagger, Navigator's Tools, Rope, Traveler's Clothes, 20 GP; or (B) 50 GP</p>\n",
+    "cleanText": "Source: Player's Handbook You lived as a seafarer, wind at your back and decks swaying beneath your feet. You've perched on barstools in more ports of call than you can remember, faced mighty storms, and swapped stories with folk who live beneath the waves. Ability Scores: Strength, Dexterity, Wisdom Feat: Tavern Brawler Skill Proficiencies: Acrobatics and Perception Tool Proficiency: Navigator's Tools Equipment: Choose A or B: (A) Dagger, Navigator's Tools, Rope, Traveler's Clothes, 20 GP; or (B) 50 GP",
+    "url": "https://dnd2024.wikidot.com/background:sailor",
+    "edition": "5.5e"
+  },
+  {
+    "id": "bg-2024-scribe",
+    "slug": "scribe",
+    "name": "Scribe",
+    "rawHtml": "\n\n<p>Source: Player's Handbook</p>\n<p>You spent formative years in a scriptorium, a monastery dedicated to the preservation of knowledge, or a government agency, where you learned to write with a clear hand and produce finely written texts. Perhaps you scribed government documents or copied tomes of literature. You might have some skill as a writer of poetry, narrative, or scholarly research. Above all, you have a careful attention to detail, helping you avoid introducing mistakes to the documents you copy and create.</p>\n<p><strong>Ability Scores:</strong> Dexterity, Intelligence, Wisdom<br />\n<strong>Feat:</strong> <a href=\"/feat:skilled\">Skilled</a><br />\n<strong>Skill Proficiencies:</strong> Investigation and Perception<br />\n<strong>Tool Proficiency:</strong> <a href=\"/equipment:tool\">Calligrapher's Supplies</a><br />\n<strong>Equipment:</strong> Choose A or B: (A) Calligrapher’s Supplies, Fine Clothes, Lamp, Oil (3 flasks), Parchment (12 sheets), 23 GP; or (B) 50 GP</p>\n",
+    "cleanText": "Source: Player's Handbook You spent formative years in a scriptorium, a monastery dedicated to the preservation of knowledge, or a government agency, where you learned to write with a clear hand and produce finely written texts. Perhaps you scribed government documents or copied tomes of literature. You might have some skill as a writer of poetry, narrative, or scholarly research. Above all, you have a careful attention to detail, helping you avoid introducing mistakes to the documents you copy and create. Ability Scores: Dexterity, Intelligence, Wisdom Feat: Skilled Skill Proficiencies: Investigation and Perception Tool Proficiency: Calligrapher's Supplies Equipment: Choose A or B: (A) Calligrapher’s Supplies, Fine Clothes, Lamp, Oil (3 flasks), Parchment (12 sheets), 23 GP; or (B) 50 GP",
+    "url": "https://dnd2024.wikidot.com/background:scribe",
+    "edition": "5.5e"
+  },
+  {
+    "id": "bg-2024-soldier",
+    "slug": "soldier",
+    "name": "Soldier",
+    "rawHtml": "\n\n<p>Source: Player's Handbook</p>\n<p>You began training for war as soon as you reached adulthood and carry precious few memories of life before you took up arms. Battle is in your blood. Sometimes you catch yourself reflexively performing the basic fighting exercises you learned first. Eventually, you put that training to use on the battlefield, protecting the realm by waging war.</p>\n<p><strong>Ability Scores:</strong> Strength, Dexterity, Constitution<br />\n<strong>Feat:</strong> <a href=\"/feat:savage-attacker\">Savage Attacker</a><br />\n<strong>Skill Proficiencies:</strong> Athletics and Intimidation<br />\n<strong>Tool Proficiency:</strong> Choose one kind of <a href=\"/equipment:tool\">Gaming Set</a><br />\n<strong>Equipment:</strong> Choose A or B: (A) Spear, Shortbow, 20 Arrows, Gaming Set (same as above), Healer's Kit, Quiver, Traveler’s Clothes, 14 GP; or (B) 50 GP</p>\n",
+    "cleanText": "Source: Player's Handbook You began training for war as soon as you reached adulthood and carry precious few memories of life before you took up arms. Battle is in your blood. Sometimes you catch yourself reflexively performing the basic fighting exercises you learned first. Eventually, you put that training to use on the battlefield, protecting the realm by waging war. Ability Scores: Strength, Dexterity, Constitution Feat: Savage Attacker Skill Proficiencies: Athletics and Intimidation Tool Proficiency: Choose one kind of Gaming Set Equipment: Choose A or B: (A) Spear, Shortbow, 20 Arrows, Gaming Set (same as above), Healer's Kit, Quiver, Traveler’s Clothes, 14 GP; or (B) 50 GP",
+    "url": "https://dnd2024.wikidot.com/background:soldier",
+    "edition": "5.5e"
+  },
+  {
+    "id": "bg-2024-wayfarer",
+    "slug": "wayfarer",
+    "name": "Wayfarer",
+    "rawHtml": "\n\n<p>Source: Player's Handbook</p>\n<p>You grew up on the streets surrounded by similarly ill-fated castoffs, a few of them friends and a few of them rivals. You slept where you could and did odd jobs for food. At times, when the hunger became unbearable, you resorted to theft. Still, you never lost your pride and never abandoned hope. Fate is not yet finished with you.</p>\n<p><strong>Ability Scores:</strong> Dexterity, Wisdom, Charisma<br />\n<strong>Feat:</strong> <a href=\"/feat:lucky\">Lucky</a><br />\n<strong>Skill Proficiencies:</strong> Insight and Stealth<br />\n<strong>Tool Proficiency:</strong> <a href=\"/equipment:tool\">Thieves' Tools</a><br />\n<strong>Equipment:</strong> Choose A or B: (A) 2 Daggers, Thieves' Tools, Gaming Set (any), Bedroll, 2 Pouches, Traveler's Clothes, 16 GP; or (B) 50 GP</p>\n",
+    "cleanText": "Source: Player's Handbook You grew up on the streets surrounded by similarly ill-fated castoffs, a few of them friends and a few of them rivals. You slept where you could and did odd jobs for food. At times, when the hunger became unbearable, you resorted to theft. Still, you never lost your pride and never abandoned hope. Fate is not yet finished with you. Ability Scores: Dexterity, Wisdom, Charisma Feat: Lucky Skill Proficiencies: Insight and Stealth Tool Proficiency: Thieves' Tools Equipment: Choose A or B: (A) 2 Daggers, Thieves' Tools, Gaming Set (any), Bedroll, 2 Pouches, Traveler's Clothes, 16 GP; or (B) 50 GP",
+    "url": "https://dnd2024.wikidot.com/background:wayfarer",
+    "edition": "5.5e"
+  }
+]

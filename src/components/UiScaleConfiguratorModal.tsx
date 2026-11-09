@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { X, Sliders, Check, RotateCcw, ZoomIn, ZoomOut, Monitor, Sparkles, Keyboard } from 'lucide-react';
+import { useLanguageStore } from '../hooks/useLanguageStore';
 
 interface UiScaleConfiguratorModalProps {
   isOpen: boolean;
@@ -16,6 +17,8 @@ export const UiScaleConfiguratorModal: React.FC<UiScaleConfiguratorModalProps> =
   onSetScale,
   onResetScale,
 }) => {
+  const { isSpanish } = useLanguageStore();
+
   // ESC key support
   useEffect(() => {
     if (!isOpen) return;
@@ -37,58 +40,74 @@ export const UiScaleConfiguratorModal: React.FC<UiScaleConfiguratorModalProps> =
     {
       value: 0.7,
       label: '70%',
-      title: 'Ultra Compacto',
-      desc: 'Máximo aprovechamiento de pantalla para monitores pequeños o paneles múltiples',
+      title: isSpanish ? 'Ultra Compacto' : 'Ultra Compact',
+      desc: isSpanish
+        ? 'Máximo aprovechamiento de pantalla para monitores pequeños o paneles múltiples'
+        : 'Maximum screen efficiency for small monitors or multi-window setups',
       emoji: '🔍',
     },
     {
       value: 0.75,
       label: '75%',
-      title: 'Muy Compacto',
-      desc: 'Ideal para ver todas las columnas de combate y fichas sin scroll horizontal',
+      title: isSpanish ? 'Muy Compacto' : 'Very Compact',
+      desc: isSpanish
+        ? 'Ideal para ver todas las columnas de combate y fichas sin scroll horizontal'
+        : 'Ideal to view all combat columns and cards without horizontal scrolling',
       emoji: '📏',
     },
     {
       value: 0.8,
       label: '80%',
-      title: 'Recomendado',
-      desc: 'Distribución orgánica óptima: amplitud visual, texto nítido y balance perfecto',
+      title: isSpanish ? 'Recomendado' : 'Recommended',
+      desc: isSpanish
+        ? 'Distribución orgánica óptima: amplitud visual, texto nítido y balance perfecto'
+        : 'Optimal organic layout: visual spaciousness, crisp text and balanced proportions',
       emoji: '🌟',
       isRecommended: true,
     },
     {
       value: 0.85,
       label: '85%',
-      title: 'Equilibrado',
-      desc: 'Un punto intermedio entre espacio extra y tipografía generosa',
+      title: isSpanish ? 'Equilibrado' : 'Balanced',
+      desc: isSpanish
+        ? 'Un punto intermedio entre espacio extra y tipografía generosa'
+        : 'A middle ground between extra room and generous typography',
       emoji: '⚖️',
     },
     {
       value: 0.9,
       label: '90%',
-      title: 'Estándar Cómodo',
-      desc: 'Lectura ágil con excelente proporción visual',
+      title: isSpanish ? 'Estándar Cómodo' : 'Comfortable Standard',
+      desc: isSpanish
+        ? 'Lectura ágil con excelente proporción visual'
+        : 'Effortless reading with excellent visual proportions',
       emoji: '📖',
     },
     {
       value: 1.0,
       label: '100%',
-      title: 'Tamaño Completo',
-      desc: 'Escala 1:1 original sin reducción',
+      title: isSpanish ? 'Tamaño Completo' : 'Full Size',
+      desc: isSpanish
+        ? 'Escala 1:1 original sin reducción'
+        : 'Native 1:1 scale without reduction',
       emoji: '🖥️',
     },
     {
       value: 1.15,
       label: '115%',
-      title: 'Letra Grande',
-      desc: 'Accesibilidad visual y lectura descansada a mayor distancia',
+      title: isSpanish ? 'Letra Grande' : 'Large Font',
+      desc: isSpanish
+        ? 'Accesibilidad visual y lectura descansada a mayor distancia'
+        : 'Visual accessibility and relaxed reading at greater distances',
       emoji: '👁️',
     },
     {
       value: 1.25,
       label: '125%',
-      title: 'Modo TV / Salón',
-      desc: 'Ideal para proyectar la mesa de juego en pantallas grandes o televisores',
+      title: isSpanish ? 'Modo TV / Salón' : 'Living Room / TV Mode',
+      desc: isSpanish
+        ? 'Ideal para proyectar la mesa de juego en pantallas grandes o televisores'
+        : 'Ideal for casting the game tabletop to large screens or TVs',
       emoji: '📺',
     },
   ];
@@ -110,13 +129,15 @@ export const UiScaleConfiguratorModal: React.FC<UiScaleConfiguratorModalProps> =
             </div>
             <div>
               <h3 className="font-fantasy font-bold text-base sm:text-lg text-[#f7f2ea] tracking-wider uppercase flex items-center gap-2">
-                <span>Configurador de Escala de UI</span>
+                <span>{isSpanish ? 'Configurador de Escala de UI' : 'UI Scale Configurator'}</span>
                 <span className="text-xs px-2 py-0.5 rounded-full bg-[#8c672b] text-white font-mono">
                   {currentPercent}%
                 </span>
               </h3>
               <p className="text-xs text-[#c5ab8d] italic">
-                Ajusta el tamaño de la interfaz para una distribución orgánica en tu pantalla
+                {isSpanish
+                  ? 'Ajusta el tamaño de la interfaz para una distribución orgánica en tu pantalla'
+                  : 'Adjust interface size for an organic distribution across your display'}
               </p>
             </div>
           </div>
@@ -125,7 +146,7 @@ export const UiScaleConfiguratorModal: React.FC<UiScaleConfiguratorModalProps> =
             type="button"
             onClick={onClose}
             className="p-2 bg-[#1c150e]/90 hover:bg-[#8c2e28] text-[#c0ad97] hover:text-white rounded-xl border border-[#c59b27]/60 shadow-md transition cursor-pointer active:scale-95"
-            title="Cerrar (Escape)"
+            title={isSpanish ? 'Cerrar (Escape)' : 'Close (Escape)'}
           >
             <X className="w-5 h-5 text-[#d4ab59] hover:text-white" />
           </button>
@@ -138,7 +159,7 @@ export const UiScaleConfiguratorModal: React.FC<UiScaleConfiguratorModalProps> =
             <div className="flex items-center justify-between">
               <span className="font-fantasy font-bold text-sm text-[#382b20] uppercase tracking-wide flex items-center gap-2">
                 <Monitor className="w-4 h-4 text-[#8c672b]" />
-                <span>Control Deslizante en Tiempo Real</span>
+                <span>{isSpanish ? 'Control Deslizante en Tiempo Real' : 'Real-Time Slider Control'}</span>
               </span>
               <div className="flex items-center gap-2">
                 <span className="text-base font-fantasy font-extrabold text-[#8c672b] bg-[#fbf7ee] px-3 py-0.5 rounded-lg border border-[#c59b27] shadow-xs font-mono">
@@ -147,7 +168,7 @@ export const UiScaleConfiguratorModal: React.FC<UiScaleConfiguratorModalProps> =
                 <button
                   onClick={onResetScale}
                   className="px-2.5 py-1 text-xs bg-[#e5d5be] hover:bg-[#d4ab59] text-[#4a3a2a] hover:text-[#1c150e] font-bold rounded-lg border border-[#c59b27]/60 transition flex items-center gap-1 shadow-2xs cursor-pointer"
-                  title="Restablecer al 80% recomendado"
+                  title={isSpanish ? 'Restablecer al 80% recomendado' : 'Reset to 80% recommended'}
                 >
                   <RotateCcw className="w-3 h-3" />
                   <span>80%</span>
@@ -160,7 +181,7 @@ export const UiScaleConfiguratorModal: React.FC<UiScaleConfiguratorModalProps> =
               <button
                 onClick={() => onSetScale(scale - 0.05)}
                 className="p-2 rounded-xl bg-[#e5d5be] hover:bg-[#d8c8af] text-[#4a3a2a] border border-[#b88c32]/50 shadow-xs transition cursor-pointer active:scale-95 shrink-0"
-                title="Reducir zoom (-5%)"
+                title={isSpanish ? 'Reducir zoom (-5%)' : 'Zoom out (-5%)'}
               >
                 <ZoomOut className="w-4 h-4" />
               </button>
@@ -180,17 +201,17 @@ export const UiScaleConfiguratorModal: React.FC<UiScaleConfiguratorModalProps> =
               <button
                 onClick={() => onSetScale(scale + 0.05)}
                 className="p-2 rounded-xl bg-[#e5d5be] hover:bg-[#d8c8af] text-[#4a3a2a] border border-[#b88c32]/50 shadow-xs transition cursor-pointer active:scale-95 shrink-0"
-                title="Aumentar zoom (+5%)"
+                title={isSpanish ? 'Aumentar zoom (+5%)' : 'Zoom in (+5%)'}
               >
                 <ZoomIn className="w-4 h-4" />
               </button>
             </div>
 
             <div className="flex justify-between text-[10px] text-[#786450] font-mono px-1">
-              <span>50% (Mínimo)</span>
-              <span className="text-[#8c672b] font-bold">80% (Recomendado)</span>
+              <span>50% {isSpanish ? '(Mínimo)' : '(Minimum)'}</span>
+              <span className="text-[#8c672b] font-bold">80% {isSpanish ? '(Recomendado)' : '(Recommended)'}</span>
               <span>100%</span>
-              <span>140% (Máximo)</span>
+              <span>140% {isSpanish ? '(Máximo)' : '(Maximum)'}</span>
             </div>
           </div>
 
@@ -198,7 +219,7 @@ export const UiScaleConfiguratorModal: React.FC<UiScaleConfiguratorModalProps> =
           <div className="space-y-3">
             <h4 className="font-fantasy font-bold text-sm text-[#382b20] uppercase tracking-wide flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-[#8c672b]" />
-              <span>Niveles Predefinidos de Vista</span>
+              <span>{isSpanish ? 'Niveles Predefinidos de Vista' : 'Preset Display Scales'}</span>
             </h4>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -239,8 +260,8 @@ export const UiScaleConfiguratorModal: React.FC<UiScaleConfiguratorModalProps> =
                     </div>
 
                     {preset.isRecommended && (
-                      <span className="absolute -top-2 right-3 text-[9px] font-bold bg-[#8c672b] text-[#ffd56b] px-2 py-0.2 rounded-full border border-[#ffd56b]/60 shadow-xs">
-                        RECOMENDADO
+                      <span className="absolute -top-2 right-3 text-[9px] font-bold bg-[#8c672b] text-[#ffd56b] px-2 py-0.2 rounded-full border border-[#ffd56b]/60 shadow-xs uppercase">
+                        {isSpanish ? 'RECOMENDADO' : 'RECOMMENDED'}
                       </span>
                     )}
                   </div>
@@ -253,7 +274,9 @@ export const UiScaleConfiguratorModal: React.FC<UiScaleConfiguratorModalProps> =
           <div className="p-3 bg-[#f5ede0] rounded-xl border border-[#d8c8af] text-xs text-[#5c472d] flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2">
               <Keyboard className="w-4 h-4 text-[#8c672b] shrink-0" />
-              <span className="text-[11px] font-medium">Atajos de teclado en el ejecutable:</span>
+              <span className="text-[11px] font-medium">
+                {isSpanish ? 'Atajos de teclado en el ejecutable:' : 'Keyboard shortcuts in desktop app:'}
+              </span>
             </div>
             <div className="flex items-center gap-3 text-[11px] font-mono text-[#423120]">
               <span className="bg-[#e8dac7] px-2 py-0.5 rounded border border-[#c59b27]/40 shadow-2xs">
@@ -272,7 +295,9 @@ export const UiScaleConfiguratorModal: React.FC<UiScaleConfiguratorModalProps> =
         {/* Footer */}
         <div className="p-4 px-6 bg-[#ebdcc4] border-t border-[#d8c8af] flex items-center justify-between text-xs shrink-0">
           <span className="text-[#6b5844] italic">
-            El ajuste se guarda automáticamente para tus próximas sesiones
+            {isSpanish
+              ? 'El ajuste se guarda automáticamente para tus próximas sesiones'
+              : 'Scale is automatically saved for your future sessions'}
           </span>
           <button
             type="button"
@@ -280,7 +305,7 @@ export const UiScaleConfiguratorModal: React.FC<UiScaleConfiguratorModalProps> =
             className="px-5 py-2 bg-gradient-to-r from-[#8c672b] to-[#a67a33] hover:from-[#7a5a25] hover:to-[#8c672b] text-white font-fantasy font-bold rounded-xl transition cursor-pointer shadow-md active:scale-95 flex items-center gap-1.5"
           >
             <Check className="w-4 h-4" />
-            <span>Aplicar & Cerrar</span>
+            <span>{isSpanish ? 'Aplicar & Cerrar' : 'Apply & Close'}</span>
           </button>
         </div>
       </div>

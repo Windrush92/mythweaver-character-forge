@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Character } from '../types';
 import { parsePdfCharacterSheet } from '../utils/pdfCharacterReader';
+import { useLanguageStore } from '../hooks/useLanguageStore';
 import {
   FileText,
   Upload,
@@ -26,6 +27,7 @@ export const PdfCharacterImportModal: React.FC<PdfCharacterImportModalProps> = (
   onImportCharacter,
   onClose,
 }) => {
+  const { isSpanish } = useLanguageStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [parsedChar, setParsedChar] = useState<Character | null>(null);
@@ -46,7 +48,11 @@ export const PdfCharacterImportModal: React.FC<PdfCharacterImportModalProps> = (
       setParsedChar(char);
     } catch (err) {
       console.error('Error parseando PDF:', err);
-      setError('No se pudo procesar el archivo PDF. Asegúrate de que sea una hoja de personaje válida.');
+      setError(
+        isSpanish
+          ? 'No se pudo procesar el archivo PDF. Asegúrate de que sea una hoja de personaje válida.'
+          : 'Could not process PDF file. Please ensure it is a valid 5e character sheet.'
+      );
     } finally {
       setLoading(false);
     }
@@ -90,10 +96,12 @@ export const PdfCharacterImportModal: React.FC<PdfCharacterImportModalProps> = (
             </span>
             <div>
               <h2 className="text-xl font-bold font-fantasy text-[#ebe3d5] tracking-wide">
-                Lector de Hojas de Personaje en PDF
+                {isSpanish ? 'Lector de Hojas de Personaje en PDF' : 'PDF Character Sheet Importer'}
               </h2>
               <p className="text-xs text-[#a69986]">
-                Importa directamente tus archivos PDF de 5e (editables o escaneados) y extrae sus estadísticas.
+                {isSpanish
+                  ? 'Importa directamente tus archivos PDF de 5e (editables o escaneados) y extrae sus estadísticas.'
+                  : 'Directly import your 5e PDF files (form-fillable or scanned) and automatically extract character stats.'}
               </p>
             </div>
           </div>
@@ -111,20 +119,25 @@ export const PdfCharacterImportModal: React.FC<PdfCharacterImportModalProps> = (
           <div className="border-2 border-dashed border-[#4d3e30] hover:border-[#c29947] bg-[#1c1815] rounded-xl p-6 text-center transition">
             <FileText className="w-12 h-12 text-[#c29947] mx-auto mb-2 opacity-80" />
             <h3 className="text-sm font-semibold text-[#ebe3d5] mb-1">
-              Arrastra aquí tu Hoja de Personaje en PDF o selecciónala de tu equipo
+              {isSpanish
+                ? 'Arrastra aquí tu Hoja de Personaje en PDF o selecciónala de tu equipo'
+                : 'Drag and drop your PDF Character Sheet here or browse your device'}
             </h3>
             <p className="text-xs text-[#a69986] mb-4">
-              Compatible con "Hoja de Personaje Editable.pdf", hojas oficiales de Wizards of the Coast y D&D 5e.
+              {isSpanish
+                ? 'Compatible con "Hoja de Personaje Editable.pdf", hojas oficiales de Wizards of the Coast y D&D 5e.'
+                : 'Compatible with standard fillable PDF sheets, official Wizards of the Coast and D&D 5e forms.'}
             </p>
 
             <label className="inline-flex items-center gap-2 px-4 py-2 bg-[#8c672b] hover:bg-[#a67a33] text-white rounded-lg text-xs font-semibold shadow-md transition cursor-pointer">
-              <Upload className="w-4 h-4" /> Seleccionar Archivo PDF
+              <Upload className="w-4 h-4" /> {isSpanish ? 'Seleccionar Archivo PDF' : 'Select PDF File'}
               <input type="file" accept=".pdf" onChange={handleFileUpload} className="hidden" />
             </label>
 
             {loading && (
               <div className="mt-4 text-xs text-[#d4ab59] font-medium flex items-center justify-center gap-2">
-                <Sparkles className="w-4 h-4 animate-spin" /> Procesando y analizando campos del PDF...
+                <Sparkles className="w-4 h-4 animate-spin" />{' '}
+                {isSpanish ? 'Procesando y analizando campos del PDF...' : 'Parsing and extracting PDF form fields...'}
               </div>
             )}
           </div>
@@ -141,10 +154,13 @@ export const PdfCharacterImportModal: React.FC<PdfCharacterImportModalProps> = (
             <div className="space-y-5 pt-2">
               <div className="flex items-center justify-between border-b border-[#3d3228] pb-2">
                 <span className="text-xs font-bold text-[#d4ab59] uppercase tracking-wider flex items-center gap-1.5 font-fantasy">
-                  <CheckCircle2 className="w-4 h-4 text-[#507a5d]" /> Datos Extraídos de la Hoja
+                  <CheckCircle2 className="w-4 h-4 text-[#507a5d]" />{' '}
+                  {isSpanish ? 'Datos Extraídos de la Hoja' : 'Extracted Character Data'}
                 </span>
                 <span className="text-xs text-[#a69986]">
-                  Revisa y asigna un avatar antes de guardar
+                  {isSpanish
+                    ? 'Revisa y asigna un avatar antes de guardar'
+                    : 'Review and assign an avatar before saving'}
                 </span>
               </div>
 
@@ -153,7 +169,7 @@ export const PdfCharacterImportModal: React.FC<PdfCharacterImportModalProps> = (
                 <div className="flex items-center gap-2">
                   <ImageIcon className="w-4 h-4 text-[#c29947]" />
                   <span className="text-xs font-bold text-[#ebe3d5] uppercase tracking-wide">
-                    Avatar del Personaje
+                    {isSpanish ? 'Avatar del Personaje' : 'Character Portrait / Avatar'}
                   </span>
                 </div>
 
@@ -177,7 +193,7 @@ export const PdfCharacterImportModal: React.FC<PdfCharacterImportModalProps> = (
                   <div className="flex-1 space-y-2.5 text-xs">
                     <div className="flex items-center justify-between">
                       <span className="text-[11px] text-[#a69986] block">
-                        Avatar del personaje:
+                        {isSpanish ? 'Avatar del personaje:' : 'Character avatar:'}
                       </span>
                       {(selectedAvatar || customAvatarUrl) && (
                         <button
@@ -188,20 +204,20 @@ export const PdfCharacterImportModal: React.FC<PdfCharacterImportModalProps> = (
                           }}
                           className="text-[10px] text-red-400 hover:underline cursor-pointer"
                         >
-                          Quitar avatar
+                          {isSpanish ? 'Quitar avatar' : 'Remove avatar'}
                         </button>
                       )}
                     </div>
 
                     <div className="flex items-center gap-2 pt-1">
                       <label className="px-3 py-1.5 bg-[#332a22] hover:bg-[#42372d] text-[#ece3d4] rounded border border-[#4d3f32] text-[11px] font-medium cursor-pointer transition shrink-0">
-                        Subir Imagen Local
+                        {isSpanish ? 'Subir Imagen Local' : 'Upload Local Image'}
                         <input type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" />
                       </label>
-                      <span className="text-[11px] text-[#7a6a57]">o</span>
+                      <span className="text-[11px] text-[#7a6a57]">{isSpanish ? 'o' : 'or'}</span>
                       <input
                         type="text"
-                        placeholder="Pegar URL de imagen..."
+                        placeholder={isSpanish ? "Pegar URL de imagen..." : "Paste image URL..."}
                         value={customAvatarUrl || (selectedAvatar && !selectedAvatar.startsWith('data:') ? selectedAvatar : '')}
                         onChange={(e) => {
                           setCustomAvatarUrl(e.target.value);
@@ -218,7 +234,9 @@ export const PdfCharacterImportModal: React.FC<PdfCharacterImportModalProps> = (
               <div className="bg-[#1c1815] p-5 rounded-xl border border-[#3d3228] space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-[11px] font-semibold text-[#a69986] mb-1">Nombre</label>
+                    <label className="block text-[11px] font-semibold text-[#a69986] mb-1">
+                      {isSpanish ? 'Nombre' : 'Name'}
+                    </label>
                     <input
                       type="text"
                       value={parsedChar.name}
@@ -227,7 +245,9 @@ export const PdfCharacterImportModal: React.FC<PdfCharacterImportModalProps> = (
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-semibold text-[#a69986] mb-1">Clase y Nivel</label>
+                    <label className="block text-[11px] font-semibold text-[#a69986] mb-1">
+                      {isSpanish ? 'Clase y Nivel' : 'Class & Level'}
+                    </label>
                     <div className="flex gap-2">
                       <input
                         type="text"
@@ -244,21 +264,23 @@ export const PdfCharacterImportModal: React.FC<PdfCharacterImportModalProps> = (
                     </div>
                   </div>
                   <div>
-                    <label className="block text-[11px] font-semibold text-[#a69986] mb-1">Raza y Jugador</label>
+                    <label className="block text-[11px] font-semibold text-[#a69986] mb-1">
+                      {isSpanish ? 'Raza y Jugador' : 'Race & Player'}
+                    </label>
                     <div className="flex gap-2">
                       <input
                         type="text"
                         value={parsedChar.race}
                         onChange={(e) => setParsedChar({ ...parsedChar, race: e.target.value })}
                         className="w-1/2 bg-[#161311] border border-[#3d3228] rounded px-2.5 py-1.5 text-xs text-white"
-                        placeholder="Raza"
+                        placeholder={isSpanish ? "Raza" : "Race"}
                       />
                       <input
                         type="text"
                         value={parsedChar.playerName}
                         onChange={(e) => setParsedChar({ ...parsedChar, playerName: e.target.value })}
                         className="w-1/2 bg-[#161311] border border-[#3d3228] rounded px-2.5 py-1.5 text-xs text-white"
-                        placeholder="Jugador"
+                        placeholder={isSpanish ? "Jugador" : "Player"}
                       />
                     </div>
                   </div>
@@ -268,7 +290,7 @@ export const PdfCharacterImportModal: React.FC<PdfCharacterImportModalProps> = (
                 <div className="grid grid-cols-4 gap-2 text-center text-xs">
                   <div className="bg-[#241e1a] p-2 rounded-lg border border-[#3d3228]">
                     <span className="text-[10px] text-[#657f99] font-bold block flex items-center justify-center gap-1">
-                      <Shield className="w-3 h-3" /> Armadura
+                      <Shield className="w-3 h-3" /> {isSpanish ? 'Armadura' : 'Armor (AC)'}
                     </span>
                     <input
                       type="number"
@@ -279,7 +301,7 @@ export const PdfCharacterImportModal: React.FC<PdfCharacterImportModalProps> = (
                   </div>
                   <div className="bg-[#241e1a] p-2 rounded-lg border border-[#3d3228]">
                     <span className="text-[10px] text-[#b5524d] font-bold block flex items-center justify-center gap-1">
-                      <Heart className="w-3 h-3" /> HP Máximo
+                      <Heart className="w-3 h-3" /> {isSpanish ? 'HP Máximo' : 'Max HP'}
                     </span>
                     <input
                       type="number"
@@ -290,7 +312,7 @@ export const PdfCharacterImportModal: React.FC<PdfCharacterImportModalProps> = (
                   </div>
                   <div className="bg-[#241e1a] p-2 rounded-lg border border-[#3d3228]">
                     <span className="text-[10px] text-[#9378af] font-bold block flex items-center justify-center gap-1">
-                      <Zap className="w-3 h-3" /> Iniciativa
+                      <Zap className="w-3 h-3" /> {isSpanish ? 'Iniciativa' : 'Initiative'}
                     </span>
                     <input
                       type="number"
@@ -300,7 +322,7 @@ export const PdfCharacterImportModal: React.FC<PdfCharacterImportModalProps> = (
                     />
                   </div>
                   <div className="bg-[#241e1a] p-2 rounded-lg border border-[#3d3228]">
-                    <span className="text-[10px] text-[#c29947] font-bold block">Velocidad</span>
+                    <span className="text-[10px] text-[#c29947] font-bold block">{isSpanish ? 'Velocidad' : 'Speed'}</span>
                     <input
                       type="text"
                       value={parsedChar.speed}
@@ -313,7 +335,7 @@ export const PdfCharacterImportModal: React.FC<PdfCharacterImportModalProps> = (
                 {/* Ability Scores */}
                 <div>
                   <span className="text-[10px] font-bold text-[#a69986] uppercase block mb-1.5">
-                    Puntuaciones de Característica
+                    {isSpanish ? 'Puntuaciones de Característica' : 'Ability Scores'}
                   </span>
                   <div className="grid grid-cols-6 gap-2 text-center text-xs">
                     {(['str', 'dex', 'con', 'int', 'wis', 'cha'] as const).map((stat) => (
@@ -346,7 +368,7 @@ export const PdfCharacterImportModal: React.FC<PdfCharacterImportModalProps> = (
             onClick={onClose}
             className="px-4 py-2 text-xs text-[#a69986] hover:text-white transition"
           >
-            Cancelar
+            {isSpanish ? 'Cancelar' : 'Cancel'}
           </button>
           <button
             type="button"
@@ -354,7 +376,7 @@ export const PdfCharacterImportModal: React.FC<PdfCharacterImportModalProps> = (
             onClick={handleSave}
             className="px-5 py-2 text-xs font-semibold bg-[#8c672b] hover:bg-[#a67a33] disabled:opacity-40 text-white rounded-lg shadow-lg shadow-[#402d12]/40 transition flex items-center gap-2 cursor-pointer font-fantasy"
           >
-            Guardar en la Campaña
+            {isSpanish ? 'Guardar en la Campaña' : 'Save to Campaign'}
           </button>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, Check, Palette, Sparkles, Shield, Compass, BookOpen } from 'lucide-react';
 import { UiSkin, SKIN_OPTIONS } from '../hooks/useUiSkin';
+import { useLanguageStore } from '../hooks/useLanguageStore';
 
 interface SkinSelectorModalProps {
   isOpen: boolean;
@@ -15,6 +16,8 @@ export const SkinSelectorModal: React.FC<SkinSelectorModalProps> = ({
   currentSkin,
   onSelectSkin,
 }) => {
+  const { isSpanish } = useLanguageStore();
+
   if (!isOpen) return null;
 
   return (
@@ -28,13 +31,15 @@ export const SkinSelectorModal: React.FC<SkinSelectorModalProps> = ({
             </span>
             <div>
               <h3 className="text-lg font-bold font-fantasy text-[#fdfaf3] flex items-center gap-2">
-                <span>Selector de Aspectos Visuales (Temas)</span>
+                <span>{isSpanish ? 'Selector de Aspectos Visuales (Temas)' : 'Visual Theme Selector'}</span>
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#8c672b] text-white font-mono font-bold uppercase">
-                  EN DESARROLLO (WIP)
+                  {isSpanish ? 'EN DESARROLLO (WIP)' : 'WORK IN PROGRESS (WIP)'}
                 </span>
               </h3>
               <p className="text-xs text-[#c0ad97] mt-0.5">
-                Personaliza la atmósfera y el estilo visual de la mesa de MythWeaver. Próximamente se añadirán más aspectos.
+                {isSpanish
+                  ? 'Personaliza la atmósfera y el estilo visual de la mesa de MythWeaver. Próximamente se añadirán más aspectos.'
+                  : 'Customize the visual atmosphere and theme of the MythWeaver tabletop. More themes coming soon.'}
               </p>
             </div>
           </div>
@@ -51,6 +56,10 @@ export const SkinSelectorModal: React.FC<SkinSelectorModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {SKIN_OPTIONS.map((opt) => {
               const isSelected = currentSkin === opt.id;
+              const displayName = !isSpanish && opt.nameEn ? opt.nameEn : opt.name;
+              const displaySubtitle = !isSpanish && opt.subtitleEn ? opt.subtitleEn : opt.subtitle;
+              const displayBadge = !isSpanish && opt.badgeEn ? opt.badgeEn : opt.badge;
+
               return (
                 <div
                   key={opt.id}
@@ -72,7 +81,7 @@ export const SkinSelectorModal: React.FC<SkinSelectorModalProps> = ({
                       <div className="flex items-center gap-2">
                         <span className="text-2xl">{opt.icon}</span>
                         <h4 className="font-fantasy font-bold text-sm text-[#f5eee2] leading-tight">
-                          {opt.name}
+                          {displayName}
                         </h4>
                       </div>
                       <span
@@ -84,11 +93,11 @@ export const SkinSelectorModal: React.FC<SkinSelectorModalProps> = ({
                             : 'bg-[#2c1d14] text-[#8c7664]'
                         }`}
                       >
-                        {isSelected ? '✓ Seleccionado' : opt.badge}
+                        {isSelected ? (isSpanish ? '✓ Seleccionado' : '✓ Selected') : displayBadge}
                       </span>
                     </div>
                     <p className="text-xs text-[#baa792] leading-relaxed">
-                      {opt.subtitle}
+                      {displaySubtitle}
                     </p>
                   </div>
 
@@ -97,15 +106,15 @@ export const SkinSelectorModal: React.FC<SkinSelectorModalProps> = ({
                       <span className={`text-[11px] font-bold font-fantasy flex items-center gap-1.5 ${isSelected ? 'text-[#eab308]' : 'text-[#cfa344]'}`}>
                         {isSelected ? (
                           <>
-                            <Check className="w-3.5 h-3.5" /> Aspecto Activo
+                            <Check className="w-3.5 h-3.5" /> {isSpanish ? 'Aspecto Activo' : 'Active Theme'}
                           </>
                         ) : (
-                          'Hacer clic para activar →'
+                          isSpanish ? 'Hacer clic para activar →' : 'Click to activate →'
                         )}
                       </span>
                     ) : (
                       <span className="text-[10px] text-[#8c7664] italic">
-                        En desarrollo para futuros parches
+                        {isSpanish ? 'En desarrollo para futuros parches' : 'In development for future updates'}
                       </span>
                     )}
                   </div>
@@ -118,7 +127,12 @@ export const SkinSelectorModal: React.FC<SkinSelectorModalProps> = ({
           <div className="p-3.5 bg-[#2a1c14] rounded-xl border border-[#5c3e28] text-xs text-[#baa792] flex items-start gap-2.5">
             <Sparkles className="w-4 h-4 text-[#eab308] shrink-0 mt-0.5" />
             <p>
-              <strong>Aspecto Oficial:</strong> El estilo activo es <span className="text-[#f5eee2] font-semibold">Forja Mítica (Mesa Oscura)</span> con mesa de caoba noble, sellos de cera, pergamino envejecido y medallones de bronce forjado. Estamos desarrollando nuevos estilos temáticos para próximas actualizaciones.
+              <strong>{isSpanish ? 'Aspecto Oficial:' : 'Official Theme:'}</strong>{' '}
+              {isSpanish ? (
+                <>El estilo activo es <span className="text-[#f5eee2] font-semibold">Forja Mítica (Mesa Oscura)</span> con mesa de caoba noble, sellos de cera, pergamino envejecido y medallones de bronce forjado. Estamos desarrollando nuevos estilos temáticos para próximas actualizaciones.</>
+              ) : (
+                <>The active style is <span className="text-[#f5eee2] font-semibold">Mythic Forge (Dark Tabletop)</span> featuring noble mahogany tabletop, wax seals, aged parchment and forged bronze medallions. Additional theme options are currently in development.</>
+              )}
             </p>
           </div>
         </div>
@@ -129,7 +143,7 @@ export const SkinSelectorModal: React.FC<SkinSelectorModalProps> = ({
             onClick={onClose}
             className="px-5 py-2 bg-[#8c672b] hover:bg-[#a67a33] text-white font-fantasy font-bold text-xs rounded-xl shadow-md transition cursor-pointer"
           >
-            Aceptar & Cerrar
+            {isSpanish ? 'Aceptar & Cerrar' : 'Accept & Close'}
           </button>
         </div>
       </div>

@@ -14,6 +14,7 @@ import { ThemedNotificationModal, ThemedModalType } from './components/ThemedNot
 import { WeaponDef, ArmorDef } from './data/weaponsAndArmorData';
 import { exportCharacterToOfficialPdf } from './utils/pdfCharacterExporter';
 import { getBarbarianMaxRages, getBarbarianRageDamageBonus } from './data/characterRulesEngine';
+import { useLanguageStore } from './hooks/useLanguageStore';
 import {
   Swords,
   Shield,
@@ -46,6 +47,7 @@ export default function App() {
   } = useCharacterStore();
 
   const { currentUser } = useUserStore();
+  const { language, isSpanish, isEnglish, setLanguage, t } = useLanguageStore();
 
   // Navigation tab state
   const [currentTab, setCurrentTab] = useState<'characters' | 'compendium'>('characters');
@@ -143,10 +145,10 @@ export default function App() {
       console.error('Error exportando PDF oficial:', e);
       setThemedAlert({
         isOpen: true,
-        title: 'Error de Exportación',
-        subtitle: 'Hoja de Personaje Oficial D&D 5e',
+        title: isSpanish ? 'Error de Exportación' : 'Export Error',
+        subtitle: isSpanish ? 'Hoja de Personaje Oficial D&D 5e' : 'Official D&D 5e Character Sheet',
         type: 'danger',
-        message: 'Hubo un error al generar la hoja oficial en PDF. Por favor revisa los datos del héroe.',
+        message: isSpanish ? 'Hubo un error al generar la hoja oficial en PDF. Por favor revisa los datos del héroe.' : 'There was an error generating the official PDF sheet. Please check the hero data.',
       });
     } finally {
       setExportingPdfId(null);
@@ -206,10 +208,12 @@ export default function App() {
       if (currentAvailable <= 0 && maxRages !== 999) {
         setThemedAlert({
           isOpen: true,
-          title: 'Sin Usos de Furia',
-          subtitle: 'Furia Primitiva Agotada',
+          title: isSpanish ? 'Sin Usos de Furia' : 'No Rage Uses Left',
+          subtitle: isSpanish ? 'Furia Primitiva Agotada' : 'Primal Rage Depleted',
           type: 'warning',
-          message: `¡${char.name} no tiene usos de Furia disponibles! Realiza un descanso largo para recuperarlos.`,
+          message: isSpanish
+            ? `¡${char.name} no tiene usos de Furia disponibles! Realiza un descanso largo para recuperarlos.`
+            : `${char.name} has no uses of Rage available! Take a long rest to recover them.`,
         });
         return;
       }
@@ -259,29 +263,35 @@ export default function App() {
           importCharacters(parsed);
           setThemedAlert({
             isOpen: true,
-            title: 'Importación Exitosa',
-            subtitle: 'Respaldo Restaurado',
+            title: isSpanish ? 'Importación Exitosa' : 'Import Successful',
+            subtitle: isSpanish ? 'Respaldo Restaurado' : 'Backup Restored',
             type: 'success',
-            message: `Se han importado correctamente ${parsed.length} personajes.`,
+            message: isSpanish
+              ? `Se han importado correctamente ${parsed.length} personajes.`
+              : `Successfully imported ${parsed.length} characters.`,
           });
         } else if (parsed && typeof parsed === 'object') {
           saveCharacter(parsed as Character);
           setThemedAlert({
             isOpen: true,
-            title: 'Héroe Importado',
-            subtitle: parsed.name || 'Nuevo Aventurero',
+            title: isSpanish ? 'Héroe Importado' : 'Hero Imported',
+            subtitle: parsed.name || (isSpanish ? 'Nuevo Aventurero' : 'New Adventurer'),
             type: 'success',
-            message: `¡${parsed.name || 'El personaje'} ha sido importado con éxito!`,
+            message: isSpanish
+              ? `¡${parsed.name || 'El personaje'} ha sido importado con éxito!`
+              : `${parsed.name || 'The character'} has been imported successfully!`,
           });
         }
       } catch (err) {
         console.error('Error importando JSON:', err);
         setThemedAlert({
           isOpen: true,
-          title: 'Error de Lectura',
-          subtitle: 'Archivo JSON Inválido',
+          title: isSpanish ? 'Error de Lectura' : 'Read Error',
+          subtitle: isSpanish ? 'Archivo JSON Inválido' : 'Invalid JSON File',
           type: 'danger',
-          message: 'El archivo seleccionado no tiene un formato JSON válido de MythWeaver.',
+          message: isSpanish
+            ? 'El archivo seleccionado no tiene un formato JSON válido de MythWeaver.'
+            : 'The selected file is not a valid MythWeaver JSON format.',
         });
       } finally {
         if (jsonFileInputRef.current) {
@@ -325,7 +335,14 @@ export default function App() {
               : 'max-h-[500px] opacity-100 relative z-30 overflow-visible'
           }`}
         >
-          <div className="w-full max-w-[1480px] mx-auto px-4 sm:px-6 py-2.5 sm:py-3.5 flex items-center justify-center">
+          <div className="w-full max-w-[1480px] mx-auto px-4 sm:px-6 py-2.5 sm:py-3.5 flex items-center justify-between">
+            {/* Left spacer for symmetry */}
+            <div className="hidden lg:flex w-44 items-center">
+              <span className="text-[10px] font-mono text-[#baa892] bg-[#140b05]/60 px-2 py-0.5 rounded border border-[#8c672b]/40">
+                ⚡ D&D 5e & 5.5e Compatible
+              </span>
+            </div>
+
             {/* Centered Dragon Logo + Fantasy Name */}
             <div className="flex items-center gap-3.5 sm:gap-4.5 shrink-0 select-none">
               <img
@@ -348,10 +365,12 @@ export default function App() {
                   Mythweaver
                 </span>
                 <span className="text-[11px] sm:text-xs font-fantasy tracking-[0.25em] text-[#a89279] uppercase mt-1">
-                  Forja de Héroes 5e <span className="text-[#ffd56b] font-semibold lowercase">v2.0 • Standalone</span>
+                  {isSpanish ? 'Forja de Héroes 5e' : 'Hero Forge 5e'} <span className="text-[#ffd56b] font-semibold lowercase">v2.5 • Standalone</span>
                 </span>
               </div>
             </div>
+
+            <div className="w-24 hidden md:block" />
           </div>
         </div>
 
@@ -390,10 +409,10 @@ export default function App() {
                 } text-xs font-fantasy uppercase tracking-wider drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]`}
               >
                 <Swords className="w-4 h-4 shrink-0" />
-                <span>Mis Aventureros ({characters.length})</span>
+                <span>{isSpanish ? 'Mis Aventureros' : 'My Adventurers'} ({characters.length})</span>
               </button>
 
-              {/* Tab 2: Compendio 5e & Armería */}
+              {/* Tab 2: Compendio */}
               <button
                 type="button"
                 onClick={() => setCurrentTab('compendium')}
@@ -415,12 +434,12 @@ export default function App() {
                 } text-xs font-fantasy uppercase tracking-wider drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]`}
               >
                 <BookOpen className="w-4 h-4 shrink-0" />
-                <span>Compendio 5e & Armería</span>
+                <span>{isSpanish ? 'Compendio' : 'Compendium'}</span>
               </button>
             </div>
 
-            {/* Right: Collapse / Expand Button with Forged Button Frame */}
-            <div className="absolute right-4 sm:right-6 flex items-center">
+            {/* Right: Collapse / Expand Button */}
+            <div className="absolute right-4 sm:right-6 flex items-center gap-2">
               <button
                 type="button"
                 onClick={toggleHeaderCollapsed}
@@ -458,7 +477,7 @@ export default function App() {
                   style={{ fontFamily: "'Cinzel', 'Cinzel Decorative', serif" }}
                   className="text-base sm:text-lg md:text-xl font-black text-[#f5eedc] tracking-wider uppercase drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]"
                 >
-                  Códice de Aventureros
+                  {isSpanish ? 'Códice de Aventureros' : 'Adventurers Codex'}
                 </h2>
               </div>
 
@@ -476,10 +495,10 @@ export default function App() {
                       backgroundColor: 'transparent',
                     }}
                     className="flex items-center justify-center gap-1.5 px-3 h-9 text-[11px] sm:text-xs font-fantasy font-bold text-[#dfbe7e] hover:text-[#fff6db] hover:brightness-110 active:scale-95 transition cursor-pointer drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)] select-none whitespace-nowrap"
-                    title="Descargar copia de seguridad con todos los personajes en .json"
+                    title={isSpanish ? "Descargar copia de seguridad con todos los personajes en .json" : "Download backup with all characters as .json"}
                   >
                     <FolderDown className="w-3.5 h-3.5 text-[#dfbe7e]" />
-                    <span>Exportar ({characters.length})</span>
+                    <span>{isSpanish ? 'Exportar' : 'Export'} ({characters.length})</span>
                   </button>
                 )}
 
@@ -494,10 +513,10 @@ export default function App() {
                     backgroundColor: 'transparent',
                   }}
                   className="flex items-center justify-center gap-1.5 px-3 sm:px-3.5 h-9 text-[11px] sm:text-xs font-fantasy font-bold text-[#dfbe7e] hover:text-[#fff6db] hover:brightness-110 active:scale-95 transition cursor-pointer drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)] select-none whitespace-nowrap"
-                  title="Cargar archivo .json de personaje previamente guardado"
+                  title={isSpanish ? "Cargar archivo .json de personaje previamente guardado" : "Load previously saved character .json file"}
                 >
                   <Upload className="w-3.5 h-3.5 text-[#dfbe7e]" />
-                  <span>Importar JSON</span>
+                  <span>{isSpanish ? 'Importar JSON' : 'Import JSON'}</span>
                 </button>
                 <input
                   type="file"
@@ -518,10 +537,10 @@ export default function App() {
                     backgroundColor: 'transparent',
                   }}
                   className="flex items-center justify-center gap-1.5 px-3 sm:px-3.5 h-9 text-[11px] sm:text-xs font-fantasy font-bold text-[#dfbe7e] hover:text-[#fff6db] hover:brightness-110 active:scale-95 transition cursor-pointer drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)] select-none whitespace-nowrap"
-                  title="Importar hoja de personaje directamente desde un archivo PDF oficial"
+                  title={isSpanish ? "Importar hoja de personaje directamente desde un archivo PDF oficial" : "Import character sheet directly from official PDF file"}
                 >
                   <FileDown className="w-3.5 h-3.5 text-[#dfbe7e]" />
-                  <span>Importar PDF</span>
+                  <span>{isSpanish ? 'Importar PDF' : 'Import PDF'}</span>
                 </button>
 
                 {/* Crear Personaje (Active Golden Asset) */}
@@ -535,10 +554,10 @@ export default function App() {
                     backgroundColor: 'transparent',
                   }}
                   className="flex items-center justify-center text-center px-4 h-9 text-[11px] sm:text-xs font-fantasy font-extrabold text-[#2e1906] hover:text-[#1a0e03] hover:brightness-110 active:scale-95 transition cursor-pointer drop-shadow-[0_1px_2px_rgba(255,240,180,0.75)] select-none whitespace-nowrap leading-none"
-                  title="Crear un nuevo personaje guiado en 9 pasos"
+                  title={isSpanish ? "Crear un nuevo personaje guiado en 9 pasos" : "Create a new guided character in 9 steps"}
                 >
                   <Plus className="w-4 h-4 stroke-[3] -ml-1 mr-1" />
-                  <span>Crear Personaje</span>
+                  <span>{isSpanish ? 'Crear Personaje' : 'Create Character'}</span>
                 </button>
               </div>
             </div>
@@ -554,7 +573,7 @@ export default function App() {
                     : 'text-[#a89279] hover:text-[#f5eee2] hover:bg-[#26170d]/60 border border-transparent'
                 }`}
               >
-                <span>Todos</span>
+                <span>{isSpanish ? 'Todos' : 'All'}</span>
                 <span className="text-[10px] font-mono opacity-80">({characters.length})</span>
               </button>
 
@@ -567,7 +586,7 @@ export default function App() {
                     : 'text-[#a89279] hover:text-[#f5eee2] hover:bg-[#26170d]/60 border border-transparent'
                 }`}
               >
-                <span>Completos</span>
+                <span>{isSpanish ? 'Completos' : 'Completed'}</span>
                 <span className="text-[10px] font-mono opacity-80">({completedCharacters.length})</span>
               </button>
 
@@ -580,7 +599,7 @@ export default function App() {
                     : 'text-[#a89279] hover:text-[#f5eee2] hover:bg-[#26170d]/60 border border-transparent'
                 }`}
               >
-                <span>Borradores</span>
+                <span>{isSpanish ? 'Borradores' : 'Drafts'}</span>
                 <span className={`text-[10px] font-mono ${draftCharacters.length > 0 ? 'text-[#ffb088] font-bold' : 'opacity-80'}`}>
                   ({draftCharacters.length})
                 </span>
@@ -608,11 +627,12 @@ export default function App() {
                     style={{ fontFamily: "'Cinzel Decorative', 'Cinzel', serif" }}
                     className="text-lg sm:text-xl font-black text-[#f5eedc] uppercase tracking-wider"
                   >
-                    Tu Códice está Vacío
+                    {isSpanish ? 'Tu Códice está Vacío' : 'Your Codex is Empty'}
                   </h3>
                   <p className="text-xs text-[#c4aa82] leading-relaxed">
-                    No tienes aventureros en esta categoría. Puedes forjar un nuevo personaje desde cero con el
-                    asistente de 9 pasos o importar una hoja en PDF o JSON.
+                    {isSpanish
+                      ? 'No tienes aventureros en esta categoría. Puedes forjar un nuevo personaje desde cero con el asistente de 9 pasos o importar una hoja en PDF o JSON.'
+                      : 'You have no adventurers in this category. You can forge a new character from scratch with the 9-step wizard or import a sheet in PDF or JSON.'}
                   </p>
                 </div>
 
@@ -629,7 +649,7 @@ export default function App() {
                     className="flex items-center justify-center gap-2 px-5 h-10 text-xs font-fantasy font-extrabold text-[#2e1906] hover:brightness-110 active:scale-95 transition cursor-pointer select-none drop-shadow-[0_1px_2px_rgba(255,240,180,0.75)]"
                   >
                     <Plus className="w-4 h-4 stroke-[3]" />
-                    <span>Crear Primer Personaje</span>
+                    <span>{isSpanish ? 'Crear Primer Personaje' : 'Create First Character'}</span>
                   </button>
                 </div>
               </div>
@@ -688,7 +708,7 @@ export default function App() {
       <footer className="w-full mt-auto py-6 px-4 text-center border-t border-[#4a3622]/50 bg-gradient-to-b from-[#140b06]/80 to-[#0a0503]/95 backdrop-blur-xs select-none relative z-10">
         <div className="max-w-4xl mx-auto space-y-1.5 font-serif">
           <p className="text-xs sm:text-sm font-fantasy tracking-wider text-[#dfbe7e] font-bold">
-            MythWeaver: Forja de Héroes 5e • Desarrollado por{' '}
+            MythWeaver: {isSpanish ? 'Forja de Héroes 5e & 5.5e' : 'Hero Forge 5e & 5.5e'} • {isSpanish ? 'Desarrollado por' : 'Developed by'}{' '}
             <a
               href="https://github.com/Windrush92"
               target="_blank"
@@ -699,7 +719,9 @@ export default function App() {
             </a>
           </p>
           <p className="text-[10.5px] sm:text-[11px] text-[#9c8974] leading-relaxed max-w-2xl mx-auto">
-            Compatible con D&amp;D 5ª Edición (SRD 5.1). Proyecto independiente de código abierto, no oficial y no afiliado con Wizards of the Coast LLC.
+            {isSpanish
+              ? 'Compatible con D&D 5ª Edición (2014) y 5.5ª Edición (PHB 2024 / SRD 5.1). Proyecto independiente de código abierto, no oficial y no afiliado con Wizards of the Coast LLC.'
+              : 'Compatible with D&D 5th Edition (2014) and 5.5th Edition (PHB 2024 / SRD 5.1). Independent open-source project, unofficial and not affiliated with Wizards of the Coast LLC.'}
           </p>
         </div>
       </footer>
@@ -780,10 +802,12 @@ export default function App() {
             setPdfImportModalOpen(false);
             setThemedAlert({
               isOpen: true,
-              title: 'Hoja Importada con Éxito',
-              subtitle: imported.name || 'Héroe desde PDF',
+              title: isSpanish ? 'Hoja Importada con Éxito' : 'Sheet Imported Successfully',
+              subtitle: imported.name || (isSpanish ? 'Héroe desde PDF' : 'Hero from PDF'),
               type: 'success',
-              message: `¡${imported.name || 'El personaje'} ha sido reconstruido desde el PDF y guardado en tu navegador!`,
+              message: isSpanish
+                ? `¡${imported.name || 'El personaje'} ha sido reconstruido desde el PDF y guardado en tu navegador!`
+                : `${imported.name || 'The character'} has been reconstructed from the PDF and saved in your browser!`,
             });
           }}
         />
@@ -828,12 +852,14 @@ export default function App() {
         <ThemedNotificationModal
           isOpen={!!deleteTargetCharacter}
           onClose={() => setDeleteTargetCharacter(null)}
-          title="¿Eliminar Aventurero?"
+          title={isSpanish ? '¿Eliminar Aventurero?' : 'Delete Adventurer?'}
           subtitle={deleteTargetCharacter.name}
           type="danger"
-          message={`¿Estás seguro de que deseas eliminar permanentemente a "${deleteTargetCharacter.name}"? Esta acción no se puede deshacer.`}
-          confirmText="Eliminar Definitivamente"
-          cancelText="Cancelar"
+          message={isSpanish
+            ? `¿Estás seguro de que deseas eliminar permanentemente a "${deleteTargetCharacter.name}"? Esta acción no se puede deshacer.`
+            : `Are you sure you want to permanently delete "${deleteTargetCharacter.name}"? This action cannot be undone.`}
+          confirmText={isSpanish ? 'Eliminar Definitivamente' : 'Delete Permanently'}
+          cancelText={isSpanish ? 'Cancelar' : 'Cancel'}
           onConfirm={confirmDeleteCharacter}
         />
       )}

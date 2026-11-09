@@ -1,9 +1,16 @@
 import * as pdfjsLib from 'pdfjs-dist';
 import { Character, CharacterAttack, AbilityScores } from '../types';
 
-// Configure local worker
+function getAssetUrl(relativePath: string): string {
+  if (typeof window === 'undefined') return relativePath;
+  const href = window.location.href;
+  const baseUrl = href.substring(0, href.lastIndexOf('/') + 1);
+  return new URL(relativePath.replace(/^\.?\//, ''), baseUrl).href;
+}
+
+// Configure local worker in browser with correct base path resolution
 if (typeof window !== 'undefined') {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
+  pdfjsLib.GlobalWorkerOptions.workerSrc = getAssetUrl('pdf.worker.min.mjs');
 }
 
 export async function parsePdfCharacterSheet(

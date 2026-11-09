@@ -5,6 +5,8 @@ import {
   WeaponCategory,
 } from '../data/weaponsAndArmorData';
 import { getWeaponBadgeAsset } from '../utils/equipmentAssets';
+import { useLanguageStore } from '../hooks/useLanguageStore';
+import { localizeReactNode } from '../utils/dndEnglishTranslator';
 import {
   Sword,
   Search,
@@ -40,6 +42,7 @@ export const WeaponPickerModal: React.FC<WeaponPickerModalProps> = ({
   selectedWeaponId,
   selectedWeaponName,
 }) => {
+  const { isSpanish } = useLanguageStore();
   const effectiveCategory = filterCategory || category;
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<'all' | 'martial' | 'simple' | 'melee' | 'ranged'>('all');
@@ -76,7 +79,7 @@ export const WeaponPickerModal: React.FC<WeaponPickerModalProps> = ({
 
   if (!isOpen) return null;
 
-  return (
+  return localizeReactNode(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-md animate-fadeIn">
       <div className="bg-[#fcf9f2] border-2 border-[#8c672b] rounded-2xl w-full max-w-5xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden animate-scaleUp">
         {/* Header */}
@@ -326,9 +329,9 @@ export const WeaponPickerModal: React.FC<WeaponPickerModalProps> = ({
                           />
                           <div className="min-w-0 flex-1">
                             <h4 className="font-fantasy font-bold text-sm text-[#382b20] group-hover:text-[#8c672b] transition leading-snug break-words">
-                              {weapon.name}
+                              {isSpanish ? weapon.name : (weapon.nameEn || weapon.name)}
                             </h4>
-                            <span className="text-[10px] text-[#8c735d] italic block mt-0.5">{weapon.nameEn}</span>
+                            {isSpanish && <span className="text-[10px] text-[#8c735d] italic block mt-0.5">{weapon.nameEn}</span>}
                           </div>
                         </div>
 
@@ -399,17 +402,22 @@ export const WeaponPickerModal: React.FC<WeaponPickerModalProps> = ({
         {/* Footer */}
         <div className="p-3 bg-[#f5ede0] border-t border-[#d6c4aa] flex items-center justify-between text-xs text-[#6b5845] shrink-0">
           <span>
-            Mostrando <strong>{filteredWeapons.length}</strong> armas oficiales de D&D 5e
+            {isSpanish ? (
+              <>Mostrando <strong>{filteredWeapons.length}</strong> armas oficiales de D&D 5e</>
+            ) : (
+              <>Showing <strong>{filteredWeapons.length}</strong> official D&D 5e weapons</>
+            )}
           </span>
           <button
             type="button"
             onClick={onClose}
             className="px-4 py-1.5 bg-[#4a361c] hover:bg-[#362713] text-[#e8c37d] rounded-lg font-fantasy font-bold transition cursor-pointer shadow-xs"
           >
-            Aceptar y Cerrar
+            {isSpanish ? 'Aceptar y Cerrar' : 'Accept & Close'}
           </button>
         </div>
       </div>
-    </div>
-  );
+    </div>,
+    isSpanish
+  ) as React.ReactElement;
 };

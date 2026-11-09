@@ -1,7 +1,7 @@
 {
   "name": "mythweaver-character-forge",
   "description": "MythWeaver: Forja de Héroes 5e - Standalone D&D 5e Character Builder & Sheet Manager",
-  "version": "1.0.0",
+  "version": "2.5.0",
   "author": "Windrush92",
   "private": true,
   "type": "module",

@@ -1,9 +1,16 @@
 import * as pdfjsLib from 'pdfjs-dist';
 import { Character, AbilityScores, CharacterAttack, Spell } from '../types';
 
-// Configure local worker in browser
+function getAssetUrl(relativePath: string): string {
+  if (typeof window === 'undefined') return relativePath;
+  const href = window.location.href;
+  const baseUrl = href.substring(0, href.lastIndexOf('/') + 1);
+  return new URL(relativePath.replace(/^\.?\//, ''), baseUrl).href;
+}
+
+// Configure local worker in browser with correct base path resolution
 if (typeof window !== 'undefined') {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
+  pdfjsLib.GlobalWorkerOptions.workerSrc = getAssetUrl('pdf.worker.min.mjs');
 }
 
 /**
@@ -290,20 +297,21 @@ const SPELL_CHECKBOX_PAIRS: Record<string, string> = {
  */
 export async function exportCharacterToOfficialPdf(
   character: Character,
-  templateUrl = './templates/Hoja_de_Personaje_Editable.pdf'
+  templateUrl?: string
 ): Promise<void> {
   // 1. Fetch template binary data
-  const response = await fetch(templateUrl);
+  const resolvedTemplateUrl = templateUrl || getAssetUrl('templates/Hoja_de_Personaje_Editable.pdf');
+  const response = await fetch(resolvedTemplateUrl);
   if (!response.ok) {
-    throw new Error(`No se pudo cargar la plantilla PDF oficial en ${templateUrl} (HTTP ${response.status})`);
+    throw new Error(`No se pudo cargar la plantilla PDF oficial en ${resolvedTemplateUrl} (HTTP ${response.status})`);
   }
   const arrayBuffer = await response.arrayBuffer();
 
   // 2. Open PDF with pdfjsLib
   const loadingTask = pdfjsLib.getDocument({
     data: new Uint8Array(arrayBuffer),
-    standardFontDataUrl: './standard_fonts/',
-    cMapUrl: './cmaps/',
+    standardFontDataUrl: getAssetUrl('standard_fonts/'),
+    cMapUrl: getAssetUrl('cmaps/'),
     cMapPacked: true,
   });
   const doc = await loadingTask.promise;
@@ -667,8 +675,13 @@ export async function exportCharacterToOfficialPdf(
   const downloadLink = document.createElement('a');
   downloadLink.href = blobUrl;
   downloadLink.download = filename;
+  downloadLink.style.display = 'none';
   document.body.appendChild(downloadLink);
   downloadLink.click();
   document.body.removeChild(downloadLink);
-  URL.revokeObjectURL(blobUrl);
+
+  // Keep blob URL alive long enough for browser download manager
+  setTimeout(() => {
+    URL.revokeObjectURL(blobUrl);
+  }, 30000);
 }

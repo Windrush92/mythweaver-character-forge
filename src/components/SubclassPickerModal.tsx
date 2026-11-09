@@ -14,6 +14,8 @@ import {
 } from 'lucide-react';
 import { WikidotClass } from '../data/wikidotData';
 import { CompendiumInspectData } from './CompendiumInspectModal';
+import { useLanguageStore } from '../hooks/useLanguageStore';
+import { translateDndTitle, translateDndText } from '../utils/dndEnglishTranslator';
 
 export interface SubclassPickerModalProps {
   isOpen: boolean;
@@ -38,8 +40,18 @@ export const SubclassPickerModal: React.FC<SubclassPickerModalProps> = ({
   isSubclassUnlocked,
   onInspectCompendium,
 }) => {
+  const { isSpanish } = useLanguageStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'caster' | 'martial'>('all');
+
+  const getSubclassName = (rawName: string) => {
+    if (isSpanish) return rawName;
+    const paren = rawName.match(/\(([^)]+)\)/);
+    if (paren && /[A-Za-z]/.test(paren[1])) {
+      return paren[1].trim();
+    }
+    return translateDndTitle(rawName);
+  };
 
   const subclasses = activeClass?.subclasses || [];
   const totalCount = subclasses.length;
@@ -91,21 +103,21 @@ export const SubclassPickerModal: React.FC<SubclassPickerModalProps> = ({
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="font-fantasy font-bold text-lg sm:text-xl text-[#f4e2bb] tracking-wide">
-                  {activeClass.subclassesName} — {activeClass.name}
+                  {isSpanish ? activeClass.subclassesName : 'Subclass / Specialization'} — {isSpanish ? activeClass.name : (activeClass.nameEn || activeClass.name)}
                 </h3>
                 <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#b88c32]/25 text-[#ffd56b] border border-[#b88c32]/40">
-                  {totalCount} {totalCount === 1 ? 'Opción' : 'Opciones Disponibles'}
+                  {totalCount} {totalCount === 1 ? (isSpanish ? 'Opción' : 'Option') : (isSpanish ? 'Opciones Disponibles' : 'Available Options')}
                 </span>
                 {isCompact && (
                   <span className="px-2 py-0.5 rounded text-[10px] bg-white/10 text-[#d8c29d] border border-white/15">
-                    Modo Compacto
+                    {isSpanish ? 'Modo Compacto' : 'Compact Mode'}
                   </span>
                 )}
               </div>
               <p className="text-xs text-[#c2ad8a] mt-0.5">
                 {isSubclassUnlocked
-                  ? `Selecciona la especialización para tu ${activeClass.name} de Nivel ${characterLevel}.`
-                  : `Tu personaje es Nivel ${characterLevel}. Esta clase consagra su especialización a Nivel ${subclassUnlockLevel}. Puedes explorar e inspeccionar cada senda.`}
+                  ? (isSpanish ? `Selecciona la especialización para tu ${activeClass.name} de Nivel ${characterLevel}.` : `Select the specialization for your Level ${characterLevel} ${activeClass.nameEn || activeClass.name}.`)
+                  : (isSpanish ? `Tu personaje es Nivel ${characterLevel}. Esta clase consagra su especialización a Nivel ${subclassUnlockLevel}. Puedes explorar e inspeccionar cada senda.` : `Your character is Level ${characterLevel}. This class chooses its specialization at Level ${subclassUnlockLevel}. You can browse and inspect every subclass now.`)}
               </p>
             </div>
           </div>
@@ -126,10 +138,10 @@ export const SubclassPickerModal: React.FC<SubclassPickerModalProps> = ({
             <Lock className="w-4 h-4 text-[#8c672b] shrink-0" />
             <div className="leading-tight">
               <span className="font-bold text-[#4a361c]">
-                Especialización bloqueada por nivel (Nivel actual: {characterLevel} / Requerido: {subclassUnlockLevel}).
+                {isSpanish ? `Especialización bloqueada por nivel (Nivel actual: ${characterLevel} / Requerido: ${subclassUnlockLevel}).` : `Specialization locked by level (Current Level: ${characterLevel} / Required: ${subclassUnlockLevel}).`}
               </span>
               <span className="text-[11px] text-[#7a6448] ml-1">
-                Puedes hacer clic en <em>Inspeccionar</em> para leer todos los rasgos detallados de cada opción.
+                {isSpanish ? <>Puedes hacer clic en <em>Rasgos</em> para leer todos los rasgos detallados de cada opción.</> : <>Click <em>Features</em> on any card to read all detailed traits for each option.</>}
               </span>
             </div>
           </div>
@@ -144,7 +156,7 @@ export const SubclassPickerModal: React.FC<SubclassPickerModalProps> = ({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={`Buscar en las ${totalCount} sendas de ${activeClass.name}...`}
+                placeholder={isSpanish ? `Buscar en las ${totalCount} sendas de ${activeClass.name}...` : `Search across ${totalCount} ${activeClass.nameEn || activeClass.name} subclasses...`}
                 className="w-full pl-9 pr-8 py-2 text-xs bg-[#fcf9f2] border border-[#cfbe9f] rounded-xl text-[#2c241b] placeholder-[#8c7860] focus:outline-none focus:ring-2 focus:ring-[#8c672b]"
               />
               {searchQuery && (
@@ -160,7 +172,7 @@ export const SubclassPickerModal: React.FC<SubclassPickerModalProps> = ({
 
             <div className="flex items-center gap-2 text-xs">
               <span className="text-[#6d573c] font-medium text-[11px]">
-                Mostrando {filteredSubclasses.length} de {totalCount}
+                {isSpanish ? `Mostrando ${filteredSubclasses.length} de ${totalCount}` : `Showing ${filteredSubclasses.length} of ${totalCount}`}
               </span>
             </div>
           </div>
@@ -171,13 +183,13 @@ export const SubclassPickerModal: React.FC<SubclassPickerModalProps> = ({
           {filteredSubclasses.length === 0 ? (
             <div className="py-12 text-center text-[#786450] space-y-2">
               <Search className="w-8 h-8 mx-auto text-[#b89f80] opacity-60" />
-              <p className="font-fantasy text-sm font-bold">No se encontraron especializaciones con "{searchQuery}"</p>
+              <p className="font-fantasy text-sm font-bold">{isSpanish ? `No se encontraron especializaciones con "${searchQuery}"` : `No specializations found matching "${searchQuery}"`}</p>
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
                 className="text-xs text-[#8c672b] underline hover:text-[#4a361c] cursor-pointer"
               >
-                Limpiar búsqueda
+                {isSpanish ? 'Limpiar búsqueda' : 'Clear search'}
               </button>
             </div>
           ) : (
@@ -190,25 +202,32 @@ export const SubclassPickerModal: React.FC<SubclassPickerModalProps> = ({
             >
               {filteredSubclasses.map((sub) => {
                 const isSelected = sub.id === selectedSubclassId;
+                const cleanSubName = getSubclassName(sub.name);
+                const cleanDesc = isSpanish ? sub.description : translateDndText(sub.description);
+                const translatedTraits = sub.features?.map((f) => ({
+                  ...f,
+                  name: isSpanish ? f.name : translateDndTitle(f.name),
+                  desc: isSpanish ? f.desc : translateDndText(f.desc),
+                }));
                 const inspectData: CompendiumInspectData = {
                   id: sub.id,
-                  title: sub.name,
-                  subtitle: `Arquetipo de ${activeClass.name}`,
-                  category: `Subclase de ${activeClass.name}`,
+                  title: cleanSubName,
+                  subtitle: isSpanish ? `Arquetipo de ${activeClass.name}` : `${activeClass.nameEn || activeClass.name} Archetype`,
+                  category: isSpanish ? `Subclase de ${activeClass.name}` : `${activeClass.nameEn || activeClass.name} Subclass`,
                   iconType: 'subclass',
-                  description: sub.description,
-                  traits: sub.features,
+                  description: cleanDesc,
+                  traits: translatedTraits,
                   badges: !isSubclassUnlocked
-                    ? [{ label: 'Requisito', value: `Desbloquea a Nivel ${subclassUnlockLevel}`, variant: 'amber' }]
+                    ? [{ label: isSpanish ? 'Requisito' : 'Requirement', value: isSpanish ? `Desbloquea a Nivel ${subclassUnlockLevel}` : `Unlocks at Level ${subclassUnlockLevel}`, variant: 'amber' }]
                     : undefined,
                   actionButton: !isSubclassUnlocked
                     ? {
-                        label: `Se desbloquea a Nivel ${subclassUnlockLevel}`,
+                        label: isSpanish ? `Se desbloquea a Nivel ${subclassUnlockLevel}` : `Unlocks at Level ${subclassUnlockLevel}`,
                         onClick: () => {},
                         disabled: true,
                       }
                     : {
-                        label: isSelected ? 'Subclase Elegida' : 'Elegir esta Subclase',
+                        label: isSelected ? (isSpanish ? 'Subclase Elegida' : 'Subclass Selected') : (isSpanish ? 'Elegir esta Subclase' : 'Choose this Subclass'),
                         onClick: () => {
                           onSelectSubclass(sub.id);
                           onClose();
@@ -241,45 +260,45 @@ export const SubclassPickerModal: React.FC<SubclassPickerModalProps> = ({
                           </div>
                           <div>
                             <h4 className="font-fantasy font-bold text-sm text-[#382b20] leading-snug">
-                              {sub.name}
+                              {cleanSubName}
                             </h4>
                             <span className="text-[10px] text-[#7a6448] block">
-                              Arquetipo de {activeClass.name}
+                              {isSpanish ? `Arquetipo de ${activeClass.name}` : `${activeClass.nameEn || activeClass.name} Archetype`}
                             </span>
                           </div>
                         </div>
 
                         {isSelected && (
                           <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#b88c32] text-white flex items-center gap-1 shrink-0">
-                            <Check className="w-3 h-3" /> Elegida
+                            <Check className="w-3 h-3" /> {isSpanish ? 'Elegida' : 'Selected'}
                           </span>
                         )}
                       </div>
 
                       {/* CARD DESCRIPTION */}
-                      <p className="text-xs text-[#5c4a35] leading-relaxed line-clamp-3">
-                        {sub.description}
+                      <p className="text-xs text-[#5c4a35] leading-relaxed">
+                        {cleanDesc}
                       </p>
 
                       {/* FEATURES PREVIEW (FIRST 2 OR 3 KEY FEATURES) */}
                       {sub.features && sub.features.length > 0 && (
                         <div className="pt-1.5 border-t border-[#e8dbca] space-y-1">
                           <span className="text-[10px] font-bold uppercase tracking-wider text-[#7a6448] flex items-center gap-1">
-                            <BookOpen className="w-3 h-3 text-[#8c672b]" /> Rasgos Principales:
+                            <BookOpen className="w-3 h-3 text-[#8c672b]" /> {isSpanish ? 'Rasgos Principales:' : 'Key Features:'}
                           </span>
                           <div className="flex flex-wrap gap-1">
                             {sub.features.slice(0, 3).map((feat, idx) => (
                               <span
                                 key={idx}
                                 className="px-1.5 py-0.5 rounded text-[10px] bg-[#ede0cc] text-[#4a361c] border border-[#d6c4aa] truncate max-w-[190px]"
-                                title={feat.desc}
+                                title={isSpanish ? feat.desc : translateDndText(feat.desc)}
                               >
-                                Nv.{feat.level}: {feat.name}
+                                {isSpanish ? 'Nv.' : 'Lv.'}{feat.level}: {isSpanish ? feat.name : translateDndTitle(feat.name)}
                               </span>
                             ))}
                             {sub.features.length > 3 && (
                               <span className="text-[10px] text-[#8c672b] font-bold self-center">
-                                +{sub.features.length - 3} más
+                                +{sub.features.length - 3} {isSpanish ? 'más' : 'more'}
                               </span>
                             )}
                           </div>
@@ -293,9 +312,9 @@ export const SubclassPickerModal: React.FC<SubclassPickerModalProps> = ({
                         type="button"
                         onClick={() => onInspectCompendium(inspectData)}
                         className="px-2.5 py-1.5 rounded-lg bg-[#ede1ce] hover:bg-[#dfd0ba] text-[#5c4a35] border border-[#cfbe9f] text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
-                        title="Inspeccionar todos los rasgos y detalles en el Compendio"
+                        title={isSpanish ? 'Inspeccionar todos los rasgos y detalles en el Compendio' : 'Inspect all features and details in Compendium'}
                       >
-                        <Eye className="w-3.5 h-3.5" /> Rasgos
+                        <Eye className="w-3.5 h-3.5" /> {isSpanish ? 'Rasgos' : 'Features'}
                       </button>
 
                       {isSubclassUnlocked ? (
@@ -313,10 +332,10 @@ export const SubclassPickerModal: React.FC<SubclassPickerModalProps> = ({
                         >
                           {isSelected ? (
                             <>
-                              <Check className="w-3.5 h-3.5" /> Seleccionada
+                              <Check className="w-3.5 h-3.5" /> {isSpanish ? 'Seleccionada' : 'Selected'}
                             </>
                           ) : (
-                            'Elegir esta Subclase'
+                            isSpanish ? 'Elegir esta Subclase' : 'Choose Subclass'
                           )}
                         </button>
                       ) : (
@@ -325,7 +344,7 @@ export const SubclassPickerModal: React.FC<SubclassPickerModalProps> = ({
                           disabled
                           className="flex-1 py-1.5 px-3 rounded-lg text-[11px] font-bold bg-[#ede0cc] text-[#8c7860] border border-[#d6c4aa] flex items-center justify-center gap-1 cursor-not-allowed opacity-80"
                         >
-                          <Lock className="w-3 h-3" /> Nivel {subclassUnlockLevel}
+                          <Lock className="w-3 h-3" /> {isSpanish ? 'Nivel' : 'Level'} {subclassUnlockLevel}
                         </button>
                       )}
                     </div>
@@ -339,13 +358,13 @@ export const SubclassPickerModal: React.FC<SubclassPickerModalProps> = ({
         {/* MODAL FOOTER */}
         <div className="bg-[#f0e4d0] border-t-2 border-[#d6c4aa] px-5 py-3.5 flex flex-wrap items-center justify-between gap-3 shrink-0">
           <div className="text-xs text-[#5c4a35] flex items-center gap-2">
-            <span className="font-bold text-[#382b20]">Selección actual:</span>
+            <span className="font-bold text-[#382b20]">{isSpanish ? 'Selección actual:' : 'Current selection:'}</span>
             {selectedSubclass ? (
               <span className="px-2.5 py-0.5 rounded-md bg-[#b88c32] text-white font-bold text-xs shadow-xs">
-                {selectedSubclass.name}
+                {getSubclassName(selectedSubclass.name)}
               </span>
             ) : (
-              <span className="italic text-[#8c7860]">Ninguna especialización seleccionada</span>
+              <span className="italic text-[#8c7860]">{isSpanish ? 'Ninguna especialización seleccionada' : 'No specialization selected'}</span>
             )}
           </div>
 
@@ -358,7 +377,7 @@ export const SubclassPickerModal: React.FC<SubclassPickerModalProps> = ({
                 }}
                 className="px-3 py-1.5 rounded-xl bg-[#ede0cc] hover:bg-[#dfceb5] text-[#8c2e28] text-xs font-bold border border-[#cfbe9f] transition cursor-pointer"
               >
-                Quitar Selección
+                {isSpanish ? 'Quitar Selección' : 'Clear Selection'}
               </button>
             )}
 
@@ -367,7 +386,7 @@ export const SubclassPickerModal: React.FC<SubclassPickerModalProps> = ({
               onClick={onClose}
               className="px-5 py-1.5 bg-gradient-to-r from-[#8c672b] to-[#6d4f1f] hover:from-[#9c7533] hover:to-[#7d5c25] text-white font-fantasy font-bold text-xs rounded-xl shadow-md transition cursor-pointer"
             >
-              Cerrar y Continuar
+              {isSpanish ? 'Cerrar y Continuar' : 'Close & Continue'}
             </button>
           </div>
         </div>

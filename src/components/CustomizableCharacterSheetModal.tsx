@@ -36,6 +36,25 @@ import { RestModal, RestResult } from './RestModal';
 import { ThemedNotificationModal, ThemedModalType } from './ThemedNotificationModal';
 import { RulesInspectorModal, RuleCategory } from './RulesInspectorModal';
 import { ALL_5E_SKILLS } from '../data/characterCreatorData';
+import { useLanguageStore } from '../hooks/useLanguageStore';
+import {
+  localizeReactNode,
+  localizeString,
+  translateDndTitle,
+  translateDndText,
+  translateSkillName,
+  translateCharacterClassName,
+  translateCharacterRaceName,
+  translateCharacterBackgroundName,
+  translateAlignment,
+  translateProficiencyText,
+  translateLanguageList,
+  translateSpellSchool,
+  translateSpellMeta,
+  translateWeaponOrItemName,
+  translateWeaponProperty,
+  translateDamageType,
+} from '../utils/dndEnglishTranslator';
 import {
   calculateCharacterSpeed,
   getExtraAttackInfo,
@@ -221,6 +240,23 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
   onEditInCreator,
   onClose,
 }) => {
+  const { isSpanish } = useLanguageStore();
+
+  const localizedAbilityLabels: Record<keyof AbilityScores, { name: string; short: string }> = useMemo(
+    () =>
+      isSpanish
+        ? ABILITY_LABELS
+        : {
+            str: { name: 'Strength', short: 'STR' },
+            dex: { name: 'Dexterity', short: 'DEX' },
+            con: { name: 'Constitution', short: 'CON' },
+            int: { name: 'Intelligence', short: 'INT' },
+            wis: { name: 'Wisdom', short: 'WIS' },
+            cha: { name: 'Charisma', short: 'CHA' },
+          },
+    [isSpanish]
+  );
+
   // Local mutable character state for live interaction
   const [charData, setCharData] = useState<Character>(character);
 
@@ -320,29 +356,45 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
   const [manualSurgeInput, setManualSurgeInput] = useState<string>('');
 
   const announceWildMagicSurge = (entry: WildMagicSurgeEntry, rollNum?: number) => {
-    const categoryBadge = {
-      beneficial: '✨ Efecto Beneficioso',
-      detrimental: '⚠️ Efecto Perjudicial',
-      chaotic: '🌀 Efecto Caótico',
-      neutral: '🔮 Efecto Mágico Neutro',
-    }[entry.category];
+    const categoryBadge = isSpanish
+      ? {
+          beneficial: '✨ Efecto Beneficioso',
+          detrimental: '⚠️ Efecto Perjudicial',
+          chaotic: '🌀 Efecto Caótico',
+          neutral: '🔮 Efecto Mágico Neutro',
+        }[entry.category]
+      : {
+          beneficial: '✨ Beneficial Effect',
+          detrimental: '⚠️ Detrimental Effect',
+          chaotic: '🌀 Chaotic Effect',
+          neutral: '🔮 Neutral Magical Effect',
+        }[entry.category];
+
+    const entryTitleDisplay = isSpanish ? entry.title : translateDndTitle(entry.title);
+    const entryEffectDisplay = isSpanish ? entry.effect : translateDndText(entry.effect);
 
     setThemedAlert({
       isOpen: true,
-      title: `🌀 ¡Oleada de Magia Salvaje: ${entry.title}! (${entry.rangeStr}${rollNum ? ` • d100 = ${rollNum}` : ''})`,
-      subtitle: `${categoryBadge} • Reglas Oficiales de Hechicero`,
+      title: isSpanish
+        ? `🌀 ¡Oleada de Magia Salvaje: ${entryTitleDisplay}! (${entry.rangeStr}${rollNum ? ` • d100 = ${rollNum}` : ''})`
+        : `🌀 Wild Magic Surge: ${entryTitleDisplay}! (${entry.rangeStr}${rollNum ? ` • d100 = ${rollNum}` : ''})`,
+      subtitle: isSpanish
+        ? `${categoryBadge} • Reglas Oficiales de Hechicero`
+        : `${categoryBadge} • Official Sorcerer Rules`,
       type: entry.category === 'detrimental' ? 'danger' : entry.category === 'beneficial' ? 'success' : 'dice',
       message: (
         <div className="p-3.5 bg-[#f5ede0] rounded-xl border border-[#d8c8af] text-xs text-[#4a361c] space-y-2">
           <div className="flex items-center justify-between">
             <span className="font-fantasy font-bold text-sm text-[#7a328c]">
-              Manifestación del Caos Arcano ({entry.rangeStr}):
+              {isSpanish
+                ? `Manifestación del Caos Arcano (${entry.rangeStr}):`
+                : `Arcane Chaos Manifestation (${entry.rangeStr}):`}
             </span>
             <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-[#7a328c]/10 text-[#7a328c]">
               {categoryBadge}
             </span>
           </div>
-          <p className="leading-relaxed text-[#362514] font-medium">{entry.effect}</p>
+          <p className="leading-relaxed text-[#362514] font-medium">{entryEffectDisplay}</p>
         </div>
       ),
     });
@@ -613,40 +665,49 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
     onUpdateCharacter(updatedChar);
 
     // Themed notification modal
-    const restTitle = result.restType === 'long' ? 'Descanso Largo (8h)' : 'Descanso Corto (1h)';
+    const restTitle = isSpanish
+      ? result.restType === 'long' ? 'Descanso Largo (8h)' : 'Descanso Corto (1h)'
+      : result.restType === 'long' ? 'Long Rest (8h)' : 'Short Rest (1h)';
     const totalHd = charData.level || 1;
     const remainingHd = Math.max(0, totalHd - result.newUsedHitDice);
 
     setThemedAlert({
       isOpen: true,
-      title: `¡${restTitle} Completado!`,
-      subtitle:
-        result.restType === 'long'
+      title: isSpanish ? `¡${restTitle} Completado!` : `${restTitle} Completed!`,
+      subtitle: isSpanish
+        ? result.restType === 'long'
           ? 'Tu aventurero despierta completamente renovado.'
-          : 'Has tomado un momento de calma para recuperar el aliento y vendarte.',
+          : 'Has tomado un momento de calma para recuperar el aliento y vendarte.'
+        : result.restType === 'long'
+          ? 'Your adventurer wakes up completely refreshed.'
+          : 'You took a moment of calm to catch your breath and bind your wounds.',
       type: 'rest',
       message: (
         <div className="space-y-3 text-xs text-[#4a3928]">
           <div className="p-3 bg-[#eadecc]/70 rounded-xl border border-[#cbb396] grid grid-cols-2 gap-3 text-center">
             <div>
-              <span className="text-[10px] text-[#7a644e] uppercase font-bold block">Puntos de Golpe</span>
+              <span className="text-[10px] text-[#7a644e] uppercase font-bold block">
+                {isSpanish ? 'Puntos de Golpe' : 'Hit Points'}
+              </span>
               <span className="text-base font-fantasy font-bold text-[#8c2525]">
                 {result.newHp} / {charData.maxHp}
               </span>
               {result.hpRegained > 0 && (
                 <span className="text-[10px] text-green-700 block font-semibold">
-                  (+{result.hpRegained} PG recuperados)
+                  {isSpanish ? `(+${result.hpRegained} PG recuperados)` : `(+${result.hpRegained} HP regained)`}
                 </span>
               )}
             </div>
             <div>
-              <span className="text-[10px] text-[#7a644e] uppercase font-bold block">Dados de Golpe</span>
+              <span className="text-[10px] text-[#7a644e] uppercase font-bold block">
+                {isSpanish ? 'Dados de Golpe' : 'Hit Dice'}
+              </span>
               <span className="text-base font-fantasy font-bold text-[#204a6e]">
-                {remainingHd} / {totalHd} disp.
+                {remainingHd} / {totalHd} {isSpanish ? 'disp.' : 'avail.'}
               </span>
               {result.hitDiceSpent > 0 && (
                 <span className="text-[10px] text-[#8c672b] block font-semibold">
-                  ({result.hitDiceSpent} gastados)
+                  {isSpanish ? `(${result.hitDiceSpent} gastados)` : `(${result.hitDiceSpent} spent)`}
                 </span>
               )}
             </div>
@@ -654,11 +715,15 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
 
           {result.restType === 'long' ? (
             <p className="text-[11px] text-[#5c4936] leading-relaxed">
-              ✨ Se han restaurado por completo todas tus ranuras de conjuro y facultades especiales de clase. Las salvaciones de muerte han sido reiniciadas.
+              {isSpanish
+                ? '✨ Se han restaurado por completo todas tus ranuras de conjuro y facultades especiales de clase. Las salvaciones de muerte han sido reiniciadas.'
+                : '✨ All your spell slots and special class features have been fully restored. Death saving throws have been reset.'}
             </p>
           ) : (
             <p className="text-[11px] text-[#5c4936] leading-relaxed">
-              ☕ Se han recargado tus recursos de clase que se renuevan en descanso corto (Ki, Puntos de Flujo, Segundo Aire, ranuras de Brujo, etc.).
+              {isSpanish
+                ? '☕ Se han recargado tus recursos de clase que se renuevan en descanso corto (Ki, Puntos de Flujo, Segundo Aire, ranuras de Brujo, etc.).'
+                : '☕ Your short-rest class resources have recharged (Ki, Moxie Points, Second Wind, Warlock Pact Slots, etc.).'}
             </p>
           )}
         </div>
@@ -787,7 +852,18 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
   }) => {
     setInspectFeatureModal({
       isOpen: true,
-      ...data,
+      title: isSpanish ? data.title : translateDndTitle(data.title),
+      badge: data.badge ? (isSpanish ? data.badge : translateDndTitle(data.badge)) : undefined,
+      classTag: data.classTag ? (isSpanish ? data.classTag : translateDndTitle(data.classTag)) : undefined,
+      summary: isSpanish ? data.summary : translateDndText(data.summary),
+      rules: isSpanish ? data.rules : data.rules.map(translateDndText),
+      mechanics: data.mechanics
+        ? data.mechanics.map((m) => ({
+            label: isSpanish ? m.label : translateDndTitle(m.label),
+            value: isSpanish ? m.value : translateDndText(m.value),
+          }))
+        : undefined,
+      tips: data.tips ? (isSpanish ? data.tips : data.tips.map(translateDndText)) : undefined,
     });
   };
 
@@ -930,10 +1006,12 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
     if (!cantripToSwapSheet || !newCantripSelectedSheet) {
       setThemedAlert({
         isOpen: true,
-        title: 'Selección Incompleta',
-        subtitle: 'Fórmulas de Trucos del Mago',
+        title: isSpanish ? 'Selección Incompleta' : 'Incomplete Selection',
+        subtitle: isSpanish ? 'Fórmulas de Trucos del Mago' : 'Wizard Cantrip Formulas',
         type: 'warning',
-        message: 'Por favor selecciona el truco que deseas reemplazar y el nuevo truco que aprenderás.',
+        message: isSpanish
+          ? 'Por favor selecciona el truco que deseas reemplazar y el nuevo truco que aprenderás.'
+          : 'Please select the cantrip you want to replace and the new cantrip you will learn.',
       });
       return;
     }
@@ -941,7 +1019,9 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
     updatedSpells.push(newCantripSelectedSheet);
     const updatedNotes =
       (charData.notes || '') +
-      `\n[Descanso Largo] Fórmulas de Trucos: Se reemplazó el truco "${cantripToSwapSheet}" por "${newCantripSelectedSheet.name}".`;
+      (isSpanish
+        ? `\n[Descanso Largo] Fórmulas de Trucos: Se reemplazó el truco "${cantripToSwapSheet}" por "${newCantripSelectedSheet.name}".`
+        : `\n[Long Rest] Cantrip Formulas: Replaced cantrip "${cantripToSwapSheet}" with "${newCantripSelectedSheet.name}".`);
     const updated = {
       ...charData,
       spells: updatedSpells,
@@ -954,10 +1034,12 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
     setNewCantripSelectedSheet(null);
     setThemedAlert({
       isOpen: true,
-      title: '¡Fórmulas Arcanas Reconfiguradas!',
-      subtitle: 'Grimorio de Mago (Tasha)',
+      title: isSpanish ? '¡Fórmulas Arcanas Reconfiguradas!' : 'Arcane Formulas Reconfigured!',
+      subtitle: isSpanish ? 'Grimorio de Mago (Tasha)' : 'Wizard Spellbook (Tasha)',
       type: 'success',
-      message: `Has consultado con éxito las fórmulas de tu libro de conjuros. Ahora tienes preparado "${newCantripSelectedSheet.name}" en lugar de "${cantripToSwapSheet}".`,
+      message: isSpanish
+        ? `Has consultado con éxito las fórmulas de tu libro de conjuros. Ahora tienes preparado "${newCantripSelectedSheet.name}" en lugar de "${cantripToSwapSheet}".`
+        : `You have successfully consulted your spellbook formulas. You now have "${newCantripSelectedSheet.name}" prepared instead of "${cantripToSwapSheet}".`,
     });
   };
 
@@ -1180,11 +1262,13 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
     if (rageResIndex === -1) {
       currentResources.push({
         id: 'res-furia',
-        name: 'Usos de Furia (Rage)',
+        name: isSpanish ? 'Usos de Furia (Rage)' : 'Rage Uses',
         current: maxRages,
         max: maxRages,
         resetOn: 'long',
-        description: `+${rageDmg} al daño cuerpo a cuerpo con FUE, ventaja en pruebas de Fuerza y resistencia a daño contundente, cortante y perforante.${barbarianLevel >= 20 ? ' (Furia ilimitada a Nivel 20)' : ''}`,
+        description: isSpanish
+          ? `+${rageDmg} al daño cuerpo a cuerpo con FUE, ventaja en pruebas de Fuerza y resistencia a daño contundente, cortante y perforante.${barbarianLevel >= 20 ? ' (Furia ilimitada a Nivel 20)' : ''}`
+          : `+${rageDmg} melee STR damage, advantage on Strength checks/saves, and resistance to bludgeoning, piercing, and slashing damage.${barbarianLevel >= 20 ? ' (Unlimited Rage at Level 20)' : ''}`,
       });
       rageResIndex = currentResources.length - 1;
     }
@@ -1195,10 +1279,12 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
       if (currentAvailable <= 0 && maxRages !== 999) {
         setThemedAlert({
           isOpen: true,
-          title: 'Sin Usos de Furia',
-          subtitle: 'Furia Primitiva Agotada',
+          title: isSpanish ? 'Sin Usos de Furia' : 'No Rage Uses Left',
+          subtitle: isSpanish ? 'Furia Primitiva Agotada' : 'Primal Rage Depleted',
           type: 'warning',
-          message: '¡No te quedan usos de Furia disponibles! Realiza un descanso largo para recuperarlos.',
+          message: isSpanish
+            ? '¡No te quedan usos de Furia disponibles! Realiza un descanso largo para recuperarlos.'
+            : 'You have no Rage uses left! Complete a long rest to recover them.',
         });
         return;
       }
@@ -1552,7 +1638,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
   // --------------------------------------------------------------------------
   // RENDER WIDGET DISPATCHER
   // --------------------------------------------------------------------------
-  const renderWidget = (modId: SheetModuleId) => {
+  const renderRawWidget = (modId: SheetModuleId) => {
     switch (modId) {
       // ----------------------------------------------------------------------
       // 0. HERO PORTRAIT MODULE (Clean Portrait Card Without Redundant Top Header)
@@ -1584,26 +1670,27 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
 
               <div className="min-w-0 flex-1 space-y-0.5">
                 <div className="font-fantasy font-bold text-xs sm:text-sm text-[#362514] uppercase tracking-wider leading-tight truncate">
-                  {charData.name}
+                  {isSpanish ? charData.name : localizeString(charData.name, false)}
                 </div>
                 <div className="text-[10px] font-serif italic text-[#5e4e3e] leading-tight truncate">
-                  {cleanSubrace} • {charData.class}
-                  {charData.subclass ? ` (${charData.subclass})` : ''}
+                  {isSpanish ? cleanSubrace : translateCharacterRaceName(cleanSubrace)} •{' '}
+                  {isSpanish ? charData.class : translateCharacterClassName(charData.class)}
+                  {charData.subclass ? ` (${isSpanish ? charData.subclass : translateDndTitle(charData.subclass)})` : ''}
                 </div>
                 <div className="flex items-center gap-1 pt-0.5 flex-wrap">
                   <span className="text-[9px] font-fantasy font-bold bg-[#ede1ce] text-[#5c4217] px-1.5 py-0.2 rounded-full border border-[#b89b6a]">
-                    Nv {charData.level}
+                    {isSpanish ? 'Nv' : 'Lv'} {charData.level}
                   </span>
                   <span className="text-[9px] font-serif bg-[#ede1ce] text-[#5c4217] px-1.5 py-0.2 rounded-full border border-[#b89b6a] truncate max-w-[70px]">
-                    {charData.alignment || 'Neutral'}
+                    {isSpanish ? (charData.alignment || 'Neutral') : translateAlignment(charData.alignment || 'Neutral')}
                   </span>
                   <button
                     type="button"
                     onClick={() => setIsAvatarLightboxOpen(true)}
                     className="ml-auto text-[9.5px] font-fantasy font-bold text-[#8c672b] hover:text-[#5c4217] flex items-center gap-0.5 cursor-pointer"
-                    title="Personalizar retrato o marco"
+                    title={isSpanish ? 'Personalizar retrato o marco' : 'Customize portrait or frame'}
                   >
-                    <Sparkles className="w-2.5 h-2.5 text-[#ffd56b]" /> Marco
+                    <Sparkles className="w-2.5 h-2.5 text-[#ffd56b]" /> {isSpanish ? 'Marco' : 'Frame'}
                   </button>
                 </div>
               </div>
@@ -1617,18 +1704,22 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
           <div className="bg-[#fcf9f2] rounded-2xl border-2 border-[#d8c8af] p-2.5 sm:p-3 shadow-sm space-y-2.5">
             {renderScrollSectionHeader(
               null,
-              'Vitalidad & Combate',
+              isSpanish ? 'Vitalidad & Combate' : 'Vitality & Combat',
               undefined,
               <>
                 {renderHeaderSmallButton({
                   onClick: () => openRulesInspector('ac'),
-                  label: 'Reglas',
+                  label: isSpanish ? 'Reglas' : 'Rules',
                   icon: <Search className="w-3 h-3 text-[#d4ab59]" />,
-                  title: 'Auditor de Reglas: Consulta el desglose matemático oficial y reglas aplicadas',
+                  title: isSpanish
+                    ? 'Auditor de Reglas: Consulta el desglose matemático oficial y reglas aplicadas'
+                    : 'Rules Inspector: View official mathematical breakdown and applied rules',
                 })}
                 {renderHeaderSmallButton({
                   onClick: () => setInspiration((prev) => !prev),
-                  label: inspiration ? '¡Inspiración!' : 'Inspiración',
+                  label: isSpanish
+                    ? inspiration ? '¡Inspiración!' : 'Inspiración'
+                    : inspiration ? 'Inspired!' : 'Inspiration',
                   active: inspiration,
                   icon: (
                     <img
@@ -1639,7 +1730,9 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                       }`}
                     />
                   ),
-                  title: 'Sello de Inspiración otorgado por el DM para ganar ventaja en una tirada',
+                  title: isSpanish
+                    ? 'Sello de Inspiración otorgado por el DM para ganar ventaja en una tirada'
+                    : 'Heroic Inspiration seal granted by the DM to gain Advantage on a roll',
                 })}
               </>
             )}
@@ -1650,10 +1743,10 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
               <div
                 onClick={() => openRulesInspector('ac')}
                 className="bg-[#f5ede0]/85 rounded-xl p-2.5 border border-[#b89b6a] flex flex-col items-center justify-between text-center shadow-xs group hover:border-[#8c672b] hover:bg-[#ede1ce] transition cursor-pointer min-w-0"
-                title="Armadura (CA): Clic para consultar desglose y reglas oficiales de CA"
+                title={isSpanish ? 'Armadura (CA): Clic para consultar desglose y reglas oficiales de CA' : 'Armor Class (AC): Click to view official AC breakdown and rules'}
               >
                 <div className="text-[10px] font-fantasy font-bold text-[#4a361c] uppercase tracking-wider truncate w-full">
-                  Armadura (CA)
+                  {isSpanish ? 'Armadura (CA)' : 'Armor (AC)'}
                 </div>
                 <div className="relative w-12 h-13 my-0.5 flex items-center justify-center group-hover:scale-105 transition-transform">
                   <img
@@ -1667,8 +1760,14 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                   </span>
                 </div>
                 <div className="text-[9.5px] text-[#5e4e3e] font-semibold leading-tight line-clamp-1 px-0.5">
-                  {equippedArmor ? equippedArmor.name.split('(')[0].trim() : 'Sin armadura'}
-                  {hasEquippedShield ? ' + Escudo' : ''}
+                  {equippedArmor
+                    ? isSpanish
+                      ? equippedArmor.name.split('(')[0].trim()
+                      : equippedArmor.nameEn || localizeString(equippedArmor.name, false)
+                    : isSpanish
+                    ? 'Sin armadura'
+                    : 'Unarmored'}
+                  {hasEquippedShield ? (isSpanish ? ' + Escudo' : ' + Shield') : ''}
                 </div>
               </div>
 
@@ -1676,15 +1775,15 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
               <div
                 onClick={() =>
                   rollD20(
-                    `Iniciativa de ${charData.name}`,
+                    isSpanish ? `Iniciativa de ${charData.name}` : `Initiative (${localizeString(charData.name, false)})`,
                     charData.initiativeBonus
                   )
                 }
                 className="bg-[#f5ede0]/85 rounded-xl p-2.5 border border-[#b89b6a] flex flex-col items-center justify-between text-center shadow-xs hover:border-[#8c672b] hover:bg-[#ede1ce] transition cursor-pointer group min-w-0"
-                title="Iniciativa: Haz clic para tirar 1d20 de iniciativa"
+                title={isSpanish ? 'Iniciativa: Haz clic para tirar 1d20 de iniciativa' : 'Initiative: Click to roll 1d20 Initiative'}
               >
                 <div className="text-[10px] font-fantasy font-bold text-[#4a361c] uppercase tracking-wider truncate w-full">
-                  Iniciativa 🎲
+                  {isSpanish ? 'Iniciativa 🎲' : 'Initiative 🎲'}
                 </div>
                 <div className="relative w-12 h-12 my-0.5 flex items-center justify-center group-hover:scale-105 transition-transform">
                   <img
@@ -1698,7 +1797,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                   </span>
                 </div>
                 <div className="text-[9.5px] font-fantasy text-[#6b5233] font-semibold truncate">
-                  Tirar d20
+                  {isSpanish ? 'Tirar d20' : 'Roll d20'}
                 </div>
               </div>
 
@@ -1706,10 +1805,10 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
               <div
                 onClick={() => openRulesInspector('speed')}
                 className="bg-[#f5ede0]/85 rounded-xl p-2.5 border border-[#b89b6a] flex flex-col items-center justify-between text-center shadow-xs group hover:border-[#8c672b] hover:bg-[#ede1ce] transition cursor-pointer min-w-0"
-                title="Velocidad: Clic para ver desglose, reglas de saltos y terreno"
+                title={isSpanish ? 'Velocidad: Clic para ver desglose, reglas de saltos y terreno' : 'Speed: Click to view breakdown, jump rules, and terrain'}
               >
                 <div className="text-[10px] font-fantasy font-bold text-[#4a361c] uppercase tracking-wider truncate w-full">
-                  Velocidad
+                  {isSpanish ? 'Velocidad' : 'Speed'}
                 </div>
                 <div className="relative w-12 h-12 my-0.5 flex flex-col items-center justify-center group-hover:scale-105 transition-transform">
                   <img
@@ -1722,11 +1821,11 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                     {effectiveSpeed.speedFeet}
                   </span>
                   <span className="relative z-10 text-[7.5px] font-fantasy font-bold uppercase text-[#e8d096] tracking-wider leading-none mt-0.5">
-                    pies
+                    {isSpanish ? 'pies' : 'ft'}
                   </span>
                 </div>
                 <div className="text-[9.5px] text-[#5e4e3e] leading-tight line-clamp-1 px-0.5">
-                  {effectiveSpeed.speedFeet} pies
+                  {effectiveSpeed.speedFeet} {isSpanish ? 'pies' : 'ft.'}
                 </div>
               </div>
 
@@ -1734,10 +1833,10 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
               <div
                 onClick={() => openRulesInspector('prof')}
                 className="bg-[#f5ede0]/85 rounded-xl p-2.5 border border-[#b89b6a] flex flex-col items-center justify-between text-center shadow-xs group hover:border-[#8c672b] hover:bg-[#ede1ce] transition cursor-pointer min-w-0 overflow-hidden"
-                title="Competencia: Clic para ver escala oficial por nivel"
+                title={isSpanish ? 'Competencia: Clic para ver escala oficial por nivel' : 'Proficiency: Click to view official scaling by level'}
               >
                 <div className="text-[10px] font-fantasy font-bold text-[#4a361c] uppercase tracking-wider truncate w-full">
-                  Competencia
+                  {isSpanish ? 'Competencia' : 'Proficiency'}
                 </div>
                 <div className="relative w-12 h-12 my-0.5 flex items-center justify-center group-hover:scale-105 transition-transform">
                   <img
@@ -1751,7 +1850,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                   </span>
                 </div>
                 <div className="text-[9.5px] text-[#5e4e3e] font-semibold truncate px-0.5">
-                  Nivel {charData.level}
+                  {isSpanish ? 'Nivel' : 'Level'} {charData.level}
                 </div>
               </div>
             </div>
@@ -1766,18 +1865,23 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-fantasy font-bold text-xs text-[#5c1d12] uppercase tracking-wide">
-                        ¡Modo Furia Activo!
+                        {isSpanish ? '¡Modo Furia Activo!' : 'Rage Mode Active!'}
                       </span>
                       <span className="text-[10px] bg-[#c53d27] text-white px-2 py-0.5 rounded font-mono font-bold">
-                        +{charData.level >= 16 ? 4 : charData.level >= 9 ? 3 : 2} Daño CaC (FUE)
+                        {isSpanish
+                          ? `+${charData.level >= 16 ? 4 : charData.level >= 9 ? 3 : 2} Daño CaC (FUE)`
+                          : `+${charData.level >= 16 ? 4 : charData.level >= 9 ? 3 : 2} Melee Dmg (STR)`}
                       </span>
                     </div>
                     <p className="text-[11px] text-[#733529] font-medium mt-0.5">
-                      🛡️ <strong>Resistencias Activas:</strong> {
-                        (charData.subclass || '').toLowerCase().includes('totem') && (charData.classDecisions?.['totemSpirit3']?.includes('totem-oso-3') || charData.notes?.toLowerCase().includes('oso'))
+                      🛡️ <strong>{isSpanish ? 'Resistencias Activas:' : 'Active Resistances:'}</strong>{' '}
+                      {(charData.subclass || '').toLowerCase().includes('totem') && (charData.classDecisions?.['totemSpirit3']?.includes('totem-oso-3') || charData.notes?.toLowerCase().includes('oso'))
+                        ? isSpanish
                           ? 'Resistencia a TODO tipo de daño excepto psíquico (Tótem Oso).'
-                          : 'Resistencia a daño Contundente, Cortante y Perforante (daño recibido ÷ 2).'
-                      }
+                          : 'Resistance to ALL damage except psychic (Bear Totem).'
+                        : isSpanish
+                          ? 'Resistencia a daño Contundente, Cortante y Perforante (daño recibido ÷ 2).'
+                          : 'Resistance to Bludgeoning, Piercing, and Slashing damage (damage taken ÷ 2).'}
                     </p>
                   </div>
                 </div>
@@ -1786,9 +1890,9 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                   type="button"
                   onClick={handleToggleRage}
                   className="px-3 py-1.5 bg-[#5c1d12] hover:bg-[#3d130c] text-white rounded-lg text-xs font-fantasy font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-xs whitespace-nowrap self-start sm:self-auto shrink-0 active:scale-95"
-                  title="Calmar furia"
+                  title={isSpanish ? 'Calmar furia' : 'End Rage'}
                 >
-                  <Flame className="w-3.5 h-3.5" /> ❄️ Calmar Furia
+                  <Flame className="w-3.5 h-3.5" /> ❄️ {isSpanish ? 'Calmar Furia' : 'End Rage'}
                 </button>
               </div>
             )}
@@ -1798,7 +1902,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-fantasy font-bold text-[#4a361c] uppercase">
-                    Puntos de Golpe (PG)
+                    {isSpanish ? 'Puntos de Golpe (PG)' : 'Hit Points (HP)'}
                   </span>
                   {charData.tempHp > 0 && (
                     <span className="text-xs font-mono font-bold bg-[#ebdcc4] text-[#5c4217] px-2 py-0.5 rounded-full border border-[#b88c32]">
@@ -1871,7 +1975,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                     type="button"
                     onClick={() => applyHpChange(-5)}
                     className="px-2.5 py-1 min-w-[34px] bg-[#22150e] hover:bg-[#331c12] text-[#ff9e94] border border-[#8c2e28] rounded-md font-mono text-xs font-bold transition-transform hover:scale-105 active:scale-95 cursor-pointer shadow-xs"
-                    title="Restar 5 PG"
+                    title={isSpanish ? 'Restar 5 PG' : 'Subtract 5 HP'}
                   >
                     -5
                   </button>
@@ -1879,7 +1983,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                     type="button"
                     onClick={() => applyHpChange(-1)}
                     className="px-2.5 py-1 min-w-[34px] bg-[#22150e] hover:bg-[#331c12] text-[#ff9e94] border border-[#8c2e28] rounded-md font-mono text-xs font-bold transition-transform hover:scale-105 active:scale-95 cursor-pointer shadow-xs"
-                    title="Restar 1 PG"
+                    title={isSpanish ? 'Restar 1 PG' : 'Subtract 1 HP'}
                   >
                     -1
                   </button>
@@ -1889,7 +1993,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                 <div className="flex items-center gap-1 bg-[#1a120c] px-1.5 py-0.5 rounded-lg border border-[#8c672b]/80 shadow-xs">
                   <input
                     type="number"
-                    placeholder="cant."
+                    placeholder={isSpanish ? 'cant.' : 'amt.'}
                     value={quickHpAmount}
                     onChange={(e) => setQuickHpAmount(e.target.value)}
                     className="w-14 bg-transparent border-none text-center font-mono text-xs text-[#fff6e0] focus:outline-none placeholder-[#7a6448]"
@@ -1898,7 +2002,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                     type="button"
                     onClick={() => applyCustomHpDelta(true)}
                     className="w-6 h-6 bg-[#8c2e28] hover:bg-[#a8362e] text-white rounded flex items-center justify-center text-xs font-bold transition-transform hover:scale-105 active:scale-95 cursor-pointer shadow-2xs"
-                    title="Aplicar Daño"
+                    title={isSpanish ? 'Aplicar Daño' : 'Apply Damage'}
                   >
                     <Minus className="w-3.5 h-3.5" />
                   </button>
@@ -1906,7 +2010,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                     type="button"
                     onClick={() => applyCustomHpDelta(false)}
                     className="w-6 h-6 bg-[#2d6139] hover:bg-[#387a47] text-white rounded flex items-center justify-center text-xs font-bold transition-transform hover:scale-105 active:scale-95 cursor-pointer shadow-2xs"
-                    title="Aplicar Curación"
+                    title={isSpanish ? 'Aplicar Curación' : 'Apply Healing'}
                   >
                     <Plus className="w-3.5 h-3.5" />
                   </button>
@@ -1918,7 +2022,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                     type="button"
                     onClick={() => applyHpChange(1)}
                     className="px-2.5 py-1 min-w-[34px] bg-[#142417] hover:bg-[#1a3320] text-[#86efac] border border-[#2d6139] rounded-md font-mono text-xs font-bold transition-transform hover:scale-105 active:scale-95 cursor-pointer shadow-xs"
-                    title="Curar 1 PG"
+                    title={isSpanish ? 'Curar 1 PG' : 'Heal 1 HP'}
                   >
                     +1
                   </button>
@@ -1926,7 +2030,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                     type="button"
                     onClick={() => applyHpChange(5)}
                     className="px-2.5 py-1 min-w-[34px] bg-[#142417] hover:bg-[#1a3320] text-[#86efac] border border-[#2d6139] rounded-md font-mono text-xs font-bold transition-transform hover:scale-105 active:scale-95 cursor-pointer shadow-xs"
-                    title="Curar 5 PG"
+                    title={isSpanish ? 'Curar 5 PG' : 'Heal 5 HP'}
                   >
                     +5
                   </button>
@@ -1938,7 +2042,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                 {/* Temp HP */}
                 <div className="flex items-center gap-2">
                   <span className="text-[#6b5844] font-medium text-[11px] font-fantasy uppercase tracking-wider">
-                    Vida Temporal:
+                    {isSpanish ? 'Vida Temporal:' : 'Temp HP:'}
                   </span>
                   {isEditingTempHp ? (
                     <div className="flex items-center gap-1">
@@ -1963,7 +2067,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                         setIsEditingTempHp(true);
                       }}
                       className="relative px-3.5 py-1 min-w-[70px] min-h-[26px] flex items-center justify-center transition-transform hover:scale-105 active:scale-95 cursor-pointer group"
-                      title="Clic para editar Vida Temporal"
+                      title={isSpanish ? 'Clic para editar Vida Temporal' : 'Click to edit Temporary Hit Points'}
                     >
                       <img
                         src="./assets/ui/badge_frame_mini.png"
@@ -1972,7 +2076,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                         className="absolute inset-0 w-full h-full object-fill pointer-events-none drop-shadow-xs"
                       />
                       <span className="relative z-10 font-mono text-xs font-bold text-[#ffd56b] drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">
-                        {charData.tempHp || 0} PG
+                        {charData.tempHp || 0} {isSpanish ? 'PG' : 'HP'}
                       </span>
                     </button>
                   )}
@@ -1981,7 +2085,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                 {/* Hit Dice */}
                 <div className="flex items-center gap-2">
                   <span className="text-[#6b5844] font-medium text-[11px] font-fantasy uppercase tracking-wider">
-                    Dados de Golpe:
+                    {isSpanish ? 'Dados de Golpe:' : 'Hit Dice:'}
                   </span>
                   <div className="relative px-3.5 py-1 min-w-[70px] min-h-[26px] flex items-center justify-center">
                     <img
@@ -2001,14 +2105,14 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
             {/* Death Saves (Salvaciones de Muerte con Tokens Distintivos para Éxitos y Fallos) */}
             <div className="bg-[#f5ede0]/90 rounded-xl p-3 border border-[#b89b6a] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
               <span className="font-fantasy font-bold text-[#4a361c] uppercase">
-                Salvaciones de Muerte
+                {isSpanish ? 'Salvaciones de Muerte' : 'Death Saves'}
               </span>
 
               <div className="flex items-center gap-5">
                 {/* Successes */}
                 <div className="flex items-center gap-1.5">
                   <span className="text-[10.5px] font-fantasy text-[#3e6b48] font-bold uppercase tracking-wider mr-1">
-                    Éxitos:
+                    {isSpanish ? 'Éxitos:' : 'Successes:'}
                   </span>
                   {[0, 1, 2].map((idx) => {
                     const isActive = idx < deathSaves.successes;
@@ -2018,7 +2122,11 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                         type="button"
                         onClick={() => toggleDeathSave('successes', idx)}
                         className="p-0.5 rounded-full transition-transform hover:scale-115 active:scale-90 cursor-pointer"
-                        title={`Éxito ${idx + 1}: ${isActive ? 'Activo (clic para alternar)' : 'Vacío'}`}
+                        title={
+                          isSpanish
+                            ? `Éxito ${idx + 1}: ${isActive ? 'Activo (clic para alternar)' : 'Vacío'}`
+                            : `Success ${idx + 1}: ${isActive ? 'Active (click to toggle)' : 'Empty'}`
+                        }
                       >
                         <img
                           src={isActive ? './assets/ui/death_save_success.png' : './assets/ui/death_save_socket.png'}
@@ -2035,7 +2143,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                 {/* Failures */}
                 <div className="flex items-center gap-1.5">
                   <span className="text-[10.5px] font-fantasy text-[#8c2e28] font-bold uppercase tracking-wider mr-1">
-                    Fallos:
+                    {isSpanish ? 'Fallos:' : 'Failures:'}
                   </span>
                   {[0, 1, 2].map((idx) => {
                     const isActive = idx < deathSaves.failures;
@@ -2045,7 +2153,11 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                         type="button"
                         onClick={() => toggleDeathSave('failures', idx)}
                         className="p-0.5 rounded-full transition-transform hover:scale-115 active:scale-90 cursor-pointer"
-                        title={`Fallo ${idx + 1}: ${isActive ? 'Activo (clic para alternar)' : 'Vacío'}`}
+                        title={
+                          isSpanish
+                            ? `Fallo ${idx + 1}: ${isActive ? 'Activo (clic para alternar)' : 'Vacío'}`
+                            : `Failure ${idx + 1}: ${isActive ? 'Active (click to toggle)' : 'Empty'}`
+                        }
                       >
                         <img
                           src={isActive ? './assets/ui/death_save_failure.png' : './assets/ui/death_save_socket.png'}
@@ -2066,7 +2178,9 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
               <div className="bg-[#f5ede0]/90 rounded-xl p-3.5 border border-[#b89b6a] space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="font-fantasy font-bold text-xs text-[#4a361c] uppercase">
-                    Recursos & Habilidades de {charData.class}
+                    {isSpanish
+                      ? `Recursos & Habilidades de ${charData.class}`
+                      : `${translateCharacterClassName(charData.class)} Resources & Abilities`}
                   </span>
                 </div>
 
@@ -2074,6 +2188,12 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                   {effectiveClassResources.map((res) => {
                     const isMax = res.current >= res.max;
                     const isZero = res.current <= 0;
+                    const resNameDisplay = isSpanish ? res.name : translateDndTitle(res.name);
+                    const resDescDisplay = isSpanish
+                      ? res.description || `Recarga en descanso ${res.resetOn === 'short' ? 'corto' : 'largo'}`
+                      : res.description
+                      ? translateDndText(res.description)
+                      : `Recharges on a ${res.resetOn === 'short' ? 'short' : 'long'} rest`;
                     return (
                       <div
                         key={res.id}
@@ -2087,22 +2207,22 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                           <div>
                             <div className="flex items-center gap-1.5 flex-wrap">
                               <span className="font-fantasy font-bold text-xs text-[#2c221a]">
-                                {res.name}
+                                {resNameDisplay}
                               </span>
                               {res.id === 'res-furia' && (
                                 charData.isRaging ? (
                                   <span className="text-[9px] bg-[#c53d27] text-white px-2 py-0.2 rounded-full font-bold animate-pulse shadow-xs">
-                                    🔥 ¡EN FURIA! (1 en uso)
+                                    {isSpanish ? '🔥 ¡EN FURIA! (1 en uso)' : '🔥 RAGING! (1 in use)'}
                                   </span>
                                 ) : (
                                   <span className="text-[9px] bg-[#ebd5c8] text-[#73291d] px-2 py-0.2 rounded-full font-mono font-bold">
-                                    0 en uso
+                                    {isSpanish ? '0 en uso' : '0 in use'}
                                   </span>
                                 )
                               )}
                             </div>
                             <span className="text-[10px] text-[#786450] line-clamp-1 mt-0.5">
-                              {res.description || `Recarga en descanso ${res.resetOn === 'short' ? 'corto' : 'largo'}`}
+                              {resDescDisplay}
                             </span>
                           </div>
                           <div className="text-right shrink-0">
@@ -2110,7 +2230,9 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                               {res.current} / {res.max === 999 ? '∞' : res.max}
                             </span>
                             <span className="text-[9px] text-[#786450] block">
-                              {res.resetOn === 'short' ? 'Desc. Corto' : 'Desc. Largo'}
+                              {isSpanish
+                                ? res.resetOn === 'short' ? 'Desc. Corto' : 'Desc. Largo'
+                                : res.resetOn === 'short' ? 'Short Rest' : 'Long Rest'}
                             </span>
                           </div>
                         </div>
@@ -2132,9 +2254,15 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                                       )
                                     }
                                     className="p-0.5 transition-transform hover:scale-115 active:scale-90 cursor-pointer"
-                                    title={`${res.name} - Uso ${idx + 1}: ${
-                                      isAvailable ? 'Disponible (clic para gastar)' : 'Gastado (clic para recuperar)'
-                                    }`}
+                                    title={
+                                      isSpanish
+                                        ? `${resNameDisplay} - Uso ${idx + 1}: ${
+                                            isAvailable ? 'Disponible (clic para gastar)' : 'Gastado (clic para recuperar)'
+                                          }`
+                                        : `${resNameDisplay} - Use ${idx + 1}: ${
+                                            isAvailable ? 'Available (click to spend)' : 'Spent (click to recover)'
+                                          }`
+                                    }
                                   >
                                     <img
                                       src={
@@ -2164,10 +2292,16 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                                       ? 'bg-[#5c1d12] hover:bg-[#3d130c] text-white border border-[#3d130c]'
                                       : 'bg-[#c53d27] hover:bg-[#a9301c] text-white border border-[#9c2e1c]'
                                   }`}
-                                  title={charData.isRaging ? 'Calmar Furia' : 'Entrar en Furia'}
+                                  title={
+                                    isSpanish
+                                      ? charData.isRaging ? 'Calmar Furia' : 'Entrar en Furia'
+                                      : charData.isRaging ? 'End Rage' : 'Enter Rage'
+                                  }
                                 >
                                   <Flame className="w-2.5 h-2.5" />
-                                  {charData.isRaging ? 'Calmar' : 'Activar Furia'}
+                                  {isSpanish
+                                    ? charData.isRaging ? 'Calmar' : 'Activar Furia'
+                                    : charData.isRaging ? 'End Rage' : 'Activate Rage'}
                                 </button>
                               )}
                               <button
@@ -2175,7 +2309,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                                 onClick={() => handleUpdateResourceCurrent(res.id, -1)}
                                 disabled={isZero}
                                 className="w-5 h-5 bg-[#22150e] hover:bg-[#331c12] disabled:opacity-40 text-[#ff9e94] border border-[#8c2e28] rounded flex items-center justify-center font-bold text-xs cursor-pointer shadow-xs active:scale-95 transition-transform"
-                                title="Gastar 1 uso"
+                                title={isSpanish ? 'Gastar 1 uso' : 'Spend 1 use'}
                               >
                                 -
                               </button>
@@ -2184,7 +2318,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                                 onClick={() => handleUpdateResourceCurrent(res.id, 1)}
                                 disabled={isMax}
                                 className="w-5 h-5 bg-[#1a120c] hover:bg-[#271a10] disabled:opacity-40 text-[#ffd56b] border border-[#8c672b] rounded flex items-center justify-center font-bold text-xs cursor-pointer shadow-xs active:scale-95 transition-transform"
-                                title="Recuperar 1 uso"
+                                title={isSpanish ? 'Recuperar 1 uso' : 'Recover 1 use'}
                               >
                                 +
                               </button>
@@ -2208,13 +2342,15 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
           <div className="bg-[#fcf9f2] rounded-2xl border-2 border-[#d8c8af] p-2.5 sm:p-3 shadow-sm space-y-2">
             {renderScrollSectionHeader(
               null,
-              'Puntuaciones & Salvaciones',
+              isSpanish ? 'Puntuaciones & Salvaciones' : 'Ability Scores & Saves',
               undefined,
               renderHeaderSmallButton({
                 onClick: () => openRulesInspector('saves'),
-                label: 'Reglas',
+                label: isSpanish ? 'Reglas' : 'Rules',
                 icon: <Search className="w-3 h-3 text-[#d4ab59]" />,
-                title: 'Auditor de Reglas: Consulta el desglose de salvaciones y modificadores',
+                title: isSpanish
+                  ? 'Auditor de Reglas: Consulta el desglose de salvaciones y modificadores'
+                  : 'Rules Inspector: View saving throw and modifier breakdowns',
               })
             )}
 
@@ -2222,9 +2358,12 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
               {(['str', 'dex', 'con', 'int', 'wis', 'cha'] as (keyof AbilityScores)[]).map((st) => {
                 const score = charData.stats[st];
                 const mod = getMod(score);
-                const info = ABILITY_LABELS[st];
+                const rawInfo = ABILITY_LABELS[st];
+                const info = localizedAbilityLabels[st];
                 const isProficientSave = (charData.savingThrows || []).some(
                   (s) =>
+                    s.toLowerCase().includes(rawInfo.name.toLowerCase()) ||
+                    s.toLowerCase().includes(rawInfo.short.toLowerCase()) ||
                     s.toLowerCase().includes(info.name.toLowerCase()) ||
                     s.toLowerCase().includes(info.short.toLowerCase())
                 );
@@ -2247,9 +2386,13 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
 
                     {/* Forged Octagonal Crest for Ability Roll */}
                     <div
-                      onClick={() => rollD20(`Prueba de ${info.name}`, mod)}
+                      onClick={() => rollD20(isSpanish ? `Prueba de ${info.name}` : `${info.name} Check`, mod)}
                       className="cursor-pointer py-1 my-0.5 group/stat flex flex-col items-center justify-center select-none"
-                      title={`Tirar prueba de ${info.name} (d20 ${formatMod(mod)}). Clic para tirar.`}
+                      title={
+                        isSpanish
+                          ? `Tirar prueba de ${info.name} (d20 ${formatMod(mod)}). Clic para tirar.`
+                          : `Roll ${info.name} check (d20 ${formatMod(mod)}). Click to roll.`
+                      }
                     >
                       <div className="relative w-12 h-12 sm:w-13 sm:h-13 flex items-center justify-center group-hover/stat:scale-105 transition-transform">
                         <img
@@ -2264,7 +2407,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                       </div>
                       <div
                         className="-mt-1.5 z-20 px-1.5 py-0.2 rounded-md bg-[#261a10] border border-[#b88c32] text-[9.5px] font-mono font-bold text-[#f3dfb1] shadow-xs inline-flex items-center gap-1"
-                        title={`Puntuación base de ${info.name}: ${score}`}
+                        title={isSpanish ? `Puntuación base de ${info.name}: ${score}` : `Base ${info.name} score: ${score}`}
                       >
                         <span className="text-[7.5px] font-fantasy uppercase text-[#cbb695] tracking-wider">Base</span>
                         <span>{score}</span>
@@ -2275,16 +2418,22 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                     <button
                       type="button"
                       onClick={() =>
-                        rollD20(`Salvación de ${info.name}`, saveBonus)
+                        rollD20(isSpanish ? `Salvación de ${info.name}` : `${info.name} Saving Throw`, saveBonus)
                       }
                       className={`w-full mt-1 py-1 px-1 rounded-lg border flex flex-col items-center justify-center transition cursor-pointer select-none gap-0.5 ${
                         isProficientSave
                           ? 'bg-gradient-to-r from-[#3a2816] to-[#261a0e] text-[#f3dfb1] font-bold border-[#b88c32] shadow-xs hover:border-[#ffd56b]'
                           : 'bg-[#ede1ce]/80 text-[#5c472d] border-[#c4ab85] hover:bg-[#e4d3b8]'
                       }`}
-                      title={`Tirar Salvación de ${info.name} (d20 ${formatMod(saveBonus)})${
-                        isProficientSave ? ` - Competente (Bono +${profBonus})` : ''
-                      }`}
+                      title={
+                        isSpanish
+                          ? `Tirar Salvación de ${info.name} (d20 ${formatMod(saveBonus)})${
+                              isProficientSave ? ` - Competente (Bono +${profBonus})` : ''
+                            }`
+                          : `Roll ${info.name} Saving Throw (d20 ${formatMod(saveBonus)})${
+                              isProficientSave ? ` - Proficient (+${profBonus})` : ''
+                            }`
+                      }
                     >
                       <div className="flex items-center justify-center gap-1 leading-none">
                         <span
@@ -2295,7 +2444,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                           }`}
                         />
                         <span className={`text-[8.5px] font-fantasy uppercase tracking-wider ${isProficientSave ? 'text-[#e8d096]' : 'text-[#695542]'}`}>
-                          Salvación
+                          {isSpanish ? 'Salvación' : 'Save'}
                         </span>
                       </div>
                       <span className={`font-mono font-bold text-xs leading-none ${isProficientSave ? 'text-[#fff6e0]' : 'text-[#2c221a]'}`}>
@@ -2317,13 +2466,15 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
           <div className="bg-[#fcf9f2] rounded-2xl border-2 border-[#d8c8af] p-4 sm:p-5 shadow-sm space-y-3">
             {renderScrollSectionHeader(
               null,
-              'Habilidades',
-              '● Competente • ★ Pericia • Clic para tirar dado',
+              isSpanish ? 'Habilidades' : 'Skills',
+              isSpanish ? '● Competente • ★ Pericia • Clic para tirar dado' : '● Proficient • ★ Expertise • Click to roll d20',
               renderHeaderSmallButton({
                 onClick: () => openRulesInspector('skills'),
-                label: 'Reglas',
+                label: isSpanish ? 'Reglas' : 'Rules',
                 icon: <Search className="w-3 h-3 text-[#d4ab59]" />,
-                title: 'Auditor de Reglas: Consulta el compendio oficial de habilidades y percepción pasiva',
+                title: isSpanish
+                  ? 'Auditor de Reglas: Consulta el compendio oficial de habilidades y percepción pasiva'
+                  : 'Rules Inspector: View official skills compendium and Passive Perception',
               })
             )}
 
@@ -2338,9 +2489,9 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                       ? 'bg-[#8c672b] text-white shadow-xs'
                       : 'text-[#6b5844] hover:text-[#2c221a]'
                   }`}
-                  title="Agrupar habilidades por tipo de atributo (Fuerza, Destreza, Inteligencia, etc.)"
+                  title={isSpanish ? 'Agrupar habilidades por tipo de atributo (Fuerza, Destreza, Inteligencia, etc.)' : 'Group skills by ability score (Strength, Dexterity, Intelligence, etc.)'}
                 >
-                  Por Atributo
+                  {isSpanish ? 'Por Atributo' : 'By Ability'}
                 </button>
                 <button
                   type="button"
@@ -2350,7 +2501,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                       ? 'bg-[#8c672b] text-white shadow-xs'
                       : 'text-[#6b5844] hover:text-[#2c221a]'
                   }`}
-                  title="Ordenar habilidades alfabéticamente de la A a la Z"
+                  title={isSpanish ? 'Ordenar habilidades alfabéticamente de la A a la Z' : 'Sort skills alphabetically A to Z'}
                 >
                   A – Z
                 </button>
@@ -2362,9 +2513,9 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                       ? 'bg-[#8c672b] text-white shadow-xs'
                       : 'text-[#6b5844] hover:text-[#2c221a]'
                   }`}
-                  title="Ordenar por mayor bonificador de tirada"
+                  title={isSpanish ? 'Ordenar por mayor bonificador de tirada' : 'Sort by highest modifier bonus'}
                 >
-                  Por Bono
+                  {isSpanish ? 'Por Bono' : 'By Bonus'}
                 </button>
               </div>
 
@@ -2373,7 +2524,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                 <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#8c745c]" />
                 <input
                   type="text"
-                  placeholder="Buscar habilidad..."
+                  placeholder={isSpanish ? 'Buscar habilidad...' : 'Search skill...'}
                   value={skillSearchQuery}
                   onChange={(e) => setSkillSearchQuery(e.target.value)}
                   className="w-full pl-8 pr-7 py-1.5 bg-[#fcf6ea] border border-[#b89b6a] rounded-lg text-xs placeholder-[#9c8975] focus:outline-hidden focus:ring-1 focus:ring-[#8c672b] text-[#2c221a]"
@@ -2395,13 +2546,14 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
               // Precompute enriched skill items
               const enrichedSkills = SKILL_DEFINITIONS.map((sk) => {
                 const statMod = getMod(charData.stats[sk.stat]);
+                const displayName = isSpanish ? sk.name : translateSkillName(sk.name);
                 const isProficient = (charData.skills || []).some(
-                  (s) => s.toLowerCase() === sk.name.toLowerCase()
+                  (s) => s.toLowerCase() === sk.name.toLowerCase() || s.toLowerCase() === displayName.toLowerCase()
                 );
                 const hasExpertise =
                   isProficient &&
                   charData.notes &&
-                  charData.notes.includes(`Pericia: ${sk.name}`);
+                  (charData.notes.includes(`Pericia: ${sk.name}`) || charData.notes.includes(`Expertise: ${displayName}`));
                 const totalBonus =
                   statMod + (hasExpertise ? 2 * profBonus : isProficient ? profBonus : 0);
 
@@ -2411,13 +2563,14 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
 
                 return {
                   ...sk,
+                  displayName,
                   statMod,
                   isProficient,
                   hasExpertise,
                   totalBonus,
-                  description: officialDef?.description || 'Habilidad oficial.',
-                  abilityName: ABILITY_LABELS[sk.stat].name,
-                  abilityShort: ABILITY_LABELS[sk.stat].short,
+                  description: officialDef?.description || (isSpanish ? 'Habilidad oficial.' : 'Official skill.'),
+                  abilityName: localizedAbilityLabels[sk.stat].name,
+                  abilityShort: localizedAbilityLabels[sk.stat].short,
                 };
               });
 
@@ -2427,6 +2580,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                 const q = skillSearchQuery.toLowerCase();
                 return (
                   sk.name.toLowerCase().includes(q) ||
+                  sk.displayName.toLowerCase().includes(q) ||
                   sk.abilityName.toLowerCase().includes(q) ||
                   sk.abilityShort.toLowerCase().includes(q)
                 );
@@ -2435,7 +2589,9 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
               if (filtered.length === 0) {
                 return (
                   <div className="p-6 text-center text-xs text-[#786450] bg-[#faf6ee] rounded-xl border border-[#e8dccb]">
-                    No se encontraron habilidades que coincidan con &ldquo;{skillSearchQuery}&rdquo;.
+                    {isSpanish
+                      ? `No se encontraron habilidades que coincidan con “${skillSearchQuery}”.`
+                      : `No skills found matching “${skillSearchQuery}”.`}
                   </div>
                 );
               }
@@ -2447,7 +2603,9 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                     key={sk.name}
                     onClick={() =>
                       rollD20(
-                        `Prueba de ${sk.name} (${sk.abilityShort})`,
+                        isSpanish
+                          ? `Prueba de ${sk.displayName} (${sk.abilityShort})`
+                          : `${sk.displayName} (${sk.abilityShort}) Check`,
                         sk.totalBonus
                       )
                     }
@@ -2458,13 +2616,23 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                         ? 'bg-[#f5ede0] border-[#d8c8af] hover:border-[#8c672b]'
                         : 'bg-[#faf6ee] border-transparent text-[#6b5844] hover:bg-[#f5ede0] hover:border-[#ebdcc7]'
                     }`}
-                    title={`${sk.name} (${sk.abilityName}): Modificador ${formatMod(sk.statMod)} ${
-                      sk.hasExpertise
-                        ? '+ Pericia (+' + 2 * profBonus + ')'
-                        : sk.isProficient
-                        ? '+ Competencia (+' + profBonus + ')'
-                        : ''
-                    } = Total ${formatMod(sk.totalBonus)}. Clic para tirar d20.`}
+                    title={
+                      isSpanish
+                        ? `${sk.displayName} (${sk.abilityName}): Modificador ${formatMod(sk.statMod)} ${
+                            sk.hasExpertise
+                              ? '+ Pericia (+' + 2 * profBonus + ')'
+                              : sk.isProficient
+                              ? '+ Competencia (+' + profBonus + ')'
+                              : ''
+                          } = Total ${formatMod(sk.totalBonus)}. Clic para tirar d20.`
+                        : `${sk.displayName} (${sk.abilityName}): Modifier ${formatMod(sk.statMod)} ${
+                            sk.hasExpertise
+                              ? '+ Expertise (+' + 2 * profBonus + ')'
+                              : sk.isProficient
+                              ? '+ Proficiency (+' + profBonus + ')'
+                              : ''
+                          } = Total ${formatMod(sk.totalBonus)}. Click to roll d20.`
+                    }
                   >
                     {/* Left: Indicator + Full Name + Stat Tag */}
                     <div className="flex items-center gap-2 min-w-0 pr-2">
@@ -2481,7 +2649,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                       </span>
 
                       <span className="font-fantasy text-xs text-[#2c221a] truncate">
-                        {sk.name}
+                        {sk.displayName}
                       </span>
 
                       <span className="text-[10px] text-[#9c8975] font-mono shrink-0">
@@ -2524,10 +2692,10 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                           <div className="flex items-center justify-between text-xs font-fantasy font-bold text-[#5c472d] border-b border-[#e8dac6] pb-1 px-1">
                             <span className="flex items-center gap-1.5">
                               <span>{grp.emoji}</span>
-                              <span className="uppercase">{ABILITY_LABELS[grp.stat].name}</span>
+                              <span className="uppercase">{localizedAbilityLabels[grp.stat].name}</span>
                             </span>
                             <span className="font-mono text-[10px] bg-[#ede1ce] text-[#6b5844] px-1.5 py-0.2 rounded border border-[#dac7ab]">
-                              {ABILITY_LABELS[grp.stat].short} {formatMod(statMod)} (Base {statScore})
+                              {localizedAbilityLabels[grp.stat].short} {formatMod(statMod)} (Base {statScore})
                             </span>
                           </div>
 
@@ -2573,8 +2741,8 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
           <div className="bg-[#fcf9f2] rounded-2xl border-2 border-[#d8c8af] p-4 sm:p-5 shadow-sm space-y-4">
             {renderScrollSectionHeader(
               null,
-              'Ataques & Armas Principales',
-              'Tira al impacto o al daño con un clic.'
+              isSpanish ? 'Ataques & Armas Principales' : 'Primary Weapons & Attacks',
+              isSpanish ? 'Tira al impacto o al daño con un clic.' : 'Roll to hit or damage with a single click.'
             )}
 
             {/* Extra Attack Badge */}
@@ -2584,7 +2752,9 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                   <Sword className="w-4 h-4 text-[#8c672b]" /> {extraAttackInfo.label}
                 </span>
                 <span className="font-mono text-[10px] text-[#6b5844] bg-[#ebdcc4] px-2 py-0.5 rounded font-bold border border-[#d6c4aa]">
-                  {extraAttackInfo.attacksCount} ataques por acción de atacar
+                  {isSpanish
+                    ? `${extraAttackInfo.attacksCount} ataques por acción de atacar`
+                    : `${extraAttackInfo.attacksCount} attacks per Attack action`}
                 </span>
               </div>
             )}
@@ -2593,6 +2763,8 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
               {(charData.attacks || []).map((att) => {
                 const numericBonus = parseInt(att.bonus.replace('+', '')) || 0;
                 const { damageType: cleanDamageType, properties: cleanProps } = parseAttackTypeAndProps(att.type);
+                const attNameDisplay = isSpanish ? att.name : translateWeaponOrItemName(att.name);
+                const dmgTypeDisplay = isSpanish ? cleanDamageType : translateDamageType(cleanDamageType);
 
                 // Barbarian Rage damage bonus: applies to melee weapon attacks using Strength
                 const isBarbarian = (charData.class || '').toLowerCase().includes('barb') || (charData.class || '').toLowerCase().includes('bárbaro');
@@ -2631,7 +2803,11 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                       <div
                         onClick={() => setSelectedDetailItem(att.name)}
                         className="flex items-center gap-2.5 min-w-0 cursor-pointer group/att"
-                        title="Clic para ver detalles completos del arma y propiedades"
+                        title={
+                          isSpanish
+                            ? 'Clic para ver detalles completos del arma y propiedades'
+                            : 'Click to view full weapon details and properties'
+                        }
                       >
                         <div className="relative w-9 h-9 shrink-0 flex items-center justify-center">
                           <img
@@ -2643,7 +2819,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                         </div>
                         <div className="min-w-0">
                           <h4 className="font-fantasy font-bold text-sm text-[#2c221a] tracking-wide truncate group-hover/att:text-[#8c672b] transition flex items-center gap-1.5">
-                            <span>{att.name}</span>
+                            <span>{attNameDisplay}</span>
                             <span className="text-[10px] text-[#8c672b] opacity-0 group-hover/att:opacity-100 transition-opacity">🔍</span>
                           </h4>
                           {cleanProps.length > 0 && (
@@ -2653,7 +2829,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                                   key={pIdx}
                                   className="text-[10px] bg-[#ede1ce]/90 text-[#5e4827] px-1.5 py-0.2 rounded border border-[#dac7ab] font-medium whitespace-nowrap"
                                 >
-                                  {prop}
+                                  {isSpanish ? prop : translateWeaponProperty(prop)}
                                 </span>
                               ))}
                             </div>
@@ -2666,7 +2842,9 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                           type="button"
                           onClick={() =>
                             rollD20(
-                              `Ataque con ${att.name}${appliesRage ? ' (En Furia)' : ''}`,
+                              isSpanish
+                                ? `Ataque con ${attNameDisplay}${appliesRage ? ' (En Furia)' : ''}`
+                                : `${attNameDisplay} Attack${appliesRage ? ' (Raging)' : ''}`,
                               numericBonus,
                               'normal',
                               effectiveDamageFormula
@@ -2677,9 +2855,13 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                               ? 'bg-gradient-to-r from-[#c53d27] to-[#d64a34] hover:from-[#b0341f] hover:to-[#c53d27] text-white border border-[#9c2e1c]'
                               : 'bg-[#ebdcc4] hover:bg-[#dfcfb4] text-[#4a361c] border border-[#cbb99f]'
                           }`}
-                          title="Tirar impacto y daño en un solo clic"
+                          title={
+                            isSpanish
+                              ? 'Tirar impacto y daño en un solo clic'
+                              : 'Roll to hit and damage with a single click'
+                          }
                         >
-                          <Dices className="w-3.5 h-3.5" /> Tirar Ataque
+                          <Dices className="w-3.5 h-3.5" /> {isSpanish ? 'Tirar Ataque' : 'Roll Attack'}
                         </button>
                       </div>
                     </div>
@@ -2690,7 +2872,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                         {/* Impact / Attack Bonus: guaranteed single line */}
                         <div className="inline-flex items-center gap-1.5 bg-[#ede1ce] px-2.5 py-1 rounded-md border border-[#dac7ab] whitespace-nowrap shadow-2xs">
                           <span className="text-[10px] text-[#735f49] font-bold uppercase tracking-wider">
-                            Impacto
+                            {isSpanish ? 'Impacto' : 'Hit'}
                           </span>
                           <span className="font-mono font-bold text-xs text-[#8c672b]">
                             {att.bonus}
@@ -2700,20 +2882,20 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                         {/* Damage: guaranteed single line */}
                         <div className="inline-flex items-center gap-1.5 bg-[#ede1ce] px-2.5 py-1 rounded-md border border-[#dac7ab] whitespace-nowrap shadow-2xs">
                           <span className="text-[10px] text-[#735f49] font-bold uppercase tracking-wider">
-                            Daño
+                            {isSpanish ? 'Daño' : 'Damage'}
                           </span>
                           <span className="font-mono font-bold text-xs text-[#2c221a] tracking-tight">
                             {effectiveDamageFormula}
                           </span>
                           <span className="text-[11px] font-semibold text-[#6b5844]">
-                            {cleanDamageType}
+                            {dmgTypeDisplay}
                           </span>
                         </div>
 
                         {/* Rage bonus badge if applied */}
                         {appliesRage && (
                           <span className="inline-flex items-center gap-1 text-[10px] bg-[#c53d27] text-white px-2 py-0.5 rounded-full font-mono font-bold shadow-xs whitespace-nowrap animate-pulse">
-                            🔥 +{rageDmg} Furia
+                            🔥 +{rageDmg} {isSpanish ? 'Furia' : 'Rage'}
                           </span>
                         )}
                       </div>
@@ -2723,7 +2905,9 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                         type="button"
                         onClick={() =>
                           rollDie(
-                            `Daño con ${att.name}${appliesRage ? ' (Furia)' : ''}`,
+                            isSpanish
+                              ? `Daño con ${attNameDisplay}${appliesRage ? ' (Furia)' : ''}`
+                              : `${attNameDisplay} Damage${appliesRage ? ' (Rage)' : ''}`,
                             0,
                             'd20',
                             'normal',
@@ -2731,9 +2915,13 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                           )
                         }
                         className="text-[11px] text-[#7a5a2b] hover:text-[#523916] underline font-fantasy whitespace-nowrap cursor-pointer transition shrink-0 ml-auto"
-                        title="Tirar únicamente el dado de daño sin tirada de impacto"
+                        title={
+                          isSpanish
+                            ? 'Tirar únicamente el dado de daño sin tirada de impacto'
+                            : 'Roll damage dice only without an attack roll'
+                        }
                       >
-                        Solo daño 🎲
+                        {isSpanish ? 'Solo daño 🎲' : 'Damage only 🎲'}
                       </button>
                     </div>
                   </div>
@@ -2742,7 +2930,9 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
 
               {(!charData.attacks || charData.attacks.length === 0) && (
                 <div className="p-4 text-center bg-[#faf6ee] rounded-xl border border-dashed border-[#d8c8af] text-xs text-[#786450]">
-                  No hay armas registradas. Se utiliza el ataque desarmado por defecto (+{profBonus + getMod(charData.stats.str)}, 1 de daño contundente).
+                  {isSpanish
+                    ? `No hay armas registradas. Se utiliza el ataque desarmado por defecto (+${profBonus + getMod(charData.stats.str)}, 1 de daño contundente).`
+                    : `No weapons registered. Defaulting to unarmed strike (+${profBonus + getMod(charData.stats.str)}, 1 bludgeoning damage).`}
                 </div>
               )}
 
@@ -3046,7 +3236,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                           <div>
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className="font-fantasy font-bold text-sm text-[#5c1d12]">
-                                Furia de Batalla (Rage) • Nivel {barbarianLevel}
+                                {isSpanish ? `Furia de Batalla (Rage) • Nivel ${barbarianLevel}` : `Battle Rage • Level ${barbarianLevel}`}
                               </span>
                               {isRaging ? (
                                 <span className="text-[10px] bg-[#c53d27] text-white px-2 py-0.5 rounded-full font-mono font-bold animate-pulse shadow-xs">
@@ -3054,15 +3244,15 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                                 </span>
                               ) : (
                                 <span className="text-[10px] bg-[#ebd5c8] text-[#78281d] px-2 py-0.5 rounded-full font-mono font-bold">
-                                  Inactiva (0 en uso)
+                                  {isSpanish ? 'Inactiva (0 en uso)' : 'Inactive (0 in use)'}
                                 </span>
                               )}
                               <span className="text-[10px] bg-[#c53d27] text-white px-2 py-0.5 rounded font-mono font-bold">
-                                +{rageDmg} Daño CaC (FUE)
+                                {isSpanish ? `+${rageDmg} Daño CaC (FUE)` : `+${rageDmg} Melee Dmg (STR)`}
                               </span>
                             </div>
                             <p className="text-[11px] text-[#733529] mt-0.5">
-                              Furias disponibles: <strong className="font-mono text-[#5c1d12]">{availableRages} / {maxRages === 999 ? '∞' : maxRages}</strong> • En uso: <strong className="font-mono text-[#5c1d12]">{inUseRages}</strong>
+                              {isSpanish ? 'Furias disponibles: ' : 'Available Rages: '}<strong className="font-mono text-[#5c1d12]">{availableRages} / {maxRages === 999 ? '∞' : maxRages}</strong> • {isSpanish ? 'En uso: ' : 'In use: '}<strong className="font-mono text-[#5c1d12]">{inUseRages}</strong>
                             </p>
                           </div>
                         </div>
@@ -3076,7 +3266,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                               ? 'bg-[#5c1d12] hover:bg-[#3d130c] text-white border-[#3d130c] shadow-md'
                               : 'bg-gradient-to-r from-[#c53d27] to-[#e04f36] hover:from-[#b0341f] hover:to-[#c53d27] text-white border-[#9c2e1c]'
                           }`}
-                          title={isRaging ? 'Calmar Furia de batalla' : 'Entrar en Furia (gasta 1 uso)'}
+                          title={isRaging ? (isSpanish ? 'Calmar Furia de batalla' : 'End Battle Rage') : (isSpanish ? 'Entrar en Furia (gasta 1 uso)' : 'Enter Rage (costs 1 use)')}
                         >
                           <Flame className="w-3.5 h-3.5" />
                           <span>{isRaging ? '❄️ Calmar Furia' : '🔥 Entrar en Furia'}</span>
@@ -3090,20 +3280,29 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                             isRaging ? 'bg-[#c53d27] text-white shadow-xs' : 'bg-[#edd6c8] text-[#5c1d12]'
                           }`}>
                             {hasBearTotem
-                              ? (isRaging ? '🛡️ RESISTENCIA ACTIVA: A TODO el daño excepto psíquico (Tótem Oso)' : 'Resistencia: Todo el daño excepto psíquico (Tótem Oso)')
-                              : (isRaging ? '🛡️ RESISTENCIA ACTIVA: Contundente, Cortante y Perforante' : 'Resistencia: Contundente, Cortante y Perforante')}
+                              ? (isRaging
+                                ? (isSpanish ? '🛡️ RESISTENCIA ACTIVA: A TODO el daño excepto psíquico (Tótem Oso)' : '🛡️ ACTIVE RESISTANCE: ALL damage except psychic (Bear Totem)')
+                                : (isSpanish ? 'Resistencia: Todo el daño excepto psíquico (Tótem Oso)' : 'Resistance: All damage except psychic (Bear Totem)'))
+                              : (isRaging
+                                ? (isSpanish ? '🛡️ RESISTENCIA ACTIVA: Contundente, Cortante y Perforante' : '🛡️ ACTIVE RESISTANCE: Bludgeoning, Piercing, and Slashing')
+                                : (isSpanish ? 'Resistencia: Contundente, Cortante y Perforante' : 'Resistance: Bludgeoning, Piercing, and Slashing'))}
                           </span>
                           <span className="bg-[#edd6c8] text-[#5c1d12] px-2 py-0.5 rounded font-bold">
-                            +{rageDmg} al daño cuerpo a cuerpo con Fuerza {isRaging ? '• (¡Activo en tus armas!)' : ''}
+                            {isSpanish
+                              ? `+${rageDmg} al daño cuerpo a cuerpo con Fuerza ${isRaging ? '• (¡Activo en tus armas!)' : ''}`
+                              : `+${rageDmg} to melee weapon damage using Strength ${isRaging ? '• (Active on your weapons!)' : ''}`}
                           </span>
                           <span className="bg-[#edd6c8] text-[#5c1d12] px-2 py-0.5 rounded font-bold">
-                            Ventaja en Pruebas y Salvaciones de Fuerza
+                            {isSpanish ? 'Ventaja en Pruebas y Salvaciones de Fuerza' : 'Advantage on Strength Checks & Saving Throws'}
                           </span>
                         </div>
 
                         {isRaging && (
                           <div className="text-[11px] font-medium text-[#7a2215] bg-[#fbede8] p-2 rounded border border-[#f5c7bc]">
-                            💥 <strong>Efecto en Combate:</strong> Tus ataques cuerpo a cuerpo con armas basadas en Fuerza ya tienen sumados automáticamente los <strong>+{rageDmg} puntos de daño</strong>. Además, divide a la mitad cualquier daño recibido según tus resistencias activas.
+                            💥 <strong>{isSpanish ? 'Efecto en Combate:' : 'Combat Effect:'}</strong>{' '}
+                            {isSpanish
+                              ? <>Tus ataques cuerpo a cuerpo con armas basadas en Fuerza ya tienen sumados automáticamente los <strong>+{rageDmg} puntos de daño</strong>. Además, divide a la mitad cualquier daño recibido según tus resistencias activas.</>
+                              : <>Your melee weapon attacks using Strength automatically include <strong>+{rageDmg} bonus damage</strong>. Halve any incoming bludgeoning, piercing, and slashing damage (or all except psychic with Bear Totem).</>}
                           </div>
                         )}
                       </div>
@@ -3120,14 +3319,16 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                             <div>
                               <div className="flex items-center gap-2 flex-wrap">
                                 <span className="font-fantasy font-bold text-xs text-[#4a2e12]">
-                                  Ataque Temerario (Reckless Attack) • Nivel 2+
+                                  {isSpanish ? 'Ataque Temerario (Reckless Attack) • Nivel 2+' : 'Reckless Attack • Level 2+'}
                                 </span>
                                 <span className="text-[10px] bg-[#ebdcc4] text-[#6b421a] px-2 py-0.5 rounded font-mono font-bold">
-                                  Habilidad Independiente
+                                  {isSpanish ? 'Habilidad Independiente' : 'Independent Ability'}
                                 </span>
                               </div>
                               <p className="text-[10px] text-[#78593a] mt-0.5">
-                                No depende de la Furia. Al realizar tu primer ataque del turno, puedes atacar temerariamente.
+                                {isSpanish
+                                  ? 'No depende de la Furia. Al realizar tu primer ataque del turno, puedes atacar temerariamente.'
+                                  : 'Does not require Rage. When you make your first attack on your turn, you can attack recklessly.'}
                               </p>
                             </div>
                           </div>
@@ -3137,26 +3338,28 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                             onClick={() => {
                               setThemedAlert({
                                 isOpen: true,
-                                title: 'Ataque Temerario Declarado',
-                                subtitle: 'Ventaja en Ataques de Fuerza',
+                                title: isSpanish ? 'Ataque Temerario Declarado' : 'Reckless Attack Declared',
+                                subtitle: isSpanish ? 'Ventaja en Ataques de Fuerza' : 'Advantage on Strength Attacks',
                                 type: 'info',
-                                message: 'Has declarado Ataque Temerario: Tienes VENTAJA en todos tus ataques cuerpo a cuerpo con Fuerza durante este turno. ¡CUIDADO! Todos los ataques enemigos contra ti tendrán VENTAJA hasta el inicio de tu próximo turno.',
+                                message: isSpanish
+                                  ? 'Has declarado Ataque Temerario: Tienes VENTAJA en todos tus ataques cuerpo a cuerpo con Fuerza durante este turno. ¡CUIDADO! Todos los ataques enemigos contra ti tendrán VENTAJA hasta el inicio de tu próximo turno.'
+                                  : 'You have declared Reckless Attack: You gain ADVANTAGE on all melee weapon attack rolls using Strength during this turn. BEWARE: Attack rolls against you have ADVANTAGE until the start of your next turn.',
                               });
                             }}
                             className="px-3 py-1.5 bg-[#d69038] hover:bg-[#bd7b2a] text-white rounded-lg text-xs font-fantasy font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs whitespace-nowrap active:scale-95 shrink-0"
-                            title="Declarar Ataque Temerario para este turno"
+                            title={isSpanish ? 'Declarar Ataque Temerario para este turno' : 'Declare Reckless Attack for this turn'}
                           >
-                            <Sparkles className="w-3.5 h-3.5" /> Declarar Ataque Temerario
+                            <Sparkles className="w-3.5 h-3.5" /> {isSpanish ? 'Declarar Ataque Temerario' : 'Declare Reckless Attack'}
                           </button>
                         </div>
 
                         <div className="p-2.5 bg-[#fcf9f2] rounded-lg border border-[#e8dccb] text-xs text-[#52371d] space-y-1">
                           <div className="flex flex-wrap gap-2 text-[10px]">
                             <span className="bg-[#eddcc8] text-[#5c3712] px-2 py-0.5 rounded font-bold">
-                              ✓ Ventaja en tiradas de ataque cuerpo a cuerpo (FUE) este turno
+                              {isSpanish ? '✓ Ventaja en tiradas de ataque cuerpo a cuerpo (FUE) este turno' : '✓ Advantage on melee attack rolls (STR) this turn'}
                             </span>
                             <span className="bg-[#f2dbd6] text-[#80251c] px-2 py-0.5 rounded font-bold">
-                              ⚠ Los ataques enemigos contra ti tienen VENTAJA hasta tu siguiente turno
+                              {isSpanish ? '⚠ Los ataques enemigos contra ti tienen VENTAJA hasta tu siguiente turno' : '⚠ Enemy attack rolls against you have ADVANTAGE until your next turn'}
                             </span>
                           </div>
                         </div>
@@ -3327,7 +3530,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1.5 font-fantasy font-bold text-xs text-[#431459]">
                           <Sparkles className="w-4 h-4 text-[#8032a8]" />
-                          <span>Inspiración Bárdica (1{inspDie}) • Nivel {charData.level}</span>
+                          <span>{isSpanish ? `Inspiración Bárdica (1${inspDie}) • Nivel ${charData.level}` : `Bardic Inspiration (1${inspDie}) • Level ${charData.level}`}</span>
                         </div>
                         <span className="text-[10px] bg-[#8032a8] text-white px-2 py-0.5 rounded font-mono font-bold">
                           1{inspDie} • {charData.level >= 5 ? 'Descanso Corto/Largo' : 'Descanso Largo'}
@@ -3354,7 +3557,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-1.5 font-fantasy font-bold text-xs text-[#2c221a]">
                             <Shield className="w-4 h-4 text-[#8c672b]" />
-                            <span>Florituras de Cuchilla (Blade Flourish • +10 pies vel al Atacar)</span>
+                            <span>{isSpanish ? 'Florituras de Cuchilla (Blade Flourish • +10 pies vel al Atacar)' : 'Blade Flourish (+10 ft speed on Attack)'}</span>
                           </div>
                           <span className="text-[10px] bg-[#8c672b] text-white px-2 py-0.5 rounded font-mono font-bold">
                             {charData.level >= 14 ? 'Floritura del Maestro (1d6 gratis)' : `Gasta 1${inspDie}`}
@@ -3558,7 +3761,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                         </span>
                       </div>
                       <span className="text-[10px] text-[#786450] font-serif italic">
-                        CD Salvación Divina: <span className="font-bold text-[#8c672b]">{spellSaveDc}</span>
+                        {isSpanish ? 'CD Salvación Divina: ' : 'Spell Save DC: '}<span className="font-bold text-[#8c672b]">{spellSaveDc}</span>
                       </span>
                     </div>
 
@@ -3955,7 +4158,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                         </span>
                       </div>
                       <span className="text-[10px] text-[#786450] font-serif italic">
-                        CD Conjuros / Habilidades: <span className="font-bold text-[#2d6a4f]">{spellSaveDc}</span>
+                        {isSpanish ? 'CD Conjuros / Habilidades: ' : 'Spell / Ability DC: '}<span className="font-bold text-[#2d6a4f]">{spellSaveDc}</span>
                       </span>
                     </div>
 
@@ -5036,7 +5239,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                           title="Lanzar daño de Ataque Furtivo (una vez por turno si cumples los requisitos de ventaja o flanqueo con arma sutil/a distancia)"
                         >
                           <Sword className="w-3.5 h-3.5 text-white" />
-                          <span>Tirar Furtivo ({sneakDiceCount}d6)</span>
+                          <span>{isSpanish ? `Tirar Furtivo (${sneakDiceCount}d6)` : `Roll Sneak Attack (${sneakDiceCount}d6)`}</span>
                         </button>
                       </div>
                     </div>
@@ -5049,7 +5252,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                             <Sword className="w-3.5 h-3.5 text-[#dc2626]" />
                             Ataque Furtivo ({sneakDiceCount}d6 daño)
                           </span>
-                          <span className="text-[10px] px-1.5 py-0.5 bg-[#fee2e2] text-[#991b1b] rounded font-bold">1 vez / turno</span>
+                          <span className="text-[10px] px-1.5 py-0.5 bg-[#fee2e2] text-[#991b1b] rounded font-bold">{isSpanish ? "1 vez / turno" : "1 / turn"}</span>
                         </div>
                         <p className="text-[11px] text-[#57534e] leading-snug">
                           Infliges <strong>{sneakDiceCount}d6</strong> de daño extra con armas sutiles o a distancia si tienes ventaja en el ataque, o si un enemigo de tu objetivo está a 5 pies de él y no tienes desventaja.
@@ -5356,7 +5559,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                             <Sparkles className="w-3.5 h-3.5 text-[#9333ea]" />
                             Crear Ranuras con Puntos (Acción Adicional)
                           </span>
-                          <span className="text-[10px] px-1.5 py-0.5 bg-[#ede9fe] text-[#6b21a8] rounded font-bold">Nv 2+</span>
+                          <span className="text-[10px] px-1.5 py-0.5 bg-[#ede9fe] text-[#6b21a8] rounded font-bold">{isSpanish ? "Nv 2+" : "Lv 2+"}</span>
                         </div>
                         <div className="grid grid-cols-5 gap-1 text-center text-[10px] pt-1">
                           <div className="p-1 bg-white rounded border border-[#e9d5ff] font-medium">Nv 1: 2 pts</div>
@@ -5796,7 +5999,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                             <Zap className="w-3.5 h-3.5 text-[#059669]" />
                             Magia del Pacto (Pact Magic)
                           </span>
-                          <span className="text-[10px] px-1.5 py-0.5 bg-[#dcfce7] text-[#15803d] rounded font-bold">Descanso Corto</span>
+                          <span className="text-[10px] px-1.5 py-0.5 bg-[#dcfce7] text-[#15803d] rounded font-bold">{isSpanish ? "Descanso Corto" : "Short Rest"}</span>
                         </div>
                         <p className="text-[11px] text-[#374151] leading-snug">
                           Todas tus ranuras de pacto ({pactSlotsCount}) se lanzan automáticamente a su máxima potencia disponible (<strong>Nivel {pactSlotLevel}</strong>) y se recargan por completo al finalizar un descanso corto o largo.
@@ -6053,7 +6256,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                         </div>
                         <div>
                           <div className="font-fantasy font-bold text-xs text-[#1e3a8a] uppercase tracking-wide flex items-center gap-1.5 flex-wrap">
-                            <span>Maestría Arcana & Tradición de la Escuela (Mago)</span>
+                            <span>{isSpanish ? 'Maestría Arcana & Tradición de la Escuela (Mago)' : 'Arcane Mastery & School Tradition (Wizard)'}</span>
                             <button
                               type="button"
                               onClick={() => openFeatureInspector({
@@ -6082,11 +6285,11 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                               title="Ver información y reglas generales del Mago"
                             >
                               <Search className="w-3.5 h-3.5" />
-                              <span>Ver clase</span>
+                              <span>{isSpanish ? 'Ver clase' : 'View Class'}</span>
                             </button>
                           </div>
                           <div className="text-[10px] text-[#3b82f6]">
-                            Grimorio • Recuperación Arcana ({maxRecovery} niveles) • Conjuros Preparados: {preparedSpellsMax}
+                            {isSpanish ? `Grimorio • Recuperación Arcana (${maxRecovery} ${maxRecovery === 1 ? 'nivel' : 'niveles'}) • Conjuros Preparados: ${preparedSpellsMax}` : `Spellbook • Arcane Recovery (${maxRecovery} levels) • Prepared Spells: ${preparedSpellsMax}`}
                           </div>
                         </div>
                       </div>
@@ -6098,7 +6301,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                           className="px-2 py-0.5 bg-[#2563eb] text-white text-[10px] rounded font-bold hover:bg-[#1d4ed8] cursor-pointer"
                           title={`Recuperar ranuras gastadas de nivel combinado hasta ${maxRecovery} tras descanso corto (1/día)`}
                         >
-                          📖 Recuperación Arcana (≤{maxRecovery})
+                          {isSpanish ? `📖 Recuperación Arcana (≤${maxRecovery})` : `📖 Arcane Recovery (≤${maxRecovery})`}
                         </button>
                         {isDivination && wizardLevel >= 2 && (
                           <button
@@ -6106,7 +6309,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                             className="px-2 py-0.5 bg-[#7c3aed] text-white text-[10px] rounded font-bold hover:bg-[#6d28d9] cursor-pointer"
                             title="Tirar dado de Presagio para el día (sustituye tiradas de d20)"
                           >
-                            🔮 Tirar Presagio ({wizardLevel >= 14 ? '3d20' : '2d20'})
+                            {isSpanish ? `🔮 Tirar Presagio (${wizardLevel >= 14 ? '3d20' : '2d20'})` : `🔮 Roll Portent (${wizardLevel >= 14 ? '3d20' : '2d20'})`}
                           </button>
                         )}
                         {isBladesinging && wizardLevel >= 2 && (
@@ -6166,12 +6369,13 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                             title="Ver explicación y reglas oficiales del Libro de Conjuros"
                           >
                             <Search className="w-3.5 h-3.5" />
-                            <span>Ver regla</span>
+                            <span>{isSpanish ? 'Ver regla' : 'View Rule'}</span>
                           </button>
                         </div>
                         <p className="text-[#334155] text-[11px] leading-snug">
-                          {wizardLevel >= 3 ? 'Fórmulas de Trucos activas. ' : ''}
-                          Preparas {preparedSpellsMax} conjuros diarios (Nivel + Mod. Int). Lanzamiento de rituales sin necesidad de prepararlos.
+                          {isSpanish
+                            ? `${wizardLevel >= 3 ? 'Fórmulas de Trucos activas. ' : ''}Preparas ${preparedSpellsMax} conjuros diarios (Nivel + Mod. Int). Lanzamiento de rituales sin necesidad de prepararlos.`
+                            : `${wizardLevel >= 3 ? 'Cantrip Formulas active. ' : ''}You prepare ${preparedSpellsMax} spells daily (Level + Int Mod). Ritual casting without needing preparation.`}
                         </p>
                       </div>
 
@@ -6179,7 +6383,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                       <div className="p-2.5 bg-white/80 rounded-lg border border-[#bfdbfe] flex flex-col justify-between gap-1 shadow-2xs">
                         <div className="flex items-center justify-between gap-2">
                           <span className="font-bold text-[#1e40af] flex items-center gap-1.5">
-                            <span>✨</span> Recuperación & Maestría
+                            <span>✨</span> {isSpanish ? 'Recuperación & Maestría' : 'Recovery & Mastery'}
                           </span>
                           <button
                             type="button"
@@ -6209,13 +6413,13 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                             title="Ver explicación y reglas de Recuperación Arcana"
                           >
                             <Search className="w-3.5 h-3.5" />
-                            <span>Ver regla</span>
+                            <span>{isSpanish ? 'Ver regla' : 'View Rule'}</span>
                           </button>
                         </div>
                         <p className="text-[#334155] text-[11px] leading-snug">
-                          Recuperación Arcana ({maxRecovery} niveles).
-                          {wizardLevel >= 18 ? ' Dominio de Conjuros: 1 conjuro de Nv 1 y 1 de Nv 2 a voluntad.' : ''}
-                          {wizardLevel >= 20 ? ' Conjuros Insignia: 2 conjuros de Nv 3 preparados gratis.' : ''}
+                          {isSpanish
+                            ? `Recuperación Arcana (${maxRecovery} ${maxRecovery === 1 ? 'nivel' : 'niveles'}).${wizardLevel >= 18 ? ' Dominio de Conjuros: 1 conjuro de Nv 1 y 1 de Nv 2 a voluntad.' : ''}${wizardLevel >= 20 ? ' Conjuros Insignia: 2 conjuros de Nv 3 preparados gratis.' : ''}`
+                            : `Arcane Recovery (${maxRecovery} levels).${wizardLevel >= 18 ? ' Spell Mastery: 1st and 2nd level at will.' : ''}${wizardLevel >= 20 ? ' Signature Spells: 2 3rd-level spells prepared free.' : ''}`}
                         </p>
                       </div>
                     </div>
@@ -6226,7 +6430,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                       <div className="p-3 bg-[#eff6ff] rounded-xl border border-[#3b82f6] text-[11px] text-[#1e3a8a] space-y-1.5 shadow-2xs">
                         <div className="flex items-center justify-between font-bold gap-2">
                           <span className="flex items-center gap-1.5">
-                            <span>🛡️</span> Guarda Arcana ({2 * wizardLevel + Math.max(0, intMod)} PG Máx)
+                            <span>🛡️</span> {isSpanish ? `Guarda Arcana (${2 * wizardLevel + Math.max(0, intMod)} PG Máx)` : `Arcane Ward (${2 * wizardLevel + Math.max(0, intMod)} Max HP)`}
                           </span>
                           <div className="flex items-center gap-1.5 shrink-0">
                             <button
@@ -6252,15 +6456,15 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                               title="Ver detalles de Guarda Arcana"
                             >
                               <Search className="w-3.5 h-3.5" />
-                              <span>Ver regla</span>
+                              <span>{isSpanish ? 'Ver regla' : 'View Rule'}</span>
                             </button>
-                            <span className="text-[10px] text-[#2563eb] bg-[#dbeafe] px-2 py-0.5 rounded font-bold">
-                              Absorbe daño antes de PG
-                            </span>
+                            <span className="text-[10px] text-[#2563eb] bg-[#dbeafe] px-2 py-0.5 rounded font-bold">{isSpanish ? "Absorbe daño antes de PG" : "Absorbs damage before HP"}</span>
                           </div>
                         </div>
                         <p className="text-[10px] text-[#475569] leading-relaxed">
-                          Al lanzar un conjuro de abjuración de nivel 1+, la Guarda recupera el doble del nivel de la ranura gastada. {wizardLevel >= 6 ? 'Guarda Proyectada: reacción para absorber daño a un aliado a 30 pies.' : ''} {wizardLevel >= 10 ? `Abjuración Mejorada: +${profBonus} a pruebas de Contrahechizo y Disipar Magia.` : ''} {wizardLevel >= 14 ? 'Resistencia a Conjuros: ventaja en salvaciones contra conjuros y resistencia a daño de conjuros.' : ''}
+                          {isSpanish
+                          ? `Al lanzar un conjuro de abjuración de nivel 1+, la Guarda recupera el doble del nivel de la ranura gastada. ${wizardLevel >= 6 ? 'Guarda Proyectada: reacción para absorber daño a un aliado a 30 pies.' : ''} ${wizardLevel >= 10 ? `Abjuración Mejorada: +${profBonus} a pruebas de Contrahechizo y Disipar Magia.` : ''} ${wizardLevel >= 14 ? 'Resistencia a Conjuros: ventaja en salvaciones contra conjuros y resistencia a daño de conjuros.' : ''}`
+                          : `When casting a 1st+ level abjuration spell, Ward recovers twice the slot level. ${wizardLevel >= 6 ? 'Projected Ward: reaction to absorb damage for ally within 30 ft.' : ''} ${wizardLevel >= 10 ? `Improved Abjuration: +${profBonus} to Counterspell and Dispel Magic checks.` : ''} ${wizardLevel >= 14 ? 'Spell Resistance: advantage on spell saves and resistance to spell damage.' : ''}`}
                         </p>
                       </div>
                     )}
@@ -6270,7 +6474,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                       <div className="p-3 bg-[#ecfdf5] rounded-xl border border-[#10b981] text-[11px] text-[#065f46] space-y-1.5 shadow-2xs">
                         <div className="flex items-center justify-between font-bold gap-2">
                           <span className="flex items-center gap-1.5">
-                            <span>⚔️</span> Canto de la Hoja ({profBonus} usos/descanso largo)
+                            <span>⚔️</span> {isSpanish ? `Canto de la Hoja (${profBonus} usos/descanso largo)` : `Bladesong (${profBonus} uses/long rest)`}
                           </span>
                           <div className="flex items-center gap-1.5 shrink-0">
                             <button
@@ -6298,15 +6502,15 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                               title="Ver detalles de Canto de la Hoja"
                             >
                               <Search className="w-3.5 h-3.5" />
-                              <span>Ver regla</span>
+                              <span>{isSpanish ? 'Ver regla' : 'View Rule'}</span>
                             </button>
-                            <span className="text-[10px] text-[#059669] bg-[#d1fae5] px-2 py-0.5 rounded font-bold">
-                              +10 pies • +{intMod} CA
-                            </span>
+                            <span className="text-[10px] text-[#059669] bg-[#d1fae5] px-2 py-0.5 rounded font-bold">{isSpanish ? `+10 pies • +${intMod} CA` : `+10 ft speed • +${intMod} AC`}</span>
                           </div>
                         </div>
                         <p className="text-[10px] text-[#475569] leading-relaxed">
-                          Acción adicional (1 min): suma Mod. Int (+{intMod}) a CA y a concentración, +10 pies movimiento y ventaja en Acrobacias. {wizardLevel >= 6 ? 'Ataque Adicional Mejorado: puedes sustituir uno de los ataques por un truco.' : ''} {wizardLevel >= 10 ? 'Canción de Defensa: reacción al recibir daño, gasta ranura para absorber 5x nivel de ranura.' : ''} {wizardLevel >= 14 ? `Canción de Victoria: suma +${intMod} (Int) al daño de ataques con arma cuerpo a cuerpo en Bladesong.` : ''}
+                          {isSpanish
+                          ? `Acción adicional (1 min): suma Mod. Int (+${intMod}) a CA y a concentración, +10 pies movimiento y ventaja en Acrobacias. ${wizardLevel >= 6 ? 'Ataque Adicional Mejorado: puedes sustituir uno de los ataques por un truco.' : ''} ${wizardLevel >= 10 ? 'Canción de Defensa: reacción al recibir daño, gasta ranura para absorber 5x nivel de ranura.' : ''} ${wizardLevel >= 14 ? `Canción de Victoria: suma +${intMod} (Int) al daño de ataques con arma cuerpo a cuerpo en Bladesong.` : ''}`
+                          : `Bonus action (1 min): add Int mod (+${intMod}) to AC and concentration, +10 ft walk speed, advantage on Acrobatics. ${wizardLevel >= 6 ? 'Extra Attack: can replace one attack with a cantrip.' : ''} ${wizardLevel >= 10 ? 'Song of Defense: reaction when taking damage to absorb 5x slot level.' : ''} ${wizardLevel >= 14 ? `Song of Victory: add +${intMod} (Int) to melee weapon damage.` : ''}`}
                         </p>
                       </div>
                     )}
@@ -6316,7 +6520,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                       <div className="p-3 bg-[#faf5ff] rounded-xl border border-[#a855f7] text-[11px] text-[#581c87] space-y-1.5 shadow-2xs">
                         <div className="flex items-center justify-between font-bold gap-2">
                           <span className="flex items-center gap-1.5">
-                            <span>🔮</span> Presagio ({wizardLevel >= 14 ? '3d20' : '2d20'} Dados de Portento)
+                            <span>🔮</span> {isSpanish ? `Presagio (${wizardLevel >= 14 ? '3d20' : '2d20'} Dados de Portento)` : `Portent (${wizardLevel >= 14 ? '3d20' : '2d20'} Portent Dice)`}
                           </span>
                           <div className="flex items-center gap-1.5 shrink-0">
                             <button
@@ -6347,15 +6551,15 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                               title="Ver detalles completos y reglas oficiales de Presagio"
                             >
                               <Search className="w-3.5 h-3.5" />
-                              <span>Ver regla</span>
+                              <span>{isSpanish ? 'Ver regla' : 'View Rule'}</span>
                             </button>
-                            <span className="text-[10px] text-[#7c3aed] bg-[#ede9fe] px-2 py-0.5 rounded-full font-bold">
-                              Sustituye d20 visible
-                            </span>
+                            <span className="text-[10px] text-[#7c3aed] bg-[#ede9fe] px-2 py-0.5 rounded-full font-bold">{isSpanish ? "Sustituye d20 visible" : "Replaces visible d20"}</span>
                           </div>
                         </div>
                         <p className="text-[10px] text-[#475569] leading-relaxed">
-                          Sustituye cualquier tirada de ataque, salvación o prueba de característica tuya o de otra criatura visible por uno de tus dados anotados. {wizardLevel >= 6 ? 'Adivinador Experto: lanzar conjuro de adivinación de nivel 2+ te devuelve una ranura de menor nivel.' : ''} {wizardLevel >= 10 ? 'El Tercer Ojo: visión en oscuridad, visión etérea, leer cualquier idioma o ver invisibilidad (1/descanso).' : ''}
+                          {isSpanish
+                          ? `Sustituye cualquier tirada de ataque, salvación o prueba de característica tuya o de otra criatura visible por uno de tus dados anotados. ${wizardLevel >= 6 ? 'Adivinador Experto: lanzar conjuro de adivinación de nivel 2+ te devuelve una ranura de menor nivel.' : ''} ${wizardLevel >= 10 ? 'El Tercer Ojo: visión en oscuridad, visión etérea, leer cualquier idioma o ver invisibilidad (1/descanso).' : ''}`
+                          : `Replace any attack roll, saving throw, or ability check made by you or a visible creature with a foretold die. ${wizardLevel >= 6 ? 'Expert Divination: casting a 2nd+ level divination spell refunds a lower slot.' : ''} ${wizardLevel >= 10 ? 'The Third Eye: darkvision, ethereal sight, read any language, or see invisibility (1/rest).' : ''}`}
                         </p>
                       </div>
                     )}
@@ -6365,7 +6569,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                       <div className="p-3 bg-[#fff7ed] rounded-xl border border-[#f97316] text-[11px] text-[#9a3412] space-y-1.5 shadow-2xs">
                         <div className="flex items-center justify-between font-bold gap-2">
                           <span className="flex items-center gap-1.5">
-                            <span>⚡</span> Deflexión Arcana & Ingenio Táctico (+{intMod} a Iniciativa)
+                            <span>⚡</span> {isSpanish ? `Deflexión Arcana & Ingenio Táctico (+${intMod} a Iniciativa)` : `Arcane Deflection & Tactical Wit (+${intMod} Initiative)`}
                           </span>
                           <div className="flex items-center gap-1.5 shrink-0">
                             <button
@@ -6392,7 +6596,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                               title="Ver detalles de Deflexión Arcana"
                             >
                               <Search className="w-3.5 h-3.5" />
-                              <span>Ver regla</span>
+                              <span>{isSpanish ? 'Ver regla' : 'View Rule'}</span>
                             </button>
                             <span className="text-[10px] text-[#ea580c] bg-[#ffedd5] px-2 py-0.5 rounded font-bold">
                               +2 CA / +4 Salv. Reacción
@@ -6434,7 +6638,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                               title="Ver detalles de Cronurgia"
                             >
                               <Search className="w-3.5 h-3.5" />
-                              <span>Ver regla</span>
+                              <span>{isSpanish ? 'Ver regla' : 'View Rule'}</span>
                             </button>
                             <span className="text-[10px] text-[#0d9488] bg-[#ccfbf1] px-2 py-0.5 rounded font-bold">
                               Reacción 30 pies
@@ -6478,7 +6682,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                               title="Ver detalles de Moldear Conjuros"
                             >
                               <Search className="w-3.5 h-3.5" />
-                              <span>Ver regla</span>
+                              <span>{isSpanish ? 'Ver regla' : 'View Rule'}</span>
                             </button>
                             <span className="text-[10px] text-[#dc2626] bg-[#fee2e2] px-2 py-0.5 rounded font-bold">
                               Protege aliados en áreas
@@ -6486,7 +6690,9 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                           </div>
                         </div>
                         <p className="text-[10px] text-[#475569] leading-relaxed">
-                          Moldear Conjuros: hasta {1 + wizardLevel} aliados superan automáticamente la salvación de tus conjuros de área y no reciben daño. {wizardLevel >= 6 ? 'Truco Potente: enemigos que superan la salvación de tus trucos reciben la mitad de daño.' : ''} {wizardLevel >= 10 ? `Evocación Potenciada: sumas +${intMod} (Int) a una tirada de daño de tus conjuros de evocación.` : ''} {wizardLevel >= 14 ? 'Sobrecarga: maximizas el daño de un conjuro de mago de nivel 1-5 (1/descanso largo sin daño necrótico).' : ''}
+                          {isSpanish
+                          ? `Moldear Conjuros: hasta ${1 + wizardLevel} aliados superan automáticamente la salvación de tus conjuros de área y no reciben daño. ${wizardLevel >= 6 ? 'Truco Potente: enemigos que superan la salvación de tus trucos reciben la mitad de daño.' : ''} ${wizardLevel >= 10 ? `Evocación Potenciada: sumas +${intMod} (Int) a una tirada de daño de tus conjuros de evocación.` : ''} ${wizardLevel >= 14 ? 'Sobrecarga: maximizas el daño de un conjuro de mago de nivel 1-5 (1/descanso largo sin daño necrótico).' : ''}`
+                          : `Sculpt Spells: up to ${1 + wizardLevel} allies auto-succeed area spell saves and take zero damage. ${wizardLevel >= 6 ? 'Potent Cantrip: targets that succeed saves against your cantrips still take half damage.' : ''} ${wizardLevel >= 10 ? `Empowered Evocation: add +${intMod} (Int) to one damage roll of your evocation spells.` : ''} ${wizardLevel >= 14 ? 'Overchannel: maximize damage of 1st-5th level wizard spell (1/long rest with no recoil).' : ''}`}
                         </p>
                       </div>
                     )}
@@ -6495,7 +6701,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                     {(isGraviturgy || isConjuration || isEnchantment || isIllusion || isNecromancy || isTransmutation || isScribes) && (
                       <div className="p-3 bg-white/80 rounded-xl border border-[#bfdbfe] text-[11px] text-[#334155] space-y-1.5 shadow-2xs">
                         <div className="flex items-center justify-between font-bold text-[#1e40af]">
-                          <span>Rasgos de {charData.subclass || 'Escuela Arcana'}</span>
+                          <span>{isSpanish ? `Rasgos de ${charData.subclass || 'Escuela Arcana'}` : `Features of ${translateDndTitle(charData.subclass || 'Arcane Tradition')}`}</span>
                           <button
                             type="button"
                             onClick={() => openFeatureInspector({
@@ -6517,17 +6723,31 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                             title="Ver detalles de la escuela"
                           >
                             <Search className="w-3.5 h-3.5" />
-                            <span>Ver regla</span>
+                            <span>{isSpanish ? 'Ver regla' : 'View Rule'}</span>
                           </button>
                         </div>
                         <p className="text-[10px] text-[#475569] leading-relaxed">
-                          {isGraviturgy && 'Escuela de Graviturgia: Ajustar Densidad (peso x2 o 1/2) • Pozo Violento (+1d10 daño arma/+2d10 caída) • Horizonte de Sucesos (2d10 fuerza, velocidad 0).'}
-                          {isConjuration && 'Escuela de Conjuración: Conjuración Menor (crear objeto no mágico) • Traslación Benigna (teletransporte 30 pies o intercambio) • Concentración Inquebrantable.'}
-                          {isEnchantment && 'Escuela de Encantamiento: Mirada Hipnótica (incapacitar a 5 pies) • Encantamiento Instintivo (desviar ataque recibido) • Encantamiento Dividido (duplicar objetivo).'}
-                          {isIllusion && 'Escuela de Ilusión: Ilusión Menor Mejorada (imagen y sonido simultáneos) • Ilusiones Maleables • Ser Ilusorio (anular impacto con copia) • Realidad Ilusoria.'}
-                          {isNecromancy && 'Escuela de Nigromancia: Cosecha Sombría (cura al matar) • Siervos No Muertos (+1 zombi/esqueleto, +PG nivel, +daño PB) • Comandar No Muertos.'}
-                          {isTransmutation && 'Escuela de Transmutación: Alquimia Menor • Piedra del Transmutador (+10 pies vel / resistencia elemental / salvación Con) • Cambiaformas.'}
-                          {isScribes && 'Orden de los Escribas: Pluma Mágica • Grimorio Despertado (cambiar tipo de daño, foco arcano) • Manifiesto Mental (avatar espectral 60 pies) • Maestro Escriba.'}
+                          {isGraviturgy && (isSpanish
+                            ? 'Escuela de Graviturgia: Ajustar Densidad (peso x2 o 1/2) • Pozo Violento (+1d10 daño arma/+2d10 caída) • Horizonte de Sucesos (2d10 fuerza, velocidad 0).'
+                            : 'School of Graviturgy: Adjust Density (weight x2 or 1/2) • Violent Attraction (+1d10 weapon / +2d10 fall dmg) • Event Horizon (2d10 force, speed 0).')}
+                          {isConjuration && (isSpanish
+                            ? 'Escuela de Conjuración: Conjuración Menor (crear objeto no mágico) • Traslación Benigna (teletransporte 30 pies o intercambio) • Concentración Inquebrantable.'
+                            : 'School of Conjuration: Minor Conjuration (create nonmagical object) • Benign Transposition (teleport 30 ft or swap) • Focused Conjuration.')}
+                          {isEnchantment && (isSpanish
+                            ? 'Escuela de Encantamiento: Mirada Hipnótica (incapacitar a 5 pies) • Encantamiento Instintivo (desviar ataque recibido) • Encantamiento Dividido (duplicar objetivo).'
+                            : 'School of Enchantment: Hypnotic Gaze (incapacitate 5 ft) • Instinctive Charm (redirect incoming attack) • Split Enchantment (twin target).')}
+                          {isIllusion && (isSpanish
+                            ? 'Escuela de Ilusión: Ilusión Menor Mejorada (imagen y sonido simultáneos) • Ilusiones Maleables • Ser Ilusorio (anular impacto con copia) • Realidad Ilusoria.'
+                            : 'School of Illusion: Improved Minor Illusion (sound + image) • Malleable Illusions • Illusory Self (negate hit with decoy) • Illusory Reality.')}
+                          {isNecromancy && (isSpanish
+                            ? 'Escuela de Nigromancia: Cosecha Sombría (cura al matar) • Siervos No Muertos (+1 zombi/esqueleto, +PG nivel, +daño PB) • Comandar No Muertos.'
+                            : 'School of Necromancy: Grim Harvest (heal on kill) • Undead Thralls (+1 undead, +HP, +dmg) • Command Undead.')}
+                          {isTransmutation && (isSpanish
+                            ? 'Escuela de Transmutación: Alquimia Menor • Piedra del Transmutador (+10 pies vel / resistencia elemental / salvación Con) • Cambiaformas.'
+                            : "School of Transmutation: Minor Alchemy • Transmuter's Stone (+10 ft speed / resistance / Con save) • Shapechanger.")}
+                          {isScribes && (isSpanish
+                            ? 'Orden de los Escribas: Pluma Mágica • Grimorio Despertado (cambiar tipo de daño, foco arcano) • Manifiesto Mental (avatar espectral 60 pies) • Maestro Escriba.'
+                            : 'Order of Scribes: Wizardly Quill • Awakened Spellbook (alter damage type) • Manifest Mind (spectral avatar 60 ft) • Master Scrivener.')}
                         </p>
                       </div>
                     )}
@@ -6546,31 +6766,39 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
           <div className="bg-[#fcf9f2] rounded-2xl border-2 border-[#d8c8af] p-4 sm:p-5 shadow-sm space-y-4">
             {renderScrollSectionHeader(
               null,
-              'Grimorio & Conjuración Mística',
-              'Ranuras activas, trucos y hechizos preparados.',
+              isSpanish ? 'Grimorio & Conjuración Mística' : 'Grimoire & Mystic Spellcasting',
+              isSpanish
+                ? 'Ranuras activas, trucos y hechizos preparados.'
+                : 'Active spell slots, cantrips, and prepared spells.',
               <>
                 {((charData.class.toLowerCase().includes('mago') ||
                   charData.class.toLowerCase().includes('wizard')) &&
                   (charData.level || 1) >= 3) &&
                   renderHeaderSmallButton({
                     onClick: () => setIsCantripFormulasOpen(true),
-                    label: 'Fórmulas',
+                    label: isSpanish ? 'Fórmulas' : 'Formulas',
                     icon: <Sparkles className="w-3 h-3 text-[#f0c869]" />,
-                    title: 'Fórmulas de Trucos (Tasha): Reemplazar un truco tras descanso largo',
+                    title: isSpanish
+                      ? 'Fórmulas de Trucos (Tasha): Reemplazar un truco tras descanso largo'
+                      : 'Cantrip Formulas (Tasha): Replace one cantrip after a long rest',
                   })}
                 {renderHeaderSmallButton({
                   onClick: () => setIsSpellPickerOpen(true),
-                  label: 'Añadir',
+                  label: isSpanish ? 'Añadir' : 'Add',
                   active: true,
                   icon: <Plus className="w-3 h-3 text-[#ffd56b]" />,
-                  title: 'Buscar y añadir conjuros de linaje, dotes o compendio oficial',
+                  title: isSpanish
+                    ? 'Buscar y añadir conjuros de linaje, dotes o compendio oficial'
+                    : 'Search and add spells from lineage, feats, or official compendium',
                 })}
                 {isCaster &&
                   renderHeaderSmallButton({
                     onClick: handleResetSpellSlots,
-                    label: 'Restaurar',
+                    label: isSpanish ? 'Restaurar' : 'Restore',
                     icon: <RotateCcw className="w-3 h-3 text-[#d4ab59]" />,
-                    title: 'Restaurar todas las ranuras de conjuro gastadas',
+                    title: isSpanish
+                      ? 'Restaurar todas las ranuras de conjuro gastadas'
+                      : 'Restore all expended spell slots',
                   })}
               </>
             )}
@@ -6579,7 +6807,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
             <div className="grid grid-cols-3 gap-2 text-center">
               <div className="bg-[#f5ede0]/85 rounded-xl p-2 border border-[#b89b6a] flex flex-col items-center justify-between">
                 <div className="text-[9.5px] font-fantasy font-bold text-[#4a361c] uppercase">
-                  Aptitud Mágica
+                  {isSpanish ? 'Aptitud Mágica' : 'Spell Ability'}
                 </div>
                 <div className="relative w-13 h-13 my-0.5 flex items-center justify-center">
                   <img
@@ -6589,7 +6817,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                     className="absolute inset-0 w-full h-full object-contain pointer-events-none drop-shadow-[0_3px_5px_rgba(0,0,0,0.55)]"
                   />
                   <span className="relative z-10 text-xs font-bold font-mono text-[#fff6e0] drop-shadow-[0_2px_2px_rgba(0,0,0,0.95)] leading-none">
-                    {ABILITY_LABELS[spellAbility].short}
+                    {localizedAbilityLabels[spellAbility].short}
                   </span>
                 </div>
                 <div className="text-[9px] text-[#6b553b] font-semibold">
@@ -6599,7 +6827,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
 
               <div className="bg-[#f5ede0]/85 rounded-xl p-2 border border-[#b89b6a] flex flex-col items-center justify-between">
                 <div className="text-[9.5px] font-fantasy font-bold text-[#4a361c] uppercase">
-                  CD Salvación
+                  {isSpanish ? 'CD Salvación' : 'Spell Save DC'}
                 </div>
                 <div className="relative w-13 h-13 my-0.5 flex items-center justify-center">
                   <img
@@ -6612,21 +6840,25 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                     {calculatedSpellDc}
                   </span>
                 </div>
-                <div className="text-[9px] text-[#6b553b] font-semibold">Dificultad enemigo</div>
+                <div className="text-[9px] text-[#6b553b] font-semibold">
+                  {isSpanish ? 'Dificultad enemigo' : 'Enemy Save DC'}
+                </div>
               </div>
 
               <div
                 onClick={() =>
                   rollD20(
-                    `Ataque de Conjuro (${ABILITY_LABELS[spellAbility].short})`,
+                    isSpanish
+                      ? `Ataque de Conjuro (${localizedAbilityLabels[spellAbility].short})`
+                      : `Spell Attack (${localizedAbilityLabels[spellAbility].short})`,
                     calculatedSpellAttack
                   )
                 }
                 className="bg-[#f5ede0]/85 rounded-xl p-2 border border-[#b89b6a] cursor-pointer hover:border-[#8c672b] hover:bg-[#ede1ce] transition group flex flex-col items-center justify-between"
-                title="Tirar ataque de conjuro mágico"
+                title={isSpanish ? 'Tirar ataque de conjuro mágico' : 'Roll spell attack'}
               >
                 <div className="text-[9.5px] font-fantasy font-bold text-[#4a361c] uppercase group-hover:text-[#8c672b]">
-                  Ataque Mágico 🎲
+                  {isSpanish ? 'Ataque Mágico 🎲' : 'Spell Attack 🎲'}
                 </div>
                 <div className="relative w-13 h-13 my-0.5 flex items-center justify-center group-hover:scale-105 transition-transform">
                   <img
@@ -6639,7 +6871,9 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                     {calculatedSpellAttack >= 0 ? `+${calculatedSpellAttack}` : calculatedSpellAttack}
                   </span>
                 </div>
-                <div className="text-[9px] text-[#6b553b] font-semibold">Clic para tirar</div>
+                <div className="text-[9px] text-[#6b553b] font-semibold">
+                  {isSpanish ? 'Clic para tirar' : 'Click to roll'}
+                </div>
               </div>
             </div>
 
@@ -6647,7 +6881,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
             {Object.keys(spellSlots).length > 0 && (
               <div className="bg-[#f5ede0]/90 rounded-xl p-3.5 border border-[#b89b6a] space-y-2">
                 <span className="text-xs font-fantasy font-bold text-[#4a361c] uppercase block">
-                  Ranuras de Conjuro Disponibles (Spell Slots)
+                  {isSpanish ? 'Ranuras de Conjuro Disponibles (Spell Slots)' : 'Available Spell Slots'}
                 </span>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {Object.entries(spellSlots).map(([key, slot]) => {
@@ -6661,7 +6895,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                         className="bg-[#fcf6ea] rounded-lg p-2 border border-[#cbb28c] flex flex-col justify-between"
                       >
                         <div className="flex items-center justify-between text-[11px] font-fantasy font-bold text-[#4a361c]">
-                          <span>Nivel {lvlNum}</span>
+                          <span>{isSpanish ? `Nivel ${lvlNum}` : `Level ${lvlNum}`}</span>
                           <span className="font-mono text-[10px] text-[#8c672b]">
                             {available}/{slot.max}
                           </span>
@@ -6684,7 +6918,15 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                                     ? 'bg-[#d6c4aa] border-[#ad9c88] text-[#5e4e3e]'
                                     : 'bg-[#8c672b] border-[#705220] text-white shadow-2xs'
                                 }`}
-                                title={isUsed ? 'Ranura gastada (clic para recuperar)' : 'Ranura libre (clic para gastar)'}
+                                title={
+                                  isUsed
+                                    ? isSpanish
+                                      ? 'Ranura gastada (clic para recuperar)'
+                                      : 'Expended slot (click to restore)'
+                                    : isSpanish
+                                    ? 'Ranura libre (clic para gastar)'
+                                    : 'Available slot (click to expend)'
+                                }
                               >
                                 {!isUsed && <Sparkles className="w-2.5 h-2.5" />}
                               </button>
@@ -6707,7 +6949,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                     type="text"
                     value={spellSearchTerm}
                     onChange={(e) => setSpellSearchTerm(e.target.value)}
-                    placeholder="Buscar en grimorio..."
+                    placeholder={isSpanish ? 'Buscar en grimorio...' : 'Search grimoire...'}
                     className="w-full bg-[#fcf6ea] border border-[#b89b6a] rounded-lg pl-8 pr-3 py-1.5 text-xs text-[#2c221a] focus:outline-none focus:border-[#8c672b]"
                   />
                 </div>
@@ -6716,15 +6958,15 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                   onChange={(e) => setSpellSchoolFilter(e.target.value)}
                   className="bg-[#fcf6ea] border border-[#b89b6a] rounded-lg px-2.5 py-1.5 text-xs text-[#2c221a] focus:outline-none cursor-pointer"
                 >
-                  <option value="all">Todas las escuelas</option>
-                  <option value="abjuración">Abjuración</option>
-                  <option value="conjuración">Conjuración</option>
-                  <option value="adivinación">Adivinación</option>
-                  <option value="encantamiento">Encantamiento</option>
-                  <option value="evocación">Evocación</option>
-                  <option value="ilusión">Ilusión</option>
-                  <option value="nigromancia">Nigromancia</option>
-                  <option value="transmutación">Transmutación</option>
+                  <option value="all">{isSpanish ? 'Todas las escuelas' : 'All schools'}</option>
+                  <option value="abjuración">{isSpanish ? 'Abjuración' : 'Abjuration'}</option>
+                  <option value="conjuración">{isSpanish ? 'Conjuración' : 'Conjuration'}</option>
+                  <option value="adivinación">{isSpanish ? 'Adivinación' : 'Divination'}</option>
+                  <option value="encantamiento">{isSpanish ? 'Encantamiento' : 'Enchantment'}</option>
+                  <option value="evocación">{isSpanish ? 'Evocación' : 'Evocation'}</option>
+                  <option value="ilusión">{isSpanish ? 'Ilusión' : 'Illusion'}</option>
+                  <option value="nigromancia">{isSpanish ? 'Nigromancia' : 'Necromancy'}</option>
+                  <option value="transmutación">{isSpanish ? 'Transmutación' : 'Transmutation'}</option>
                 </select>
               </div>
 
@@ -6734,7 +6976,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                 {filteredSpellsList.some((s) => s.level === 0) && (
                   <div>
                     <span className="text-[11px] font-fantasy font-bold text-[#8c672b] uppercase tracking-wider block mb-1">
-                      Trucos (Nivel 0 - Ilimitados)
+                      {isSpanish ? 'Trucos (Nivel 0 - Ilimitados)' : 'Cantrips (Level 0 - At Will)'}
                     </span>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                       {filteredSpellsList
@@ -6746,11 +6988,11 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                             className="p-2 bg-[#f5ede0] rounded-lg border border-[#d8c8af] hover:border-[#8c672b] cursor-pointer transition flex items-center justify-between text-xs group"
                           >
                             <span className="font-fantasy font-bold text-[#2c221a] truncate">
-                              {sp.name}
+                              {isSpanish ? sp.name : ((sp as any).nameEn || translateDndTitle(sp.name))}
                             </span>
                             <div className="flex items-center gap-1 shrink-0 ml-1">
                               <span className="text-[10px] text-[#786450] font-mono">
-                                {sp.castingTime}
+                                {isSpanish ? sp.castingTime : (sp.castingTimeEn || translateSpellMeta(sp.castingTime))}
                               </span>
                               <button
                                 type="button"
@@ -6759,7 +7001,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                                   handleRemoveSpell(sp.name);
                                 }}
                                 className="p-0.5 text-[#9c8975] hover:text-[#a8423d] rounded transition cursor-pointer"
-                                title="Quitar truco del grimorio"
+                                title={isSpanish ? 'Quitar truco del grimorio' : 'Remove cantrip from grimoire'}
                               >
                                 <Trash2 className="w-3 h-3" />
                               </button>
@@ -6778,7 +7020,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                   return (
                     <div key={lvl}>
                       <span className="text-[11px] font-fantasy font-bold text-[#8c672b] uppercase tracking-wider block mb-1">
-                        Conjuros de Nivel {lvl}
+                        {isSpanish ? `Conjuros de Nivel ${lvl}` : `Level ${lvl} Spells`}
                       </span>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                         {spellsAtLvl.map((sp) => (
@@ -6789,7 +7031,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                           >
                             <div className="flex items-center gap-1.5 truncate">
                               <span className="font-fantasy font-bold text-[#2c221a] truncate">
-                                {sp.name}
+                                {isSpanish ? sp.name : ((sp as any).nameEn || translateDndTitle(sp.name))}
                               </span>
                               {sp.concentration && (
                                 <span className="text-[9px] bg-[#f8dcd9] text-[#8c2e28] px-1 rounded font-mono">
@@ -6804,7 +7046,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                             </div>
                             <div className="flex items-center gap-1 shrink-0 ml-1">
                               <span className="text-[10px] text-[#786450] font-mono">
-                                {sp.school}
+                                {isSpanish ? sp.school : translateSpellSchool(sp.school)}
                               </span>
                               <button
                                 type="button"
@@ -6813,7 +7055,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                                   handleRemoveSpell(sp.name);
                                 }}
                                 className="p-0.5 text-[#9c8975] hover:text-[#a8423d] rounded transition cursor-pointer"
-                                title="Quitar conjuro del grimorio"
+                                title={isSpanish ? 'Quitar conjuro del grimorio' : 'Remove spell from grimoire'}
                               >
                                 <Trash2 className="w-3 h-3" />
                               </button>
@@ -6827,13 +7069,18 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
 
                 {filteredSpellsList.length === 0 && (
                   <div className="p-5 text-center bg-[#faf6ee] rounded-xl border border-dashed border-[#d8c8af] text-xs text-[#786450] space-y-2">
-                    <div>No hay conjuros registrados en el grimorio.</div>
+                    <div>
+                      {isSpanish
+                        ? 'No hay conjuros registrados en el grimorio.'
+                        : 'No spells registered in the grimoire.'}
+                    </div>
                     <button
                       type="button"
                       onClick={() => setIsSpellPickerOpen(true)}
                       className="px-3 py-1 bg-[#8c672b] hover:bg-[#73521e] text-white rounded-lg text-xs font-fantasy font-bold transition inline-flex items-center gap-1.5 cursor-pointer shadow-xs"
                     >
-                      <Plus className="w-3.5 h-3.5" /> Añadir Conjuro del Compendio...
+                      <Plus className="w-3.5 h-3.5" />{' '}
+                      {isSpanish ? 'Añadir Conjuro del Compendio...' : 'Add Spell from Compendium...'}
                     </button>
                   </div>
                 )}
@@ -6850,8 +7097,10 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
           <div className="bg-[#fcf9f2] rounded-2xl border-2 border-[#d8c8af] p-2.5 sm:p-3 shadow-sm space-y-2">
             {renderScrollSectionHeader(
               null,
-              'Rasgos de Clase, Subclase & Dotes',
-              `Habilidades otorgadas por tu progreso hasta Nivel ${charData.level}.`
+              isSpanish ? 'Rasgos de Clase, Subclase & Dotes' : 'Class, Subclass & Feat Traits',
+              isSpanish
+                ? `Habilidades otorgadas por tu progreso hasta Nivel ${charData.level}.`
+                : `Features granted by your progression up to Level ${charData.level}.`
             )}
 
             <div className="space-y-3 max-h-[380px] overflow-y-auto pr-1">
@@ -6859,7 +7108,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
               {identifiedFeats.length > 0 && (
                 <div className="space-y-2">
                   <span className="text-[11px] font-fantasy font-bold text-[#8c672b] uppercase tracking-wide block">
-                    ⭐ Dotes Consagradas (Feats)
+                    {isSpanish ? '⭐ Dotes Consagradas (Feats)' : '⭐ Chosen Feats'}
                   </span>
                   {identifiedFeats.map((feat) => (
                     <div
@@ -6867,10 +7116,12 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                       className="p-3 bg-[#f5ede0] rounded-xl border border-[#d8c8af] space-y-1 shadow-2xs"
                     >
                       <div className="font-fantasy font-bold text-xs text-[#2c221a]">
-                        {feat.name}
+                        {isSpanish ? feat.name : ((feat as any).nameEn || translateDndTitle(feat.name))}
                       </div>
                       <p className="text-[11px] text-[#5e4e3e] leading-relaxed">
-                        {feat.description}
+                        {isSpanish
+                          ? feat.description
+                          : ((feat as any).descriptionEn || translateDndText(feat.description))}
                       </p>
                     </div>
                   ))}
@@ -6881,11 +7132,13 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
               {charData.classDecisions && Object.keys(charData.classDecisions).length > 0 && (
                 <div className="space-y-2">
                   <span className="text-[11px] font-fantasy font-bold text-[#8c672b] uppercase tracking-wide block">
-                    ⚡ Decisiones Tácticas de Especialización
+                    {isSpanish
+                      ? '⚡ Decisiones Tácticas de Especialización'
+                      : '⚡ Tactical Specialization Decisions'}
                   </span>
                   {Object.entries(charData.classDecisions).map(([key, val]) => {
-                    const label =
-                      key === 'elementalDisciplines'
+                    const label = isSpanish
+                      ? (key === 'elementalDisciplines'
                         ? 'Disciplinas de los Cuatro Elementos'
                         : key === 'kenseiWeapons'
                         ? 'Armas de Kensei'
@@ -7013,9 +7266,140 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                         ? 'Idioma Dracónico (Dragón Ascendente)'
                         : key === 'paladinFightingStyle_2'
                         ? 'Estilo de Combate (Paladín)'
-                        : key;
+                        : key)
+                      : (key === 'elementalDisciplines'
+                        ? 'Four Elements Disciplines'
+                        : key === 'kenseiWeapons'
+                        ? 'Kensei Weapons'
+                        : key.startsWith('totem')
+                        ? 'Totemic Spirit / Aspect'
+                        : key === 'runeKnightRunes'
+                        ? 'Inscribed Runes'
+                        : key === 'arcaneArcherShots'
+                        ? 'Arcane Shots'
+                        : key === 'battleMasterManeuvers'
+                        ? 'Combat Maneuvers'
+                        : key === 'metamagic'
+                        ? 'Metamagic Options'
+                        : key === 'invocations'
+                        ? 'Eldritch Invocations'
+                        : key === 'pactBoon'
+                        ? 'Pact Boon'
+                        : key === 'pactTomeCantrips'
+                        ? 'Pact of the Tome Cantrips'
+                        : key === 'pactChainFamiliar'
+                        ? 'Eldritch Familiar (Pact of the Chain)'
+                        : key === 'artificerArtisanTools'
+                        ? "Artificer's Tools"
+                        : key === 'artificerInfusions'
+                        ? 'Artificer Infusions'
+                        : key === 'armorerModel'
+                        ? 'Arcane Armor Model (Armorer)'
+                        : key === 'armorerModifications'
+                        ? 'Armor Modifications (Armorer Lv 9)'
+                        : key === 'artilleristCannon'
+                        ? 'Preferred Eldritch Cannon (Artillerist)'
+                        : key === 'battleSmithSteelDefender'
+                        ? 'Steel Defender (Battle Smith)'
+                        : key === 'alchemistExperimentalElixir'
+                        ? 'Experimental Elixir (Alchemist)'
+                        : key === 'clericKnowledgeSkills'
+                        ? 'Blessings of Knowledge - Skills'
+                        : key === 'clericKnowledgeLanguages'
+                        ? 'Blessings of Knowledge - Languages'
+                        : key === 'clericNatureCantrip'
+                        ? 'Druid Cantrip (Nature Domain)'
+                        : key === 'clericNatureSkill'
+                        ? 'Acolyte of Nature Skill'
+                        : key === 'clericArcanaCantrips'
+                        ? 'Wizard Cantrips (Arcana Domain)'
+                        : key === 'clericOrderSkill'
+                        ? 'Voice of Authority Skill (Order Domain)'
+                        : key === 'clericPeaceSkill'
+                        ? 'Implement of Peace Skill'
+                        : key === 'clericDeathCantrip'
+                        ? 'Reaper Cantrip (Death Domain)'
+                        : key === 'clericArcanaMastery_17'
+                        ? 'Arcane Mastery (Arcana Domain Lv 17)'
+                        : key.startsWith('bardMagicalSecrets')
+                        ? 'Magical Secrets (Bard)'
+                        : key.startsWith('featChoice_')
+                        ? `Special Feat: ${key.replace('featChoice_', '').toUpperCase()}`
+                        : key === 'zealotDivineFury'
+                        ? 'Divine Fury (Zealot Lv 3)'
+                        : key === 'beastNaturalWeapons'
+                        ? 'Form of the Beast - Natural Weapons'
+                        : key === 'beastSoulAdaptation'
+                        ? 'Bestial Soul - Physical Adaptation (Lv 6)'
+                        : key === 'stormHeraldEnvironment'
+                        ? 'Storm Aura Environment'
+                        : key === 'giantLanguage'
+                        ? 'Giant Language'
+                        : key === 'giantElementalCleaver'
+                        ? 'Elemental Cleaver (Giant Lv 6)'
+                        : key.startsWith('primalKnowledge')
+                        ? 'Primal Knowledge (Tasha)'
+                        : key === 'totemTigerSkills6'
+                        ? 'Aspect of the Tiger Skills'
+                        : key === 'swordsFightingStyle'
+                        ? 'Fighting Style (College of Swords)'
+                        : key === 'loreBonusSkills'
+                        ? 'Bonus Proficiencies (College of Lore)'
+                        : key === 'spiritsSpiritSession'
+                        ? 'Spirit Session (College of Spirits)'
+                        : key.startsWith('bardExpertise_')
+                        ? 'Expertise (Bard)'
+                        : key === 'fightingStyle'
+                        ? 'Fighting Style'
+                        : key === 'expertise'
+                        ? 'Expertise (Double Proficiency)'
+                        : key === 'draconicAncestry'
+                        ? 'Draconic Ancestry'
+                        : key === 'druidLandCantrip'
+                        ? 'Bonus Cantrip (Circle of the Land)'
+                        : key === 'druidShepherdLanguage'
+                        ? 'Speech of the Woods (Sylvan)'
+                        : key === 'landBiome'
+                        ? 'Circle of the Land Biome'
+                        : key.startsWith('favoredEnemy')
+                        ? 'Favored Enemy'
+                        : key.startsWith('naturalExplorer')
+                        ? 'Natural Explorer'
+                        : key === 'rangerFightingStyle_2'
+                        ? 'Fighting Style (Ranger)'
+                        : key === 'hunterPrey_3'
+                        ? "Hunter's Prey"
+                        : key === 'hunterDefense_7'
+                        ? 'Defensive Tactics (Hunter)'
+                        : key === 'hunterMultiattack_11'
+                        ? 'Multiattack (Hunter)'
+                        : key === 'hunterSuperiorDefense_15'
+                        ? "Superior Hunter's Defense"
+                        : key === 'drakewardenDraconicEssence_3'
+                        ? "Drake's Draconic Essence"
+                        : key === 'fighterFightingStyle_1'
+                        ? 'Fighting Style (Fighter)'
+                        : key === 'championSecondFightingStyle'
+                        ? 'Additional Fighting Style (Champion)'
+                        : key === 'battleMasterArtisanTool_3'
+                        ? 'Student of War Tool'
+                        : key === 'samuraiBonusSkill_3'
+                        ? 'Elegant Courtier Skill'
+                        : key === 'elementalDisciplines'
+                        ? 'Four Elements Disciplines'
+                        : key === 'kenseiWeapons'
+                        ? 'Kensei Weapons'
+                        : key === 'kenseiTool_3'
+                        ? 'Way of the Kensei Tool'
+                        : key === 'ascendantDragonLanguage_3'
+                        ? 'Draconic Language (Ascendant Dragon)'
+                        : key === 'paladinFightingStyle_2'
+                        ? 'Fighting Style (Paladin)'
+                        : translateDndTitle(key));
 
-                    const displayVal = Array.isArray(val) ? val.join(', ') : String(val);
+                    const displayVal = Array.isArray(val)
+                      ? val.map((v) => (isSpanish ? v : translateDndTitle(String(v)))).join(', ')
+                      : (isSpanish ? String(val) : translateDndTitle(String(val)));
 
                     return (
                       <div
@@ -7023,10 +7407,10 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                         className="p-3 bg-[#f5ede0] rounded-xl border border-[#d8c8af] space-y-1 shadow-2xs"
                       >
                         <div className="font-fantasy font-bold text-xs text-[#2c221a]">
-                          {label}
+                          {isSpanish ? label : localizeString(label, false)}
                         </div>
                         <p className="text-[11px] text-[#5e4e3e] leading-relaxed font-semibold">
-                          {displayVal}
+                          {isSpanish ? displayVal : localizeString(displayVal, false)}
                         </p>
                       </div>
                     );
@@ -7038,7 +7422,9 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
               {unlockedSubclassFeatures.length > 0 && (
                 <div className="space-y-2">
                   <span className="text-[11px] font-fantasy font-bold text-[#8c672b] uppercase tracking-wide block">
-                    ⚜️ Rasgos de Subclase ({charData.subclass})
+                    {isSpanish
+                      ? `⚜️ Rasgos de Subclase (${charData.subclass})`
+                      : `⚜️ Subclass Features (${translateDndTitle(charData.subclass || '')})`}
                   </span>
                   {unlockedSubclassFeatures.map((f, i) => (
                     <div
@@ -7046,13 +7432,13 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                       className="p-3 bg-[#f5ede0] rounded-xl border border-[#d8c8af] space-y-1 shadow-2xs"
                     >
                       <div className="font-fantasy font-bold text-xs text-[#2c221a] flex items-center justify-between">
-                        <span>{f.name}</span>
+                        <span>{isSpanish ? f.name : translateDndTitle(f.name)}</span>
                         <span className="text-[9px] text-[#8c672b] font-mono">
-                          Nv. {f.level}
+                          {isSpanish ? 'Nv.' : 'Lv.'} {f.level}
                         </span>
                       </div>
                       <p className="text-[11px] text-[#5e4e3e] leading-relaxed">
-                        {f.desc}
+                        {isSpanish ? f.desc : translateDndText(f.desc)}
                       </p>
                     </div>
                   ))}
@@ -7062,7 +7448,9 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
               {/* Class Features */}
               <div className="space-y-2">
                 <span className="text-[11px] font-fantasy font-bold text-[#8c672b] uppercase tracking-wide block">
-                  🛡️ Rasgos Básicos de Clase ({charData.class})
+                  {isSpanish
+                    ? `🛡️ Rasgos Básicos de Clase (${charData.class})`
+                    : `🛡️ Core Class Features (${translateCharacterClassName(charData.class)})`}
                 </span>
                 {unlockedClassFeatures.map((f, i) => (
                   <div
@@ -7070,13 +7458,13 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                     className="p-3 bg-[#f5ede0] rounded-xl border border-[#d8c8af] space-y-1 shadow-2xs"
                   >
                     <div className="font-fantasy font-bold text-xs text-[#2c221a] flex items-center justify-between">
-                      <span>{f.name}</span>
+                      <span>{isSpanish ? f.name : translateDndTitle(f.name)}</span>
                       <span className="text-[9px] text-[#8c672b] font-mono">
-                        Nv. {f.level}
+                        {isSpanish ? 'Nv.' : 'Lv.'} {f.level}
                       </span>
                     </div>
                     <p className="text-[11px] text-[#5e4e3e] leading-relaxed">
-                      {f.desc}
+                      {isSpanish ? f.desc : translateDndText(f.desc)}
                     </p>
                   </div>
                 ))}
@@ -7086,10 +7474,14 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
               {backgroundObj && (
                 <div className="p-3 bg-[#f5ede0] rounded-xl border border-[#d8c8af] space-y-1 shadow-2xs">
                   <div className="font-fantasy font-bold text-xs text-[#8c672b]">
-                    📜 Rasgo de Trasfondo ({backgroundObj.name}): {backgroundObj.featureName}
+                    {isSpanish
+                      ? `📜 Rasgo de Trasfondo (${backgroundObj.name}): ${backgroundObj.featureName}`
+                      : `📜 Background Feature (${(backgroundObj as any).nameEn || translateCharacterBackgroundName(backgroundObj.name)}): ${(backgroundObj as any).featureNameEn || translateDndTitle(backgroundObj.featureName || '')}`}
                   </div>
                   <p className="text-[11px] text-[#5e4e3e] leading-relaxed">
-                    {backgroundObj.featureDescription}
+                    {isSpanish
+                      ? backgroundObj.featureDescription
+                      : ((backgroundObj as any).featureDescriptionEn || translateDndText(backgroundObj.featureDescription || ''))}
                   </p>
                 </div>
               )}
@@ -7105,19 +7497,21 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
           <div className="bg-[#fcf9f2] rounded-2xl border-2 border-[#d8c8af] p-4 sm:p-5 shadow-sm space-y-4">
             {renderScrollSectionHeader(
               null,
-              'Inventario & Monedero',
-              `Capacidad de carga: ${charData.stats.str * 15} libras.`
+              isSpanish ? 'Inventario & Monedero' : 'Inventory & Coin Purse',
+              isSpanish
+                ? `Capacidad de carga: ${charData.stats.str * 15} libras.`
+                : `Carrying Capacity: ${charData.stats.str * 15} lb.`
             )}
 
             {/* Coin Pouch */}
             <div className="bg-[#f5ede0]/90 rounded-xl p-3 border border-[#b89b6a] space-y-1.5">
               <span className="text-[11px] font-fantasy font-bold text-[#4a361c] uppercase block">
-                💰 Monedero del Aventurero
+                {isSpanish ? '💰 Monedero del Aventurero' : "💰 Adventurer's Coin Purse"}
               </span>
               <div className="grid grid-cols-5 gap-1.5 text-center">
                 {(['cp', 'sp', 'ep', 'gp', 'pp'] as const).map((coin) => {
-                  const label =
-                    coin === 'cp'
+                  const label = isSpanish
+                    ? coin === 'cp'
                       ? 'PC (Cobre)'
                       : coin === 'sp'
                       ? 'PP (Plata)'
@@ -7125,7 +7519,16 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                       ? 'PE (Electro)'
                       : coin === 'gp'
                       ? 'PO (Oro)'
-                      : 'PT (Platino)';
+                      : 'PT (Platino)'
+                    : coin === 'cp'
+                    ? 'CP (Copper)'
+                    : coin === 'sp'
+                    ? 'SP (Silver)'
+                    : coin === 'ep'
+                    ? 'EP (Electrum)'
+                    : coin === 'gp'
+                    ? 'GP (Gold)'
+                    : 'PP (Platinum)';
                   return (
                     <div
                       key={coin}
@@ -7168,10 +7571,13 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
             <div className="bg-[#f5ede0]/90 rounded-xl p-3 border border-[#b89b6a] space-y-2 shadow-2xs">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-fantasy font-bold text-[#4a361c] uppercase flex items-center gap-1.5">
-                  <Shield className="w-4 h-4 text-[#8c672b]" /> Equipamiento Activo & Defensa Táctica
+                  <Shield className="w-4 h-4 text-[#8c672b]" />{' '}
+                  {isSpanish
+                    ? 'Equipamiento Activo & Defensa Táctica'
+                    : 'Active Equipment & Tactical Defense'}
                 </span>
                 <span className="bg-[#3a2816] text-[#f3dfb1] border border-[#b88c32] font-mono font-bold text-xs px-2.5 py-0.5 rounded-lg shadow-xs">
-                  🛡️ CA Total: {currentAc}
+                  🛡️ {isSpanish ? 'CA Total' : 'Total AC'}: {currentAc}
                 </span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
@@ -7180,7 +7586,15 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                   className={`p-2.5 bg-[#fcf6ea] rounded-xl border border-[#cbb28c] flex items-center gap-2.5 min-w-0 transition cursor-pointer hover:border-[#8c672b] hover:bg-[#ede1ce] ${
                     equippedArmor ? 'shadow-2xs' : 'opacity-80'
                   }`}
-                  title={equippedArmor ? 'Clic para ver detalles de la armadura' : 'Sin armadura equipada'}
+                  title={
+                    equippedArmor
+                      ? isSpanish
+                        ? 'Clic para ver detalles de la armadura'
+                        : 'Click to view armor details'
+                      : isSpanish
+                      ? 'Sin armadura equipada'
+                      : 'No armor equipped'
+                  }
                 >
                   <img
                     src={getArmorBadgeAsset(equippedArmor?.name || '', equippedArmor?.category || 'medium')}
@@ -7189,10 +7603,14 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                   />
                   <div className="min-w-0 flex-1">
                     <span className="text-[#5c4a35] font-medium text-[9.5px] uppercase font-fantasy tracking-wider block leading-none">
-                      Armadura:
+                      {isSpanish ? 'Armadura:' : 'Armor:'}
                     </span>
                     <span className="font-fantasy font-bold text-xs text-[#382b20] leading-snug break-words block mt-0.5">
-                      {equippedArmor ? `${equippedArmor.name.split('(')[0].trim()} (Base ${equippedArmor.baseAc})` : 'Sin armadura (10 + Des)'}
+                      {equippedArmor
+                        ? `${isSpanish ? equippedArmor.name.split('(')[0].trim() : (equippedArmor.nameEn || translateDndTitle(equippedArmor.name.split('(')[0].trim()))} (Base ${equippedArmor.baseAc})`
+                        : isSpanish
+                        ? 'Sin armadura (10 + Des)'
+                        : 'Unarmored (10 + Dex)'}
                     </span>
                   </div>
                 </div>
@@ -7202,7 +7620,15 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                   className={`p-2.5 bg-[#fcf6ea] rounded-xl border border-[#cbb28c] flex items-center gap-2.5 min-w-0 transition ${
                     hasEquippedShield ? 'cursor-pointer hover:border-[#8c672b] hover:bg-[#ede1ce] shadow-2xs' : 'opacity-70'
                   }`}
-                  title={hasEquippedShield ? 'Clic para ver detalles del escudo' : 'Ningún escudo empuñado'}
+                  title={
+                    hasEquippedShield
+                      ? isSpanish
+                        ? 'Clic para ver detalles del escudo'
+                        : 'Click to view shield details'
+                      : isSpanish
+                      ? 'Ningún escudo empuñado'
+                      : 'No shield wielded'
+                  }
                 >
                   <img
                     src={getArmorBadgeAsset('escudo', 'shield')}
@@ -7211,10 +7637,16 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                   />
                   <div className="min-w-0 flex-1">
                     <span className="text-[#5c4a35] font-medium text-[9.5px] uppercase font-fantasy tracking-wider block leading-none">
-                      Escudo:
+                      {isSpanish ? 'Escudo:' : 'Shield:'}
                     </span>
                     <span className={`font-fantasy font-bold text-xs leading-snug break-words block mt-0.5 ${hasEquippedShield ? 'text-[#8c672b]' : 'text-[#7a6448]'}`}>
-                      {hasEquippedShield ? '🛡️ Sí (Equipado +2 CA)' : 'Ninguno empuñado'}
+                      {hasEquippedShield
+                        ? isSpanish
+                          ? '🛡️ Sí (Equipado +2 CA)'
+                          : '🛡️ Yes (Equipped +2 AC)'
+                        : isSpanish
+                        ? 'Ninguno empuñado'
+                        : 'None wielded'}
                     </span>
                   </div>
                 </div>
@@ -7229,20 +7661,28 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                   type="button"
                   onClick={() => setIsWeaponPickerOpen(true)}
                   className="w-full px-3 py-2 bg-[#3a2816] hover:bg-[#2a1c0e] text-[#f3dfb1] border border-[#b88c32] rounded-lg text-xs font-fantasy font-bold shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
-                  title="Abrir el catálogo oficial y suplementario de armas"
+                  title={
+                    isSpanish
+                      ? 'Abrir el catálogo oficial y suplementario de armas'
+                      : 'Open official and supplementary weapons catalog'
+                  }
                 >
                   <Sword className="w-3.5 h-3.5 text-[#ffd56b] shrink-0" />
-                  <span>⚔️ Añadir Arma...</span>
+                  <span>{isSpanish ? '⚔️ Añadir Arma...' : '⚔️ Add Weapon...'}</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setIsArmorPickerOpen(true)}
                   className="w-full px-3 py-2 bg-[#2b2015] hover:bg-[#1e150d] text-[#e8d096] border border-[#8c672b] rounded-lg text-xs font-fantasy font-bold shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
-                  title="Abrir el catálogo oficial y suplementario de armaduras y escudos"
+                  title={
+                    isSpanish
+                      ? 'Abrir el catálogo oficial y suplementario de armaduras y escudos'
+                      : 'Open official and supplementary armor and shields catalog'
+                  }
                 >
                   <Shield className="w-3.5 h-3.5 text-[#d4ab59] shrink-0" />
-                  <span>🛡️ Añadir Armadura...</span>
+                  <span>{isSpanish ? '🛡️ Añadir Armadura...' : '🛡️ Add Armor...'}</span>
                 </button>
               </div>
 
@@ -7253,17 +7693,21 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                   value={newItemName}
                   onChange={(e) => setNewItemName(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAddCustomItem()}
-                  placeholder="Escribir nombre de objeto o equipo personalizado..."
+                  placeholder={
+                    isSpanish
+                      ? 'Escribir nombre de objeto o equipo personalizado...'
+                      : 'Type custom item or gear name...'
+                  }
                   className="w-full min-w-0 flex-1 bg-[#fcf6ea] border border-[#b89b6a] rounded-lg px-3 py-2 text-xs text-[#2c221a] focus:outline-none focus:border-[#8c672b] shadow-2xs"
                 />
                 <button
                   type="button"
                   onClick={() => handleAddCustomItem()}
                   className="px-3.5 py-2 bg-[#8c672b] hover:bg-[#73521e] text-white rounded-lg text-xs font-fantasy font-bold shadow-xs transition cursor-pointer shrink-0 flex items-center justify-center gap-1"
-                  title="Añadir a inventario"
+                  title={isSpanish ? 'Añadir a inventario' : 'Add to inventory'}
                 >
                   <Plus className="w-4 h-4" />
-                  <span className="hidden sm:inline">Añadir</span>
+                  <span className="hidden sm:inline">{isSpanish ? 'Añadir' : 'Add'}</span>
                 </button>
               </div>
 
@@ -7271,7 +7715,9 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
               <div className="space-y-2 max-h-[340px] overflow-y-auto pr-1">
                 {customItems.length === 0 ? (
                   <div className="p-4 bg-[#fcf6ea]/70 rounded-lg border border-dashed border-[#b89b6a] text-center text-xs text-[#786450]">
-                    El inventario está vacío. Añade objetos o armas del compendio arriba.
+                    {isSpanish
+                      ? 'El inventario está vacío. Añade objetos o armas del compendio arriba.'
+                      : 'Inventory is empty. Add items or weapons from the compendium above.'}
                   </div>
                 ) : (
                   customItems.map((item, idx) => {
@@ -7290,7 +7736,11 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                             ? 'bg-gradient-to-r from-[#faecd4] to-[#fbf1e3] border-[#b88c32] shadow-2xs'
                             : 'bg-[#f5ede0]/85 border-[#cbb28c]'
                         }`}
-                        title="Clic para ver detalles completos del objeto"
+                        title={
+                          isSpanish
+                            ? 'Clic para ver detalles completos del objeto'
+                            : 'Click to view full item details'
+                        }
                       >
                         {/* Top Subrow: Badge + Full Item Name (Never truncated) + Actions */}
                         <div className="flex items-center justify-between gap-2">
@@ -7300,14 +7750,16 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
 
                             <div className="min-w-0 flex-1">
                               <span className={`text-xs font-fantasy font-bold block leading-snug break-words ${isEquipped ? 'text-[#2c1d0d]' : 'text-[#382b20]'}`}>
-                                {item}
+                                {isSpanish
+                                  ? item
+                                  : (weapon?.nameEn || armor?.nameEn || localizeString(item, false))}
                               </span>
-                              {weapon?.nameEn && weapon.nameEn.toLowerCase() !== item.toLowerCase() && (
+                              {isSpanish && weapon?.nameEn && weapon.nameEn.toLowerCase() !== item.toLowerCase() && (
                                 <span className="text-[10px] text-[#8c735d] italic block leading-none mt-0.5">
                                   {weapon.nameEn}
                                 </span>
                               )}
-                              {armor?.nameEn && armor.nameEn.toLowerCase() !== item.toLowerCase() && (
+                              {isSpanish && armor?.nameEn && armor.nameEn.toLowerCase() !== item.toLowerCase() && (
                                 <span className="text-[10px] text-[#8c735d] italic block leading-none mt-0.5">
                                   {armor.nameEn}
                                 </span>
@@ -7326,19 +7778,35 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                                     ? 'bg-gradient-to-r from-[#5c3d1e] to-[#8c672b] text-[#fff6e0] border-[#d4ab59] hover:from-[#4a3016] hover:to-[#73521e] shadow-xs'
                                     : 'bg-[#fcf6ea] text-[#4a361c] border-[#b89b6a] hover:bg-[#ebdcc4]'
                                 }`}
-                                title={isEquipped ? 'Desequipar objeto' : 'Equipar objeto'}
+                                title={
+                                  isEquipped
+                                    ? isSpanish
+                                      ? 'Desequipar objeto'
+                                      : 'Unequip item'
+                                    : isSpanish
+                                    ? 'Equipar objeto'
+                                    : 'Equip item'
+                                }
                               >
                                 {isEquipped ? <Check className="w-3 h-3 text-[#ffd56b]" /> : <Shield className="w-3 h-3 text-[#8c672b]" />}
-                                <span>{isEquipped ? 'Equipado' : 'Equipar'}</span>
+                                <span>
+                                  {isEquipped
+                                    ? isSpanish
+                                      ? 'Equipado'
+                                      : 'Equipped'
+                                    : isSpanish
+                                    ? 'Equipar'
+                                    : 'Equip'}
+                                </span>
                               </button>
                             ) : isEquipped ? (
                               <button
                                 type="button"
                                 onClick={() => handleToggleEquipItem(item)}
                                 className="px-2.5 py-1 rounded-md text-[11px] font-fantasy font-bold transition flex items-center gap-1 cursor-pointer border bg-[#8c2e28] text-white border-[#70231e]"
-                                title="Desequipar objeto"
+                                title={isSpanish ? 'Desequipar objeto' : 'Unequip item'}
                               >
-                                <span>Desequipar</span>
+                                <span>{isSpanish ? 'Desequipar' : 'Unequip'}</span>
                               </button>
                             ) : null}
 
@@ -7346,7 +7814,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                               type="button"
                               onClick={() => handleRemoveCustomItem(idx)}
                               className="text-[#9c8975] hover:text-[#a8423d] p-1 rounded transition cursor-pointer hover:bg-[#faeae6]"
-                              title="Eliminar del inventario"
+                              title={isSpanish ? 'Eliminar del inventario' : 'Remove from inventory'}
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -7358,17 +7826,18 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                           <div className="flex items-center gap-1.5 flex-wrap">
                             {armor && !isShield && (
                               <span className="bg-[#3a2816] text-[#f3dfb1] border border-[#8c672b] px-2 py-0.2 rounded font-mono font-bold">
-                                🛡️ CA {armor.baseAc}
+                                🛡️ {isSpanish ? 'CA' : 'AC'} {armor.baseAc}
                               </span>
                             )}
                             {isShield && (
                               <span className="bg-[#3a2816] text-[#f3dfb1] border border-[#8c672b] px-2 py-0.2 rounded font-mono font-bold">
-                                🛡️ +{armor?.category === 'shield' ? armor.baseAc : 2} CA
+                                🛡️ +{armor?.category === 'shield' ? armor.baseAc : 2} {isSpanish ? 'CA' : 'AC'}
                               </span>
                             )}
                             {weapon && (
                               <span className="bg-[#ebdcc4] text-[#4a361c] border border-[#b89b6a] px-2 py-0.2 rounded font-mono font-bold">
-                                ⚔️ {weapon.damageDice} {weapon.damageType}
+                                ⚔️ {weapon.damageDice}{' '}
+                                {isSpanish ? weapon.damageType : localizeString(weapon.damageType, false)}
                               </span>
                             )}
                             {weapon?.weight && (
@@ -7384,7 +7853,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                           </div>
 
                           <span className="text-[10px] text-[#8c672b] font-medium group-hover:underline flex items-center gap-0.5 shrink-0">
-                            Ver detalles →
+                            {isSpanish ? 'Ver detalles →' : 'View details →'}
                           </span>
                         </div>
                       </div>
@@ -7404,48 +7873,53 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
           <div className="bg-[#fcf9f2] rounded-2xl border-2 border-[#d8c8af] p-4 sm:p-5 shadow-sm space-y-4">
             {renderScrollSectionHeader(
               null,
-              'Identidad, Rol & Convicciones',
-              `Alineamiento: ${charData.alignment || 'Neutral'}`
+              isSpanish ? 'Identidad, Rol & Convicciones' : 'Identity, Roleplay & Convictions',
+              isSpanish
+                ? `Alineamiento: ${charData.alignment || 'Neutral'}`
+                : `Alignment: ${translateAlignment(charData.alignment || 'Neutral')}`
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {/* Personality Traits / Virtues */}
               <div className="p-3 bg-[#f5ede0]/85 rounded-xl border border-[#b89b6a] space-y-1 shadow-2xs">
                 <span className="text-[11px] font-fantasy font-bold text-[#4a361c] uppercase flex items-center gap-1">
-                  <span>🎭</span> Rasgos de Personalidad & Virtudes
+                  <span>🎭</span>{' '}
+                  {isSpanish ? 'Rasgos de Personalidad & Virtudes' : 'Personality Traits & Virtues'}
                 </span>
                 <p className="text-xs text-[#5e4e3e] italic whitespace-pre-line leading-relaxed">
-                  {charData.personalityTraits || 'Sin rasgos definidos.'}
+                  {charData.personalityTraits || (isSpanish ? 'Sin rasgos definidos.' : 'No traits defined.')}
                 </p>
               </div>
 
               {/* Ideals */}
               <div className="p-3 bg-[#f5ede0]/85 rounded-xl border border-[#b89b6a] space-y-1 shadow-2xs">
                 <span className="text-[11px] font-fantasy font-bold text-[#4a361c] uppercase flex items-center gap-1">
-                  <span>⚖️</span> Ideales & Convicciones Morales
+                  <span>⚖️</span>{' '}
+                  {isSpanish ? 'Ideales & Convicciones Morales' : 'Ideals & Moral Convictions'}
                 </span>
                 <p className="text-xs text-[#5e4e3e] italic whitespace-pre-line leading-relaxed">
-                  {charData.ideals || 'Sin ideales definidos.'}
+                  {charData.ideals || (isSpanish ? 'Sin ideales definidos.' : 'No ideals defined.')}
                 </p>
               </div>
 
               {/* Bonds */}
               <div className="p-3 bg-[#f5ede0]/85 rounded-xl border border-[#b89b6a] space-y-1 shadow-2xs">
                 <span className="text-[11px] font-fantasy font-bold text-[#4a361c] uppercase flex items-center gap-1">
-                  <span>🔗</span> Vínculos & Lazos de Vida
+                  <span>🔗</span> {isSpanish ? 'Vínculos & Lazos de Vida' : 'Bonds & Life Ties'}
                 </span>
                 <p className="text-xs text-[#5e4e3e] italic whitespace-pre-line leading-relaxed">
-                  {charData.bonds || 'Sin vínculos definidos.'}
+                  {charData.bonds || (isSpanish ? 'Sin vínculos definidos.' : 'No bonds defined.')}
                 </p>
               </div>
 
               {/* Flaws */}
               <div className="p-3 bg-[#f5ede0]/85 rounded-xl border border-[#b89b6a] space-y-1 shadow-2xs">
                 <span className="text-[11px] font-fantasy font-bold text-[#4a361c] uppercase flex items-center gap-1">
-                  <span>⚠️</span> Defectos, Debilidades & Tentaciones
+                  <span>⚠️</span>{' '}
+                  {isSpanish ? 'Defectos, Debilidades & Tentaciones' : 'Flaws, Weaknesses & Temptations'}
                 </span>
                 <p className="text-xs text-[#5e4e3e] italic whitespace-pre-line leading-relaxed">
-                  {charData.flaws || 'Sin defectos definidos.'}
+                  {charData.flaws || (isSpanish ? 'Sin defectos definidos.' : 'No flaws defined.')}
                 </p>
               </div>
             </div>
@@ -7460,12 +7934,17 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
           <div className="bg-[#fcf9f2] rounded-2xl border-2 border-[#d8c8af] p-4 sm:p-5 shadow-sm space-y-3">
             {renderScrollSectionHeader(
               null,
-              'Historia & Pasado del Héroe',
-              'Orígenes, mentores y motivaciones para la aventura.'
+              isSpanish ? 'Historia & Pasado del Héroe' : "Hero's Backstory & Past",
+              isSpanish
+                ? 'Orígenes, mentores y motivaciones para la aventura.'
+                : 'Origins, mentors, and motivations for adventure.'
             )}
 
             <div className="p-3.5 bg-[#f5ede0]/85 rounded-xl border border-[#b89b6a] text-xs text-[#4a361c] leading-relaxed whitespace-pre-line italic shadow-2xs">
-              {charData.backstory || 'No se ha redactado todavía la historia del personaje.'}
+              {charData.backstory ||
+                (isSpanish
+                  ? 'No se ha redactado todavía la historia del personaje.'
+                  : 'Character backstory has not been written yet.')}
             </div>
           </div>
         );
@@ -7478,18 +7957,27 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
           <div className="bg-[#fcf9f2] rounded-2xl border-2 border-[#d8c8af] p-4 sm:p-5 shadow-sm space-y-3">
             {renderScrollSectionHeader(
               null,
-              'Sentidos & Competencias',
-              'Percepción pasiva, idiomas y entrenamiento táctico.'
+              isSpanish ? 'Sentidos & Competencias' : 'Senses & Proficiencies',
+              isSpanish
+                ? 'Percepción pasiva, idiomas y entrenamiento táctico.'
+                : 'Passive perception, languages, and tactical training.'
             )}
 
             <div className="grid grid-cols-3 gap-2 text-center">
-              <div className="bg-[#f5ede0]/85 rounded-xl p-2 border border-[#b89b6a] flex flex-col items-center justify-between min-w-0 shadow-2xs" title="Percepción Pasiva (10 + Sabiduría + Competencia si aplica)">
+              <div
+                className="bg-[#f5ede0]/85 rounded-xl p-2 border border-[#b89b6a] flex flex-col items-center justify-between min-w-0 shadow-2xs"
+                title={
+                  isSpanish
+                    ? 'Percepción Pasiva (10 + Sabiduría + Competencia si aplica)'
+                    : 'Passive Perception (10 + Wisdom + Proficiency if applicable)'
+                }
+              >
                 <div className="w-full text-center">
                   <span className="text-[9px] sm:text-[10px] font-fantasy font-bold text-[#4a361c] uppercase tracking-tight block truncate">
-                    Percepción
+                    {isSpanish ? 'Percepción' : 'Perception'}
                   </span>
                   <span className="text-[8px] font-sans font-semibold text-[#785e3c] uppercase tracking-wider block">
-                    Pasiva
+                    {isSpanish ? 'Pasiva' : 'Passive'}
                   </span>
                 </div>
                 <div className="relative w-13 h-13 mt-1 flex items-center justify-center">
@@ -7505,13 +7993,20 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                 </div>
               </div>
 
-              <div className="bg-[#f5ede0]/85 rounded-xl p-2 border border-[#b89b6a] flex flex-col items-center justify-between min-w-0 shadow-2xs" title="Investigación Pasiva (10 + Inteligencia + Competencia si aplica)">
+              <div
+                className="bg-[#f5ede0]/85 rounded-xl p-2 border border-[#b89b6a] flex flex-col items-center justify-between min-w-0 shadow-2xs"
+                title={
+                  isSpanish
+                    ? 'Investigación Pasiva (10 + Inteligencia + Competencia si aplica)'
+                    : 'Passive Investigation (10 + Intelligence + Proficiency if applicable)'
+                }
+              >
                 <div className="w-full text-center">
                   <span className="text-[9px] sm:text-[10px] font-fantasy font-bold text-[#4a361c] uppercase tracking-tight block truncate">
-                    Investigación
+                    {isSpanish ? 'Investigación' : 'Investigation'}
                   </span>
                   <span className="text-[8px] font-sans font-semibold text-[#785e3c] uppercase tracking-wider block">
-                    Pasiva
+                    {isSpanish ? 'Pasiva' : 'Passive'}
                   </span>
                 </div>
                 <div className="relative w-13 h-13 mt-1 flex items-center justify-center">
@@ -7529,13 +8024,20 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                 </div>
               </div>
 
-              <div className="bg-[#f5ede0]/85 rounded-xl p-2 border border-[#b89b6a] flex flex-col items-center justify-between min-w-0 shadow-2xs" title="Perspicacia Pasiva (10 + Sabiduría + Competencia si aplica)">
+              <div
+                className="bg-[#f5ede0]/85 rounded-xl p-2 border border-[#b89b6a] flex flex-col items-center justify-between min-w-0 shadow-2xs"
+                title={
+                  isSpanish
+                    ? 'Perspicacia Pasiva (10 + Sabiduría + Competencia si aplica)'
+                    : 'Passive Insight (10 + Wisdom + Proficiency if applicable)'
+                }
+              >
                 <div className="w-full text-center">
                   <span className="text-[9px] sm:text-[10px] font-fantasy font-bold text-[#4a361c] uppercase tracking-tight block truncate">
-                    Perspicacia
+                    {isSpanish ? 'Perspicacia' : 'Insight'}
                   </span>
                   <span className="text-[8px] font-sans font-semibold text-[#785e3c] uppercase tracking-wider block">
-                    Pasiva
+                    {isSpanish ? 'Pasiva' : 'Passive'}
                   </span>
                 </div>
                 <div className="relative w-13 h-13 mt-1 flex items-center justify-center">
@@ -7556,21 +8058,33 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
 
             <div className="bg-[#f5ede0]/85 rounded-xl p-3 border border-[#b89b6a] space-y-1.5 text-xs">
               <div>
-                <strong className="text-[#8c672b] font-fantasy">Armaduras:</strong>{' '}
+                <strong className="text-[#8c672b] font-fantasy">
+                  {isSpanish ? 'Armaduras:' : 'Armor:'}
+                </strong>{' '}
                 <span className="text-[#4a361c]">
-                  {(classObj.armorProficiencies || []).join(', ') || 'Ninguna'}
+                  {isSpanish
+                    ? (classObj.armorProficiencies || []).join(', ') || 'Ninguna'
+                    : translateProficiencyText((classObj.armorProficiencies || []).join(', ') || 'None')}
                 </span>
               </div>
               <div>
-                <strong className="text-[#8c672b] font-fantasy">Armas:</strong>{' '}
+                <strong className="text-[#8c672b] font-fantasy">
+                  {isSpanish ? 'Armas:' : 'Weapons:'}
+                </strong>{' '}
                 <span className="text-[#4a361c]">
-                  {(classObj.weaponProficiencies || []).join(', ') || 'Simples'}
+                  {isSpanish
+                    ? (classObj.weaponProficiencies || []).join(', ') || 'Simples'
+                    : translateProficiencyText((classObj.weaponProficiencies || []).join(', ') || 'Simple')}
                 </span>
               </div>
               <div>
-                <strong className="text-[#8c672b] font-fantasy">Idiomas:</strong>{' '}
+                <strong className="text-[#8c672b] font-fantasy">
+                  {isSpanish ? 'Idiomas:' : 'Languages:'}
+                </strong>{' '}
                 <span className="text-[#4a361c]">
-                  {(raceObj.languages || ['Común']).join(', ')}
+                  {isSpanish
+                    ? (raceObj.languages || ['Común']).join(', ')
+                    : translateLanguageList(raceObj.languages || ['Común'])}
                 </span>
               </div>
             </div>
@@ -7585,8 +8099,10 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
           <div className="bg-[#fcf9f2] rounded-2xl border-2 border-[#d8c8af] p-4 sm:p-5 shadow-sm space-y-3">
             {renderScrollSectionHeader(
               null,
-              'Diario & Notas Libres',
-              'Anotaciones tácticas, secretos de sesión y pistas.',
+              isSpanish ? 'Diario & Notas Libres' : 'Campaign Diary & Notes',
+              isSpanish
+                ? 'Anotaciones tácticas, secretos de sesión y pistas.'
+                : 'Tactical notes, session secrets, and clues.',
               renderHeaderSmallButton({
                 onClick: () => {
                   if (isEditingNotes) {
@@ -7595,14 +8111,20 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                     setIsEditingNotes(true);
                   }
                 },
-                label: isEditingNotes ? 'Guardar' : 'Editar',
+                label: isEditingNotes ? (isSpanish ? 'Guardar' : 'Save') : (isSpanish ? 'Editar' : 'Edit'),
                 active: isEditingNotes,
                 icon: isEditingNotes ? (
                   <Save className="w-3 h-3 text-[#ffd56b]" />
                 ) : (
                   <Edit2 className="w-3 h-3 text-[#d4ab59]" />
                 ),
-                title: isEditingNotes ? 'Guardar notas en la hoja' : 'Editar apuntes de sesión',
+                title: isEditingNotes
+                  ? isSpanish
+                    ? 'Guardar notas en la hoja'
+                    : 'Save notes to sheet'
+                  : isSpanish
+                  ? 'Editar apuntes de sesión'
+                  : 'Edit session notes',
               })
             )}
 
@@ -7611,12 +8133,15 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                 rows={6}
                 value={playerNotes}
                 onChange={(e) => setPlayerNotes(e.target.value)}
-                placeholder="Escribe notas de la campaña aquí..."
+                placeholder={isSpanish ? 'Escribe notas de la campaña aquí...' : 'Write campaign notes here...'}
                 className="w-full bg-[#fcf6ea] border border-[#b89b6a] rounded-xl p-3 text-xs text-[#2c221a] focus:outline-none focus:border-[#8c672b] shadow-inner font-serif leading-relaxed"
               />
             ) : (
               <div className="p-3.5 bg-[#f5ede0]/85 rounded-xl border border-[#b89b6a] text-xs text-[#4a361c] leading-relaxed whitespace-pre-line shadow-2xs min-h-[80px]">
-                {charData.notes || 'No hay notas registradas. Haz clic en "Editar" para añadir apuntes.'}
+                {charData.notes ||
+                  (isSpanish
+                    ? 'No hay notas registradas. Haz clic en "Editar" para añadir apuntes.'
+                    : 'No notes recorded. Click "Edit" to add session notes.')}
               </div>
             )}
           </div>
@@ -7626,6 +8151,9 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
         return null;
     }
   };
+
+  const renderWidget = (modId: SheetModuleId) =>
+    localizeReactNode(renderRawWidget(modId), isSpanish);
 
   // --------------------------------------------------------------------------
   // LAYOUT ENGINE: RENDERING MODULES ACCORDING TO USER'S CONFIGURATION
@@ -7764,7 +8292,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
   const topRollerScaleY = 0.90 + scrollProgress * 0.22;
   const bottomRollerScaleY = 1.12 - scrollProgress * 0.22;
 
-  return (
+  return localizeReactNode(
     <div className="fixed inset-0 h-screen w-screen z-50 flex items-center justify-center p-0 sm:p-0.5 bg-black/90 backdrop-blur-md animate-fadeIn font-serif text-[#2c241b]">
       {/* OUTER MYSTIC SCROLL ASSEMBLY (Top Roller + Papyrus Sheet + Bottom Roller) */}
       <div
@@ -7808,7 +8336,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
             type="button"
             onClick={onClose}
             className="pointer-events-auto absolute right-6 sm:right-14 md:right-20 top-1/2 -translate-y-1/2 z-50 p-1.5 sm:p-2 bg-[#1c130b]/95 hover:bg-[#8c2e28] text-[#e8d096] hover:text-white rounded-full border-2 border-[#d4ab59] shadow-[0_0_16px_rgba(0,0,0,0.9)] transition cursor-pointer active:scale-95 group"
-            title="Cerrar Pergamino de Personaje"
+            title={isSpanish ? 'Cerrar Pergamino de Personaje' : 'Close Character Scroll'}
           >
             <X className="w-4 h-4 sm:w-5 sm:h-5 text-[#f0c869] group-hover:text-white transition" />
           </button>
@@ -7869,7 +8397,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
               <div className="flex items-center gap-3 min-w-0">
                 <div
                   className="relative w-10 h-10 shrink-0 flex flex-col items-center justify-center select-none"
-                  title={`Nivel ${charData.level}`}
+                  title={isSpanish ? `Nivel ${charData.level}` : `Level ${charData.level}`}
                 >
                   <img
                     src="./assets/ui/coin_stat_medallion.png"
@@ -7878,7 +8406,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                     className="absolute inset-0 w-full h-full object-contain pointer-events-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
                   />
                   <span className="relative z-10 text-[7px] font-fantasy font-bold uppercase text-[#e0b861] leading-none">
-                    NIV
+                    {isSpanish ? 'NIV' : 'LVL'}
                   </span>
                   <span className="relative z-10 text-xs font-mono font-bold text-[#fff6e0] leading-none">
                     {charData.level}
@@ -7888,17 +8416,34 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <h2 className="text-sm sm:text-base font-bold font-fantasy text-[#f5e3b8] tracking-wider uppercase drop-shadow-[0_2px_3px_rgba(0,0,0,0.95)] truncate">
-                      {charData.name}
+                      {isSpanish ? charData.name : localizeString(charData.name, false)}
                     </h2>
                     <span className="text-[9.5px] bg-[#160f09]/90 text-[#e0b861] px-1.5 py-0.2 rounded border border-[#8c672b] font-mono shrink-0">
-                      {charData.alignment || 'Neutral'}
+                      {isSpanish
+                        ? charData.alignment || 'Neutral'
+                        : translateAlignment(charData.alignment || 'Neutral')}
                     </span>
                   </div>
                   <p className="text-[10.5px] text-[#cbb695] italic truncate max-w-md lg:max-w-xl drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">
-                    {charData.race} {charData.subrace ? `(${charData.subrace})` : ''} •{' '}
-                    {charData.class} {charData.subclass ? `(${charData.subclass})` : ''} •{' '}
-                    {charData.background || 'Aventurero'}
-                    {charData.playerName ? ` • Jugador: ${charData.playerName}` : ''}
+                    {isSpanish ? charData.race : translateCharacterRaceName(charData.race)}{' '}
+                    {charData.subrace
+                      ? `(${isSpanish ? charData.subrace : translateCharacterRaceName(charData.subrace)})`
+                      : ''}{' '}
+                    • {isSpanish ? charData.class : translateCharacterClassName(charData.class)}{' '}
+                    {charData.subclass
+                      ? `(${isSpanish ? charData.subclass : translateDndTitle(charData.subclass)})`
+                      : ''}{' '}
+                    •{' '}
+                    {isSpanish
+                      ? charData.background || 'Aventurero'
+                      : translateCharacterBackgroundName(charData.background || 'Adventurer')}
+                    {charData.playerName
+                      ? isSpanish
+                        ? ` • Jugador: ${charData.playerName}`
+                        : ` • Player: ${
+                            charData.playerName === 'Aventurero' ? 'Adventurer' : charData.playerName
+                          }`
+                      : ''}
                   </p>
                 </div>
               </div>
@@ -7908,46 +8453,65 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                 {[
                   {
                     id: 'dice',
-                    onClick: () => rollD20('Tirada Libre de d20', 0, 'normal'),
+                    onClick: () =>
+                      rollD20(isSpanish ? 'Tirada Libre de d20' : 'Free d20 Roll', 0, 'normal'),
                     icon: <Dices className="w-4 h-4 text-[#ffd56b]" />,
-                    label: 'Tirar Dado d20 Libre',
-                    desc: 'Lanza 1d20 rápido en cualquier momento',
+                    label: isSpanish ? 'Tirar Dado d20 Libre' : 'Roll Free d20',
+                    desc: isSpanish
+                      ? 'Lanza 1d20 rápido en cualquier momento'
+                      : 'Roll a quick 1d20 at any time',
                   },
                   {
                     id: 'short-rest',
                     onClick: handleShortRest,
                     icon: <Coffee className="w-4 h-4 text-[#e8c37d]" />,
-                    label: 'Descanso Corto',
-                    desc: 'Recupera PG usando Dados de Golpe y recursos cortos',
+                    label: isSpanish ? 'Descanso Corto' : 'Short Rest',
+                    desc: isSpanish
+                      ? 'Recupera PG usando Dados de Golpe y recursos cortos'
+                      : 'Recover HP using Hit Dice and short rest resources',
                   },
                   {
                     id: 'long-rest',
                     onClick: handleLongRest,
                     icon: <Moon className="w-4 h-4 text-[#9cd69c]" />,
-                    label: 'Descanso Largo',
-                    desc: 'Restaura toda la salud, dados de golpe y ranuras mágicas',
+                    label: isSpanish ? 'Descanso Largo' : 'Long Rest',
+                    desc: isSpanish
+                      ? 'Restaura toda la salud, dados de golpe y ranuras mágicas'
+                      : 'Restore all HP, hit dice, and spell slots',
                   },
                   {
                     id: 'level-up',
                     onClick: () => setIsLevelUpOpen(true),
                     icon: <ArrowUp className="w-4 h-4 text-[#6ee7b7]" />,
-                    label: 'Subir de Nivel',
-                    desc: `Ascender a Nivel ${(charData.level || 1) + 1} y elegir mejoras`,
+                    label: isSpanish ? 'Subir de Nivel' : 'Level Up',
+                    desc: isSpanish
+                      ? `Ascender a Nivel ${(charData.level || 1) + 1} y elegir mejoras`
+                      : `Advance to Level ${(charData.level || 1) + 1} and choose upgrades`,
                   },
                   {
                     id: 'export-pdf',
                     onClick: handleExportPdf,
                     disabled: isExportingPdf,
                     icon: <FileDown className="w-4 h-4 text-[#93c5fd]" />,
-                    label: isExportingPdf ? 'Exportando PDF...' : 'Exportar a Hoja Oficial (PDF)',
-                    desc: 'Descarga el PDF oficial de 3 páginas rellenado',
+                    label: isExportingPdf
+                      ? isSpanish
+                        ? 'Exportando PDF...'
+                        : 'Exporting PDF...'
+                      : isSpanish
+                      ? 'Exportar a Hoja Oficial (PDF)'
+                      : 'Export to Official Sheet (PDF)',
+                    desc: isSpanish
+                      ? 'Descarga el PDF oficial de 3 páginas rellenado'
+                      : 'Download the filled 3-page official PDF sheet',
                   },
                   {
                     id: 'customize',
                     onClick: () => setIsCustomizeDrawerOpen(true),
                     icon: <Sliders className="w-4 h-4 text-[#f5d076]" />,
-                    label: 'Personalizar Hoja',
-                    desc: 'Activa/desactiva módulos (incluido el Retrato) y cambia la vista',
+                    label: isSpanish ? 'Personalizar Hoja' : 'Customize Sheet',
+                    desc: isSpanish
+                      ? 'Activa/desactiva módulos (incluido el Retrato) y cambia la vista'
+                      : 'Toggle modules (including Portrait) and switch layout view',
                   },
                   ...(onEditInCreator
                     ? [
@@ -7955,8 +8519,12 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                           id: 'edit-creator',
                           onClick: () => onEditInCreator(charData),
                           icon: <Sparkles className="w-4 h-4 text-[#fbbf24]" />,
-                          label: 'Editar Construcción en Creador',
-                          desc: 'Modificar raza, clase, dotes, atributos o conjuros paso a paso',
+                          label: isSpanish
+                            ? 'Editar Construcción en Creador'
+                            : 'Edit Build in Character Creator',
+                          desc: isSpanish
+                            ? 'Modificar raza, clase, dotes, atributos o conjuros paso a paso'
+                            : 'Modify race, class, feats, ability scores, or spells step by step',
                         },
                       ]
                     : []),
@@ -8423,8 +8991,12 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
             setIsSpellPickerOpen(false);
           }}
           selectedSpellNames={(charData.spells || []).map((s) => s.name)}
-          title="Grimorio: Añadir Conjuro Oficial"
-          subtitle="Añade conjuros de linaje racial, dotes, magia innata o entrenamiento especial a tu grimorio."
+          title={isSpanish ? 'Grimorio: Añadir Conjuro Oficial' : 'Grimoire: Add Official Spell'}
+          subtitle={
+            isSpanish
+              ? 'Añade conjuros de linaje racial, dotes, magia innata o entrenamiento especial a tu grimorio.'
+              : 'Add spells from racial lineage, feats, innate magic, or special training to your grimoire.'
+          }
         />
 
         {/* LEVEL UP MODAL */}
@@ -8450,8 +9022,12 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
             setIsWeaponPickerOpen(false);
           }}
           filterCategory="all"
-          title="Armería: Compendio de Armas"
-          subtitle="Selecciona un arma oficial para añadirla directamente a tu inventario y equiparla."
+          title={isSpanish ? 'Armería: Compendio de Armas' : 'Armory: Weapons Compendium'}
+          subtitle={
+            isSpanish
+              ? 'Selecciona un arma oficial para añadirla directamente a tu inventario y equiparla.'
+              : 'Select an official weapon to add directly to your inventory and equip it.'
+          }
         />
 
         {/* ARMOR PICKER COMPENDIUM MODAL */}
@@ -8464,8 +9040,12 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
             setIsArmorPickerOpen(false);
           }}
           filterCategory="all"
-          title="Armería: Catálogo de Armaduras y Escudos"
-          subtitle="Selecciona una armadura o escudo oficial para añadirlo a tu inventario y equiparlo."
+          title={isSpanish ? 'Armería: Catálogo de Armaduras y Escudos' : 'Armory: Armor & Shields Catalog'}
+          subtitle={
+            isSpanish
+              ? 'Selecciona una armadura o escudo oficial para añadirlo a tu inventario y equiparlo.'
+              : 'Select an official armor or shield to add to your inventory and equip it.'
+          }
         />
 
         {/* ITEM DETAIL INSPECTOR MODAL */}
@@ -8861,12 +9441,16 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
         <ThemedNotificationModal
           isOpen={themedAlert.isOpen}
           onClose={() => setThemedAlert((prev) => ({ ...prev, isOpen: false }))}
-          title={themedAlert.title}
-          subtitle={themedAlert.subtitle}
-          message={themedAlert.message}
+          title={isSpanish ? themedAlert.title : translateDndTitle(themedAlert.title)}
+          subtitle={themedAlert.subtitle ? (isSpanish ? themedAlert.subtitle : translateDndTitle(themedAlert.subtitle)) : undefined}
+          message={
+            typeof themedAlert.message === 'string'
+              ? (isSpanish ? themedAlert.message : translateDndText(themedAlert.message))
+              : themedAlert.message
+          }
           type={themedAlert.type}
-          confirmText={themedAlert.confirmText}
-          cancelText={themedAlert.cancelText}
+          confirmText={themedAlert.confirmText ? (isSpanish ? themedAlert.confirmText : translateDndTitle(themedAlert.confirmText)) : undefined}
+          cancelText={themedAlert.cancelText ? (isSpanish ? themedAlert.cancelText : translateDndTitle(themedAlert.cancelText)) : undefined}
           onConfirm={themedAlert.onConfirm}
         />
 
@@ -9017,6 +9601,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
           onUpdateAvatarAdjustments={handleUpdateAvatarAdjustments}
         />
       </div>
-    </div>
-  );
+    </div>,
+    isSpanish
+  ) as React.ReactElement;
 };

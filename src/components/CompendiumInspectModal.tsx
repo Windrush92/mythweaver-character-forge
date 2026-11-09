@@ -1,4 +1,11 @@
 import React, { useEffect } from 'react';
+import { useLanguageStore } from '../hooks/useLanguageStore';
+import {
+  translateDndTitle,
+  translateDndText,
+  translateAbilityText,
+  translateProficiencyText,
+} from '../utils/dndEnglishTranslator';
 import {
   X,
   Sparkles,
@@ -63,7 +70,27 @@ export const CompendiumInspectModal: React.FC<CompendiumInspectModalProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [data, onClose]);
 
+  const { isSpanish, t } = useLanguageStore();
   if (!data) return null;
+
+  const displayTitle = isSpanish
+    ? data.title
+    : data.englishTitle || translateDndTitle(data.title);
+  const displayCategory = data.category
+    ? isSpanish
+      ? data.category
+      : translateDndTitle(data.category)
+    : undefined;
+  const displayPrereq = data.prerequisite
+    ? isSpanish
+      ? data.prerequisite
+      : translateDndText(data.prerequisite)
+    : undefined;
+  const displayQuote = data.quote
+    ? isSpanish
+      ? data.quote
+      : translateDndText(data.quote)
+    : undefined;
 
   const renderIcon = () => {
     switch (data.iconType) {
@@ -102,22 +129,22 @@ export const CompendiumInspectModal: React.FC<CompendiumInspectModalProps> = ({
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="text-base sm:text-lg font-bold font-fantasy text-[#f7f2ea] tracking-wide">
-                  {data.title}
+                  {displayTitle}
                 </h3>
-                {data.englishTitle && (
+                {isSpanish && data.englishTitle && (
                   <span className="text-xs text-[#b8a691] font-serif italic">
                     ({data.englishTitle})
                   </span>
                 )}
               </div>
               <div className="flex flex-wrap items-center gap-2 text-xs text-[#c7b9a5] mt-0.5">
-                {data.category && (
+                {displayCategory && (
                   <span className="bg-[#41311b] text-[#ecd89f] px-2 py-0.5 rounded text-[10px] border border-[#75592e] font-mono font-bold uppercase">
-                    {data.category}
+                    {displayCategory}
                   </span>
                 )}
                 <span className="text-[11px] text-[#b8a691] font-fantasy">
-                  Compendio Oficial D&D 5e
+                  {isSpanish ? 'Compendio Oficial D&D' : 'Official D&D Compendium'}
                 </span>
               </div>
             </div>
@@ -126,7 +153,7 @@ export const CompendiumInspectModal: React.FC<CompendiumInspectModalProps> = ({
           <button
             onClick={onClose}
             className="p-1.5 text-[#c7b9a5] hover:text-white hover:bg-[#4a3a2a] rounded-lg transition cursor-pointer shrink-0"
-            title="Cerrar detalles (Esc)"
+            title={t('Cerrar detalles (Esc)', 'Close details (Esc)')}
           >
             <X className="w-5 h-5" />
           </button>
@@ -135,14 +162,14 @@ export const CompendiumInspectModal: React.FC<CompendiumInspectModalProps> = ({
         {/* Parchment Body */}
         <div className="p-5 sm:p-6 overflow-y-auto space-y-4 font-serif bg-[#fbf6e9] flex-1">
           {/* Prerequisite Callout */}
-          {data.prerequisite && (
+          {displayPrereq && (
             <div className="p-3 bg-[#f5e9d5] rounded-xl border border-[#cba86e] flex items-start gap-2.5 text-xs text-[#523a1a]">
               <AlertCircle className="w-4 h-4 text-[#8c672b] shrink-0 mt-0.5" />
               <div>
                 <strong className="font-fantasy uppercase text-[11px] text-[#63451d] block">
-                  Requisito Previo
+                  {isSpanish ? 'Requisito Previo' : 'Prerequisite'}
                 </strong>
-                <p className="mt-0.5 font-semibold text-[#4a361c]">{data.prerequisite}</p>
+                <p className="mt-0.5 font-semibold text-[#4a361c]">{displayPrereq}</p>
               </div>
             </div>
           )}
@@ -153,10 +180,10 @@ export const CompendiumInspectModal: React.FC<CompendiumInspectModalProps> = ({
               {data.badges.map((b, i) => (
                 <div key={i} className="text-center sm:text-left">
                   <span className="text-[10px] font-bold text-[#8c672b] uppercase block font-fantasy">
-                    {b.label}
+                    {isSpanish ? b.label : translateDndTitle(b.label)}
                   </span>
                   <span className="font-semibold text-[#3b2b1b] mt-0.5 block font-mono text-xs">
-                    {b.value}
+                    {isSpanish ? b.value : translateAbilityText(translateProficiencyText(translateDndText(b.value)))}
                   </span>
                 </div>
               ))}
@@ -164,16 +191,18 @@ export const CompendiumInspectModal: React.FC<CompendiumInspectModalProps> = ({
           )}
 
           {/* Lore / Quote */}
-          {data.quote && (
+          {displayQuote && (
             <blockquote className="p-3 border-l-4 border-[#8c672b] bg-[#f5ede0]/60 italic text-xs text-[#6e5842] rounded-r-lg">
-              "{data.quote}"
+              "{displayQuote}"
             </blockquote>
           )}
 
           {/* Main Description & Detailed Lore */}
           {(() => {
-            const desc = data.description?.trim() || '';
-            const detailed = data.detailedDescription?.trim() || '';
+            const rawDesc = data.description?.trim() || '';
+            const rawDetailed = data.detailedDescription?.trim() || '';
+            const desc = isSpanish ? rawDesc : translateDndText(rawDesc);
+            const detailed = isSpanish ? rawDetailed : translateDndText(rawDetailed);
 
             // Check if one is just a truncated or identical version of the other
             const isRedundant =
@@ -191,7 +220,7 @@ export const CompendiumInspectModal: React.FC<CompendiumInspectModalProps> = ({
                 {mainText && (
                   <div className="p-4 bg-[#f8f2e4] rounded-xl border border-[#d6c4aa] shadow-inner">
                     <h4 className="text-xs font-bold font-fantasy text-[#63451d] uppercase mb-1.5 flex items-center gap-1.5">
-                      <BookOpen className="w-3.5 h-3.5 text-[#8c672b]" /> Descripción
+                      <BookOpen className="w-3.5 h-3.5 text-[#8c672b]" /> {isSpanish ? 'Descripción' : 'Description'}
                     </h4>
                     <p className="text-xs sm:text-sm text-[#423120] leading-relaxed whitespace-pre-line">
                       {mainText}
@@ -202,7 +231,7 @@ export const CompendiumInspectModal: React.FC<CompendiumInspectModalProps> = ({
                 {!isRedundant && detailed && (
                   <div className="p-4 bg-[#fcf9f2] rounded-xl border border-[#d6c4aa] shadow-inner space-y-2">
                     <h4 className="text-xs font-bold font-fantasy text-[#63451d] uppercase flex items-center gap-1.5">
-                      <BookOpen className="w-3.5 h-3.5 text-[#8c672b]" /> Lore y Reglas Detalladas (Wikidot)
+                      <BookOpen className="w-3.5 h-3.5 text-[#8c672b]" /> {isSpanish ? 'Lore y Reglas Detalladas (Wikidot)' : 'Detailed Lore & Rules (Wikidot)'}
                     </h4>
                     <p className="text-xs sm:text-sm text-[#4a361c] leading-relaxed whitespace-pre-line">
                       {detailed}
@@ -217,7 +246,7 @@ export const CompendiumInspectModal: React.FC<CompendiumInspectModalProps> = ({
           {data.benefits && data.benefits.length > 0 && (
             <div className="space-y-2">
               <h4 className="text-xs font-bold font-fantasy text-[#63451d] uppercase flex items-center gap-1.5">
-                <Award className="w-3.5 h-3.5 text-[#8c672b]" /> Beneficios y Reglas Completas ({data.benefits.length})
+                <Award className="w-3.5 h-3.5 text-[#8c672b]" /> {isSpanish ? 'Beneficios y Reglas Completas' : 'Benefits & Complete Rules'} ({data.benefits.length})
               </h4>
               <div className="space-y-2">
                 {data.benefits.map((ben, idx) => (
@@ -228,7 +257,7 @@ export const CompendiumInspectModal: React.FC<CompendiumInspectModalProps> = ({
                     <span className="w-5 h-5 rounded-full bg-[#ebdcc4] text-[#8c672b] border border-[#b88c32] font-fantasy font-bold flex items-center justify-center text-[11px] shrink-0 mt-0.5">
                       {idx + 1}
                     </span>
-                    <p className="leading-relaxed flex-1">{ben}</p>
+                    <p className="leading-relaxed flex-1">{isSpanish ? ben : translateDndText(ben)}</p>
                   </div>
                 ))}
               </div>
@@ -239,10 +268,10 @@ export const CompendiumInspectModal: React.FC<CompendiumInspectModalProps> = ({
           {data.traits && data.traits.length > 0 && (
             <div className="space-y-2.5">
               <h4 className="text-xs font-bold font-fantasy text-[#63451d] uppercase flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-[#8c672b]" /> Rasgos y Habilidades Especiales ({data.traits.length})
+                <Sparkles className="w-3.5 h-3.5 text-[#8c672b]" /> {isSpanish ? 'Rasgos y Habilidades Especiales' : 'Special Traits & Features'} ({data.traits.length})
               </h4>
               <div className="space-y-2">
-                {data.traits.map((t, idx) => (
+                {data.traits.map((tr, idx) => (
                   <div
                     key={idx}
                     className="p-3 bg-[#fcf9f2] rounded-xl border border-[#dbcbb2] text-xs shadow-xs"
@@ -250,11 +279,11 @@ export const CompendiumInspectModal: React.FC<CompendiumInspectModalProps> = ({
                     <div className="flex items-center gap-2 mb-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#8c672b]" />
                       <h5 className="font-fantasy font-bold text-xs text-[#4a361c]">
-                        {t.name}
+                        {isSpanish ? tr.name : translateDndTitle(tr.name)}
                       </h5>
                     </div>
                     <p className="text-xs sm:text-sm text-[#523e2b] leading-relaxed pl-3.5">
-                      {t.desc}
+                      {isSpanish ? tr.desc : translateDndText(tr.desc)}
                     </p>
                   </div>
                 ))}
@@ -266,10 +295,10 @@ export const CompendiumInspectModal: React.FC<CompendiumInspectModalProps> = ({
           {data.equipment && (
             <div className="p-3 bg-[#f5ede0] rounded-xl border border-[#dbcbb2] text-xs">
               <span className="text-[10px] font-bold text-[#8c672b] uppercase block font-fantasy mb-1">
-                Equipo Sugerido Inicial
+                {isSpanish ? 'Equipo Sugerido Inicial' : 'Suggested Starting Equipment'}
               </span>
               <p className="text-xs text-[#523e2b] italic leading-relaxed">
-                {data.equipment}
+                {isSpanish ? data.equipment : translateDndText(data.equipment)}
               </p>
             </div>
           )}
@@ -277,7 +306,7 @@ export const CompendiumInspectModal: React.FC<CompendiumInspectModalProps> = ({
           {/* Extra Notes */}
           {data.extraNotes && (
             <div className="p-3 bg-[#ede1ce] rounded-xl border border-[#cbb391] text-xs text-[#5c4428]">
-              <p className="leading-relaxed">{data.extraNotes}</p>
+              <p className="leading-relaxed">{isSpanish ? data.extraNotes : translateDndText(data.extraNotes)}</p>
             </div>
           )}
 
@@ -285,7 +314,7 @@ export const CompendiumInspectModal: React.FC<CompendiumInspectModalProps> = ({
           <div className="p-2.5 bg-[#f3eae0] rounded-lg border border-dashed border-[#cbb391] text-[11px] text-[#7a6448] flex items-center gap-2">
             <Info className="w-4 h-4 text-[#8c672b] shrink-0" />
             <span>
-              <strong>Consejo:</strong> Puedes mantener presionado cualquier elemento o hacer click en el icono de información para ver su ficha completa en cualquier momento.
+              <strong>{t('Consejo: ', 'Tip: ')}</strong>{t('Haz click en el icono del ojo en cualquier elemento para consultar su ficha y reglas completas.', 'Click the eye icon on any element to view its complete rules and dossier.')}
             </span>
           </div>
         </div>
@@ -296,7 +325,7 @@ export const CompendiumInspectModal: React.FC<CompendiumInspectModalProps> = ({
             onClick={onClose}
             className="px-4 py-2 rounded-xl border border-[#bfa88c] bg-white text-[#4a361c] font-fantasy font-bold text-xs hover:bg-[#ede1ce] transition cursor-pointer"
           >
-            Cerrar
+            {isSpanish ? 'Cerrar' : 'Close'}
           </button>
 
           {data.actionButton && (

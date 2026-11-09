@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { ALL_5E_ARMORS, ArmorDef, ArmorCategory } from '../data/weaponsAndArmorData';
 import { getArmorBadgeAsset } from '../utils/equipmentAssets';
+import { useLanguageStore } from '../hooks/useLanguageStore';
+import { localizeReactNode } from '../utils/dndEnglishTranslator';
 import { Shield, Search, X, Check, Filter, AlertCircle } from 'lucide-react';
 
 interface ArmorPickerModalProps {
@@ -24,6 +26,7 @@ export const ArmorPickerModal: React.FC<ArmorPickerModalProps> = ({
   selectedArmorId,
   selectedArmorName,
 }) => {
+  const { isSpanish } = useLanguageStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<ArmorCategory | 'all'>(filterCategory);
 
@@ -85,7 +88,7 @@ export const ArmorPickerModal: React.FC<ArmorPickerModalProps> = ({
     return `${armor.baseAc} (Fija)`;
   };
 
-  return (
+  return localizeReactNode(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-md animate-fadeIn">
       <div className="bg-[#fcf9f2] border-2 border-[#8c672b] rounded-2xl w-full max-w-5xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden animate-scaleUp">
         {/* Header */}
@@ -238,7 +241,7 @@ export const ArmorPickerModal: React.FC<ArmorPickerModalProps> = ({
                         />
                         <div className="min-w-0 flex-1">
                           <h4 className="font-fantasy font-bold text-sm text-[#2c221a] group-hover:text-[#8c672b] transition leading-snug break-words">
-                            {armor.name}
+                            {isSpanish ? armor.name : (armor.nameEn || armor.name)}
                           </h4>
                           <span className="text-[10px] text-[#7a6448] font-mono block mt-0.5">
                             {getCategoryLabel(armor.category)} • {armor.cost}
@@ -323,17 +326,22 @@ export const ArmorPickerModal: React.FC<ArmorPickerModalProps> = ({
         {/* Footer */}
         <div className="p-3.5 sm:p-4 bg-[#f4ebd9] border-t border-[#d6c4aa] flex items-center justify-between text-xs text-[#5c4a35] shrink-0">
           <span>
-            Mostrando <strong>{filteredArmors.length}</strong> de {ALL_5E_ARMORS.length} armaduras y escudos
+            {isSpanish ? (
+              <>Mostrando <strong>{filteredArmors.length}</strong> de {ALL_5E_ARMORS.length} armaduras y escudos</>
+            ) : (
+              <>Showing <strong>{filteredArmors.length}</strong> of {ALL_5E_ARMORS.length} armors and shields</>
+            )}
           </span>
           <button
             type="button"
             onClick={onClose}
             className="px-4 py-1.5 bg-[#dfcfb9] hover:bg-[#cfbe9e] text-[#382b20] rounded-lg font-fantasy font-bold transition cursor-pointer"
           >
-            Cerrar
+            {isSpanish ? 'Cerrar' : 'Close'}
           </button>
         </div>
       </div>
-    </div>
-  );
+    </div>,
+    isSpanish
+  ) as React.ReactElement;
 };

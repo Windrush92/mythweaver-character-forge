@@ -1,5 +1,30 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useUserStore } from '../hooks/useUserStore';
+import { useLanguageStore } from '../hooks/useLanguageStore';
+import {
+  translateAbilityText,
+  translateProficiencyText,
+  translateSubclassGroup,
+  translateSkillName,
+  translateTableColumnLabel,
+  translateTableSpecificValue,
+  translateProgressionFeature,
+  TASHA_OPTIONAL_FEATURES_EN,
+  CONDITIONS_EN,
+  TACTICAL_RULES_EN,
+  translateDndTitle,
+  translateDndText,
+  translateLanguageList,
+  translateSpellSchool,
+  translateSpellMeta,
+  translateSpellClass,
+  MAGIC_ITEM_RARITY_EN,
+  MAGIC_ITEM_CATEGORY_EN,
+  FEAT_CATEGORY_EN,
+  MONSTER_TYPE_EN,
+  MONSTER_SIZE_EN,
+} from '../utils/dndEnglishTranslator';
+import { translateBackgroundDescription } from '../utils/dndEnglishRoleplayAndBackgrounds';
 import {
   WIKIDOT_CLASSES,
   WikidotClass,
@@ -13,10 +38,20 @@ import { WIKIDOT_RACES, WikidotRace } from '../data/wikidotRacesData';
 import { WIKIDOT_BACKGROUNDS, WikidotBackground, formatBackgroundWealth } from '../data/wikidotBackgroundsData';
 import { OFFICIAL_SPELLS_COMPENDIUM } from '../data/spellsData';
 import { OFFICIAL_5E_FEATS, OfficialFeat } from '../data/characterCreatorData';
+import { ALL_WIKIDOT_FEATS } from '../data/wikidotFeatsData';
 import { ALL_5E_WEAPONS, ALL_5E_ARMORS, WeaponDef, ArmorDef } from '../data/weaponsAndArmorData';
+import {
+  DND_2024_SPECIES,
+  DND_2024_BACKGROUNDS,
+  DND_2024_FEATS,
+  DND_2024_CLASSES,
+  DND_2024_WEAPONS,
+  DND_2024_WEAPON_MASTERIES,
+} from '../data/dnd2024';
 import { Spell } from '../types';
 import { SpellDetailModal } from './SpellDetailModal';
 import { CompendiumInspectModal, CompendiumInspectData } from './CompendiumInspectModal';
+import { Compendium2024View } from './Compendium2024View';
 import { EquipmentBadge } from './EquipmentBadge';
 import {
   OFFICIAL_5E_CONDITIONS,
@@ -104,6 +139,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
   onDeleteCustomArmor,
 }) => {
   const { isDm } = useUserStore();
+  const { language, isSpanish, t } = useLanguageStore();
   const [section, setSection] = useState<CompendiumSection>(initialSection);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -113,6 +149,73 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
       setSection('classes');
     }
   }, [isDm, section]);
+
+  // ---------------------------------------------------------------------------
+  // EDITION SWITCHER STATE (5e 2014 vs 5.5e 2024)
+  // ---------------------------------------------------------------------------
+  const [edition, setEdition] = useState<'5e' | '5.5e'>('5e');
+  const [selectedSpecies2024Id, setSelectedSpecies2024Id] = useState<string>(DND_2024_SPECIES[0]?.id || '');
+  const [selectedBackground2024Id, setSelectedBackground2024Id] = useState<string>(DND_2024_BACKGROUNDS[0]?.id || '');
+  const [selectedClass2024Id, setSelectedClass2024Id] = useState<string>(DND_2024_CLASSES[0]?.id || '');
+  const [selectedFeat2024Id, setSelectedFeat2024Id] = useState<string>(DND_2024_FEATS[0]?.id || '');
+  const [selectedWeapon2024Id, setSelectedWeapon2024Id] = useState<string>(DND_2024_WEAPONS[0]?.id || '');
+  const [selectedMasteryName, setSelectedMasteryName] = useState<string>('Vex (Acosar)');
+
+  const filteredSpecies2024 = useMemo(() => {
+    return DND_2024_SPECIES.filter(sp => {
+      if (!searchTerm.trim()) return true;
+      const term = searchTerm.toLowerCase();
+      return sp.name.toLowerCase().includes(term) || sp.description.toLowerCase().includes(term) || sp.traits.some(t => t.name.toLowerCase().includes(term) || t.desc.toLowerCase().includes(term));
+    });
+  }, [searchTerm]);
+
+  const selectedSpecies2024 = useMemo(() => {
+    return DND_2024_SPECIES.find(s => s.id === selectedSpecies2024Id) || DND_2024_SPECIES[0];
+  }, [selectedSpecies2024Id]);
+
+  const filteredBackgrounds2024 = useMemo(() => {
+    return DND_2024_BACKGROUNDS.filter(bg => {
+      if (!searchTerm.trim()) return true;
+      const term = searchTerm.toLowerCase();
+      return bg.name.toLowerCase().includes(term) || bg.feat.toLowerCase().includes(term) || bg.description.toLowerCase().includes(term) || bg.skillProficiencies.toLowerCase().includes(term);
+    });
+  }, [searchTerm]);
+
+  const selectedBackground2024 = useMemo(() => {
+    return DND_2024_BACKGROUNDS.find(b => b.id === selectedBackground2024Id) || DND_2024_BACKGROUNDS[0];
+  }, [selectedBackground2024Id]);
+
+  const filteredClasses2024 = useMemo(() => {
+    return DND_2024_CLASSES.filter(c => {
+      if (!searchTerm.trim()) return true;
+      const term = searchTerm.toLowerCase();
+      return c.name.toLowerCase().includes(term) || c.description.toLowerCase().includes(term) || c.subclasses.some(s => s.name.toLowerCase().includes(term));
+    });
+  }, [searchTerm]);
+
+  const selectedClass2024 = useMemo(() => {
+    return DND_2024_CLASSES.find(c => c.id === selectedClass2024Id) || DND_2024_CLASSES[0];
+  }, [selectedClass2024Id]);
+
+  const filteredFeats2024 = useMemo(() => {
+    return DND_2024_FEATS.filter(f => {
+      if (!searchTerm.trim()) return true;
+      const term = searchTerm.toLowerCase();
+      return f.name.toLowerCase().includes(term) || f.category.toLowerCase().includes(term) || f.description.toLowerCase().includes(term) || f.benefits.some(b => b.name.toLowerCase().includes(term) || b.desc.toLowerCase().includes(term));
+    });
+  }, [searchTerm]);
+
+  const selectedFeat2024 = useMemo(() => {
+    return DND_2024_FEATS.find(f => f.id === selectedFeat2024Id) || DND_2024_FEATS[0];
+  }, [selectedFeat2024Id]);
+
+  const filteredWeapons2024 = useMemo(() => {
+    return DND_2024_WEAPONS.filter(w => {
+      if (!searchTerm.trim()) return true;
+      const term = searchTerm.toLowerCase();
+      return w.name.toLowerCase().includes(term) || w.mastery.toLowerCase().includes(term) || w.properties.some(p => p.toLowerCase().includes(term));
+    });
+  }, [searchTerm]);
 
   // ---------------------------------------------------------------------------
   // 1. CLASSES STATE
@@ -155,8 +258,10 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
         const term = searchTerm.toLowerCase();
         return (
           subclass.name.toLowerCase().includes(term) ||
+          translateDndTitle(subclass.name).toLowerCase().includes(term) ||
           subclass.description.toLowerCase().includes(term) ||
-          parentClass.name.toLowerCase().includes(term)
+          parentClass.name.toLowerCase().includes(term) ||
+          (parentClass.nameEn && parentClass.nameEn.toLowerCase().includes(term))
         );
       }
       return true;
@@ -175,7 +280,12 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
     return WIKIDOT_RACES.filter((r) => {
       if (!searchTerm.trim()) return true;
       const term = searchTerm.toLowerCase();
-      return r.name.toLowerCase().includes(term) || r.description.toLowerCase().includes(term);
+      return (
+        r.name.toLowerCase().includes(term) ||
+        (r.nameEn && r.nameEn.toLowerCase().includes(term)) ||
+        r.description.toLowerCase().includes(term) ||
+        (r.descriptionEn && r.descriptionEn.toLowerCase().includes(term))
+      );
     });
   }, [searchTerm]);
 
@@ -196,7 +306,11 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
     return WIKIDOT_BACKGROUNDS.filter((b) => {
       if (!searchTerm.trim()) return true;
       const term = searchTerm.toLowerCase();
-      return b.name.toLowerCase().includes(term) || b.description.toLowerCase().includes(term);
+      return (
+        b.name.toLowerCase().includes(term) ||
+        (b.nameEn && b.nameEn.toLowerCase().includes(term)) ||
+        b.description.toLowerCase().includes(term)
+      );
     });
   }, [searchTerm]);
 
@@ -409,15 +523,15 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
               </div>
               <div>
                 <h2 className="text-2xl font-bold font-fantasy text-[#f7f2ea] tracking-wider uppercase">
-                  Compendio Oficial de Reglas 5e
+                  {t('Compendio Oficial de Reglas', 'Official Rules Compendium')}
                 </h2>
-                <span className="text-xs text-[#dfbe7e] font-sans font-semibold">
-                  Base de Datos Canónica ({isDm ? 'PHB • DMG • Monster Manual • Tasha • Xanathar' : 'Manual del Jugador • Tasha • Xanathar • Tesoros'})
-                </span>
               </div>
             </div>
             <p className="text-xs sm:text-sm text-[#baa892] max-w-2xl leading-relaxed">
-              Consulta clases 1-20, subclases, razas, trasfondos, dotes, grimorio oficial, armería & equipo, condiciones y táctica, objetos mágicos{isDm ? ' y bestiario SRD' : ''} sin salir de tu mesa de juego.
+              {t(
+                `Consulta clases, subclases, razas y especies, trasfondos, dotes, grimorio, armamento, condiciones y objetos mágicos${isDm ? ' y bestiario SRD' : ''} sin salir de tu mesa de juego.`,
+                `Browse classes, subclasses, species & races, backgrounds, feats, spellbook, equipment, conditions, and magic items${isDm ? ' and SRD bestiary' : ''} without leaving your table.`
+              )}
             </p>
           </div>
 
@@ -426,12 +540,67 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#c0ad97]" />
             <input
               type="text"
-              placeholder="Buscar en el compendio..."
+              placeholder={
+                edition === '5.5e'
+                  ? t("Buscar en compendio 2024...", "Search 2024 compendium...")
+                  : t("Buscar en el compendio...", "Search the compendium...")
+              }
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-9 pr-4 py-2.5 bg-[#1b1510]/80 border border-[#b88c32]/50 rounded-xl text-xs sm:text-sm text-[#f7f2ea] placeholder-[#8c7b69] focus:outline-none focus:border-[#ffd56b]"
             />
           </div>
+        </div>
+      </div>
+
+      {/* Edition Switcher Selector Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-[#ede2cf] p-2 sm:p-2.5 rounded-2xl border-2 border-[#c59b27]/40 shadow-sm">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-fantasy font-bold uppercase tracking-wider text-[#5a4838] px-2 flex items-center gap-1.5">
+            <BookOpen className="w-4 h-4 text-[#8c672b]" />
+            {t('Edición de Reglas:', 'Rules Edition:')}
+          </span>
+          <div className="flex items-center gap-2 p-1 bg-[#1c140e]/90 rounded-xl border border-[#b88c32]/50 shadow-inner">
+            <button
+              type="button"
+              onClick={() => { setEdition('5e'); setSearchTerm(''); }}
+              style={{
+                backgroundImage: `url(${edition === '5e' ? './assets/ui/sheet_small_btn_active.png' : './assets/ui/sheet_small_btn.png'})`,
+                backgroundSize: '100% 100%',
+                backgroundRepeat: 'no-repeat',
+              }}
+              className={`px-4 py-2 text-xs font-fantasy font-bold transition flex items-center justify-center gap-1.5 cursor-pointer min-w-[125px] ${
+                edition === '5e'
+                  ? 'text-[#ffe8a3] drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]'
+                  : 'text-[#d8c8af] opacity-85 hover:opacity-100 hover:text-white'
+              }`}
+            >
+              <span>⚔️ 5e (2014)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => { setEdition('5.5e'); setSearchTerm(''); }}
+              style={{
+                backgroundImage: `url(${edition === '5.5e' ? './assets/ui/sheet_small_btn_active.png' : './assets/ui/sheet_small_btn.png'})`,
+                backgroundSize: '100% 100%',
+                backgroundRepeat: 'no-repeat',
+              }}
+              className={`px-4 py-2 text-xs font-fantasy font-bold transition flex items-center justify-center gap-1.5 cursor-pointer min-w-[145px] ${
+                edition === '5.5e'
+                  ? 'text-[#ffe8a3] drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]'
+                  : 'text-[#d8c8af] opacity-85 hover:opacity-100 hover:text-white'
+              }`}
+            >
+              <span>✨ 5.5e (2024)</span>
+              <span className="text-[9px] bg-amber-400 text-stone-900 px-1 rounded font-mono font-black uppercase">PHB</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="text-xs text-[#6e5c4a] italic px-2 hidden sm:block">
+          {edition === '5.5e' 
+            ? t('✨ Mostrando compendio oficial 2024: Especies, Trasfondos con Dotes de Origen, Subclases Nvl 3 y Maestría en Armas.', '✨ Showing official 2024 compendium: Flexible Species, Backgrounds with Origin Feats, Level 3 Subclasses, and Weapon Masteries.')
+            : t('📜 Mostrando compendio oficial 2014: PHB + Tasha + Xanathar canónico.', '📜 Showing canonical 2014 compendium: PHB + Tasha + Xanathar.')}
         </div>
       </div>
 
@@ -446,7 +615,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
           }`}
         >
           <Shield className="w-4 h-4" />
-          Clases & Progresión 1-20
+          {edition === '5.5e' ? t('Clases 2024', '2024 Classes') : t('Clases & Progresión 1-20', 'Classes & Progression 1-20')}
         </button>
 
         <button
@@ -458,7 +627,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
           }`}
         >
           <Crown className="w-4 h-4" />
-          Subclases ({allSubclasses.length})
+          {edition === '5.5e' ? t('Subclases Nvl 3 (48)', 'Level 3 Subclasses (48)') : `${t('Subclases', 'Subclasses')} (${allSubclasses.length})`}
         </button>
 
         <button
@@ -470,7 +639,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
           }`}
         >
           <Users className="w-4 h-4" />
-          Razas & Linajes ({WIKIDOT_RACES.length})
+          {edition === '5.5e' ? t('Especies (10 Oficiales)', 'Species (10 Official)') : `${t('Razas & Linajes', 'Races & Lineages')} (${WIKIDOT_RACES.length})`}
         </button>
 
         <button
@@ -482,19 +651,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
           }`}
         >
           <FileText className="w-4 h-4" />
-          Trasfondos ({WIKIDOT_BACKGROUNDS.length})
-        </button>
-
-        <button
-          onClick={() => { setSection('spells'); setSearchTerm(''); }}
-          className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-fantasy font-bold transition flex items-center gap-2 cursor-pointer shrink-0 ${
-            section === 'spells'
-              ? 'bg-[#8c672b] text-white shadow-md ring-2 ring-[#c59b27]/40'
-              : 'bg-[#faf3e8] text-[#6e5c4a] hover:bg-[#ede1ce] hover:text-[#2c221a]'
-          }`}
-        >
-          <Sparkles className="w-4 h-4" />
-          Grimorio Oficial ({OFFICIAL_SPELLS_COMPENDIUM.length})
+          {edition === '5.5e' ? t('Trasfondos 2024 (16)', '2024 Backgrounds (16)') : `${t('Trasfondos', 'Backgrounds')} (${WIKIDOT_BACKGROUNDS.length})`}
         </button>
 
         <button
@@ -506,7 +663,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
           }`}
         >
           <Award className="w-4 h-4" />
-          Dotes ({OFFICIAL_5E_FEATS.length})
+          {edition === '5.5e' ? t('Dotes (Origen & Nvl 4+)', 'Feats (Origin & Lv 4+)') : `${t('Dotes', 'Feats')} (${OFFICIAL_5E_FEATS.length})`}
         </button>
 
         <button
@@ -518,7 +675,19 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
           }`}
         >
           <Sword className="w-4 h-4" />
-          Armería & Equipo ({allWeapons.length + allArmors.length})
+          {edition === '5.5e' ? t('Armas & Maestría (8)', 'Weapons & Masteries (8)') : `${t('Armería & Equipo', 'Armory & Equipment')} (${allWeapons.length + allArmors.length})`}
+        </button>
+
+        <button
+          onClick={() => { setSection('spells'); setSearchTerm(''); }}
+          className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-fantasy font-bold transition flex items-center gap-2 cursor-pointer shrink-0 ${
+            section === 'spells'
+              ? 'bg-[#8c672b] text-white shadow-md ring-2 ring-[#c59b27]/40'
+              : 'bg-[#faf3e8] text-[#6e5c4a] hover:bg-[#ede1ce] hover:text-[#2c221a]'
+          }`}
+        >
+          <Sparkles className="w-4 h-4" />
+          {t('Grimorio Oficial', 'Official Spellbook')} ({OFFICIAL_SPELLS_COMPENDIUM.length})
         </button>
 
         <button
@@ -530,7 +699,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
           }`}
         >
           <ShieldAlert className="w-4 h-4" />
-          Condiciones & Táctica ({OFFICIAL_5E_CONDITIONS.length + OFFICIAL_5E_TACTICAL_RULES.length})
+          {t('Condiciones & Táctica', 'Conditions & Tactics')} ({OFFICIAL_5E_CONDITIONS.length + OFFICIAL_5E_TACTICAL_RULES.length})
         </button>
 
         <button
@@ -542,7 +711,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
           }`}
         >
           <Wand2 className="w-4 h-4" />
-          Objetos Mágicos ({OFFICIAL_5E_MAGIC_ITEMS.length})
+          {t('Objetos Mágicos', 'Magic Items')} ({OFFICIAL_5E_MAGIC_ITEMS.length})
         </button>
 
         {isDm && (
@@ -555,10 +724,29 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
             }`}
           >
             <Skull className="w-4 h-4" />
-            Bestiario Manual de Monstruos (Solo DM) ({effectiveMonsters.length})
+            {t('Bestiario Manual de Monstruos (Solo DM)', 'Monster Manual Bestiary (DM Only)')} ({effectiveMonsters.length})
           </button>
         )}
       </div>
+
+      {/* 2024 REVISED RULES COMPENDIUM VIEW */}
+      {edition === '5.5e' && ['classes', 'subclasses', 'races', 'backgrounds', 'feats', 'equipment'].includes(section) ? (
+        <Compendium2024View
+          section={section}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+        />
+      ) : (
+        <>
+          {edition === '5.5e' && (
+            <div className="bg-[#fef9ee] border-2 border-[#b88c32] p-4 rounded-2xl flex items-center gap-3 shadow-xs">
+              <Sparkles className="w-5 h-5 text-[#b88c32] shrink-0" />
+              <div className="text-xs text-[#5c4a35] leading-relaxed">
+                <strong className="text-[#8c672b] font-fantasy">{t('Compatibilidad Canónica D&D 5.5e (2024):', 'Canonical D&D 5.5e (2024) Compatibility:')}</strong>{' '}
+                {t('Esta sección mantiene 100% de compatibilidad canónica y retroactiva entre la 5ª Edición (2014) y la revisión PHB 2024.', 'This section maintains 100% canonical and backward compatibility between the 2014 5th Edition and the 2024 PHB rules.')}
+              </div>
+            </div>
+          )}
 
       {/* ==================================================================== */}
       {/* SECTION 1: CLASES & PROGRESIÓN 1-20 (FASE 1)                         */}
@@ -568,11 +756,13 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
           {/* Left Column: Class Selector List */}
           <div className="lg:col-span-1 space-y-2">
             <h3 className="font-fantasy font-bold text-xs uppercase text-[#786450] tracking-wider px-1">
-              Clases Oficiales 5e ({WIKIDOT_CLASSES.length})
+              {t('Clases Oficiales 5e', 'Official 5e Classes')} ({WIKIDOT_CLASSES.length})
             </h3>
             <div className="space-y-1.5 max-h-[750px] overflow-y-auto pr-1">
               {WIKIDOT_CLASSES.map((cls) => {
                 const isSelected = cls.id === selectedClassId;
+                const displayClassName = isSpanish ? cls.name : (cls.nameEn || translateDndTitle(cls.name));
+                const displayPrimary = isSpanish ? cls.primaryAbility : translateAbilityText(cls.primaryAbility);
                 return (
                   <button
                     key={cls.id}
@@ -585,10 +775,10 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                   >
                     <div>
                       <span className="font-fantasy font-bold text-sm text-[#2c221a] block">
-                        {cls.name}
+                        {displayClassName}
                       </span>
                       <span className="text-[10px] text-[#786450]">
-                        d{cls.hitDie} • {cls.primaryAbility} • {cls.subclasses.length} subclases
+                        d{cls.hitDie} • {displayPrimary} • {cls.subclasses.length} {t('subclases', 'subclasses')}
                       </span>
                     </div>
                     {isSelected ? (
@@ -611,15 +801,15 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
               <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#ebdcc7] pb-4">
                 <div>
                   <h3 className="text-xl sm:text-2xl font-fantasy font-bold text-[#2c221a]">
-                    {selectedClass.name}
+                    {isSpanish ? selectedClass.name : (selectedClass.nameEn || translateDndTitle(selectedClass.name))}
                   </h3>
                   <p className="text-xs text-[#6e5c4a] mt-1 max-w-2xl leading-relaxed">
-                    {selectedClass.description}
+                    {isSpanish ? selectedClass.description : (selectedClass.descriptionEn || translateDndText(selectedClass.description))}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-mono font-bold bg-[#8c672b] text-white px-3 py-1 rounded-lg shadow-xs">
-                    Dado de Golpe: 1d{selectedClass.hitDie}
+                    {t('Dado de Golpe:', 'Hit Die:')} 1d{selectedClass.hitDie}
                   </span>
                 </div>
               </div>
@@ -628,39 +818,45 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                 <div className="p-2.5 bg-[#f5ede0] rounded-xl border border-[#d8c8af]">
                   <span className="text-[10px] text-[#786450] font-fantasy uppercase block">
-                    Característica Primaria
+                    {t('Característica Primaria', 'Primary Ability')}
                   </span>
                   <span className="text-xs font-bold text-[#2c221a]">
-                    {selectedClass.primaryAbility}
+                    {isSpanish ? selectedClass.primaryAbility : translateAbilityText(selectedClass.primaryAbility)}
                   </span>
                 </div>
 
                 <div className="p-2.5 bg-[#f5ede0] rounded-xl border border-[#d8c8af]">
                   <span className="text-[10px] text-[#786450] font-fantasy uppercase block">
-                    Tiradas de Salvación
+                    {t('Tiradas de Salvación', 'Saving Throws')}
                   </span>
                   <span className="text-xs font-bold text-[#2c221a]">
-                    {selectedClass.savingThrows.join(', ')}
+                    {selectedClass.savingThrows
+                      .map((st) => (isSpanish ? st : translateAbilityText(st)))
+                      .join(', ')}
                   </span>
                 </div>
 
                 <div className="p-2.5 bg-[#f5ede0] rounded-xl border border-[#d8c8af]">
                   <span className="text-[10px] text-[#786450] font-fantasy uppercase block">
-                    Competencia Armaduras
+                    {t('Competencia Armaduras', 'Armor Proficiencies')}
                   </span>
                   <span className="text-[11px] font-bold text-[#2c221a] line-clamp-1">
-                    {selectedClass.armorProficiencies.join(', ') || 'Ninguna'}
+                    {selectedClass.armorProficiencies.length > 0
+                      ? selectedClass.armorProficiencies
+                          .map((ap) => (isSpanish ? ap : translateProficiencyText(ap)))
+                          .join(', ')
+                      : t('Ninguna', 'None')}
                   </span>
                 </div>
 
                 <div className="p-2.5 bg-[#f5ede0] rounded-xl border border-[#d8c8af]">
                   <span className="text-[10px] text-[#786450] font-fantasy uppercase block">
-                    Conjuración
+                    {t('Conjuración', 'Spellcasting')}
                   </span>
                   <span className="text-xs font-bold text-[#2c221a]">
                     {selectedClass.isSpellcaster
-                      ? `Conjurador (${(selectedClass.spellcastingAbility || '').toUpperCase()})`
-                      : 'No Conjurador'}
+                      ? `${t('Conjurador', 'Spellcaster')} (${(selectedClass.spellcastingAbility || '').toUpperCase()})`
+                      : t('No Conjurador', 'Non-Spellcaster')}
                   </span>
                 </div>
               </div>
@@ -676,7 +872,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                       : 'bg-[#ede1ce] text-[#6e5c4a] hover:bg-[#dfd0ba]'
                   }`}
                 >
-                  <Activity className="w-3.5 h-3.5" /> Tabla de Progresión 1-20
+                  <Activity className="w-3.5 h-3.5" /> {t('Tabla de Progresión 1-20', 'Progression Table 1-20')}
                 </button>
 
                 <button
@@ -688,7 +884,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                       : 'bg-[#ede1ce] text-[#6e5c4a] hover:bg-[#dfd0ba]'
                   }`}
                 >
-                  <BookOpen className="w-3.5 h-3.5" /> Rasgos de Clase ({selectedClass.featuresByLevel.length})
+                  <BookOpen className="w-3.5 h-3.5" /> {t('Rasgos de Clase', 'Class Features')} ({selectedClass.featuresByLevel.length})
                 </button>
 
                 {selectedClassProgression && selectedClassProgression.optionalFeatures.length > 0 && (
@@ -701,7 +897,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                         : 'bg-[#e2edf7] text-[#1e4e79] hover:bg-[#d0e2f2]'
                     }`}
                   >
-                    <Sparkles className="w-3.5 h-3.5" /> Reglas Opcionales de Tasha ({selectedClassProgression.optionalFeatures.length})
+                    <Sparkles className="w-3.5 h-3.5" /> {t('Reglas Opcionales de Tasha', "Tasha's Optional Rules")} ({selectedClassProgression.optionalFeatures.length})
                   </button>
                 )}
 
@@ -714,7 +910,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                       : 'bg-[#ede1ce] text-[#6e5c4a] hover:bg-[#dfd0ba]'
                   }`}
                 >
-                  <Crown className="w-3.5 h-3.5" /> {selectedClass.subclassesName} ({selectedClass.subclasses.length})
+                  <Crown className="w-3.5 h-3.5" /> {isSpanish ? selectedClass.subclassesName : translateSubclassGroup(selectedClass.subclassesName)} ({selectedClass.subclasses.length})
                 </button>
               </div>
             </div>
@@ -724,10 +920,12 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
               <div className="bg-[#fcf9f2] p-5 rounded-2xl border-2 border-[#d8c8af] shadow-xs space-y-3">
                 <div className="flex items-center justify-between">
                   <h4 className="font-fantasy font-bold text-sm text-[#382b20] uppercase tracking-wide">
-                    Tabla Oficial de Progresión de {selectedClass.name} (Niveles 1 al 20)
+                    {isSpanish
+                      ? `Tabla Oficial de Progresión de ${selectedClass.name} (Niveles 1 al 20)`
+                      : `Official ${selectedClass.nameEn || translateDndTitle(selectedClass.name)} Progression Table (Levels 1–20)`}
                   </h4>
                   <span className="text-[11px] text-[#786450] italic">
-                    Reglas Oficiales 5e
+                    {t('Reglas Oficiales 5e', 'Official 5e Rules')}
                   </span>
                 </div>
 
@@ -735,25 +933,25 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                   <table className="w-full text-left text-xs border-collapse">
                     <thead>
                       <tr className="bg-[#2c221a] text-[#f7f2ea] font-fantasy uppercase text-[10px] tracking-wider">
-                        <th className="p-2.5 text-center w-12 border-r border-[#4a3a2d]">Nivel</th>
-                        <th className="p-2.5 text-center w-14 border-r border-[#4a3a2d]">Bono Comp.</th>
-                        <th className="p-2.5 border-r border-[#4a3a2d]">Rasgos de Clase</th>
+                        <th className="p-2.5 text-center w-12 border-r border-[#4a3a2d]">{t('Nivel', 'Level')}</th>
+                        <th className="p-2.5 text-center w-14 border-r border-[#4a3a2d]">{t('Bono Comp.', 'Prof. Bonus')}</th>
+                        <th className="p-2.5 border-r border-[#4a3a2d]">{t('Rasgos de Clase', 'Class Features')}</th>
                         {selectedClassProgression.specificColumns.map((col) => (
                           <th key={col.key} className="p-2.5 text-center border-r border-[#4a3a2d] whitespace-nowrap">
-                            {col.label}
+                            {isSpanish ? col.label : translateTableColumnLabel(col.label)}
                           </th>
                         ))}
                         {selectedClassProgression.rows[0]?.slots && (
                           <>
-                            <th className="p-2 text-center w-8 border-r border-[#4a3a2d]">1º</th>
-                            <th className="p-2 text-center w-8 border-r border-[#4a3a2d]">2º</th>
-                            <th className="p-2 text-center w-8 border-r border-[#4a3a2d]">3º</th>
-                            <th className="p-2 text-center w-8 border-r border-[#4a3a2d]">4º</th>
-                            <th className="p-2 text-center w-8 border-r border-[#4a3a2d]">5º</th>
-                            <th className="p-2 text-center w-8 border-r border-[#4a3a2d]">6º</th>
-                            <th className="p-2 text-center w-8 border-r border-[#4a3a2d]">7º</th>
-                            <th className="p-2 text-center w-8 border-r border-[#4a3a2d]">8º</th>
-                            <th className="p-2 text-center w-8">9º</th>
+                            <th className="p-2 text-center w-8 border-r border-[#4a3a2d]">{t('1º', '1st')}</th>
+                            <th className="p-2 text-center w-8 border-r border-[#4a3a2d]">{t('2º', '2nd')}</th>
+                            <th className="p-2 text-center w-8 border-r border-[#4a3a2d]">{t('3º', '3rd')}</th>
+                            <th className="p-2 text-center w-8 border-r border-[#4a3a2d]">{t('4º', '4th')}</th>
+                            <th className="p-2 text-center w-8 border-r border-[#4a3a2d]">{t('5º', '5th')}</th>
+                            <th className="p-2 text-center w-8 border-r border-[#4a3a2d]">{t('6º', '6th')}</th>
+                            <th className="p-2 text-center w-8 border-r border-[#4a3a2d]">{t('7º', '7th')}</th>
+                            <th className="p-2 text-center w-8 border-r border-[#4a3a2d]">{t('8º', '8th')}</th>
+                            <th className="p-2 text-center w-8">{t('9º', '9th')}</th>
                           </>
                         )}
                       </tr>
@@ -761,6 +959,8 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                     <tbody>
                       {selectedClassProgression.rows.map((row, idx) => {
                         const isEven = idx % 2 === 0;
+                        const levelOrdinalEn =
+                          row.level === 1 ? '1st' : row.level === 2 ? '2nd' : row.level === 3 ? '3rd' : `${row.level}th`;
                         return (
                           <tr
                             key={row.level}
@@ -769,24 +969,29 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                             }`}
                           >
                             <td className="p-2 text-center font-mono font-bold text-[#8c672b] border-r border-[#ebdcc7]">
-                              {row.level}º
+                              {isSpanish ? `${row.level}º` : levelOrdinalEn}
                             </td>
                             <td className="p-2 text-center font-mono text-[#2c221a] border-r border-[#ebdcc7]">
                               +{row.profBonus}
                             </td>
                             <td className="p-2 border-r border-[#ebdcc7]">
                               <span className="font-semibold text-[#2c221a]">
-                                {row.features.join(', ')}
+                                {row.features
+                                  .map((featStr) => (isSpanish ? featStr : translateProgressionFeature(featStr)))
+                                  .join(', ')}
                               </span>
                             </td>
-                            {selectedClassProgression.specificColumns.map((col) => (
-                              <td
-                                key={col.key}
-                                className="p-2 text-center font-mono font-bold text-[#5c3a70] border-r border-[#ebdcc7]"
-                              >
-                                {row.specifics[col.key] || '-'}
-                              </td>
-                            ))}
+                            {selectedClassProgression.specificColumns.map((col) => {
+                              const rawVal = row.specifics[col.key] || '-';
+                              return (
+                                <td
+                                  key={col.key}
+                                  className="p-2 text-center font-mono font-bold text-[#5c3a70] border-r border-[#ebdcc7]"
+                                >
+                                  {isSpanish ? rawVal : translateTableSpecificValue(rawVal)}
+                                </td>
+                              );
+                            })}
                             {row.slots && (
                               <>
                                 {row.slots.map((s, slotIdx) => (
@@ -814,7 +1019,9 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
             {classDetailTab === 'features' && (
               <div className="bg-[#fcf9f2] p-5 rounded-2xl border-2 border-[#d8c8af] shadow-xs space-y-3">
                 <h4 className="font-fantasy font-bold text-sm text-[#382b20] uppercase tracking-wide">
-                  Rasgos Canónicos de {selectedClass.name}
+                  {isSpanish
+                    ? `Rasgos Canónicos de ${selectedClass.name}`
+                    : `Canonical ${selectedClass.nameEn || translateDndTitle(selectedClass.name)} Features`}
                 </h4>
                 <div className="space-y-3">
                   {selectedClass.featuresByLevel.map((feat, idx) => (
@@ -825,14 +1032,14 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                       <div className="flex items-center justify-between">
                         <span className="font-fantasy font-bold text-sm text-[#2c221a] flex items-center gap-1.5">
                           <Sparkles className="w-3.5 h-3.5 text-[#8c672b]" />
-                          {feat.name}
+                          {isSpanish ? feat.name : translateDndTitle(feat.name)}
                         </span>
                         <span className="text-[10px] font-mono font-bold text-[#8c672b] bg-[#f5ede0] px-2 py-0.5 rounded-full border border-[#d8c8af]">
-                          Nivel {feat.level}
+                          {t('Nivel', 'Level')} {feat.level}
                         </span>
                       </div>
                       <p className="text-xs text-[#6e5c4a] mt-1.5 leading-relaxed">
-                        {feat.desc}
+                        {isSpanish ? feat.desc : translateDndText(feat.desc)}
                       </p>
                     </div>
                   ))}
@@ -849,39 +1056,50 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                   </div>
                   <div>
                     <h4 className="font-fantasy font-bold text-sm text-[#143654] uppercase tracking-wide">
-                      Reglas y Rasgos Opcionales de Tasha (Oficial 5e)
+                      {t('Reglas y Rasgos Opcionales de Tasha (Oficial 5e)', "Tasha's Optional Class Features (Official 5e)")}
                     </h4>
                     <p className="text-xs text-[#2b597e]">
-                      Mejoras y opciones oficiales del libro <em>Tasha's Cauldron of Everything</em> para {selectedClass.name}.
+                      {isSpanish ? (
+                        <>Mejoras y opciones oficiales del libro <em>Tasha's Cauldron of Everything</em> para {selectedClass.name}.</>
+                      ) : (
+                        <>Official enhancements and options from <em>Tasha's Cauldron of Everything</em> for {selectedClass.nameEn || translateDndTitle(selectedClass.name)}.</>
+                      )}
                     </p>
                   </div>
                 </div>
 
                 <div className="space-y-3">
-                  {selectedClassProgression.optionalFeatures.map((opt) => (
-                    <div
-                      key={opt.id}
-                      className="bg-white/90 p-4 rounded-xl border border-[#b6d4e8] shadow-2xs space-y-1.5"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="font-fantasy font-bold text-sm text-[#143654] flex items-center gap-1.5">
-                          <Check className="w-4 h-4 text-[#1e4e79]" />
-                          {opt.name}
-                        </span>
-                        <span className="text-[10px] font-mono font-bold text-[#1e4e79] bg-[#dbebf7] px-2 py-0.5 rounded-full border border-[#a8cde5]">
-                          Nivel {opt.level} • {opt.type}
-                        </span>
+                  {selectedClassProgression.optionalFeatures.map((opt) => {
+                    const tashaEn = TASHA_OPTIONAL_FEATURES_EN[opt.id];
+                    const optName = isSpanish ? opt.name : (tashaEn?.name || translateDndTitle(opt.name));
+                    const optType = isSpanish ? opt.type : (tashaEn?.type || 'Tasha Optional Rule');
+                    const optReplaces = isSpanish ? opt.replacesOrEnhances : (tashaEn?.replacesOrEnhances || (opt.replacesOrEnhances ? translateDndText(opt.replacesOrEnhances) : undefined));
+                    const optDesc = isSpanish ? opt.desc : (tashaEn?.desc || translateDndText(opt.desc));
+                    return (
+                      <div
+                        key={opt.id}
+                        className="bg-white/90 p-4 rounded-xl border border-[#b6d4e8] shadow-2xs space-y-1.5"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-fantasy font-bold text-sm text-[#143654] flex items-center gap-1.5">
+                            <Check className="w-4 h-4 text-[#1e4e79]" />
+                            {optName}
+                          </span>
+                          <span className="text-[10px] font-mono font-bold text-[#1e4e79] bg-[#dbebf7] px-2 py-0.5 rounded-full border border-[#a8cde5]">
+                            {t('Nivel', 'Level')} {opt.level} • {optType}
+                          </span>
+                        </div>
+                        {optReplaces && (
+                          <span className="text-[10px] text-[#7b5120] font-semibold italic block">
+                            {optReplaces}
+                          </span>
+                        )}
+                        <p className="text-xs text-[#355776] leading-relaxed">
+                          {optDesc}
+                        </p>
                       </div>
-                      {opt.replacesOrEnhances && (
-                        <span className="text-[10px] text-[#7b5120] font-semibold italic block">
-                          {opt.replacesOrEnhances}
-                        </span>
-                      )}
-                      <p className="text-xs text-[#355776] leading-relaxed">
-                        {opt.desc}
-                      </p>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -891,146 +1109,158 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
               <div className="bg-[#fcf9f2] p-5 rounded-2xl border-2 border-[#d8c8af] shadow-xs space-y-4">
                 <div className="flex items-center justify-between border-b border-[#ebdcc7] pb-2">
                   <h4 className="font-fantasy font-bold text-sm text-[#382b20] uppercase tracking-wide">
-                    {selectedClass.subclassesName} ({selectedClass.subclasses.length} Subclases Oficiales)
+                    {isSpanish ? selectedClass.subclassesName : translateSubclassGroup(selectedClass.subclassesName)} ({selectedClass.subclasses.length} {t('Subclases Oficiales', 'Official Subclasses')})
                   </h4>
                   <span className="text-xs text-[#786450]">
-                    Desbloqueo a Nivel {selectedClass.subclassUnlockLevel || 3}
+                    {t('Desbloqueo a Nivel', 'Unlocks at Level')} {selectedClass.subclassUnlockLevel || 3}
                   </span>
                 </div>
 
                 <div className="space-y-4">
-                  {selectedClass.subclasses.map((sub) => (
-                    <div
-                      key={sub.id}
-                      className="bg-[#faf3e8] p-4 rounded-xl border border-[#d8c8af] space-y-2.5"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="font-fantasy font-bold text-sm text-[#2c221a]">
-                          {sub.name}
-                        </span>
-                        {sub.isCasterSubclass && (
-                          <span className="text-[10px] font-mono text-[#7d519e] bg-[#f3eafa] px-2 py-0.5 rounded border border-[#e2d0f0]">
-                            Subclase Conjuradora ({(sub.spellcastingAbility || '').toUpperCase()})
+                  {selectedClass.subclasses.map((sub) => {
+                    const subNameDisplay = isSpanish ? sub.name : translateDndTitle(sub.name);
+                    const subDescDisplay = isSpanish ? sub.description : translateDndText(sub.description);
+                    const parentNameDisplay = isSpanish ? selectedClass.name : (selectedClass.nameEn || translateDndTitle(selectedClass.name));
+                    const groupNameDisplay = isSpanish ? selectedClass.subclassesName : translateSubclassGroup(selectedClass.subclassesName);
+                    return (
+                      <div
+                        key={sub.id}
+                        className="bg-[#faf3e8] p-4 rounded-xl border border-[#d8c8af] space-y-2.5"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-fantasy font-bold text-sm text-[#2c221a]">
+                            {subNameDisplay}
                           </span>
-                        )}
-                      </div>
-                      <p className="text-xs text-[#6e5c4a] italic leading-relaxed">
-                        {sub.description}
-                      </p>
-
-                      {sub.features && sub.features.length > 0 && (
-                        <div className="space-y-2 pt-2 border-t border-[#ebdcc7]">
-                          <div className="flex flex-wrap items-center justify-between gap-2">
-                            <span className="text-[11px] font-fantasy font-bold text-[#8c672b] uppercase block">
-                              Progresión de Rasgos de la Subclase:
+                          {sub.isCasterSubclass && (
+                            <span className="text-[10px] font-mono text-[#7d519e] bg-[#f3eafa] px-2 py-0.5 rounded border border-[#e2d0f0]">
+                              {t('Subclase Conjuradora', 'Spellcasting Subclass')} ({(sub.spellcastingAbility || '').toUpperCase()})
                             </span>
-                            <div className="flex items-center gap-2">
-                              <button
-                                type="button"
-                                onClick={() => setShowAllSubclassFeaturesExpanded((prev) => !prev)}
-                                className="text-[10px] text-[#8c672b] hover:text-[#5a4837] bg-[#f5ede0] hover:bg-[#ebdcc7] px-2 py-0.5 rounded border border-[#d8c8af] font-semibold transition cursor-pointer"
-                              >
-                                {showAllSubclassFeaturesExpanded ? 'Vista compacta (con Leer más)' : 'Mostrar toda la info de una vez'}
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setInspectData({
-                                    id: sub.id,
-                                    title: sub.name,
-                                    subtitle: `Subclase oficial de ${selectedClass.name}`,
-                                    category: selectedClass.subclassesName,
-                                    description: sub.description,
-                                    traits: sub.features.map((feat) => ({
-                                      name: `Nivel ${feat.level}: ${feat.name}`,
-                                      desc: feat.desc,
-                                    })),
-                                  })
-                                }
-                                className="text-[10px] bg-[#f5ede0] hover:bg-[#ebdcc7] text-[#8c672b] font-bold px-2 py-0.5 rounded border border-[#d8c8af] flex items-center gap-1 cursor-pointer"
-                                title="Inspeccionar subclase completa en pergamino"
-                              >
-                                <Eye className="w-3 h-3" /> Ver pergamino 1:1
-                              </button>
-                            </div>
-                          </div>
+                          )}
+                        </div>
+                        <p className="text-xs text-[#6e5c4a] italic leading-relaxed">
+                          {subDescDisplay}
+                        </p>
 
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                            {sub.features.map((f, fIdx) => {
-                              const featureKey = `${sub.id}-${f.name}-${f.level}`;
-                              const isIndividuallyExpanded = expandedSubclassFeatures[featureKey];
-                              const isExpanded = showAllSubclassFeaturesExpanded || isIndividuallyExpanded;
-                              const isLong = f.desc.length > 110;
-
-                              return (
-                                <div
-                                  key={fIdx}
-                                  className="bg-white/90 p-3 rounded-xl border border-[#e2d6c3] text-xs flex flex-col justify-between shadow-2xs hover:border-[#b88c32] transition"
+                        {sub.features && sub.features.length > 0 && (
+                          <div className="space-y-2 pt-2 border-t border-[#ebdcc7]">
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <span className="text-[11px] font-fantasy font-bold text-[#8c672b] uppercase block">
+                                {t('Progresión de Rasgos de la Subclase:', 'Subclass Feature Progression:')}
+                              </span>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => setShowAllSubclassFeaturesExpanded((prev) => !prev)}
+                                  className="text-[10px] text-[#8c672b] hover:text-[#5a4837] bg-[#f5ede0] hover:bg-[#ebdcc7] px-2 py-0.5 rounded border border-[#d8c8af] font-semibold transition cursor-pointer"
                                 >
-                                  <div>
-                                    <div className="flex items-start justify-between gap-1 border-b border-[#f0e4d2] pb-1 mb-1">
-                                      <span className="font-fantasy font-bold text-xs text-[#2c221a]">
-                                        {f.name}
-                                      </span>
-                                      <div className="flex items-center gap-1 shrink-0">
-                                        <span className="text-[10px] font-mono font-bold text-[#8c672b] bg-[#faf3e8] px-1.5 py-0.5 rounded border border-[#ebdcc7]">
-                                          Nv {f.level}
+                                  {showAllSubclassFeaturesExpanded
+                                    ? t('Vista compacta (con Leer más)', 'Compact view (with Read more)')
+                                    : t('Mostrar toda la info de una vez', 'Expand all info at once')}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setInspectData({
+                                      id: sub.id,
+                                      title: subNameDisplay,
+                                      subtitle: isSpanish
+                                        ? `Subclase oficial de ${parentNameDisplay}`
+                                        : `Official ${parentNameDisplay} Subclass`,
+                                      category: groupNameDisplay,
+                                      description: subDescDisplay,
+                                      traits: sub.features.map((feat) => ({
+                                        name: `${t('Nivel', 'Level')} ${feat.level}: ${isSpanish ? feat.name : translateDndTitle(feat.name)}`,
+                                        desc: isSpanish ? feat.desc : translateDndText(feat.desc),
+                                      })),
+                                    })
+                                  }
+                                  className="text-[10px] bg-[#f5ede0] hover:bg-[#ebdcc7] text-[#8c672b] font-bold px-2 py-0.5 rounded border border-[#d8c8af] flex items-center gap-1 cursor-pointer"
+                                  title={t('Inspeccionar subclase completa en pergamino', 'Inspect full subclass on scroll')}
+                                >
+                                  <Eye className="w-3 h-3" /> {t('Ver pergamino 1:1', 'View 1:1 Scroll')}
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                              {sub.features.map((f, fIdx) => {
+                                const featureKey = `${sub.id}-${f.name}-${f.level}`;
+                                const isIndividuallyExpanded = expandedSubclassFeatures[featureKey];
+                                const isExpanded = showAllSubclassFeaturesExpanded || isIndividuallyExpanded;
+                                const fNameDisplay = isSpanish ? f.name : translateDndTitle(f.name);
+                                const fDescDisplay = isSpanish ? f.desc : translateDndText(f.desc);
+                                const isLong = fDescDisplay.length > 110;
+
+                                return (
+                                  <div
+                                    key={fIdx}
+                                    className="bg-white/90 p-3 rounded-xl border border-[#e2d6c3] text-xs flex flex-col justify-between shadow-2xs hover:border-[#b88c32] transition"
+                                  >
+                                    <div>
+                                      <div className="flex items-start justify-between gap-1 border-b border-[#f0e4d2] pb-1 mb-1">
+                                        <span className="font-fantasy font-bold text-xs text-[#2c221a]">
+                                          {fNameDisplay}
                                         </span>
-                                        <button
-                                          type="button"
-                                          title="Inspeccionar rasgo 1:1"
-                                          onClick={() =>
-                                            setInspectData({
-                                              id: `${sub.id}-${f.name}`,
-                                              title: f.name,
-                                              subtitle: `${sub.name} (Nivel ${f.level})`,
-                                              category: 'Rasgo de Subclase',
-                                              description: f.desc,
-                                              badges: [
-                                                { label: 'Nivel Requerido', value: `Nivel ${f.level}`, variant: 'gold' },
-                                                { label: 'Clase', value: selectedClass.name, variant: 'neutral' },
-                                                { label: 'Subclase', value: sub.name, variant: 'amber' },
-                                              ],
-                                            })
-                                          }
-                                          className="p-0.5 text-[#8c672b] hover:text-[#5a4837] hover:bg-[#ede1ce] rounded transition cursor-pointer"
-                                        >
-                                          <Eye className="w-3 h-3" />
-                                        </button>
+                                        <div className="flex items-center gap-1 shrink-0">
+                                          <span className="text-[10px] font-mono font-bold text-[#8c672b] bg-[#faf3e8] px-1.5 py-0.5 rounded border border-[#ebdcc7]">
+                                            {t('Nv', 'Lv')} {f.level}
+                                          </span>
+                                          <button
+                                            type="button"
+                                            title={t('Inspeccionar rasgo 1:1', 'Inspect feature 1:1')}
+                                            onClick={() =>
+                                              setInspectData({
+                                                id: `${sub.id}-${f.name}`,
+                                                title: fNameDisplay,
+                                                subtitle: `${subNameDisplay} (${t('Nivel', 'Level')} ${f.level})`,
+                                                category: t('Rasgo de Subclase', 'Subclass Feature'),
+                                                description: fDescDisplay,
+                                                badges: [
+                                                  { label: t('Nivel Requerido', 'Required Level'), value: `${t('Nivel', 'Level')} ${f.level}`, variant: 'gold' },
+                                                  { label: t('Clase', 'Class'), value: parentNameDisplay, variant: 'neutral' },
+                                                  { label: t('Subclase', 'Subclass'), value: subNameDisplay, variant: 'amber' },
+                                                ],
+                                              })
+                                            }
+                                            className="p-0.5 text-[#8c672b] hover:text-[#5a4837] hover:bg-[#ede1ce] rounded transition cursor-pointer"
+                                          >
+                                            <Eye className="w-3 h-3" />
+                                          </button>
+                                        </div>
                                       </div>
+
+                                      <p
+                                        className={`text-[11px] text-[#5e4a36] mt-0.5 leading-relaxed whitespace-pre-line ${
+                                          !isExpanded ? 'line-clamp-2' : ''
+                                        }`}
+                                      >
+                                        {fDescDisplay}
+                                      </p>
                                     </div>
 
-                                    <p
-                                      className={`text-[11px] text-[#5e4a36] mt-0.5 leading-relaxed whitespace-pre-line ${
-                                        !isExpanded ? 'line-clamp-2' : ''
-                                      }`}
-                                    >
-                                      {f.desc}
-                                    </p>
+                                    {isLong && !showAllSubclassFeaturesExpanded && (
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          setExpandedSubclassFeatures((prev) => ({
+                                            ...prev,
+                                            [featureKey]: !prev[featureKey],
+                                          }))
+                                        }
+                                        className="mt-1.5 text-[10px] font-bold text-[#8c672b] hover:text-[#5a4837] self-start cursor-pointer flex items-center gap-0.5 bg-[#faf3e8] px-1.5 py-0.5 rounded border border-[#ebdcc7]"
+                                      >
+                                        {isIndividuallyExpanded ? t('Leer menos ▴', 'Read less ▴') : t('Leer más ▾', 'Read more ▾')}
+                                      </button>
+                                    )}
                                   </div>
-
-                                  {isLong && !showAllSubclassFeaturesExpanded && (
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        setExpandedSubclassFeatures((prev) => ({
-                                          ...prev,
-                                          [featureKey]: !prev[featureKey],
-                                        }))
-                                      }
-                                      className="mt-1.5 text-[10px] font-bold text-[#8c672b] hover:text-[#5a4837] self-start cursor-pointer flex items-center gap-0.5 bg-[#faf3e8] px-1.5 py-0.5 rounded border border-[#ebdcc7]"
-                                    >
-                                      {isIndividuallyExpanded ? 'Leer menos ▴' : 'Leer más ▾'}
-                                    </button>
-                                  )}
-                                </div>
-                              );
-                            })}
+                                );
+                              })}
+                            </div>
                           </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -1046,116 +1276,129 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
           <div className="flex flex-wrap items-center justify-between gap-3 bg-[#fcf9f2] p-4 rounded-xl border border-[#d8c8af]">
             <div className="flex items-center gap-2">
               <Filter className="w-4 h-4 text-[#8c672b]" />
-              <span className="text-xs font-bold text-[#6e5c4a]">Filtrar por Clase:</span>
+              <span className="text-xs font-bold text-[#6e5c4a]">{t('Filtrar por Clase:', 'Filter by Class:')}</span>
               <select
                 value={subclassParentFilter}
                 onChange={(e) => setSubclassParentFilter(e.target.value)}
                 className="bg-white border border-[#cfbeaa] rounded-lg px-2.5 py-1 text-xs text-[#2c221a] font-bold"
               >
-                <option value="all">Todas las clases ({allSubclasses.length} subclases)</option>
+                <option value="all">
+                  {t(`Todas las clases (${allSubclasses.length} subclases)`, `All classes (${allSubclasses.length} subclasses)`)}
+                </option>
                 {WIKIDOT_CLASSES.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.name} ({c.subclasses.length})
+                    {isSpanish ? c.name : (c.nameEn || translateDndTitle(c.name))} ({c.subclasses.length})
                   </option>
                 ))}
               </select>
             </div>
 
             <span className="text-xs font-mono font-bold text-[#8c672b]">
-              Mostrando {filteredSubclasses.length} subclases
+              {t(`Mostrando ${filteredSubclasses.length} subclases`, `Showing ${filteredSubclasses.length} subclasses`)}
             </span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredSubclasses.map(({ parentClass, subclass }) => (
-              <div
-                key={`${parentClass.id}-${subclass.id}`}
-                className="bg-[#fcf9f2] p-4 sm:p-5 rounded-2xl border-2 border-[#d8c8af] shadow-xs space-y-3"
-              >
-                <div className="flex items-center justify-between border-b border-[#ebdcc7] pb-2">
-                  <div>
-                    <span className="text-base font-fantasy font-bold text-[#2c221a]">
-                      {subclass.name}
-                    </span>
-                    <span className="text-xs text-[#8c672b] font-bold block">
-                      {parentClass.name} • {parentClass.subclassesName}
-                    </span>
-                  </div>
-                  <span className="text-[10px] font-mono text-[#2c221a] bg-[#f5ede0] px-2 py-0.5 rounded-full border border-[#d8c8af]">
-                    Nv {parentClass.subclassUnlockLevel || 3}+
-                  </span>
-                </div>
+            {filteredSubclasses.map(({ parentClass, subclass }) => {
+              const subNameDisplay = isSpanish ? subclass.name : translateDndTitle(subclass.name);
+              const subDescDisplay = isSpanish ? subclass.description : translateDndText(subclass.description);
+              const parentNameDisplay = isSpanish ? parentClass.name : (parentClass.nameEn || translateDndTitle(parentClass.name));
+              const groupNameDisplay = isSpanish ? parentClass.subclassesName : translateSubclassGroup(parentClass.subclassesName);
 
-                <p className="text-xs text-[#6e5c4a] leading-relaxed">
-                  {subclass.description}
-                </p>
-
-                {subclass.features && subclass.features.length > 0 && (
-                  <div className="space-y-1.5 pt-2 border-t border-[#ebdcc7]">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-fantasy font-bold text-[#786450] uppercase block">
-                        Rasgos:
+              return (
+                <div
+                  key={`${parentClass.id}-${subclass.id}`}
+                  className="bg-[#fcf9f2] p-4 sm:p-5 rounded-2xl border-2 border-[#d8c8af] shadow-xs space-y-3"
+                >
+                  <div className="flex items-center justify-between border-b border-[#ebdcc7] pb-2">
+                    <div>
+                      <span className="text-base font-fantasy font-bold text-[#2c221a]">
+                        {subNameDisplay}
                       </span>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setInspectData({
-                            id: subclass.id,
-                            title: subclass.name,
-                            subtitle: `${parentClass.name} • ${parentClass.subclassesName}`,
-                            category: parentClass.subclassesName,
-                            description: subclass.description,
-                            traits: subclass.features.map((feat) => ({
-                              name: `Nivel ${feat.level}: ${feat.name}`,
-                              desc: feat.desc,
-                            })),
-                          })
-                        }
-                        className="text-[10px] text-[#8c672b] hover:text-[#5a4837] font-bold flex items-center gap-1 cursor-pointer bg-[#faf3e8] px-2 py-0.5 rounded border border-[#ebdcc7]"
-                      >
-                        <Eye className="w-3 h-3" /> Ver pergamino 1:1
-                      </button>
+                      <span className="text-xs text-[#8c672b] font-bold block">
+                        {parentNameDisplay} • {groupNameDisplay}
+                      </span>
                     </div>
-                    <div className="space-y-1.5">
-                      {subclass.features.map((f, idx) => (
-                        <div key={idx} className="bg-[#faf3e8] p-2.5 rounded-lg text-xs border border-[#ebdcc7]/60">
-                          <div className="flex items-center justify-between">
-                            <strong className="text-[#2c221a] font-fantasy">{f.name}</strong>
-                            <div className="flex items-center gap-1">
-                              <span className="text-[10px] font-mono text-[#8c672b] bg-white px-1.5 py-0.5 rounded border border-[#ebdcc7]">
-                                Nv {f.level}
-                              </span>
-                              <button
-                                type="button"
-                                title="Inspeccionar rasgo 1:1"
-                                onClick={() =>
-                                  setInspectData({
-                                    id: `${subclass.id}-${f.name}`,
-                                    title: f.name,
-                                    subtitle: `${subclass.name} (Nivel ${f.level})`,
-                                    category: 'Rasgo de Subclase',
-                                    description: f.desc,
-                                    badges: [
-                                      { label: 'Nivel Requerido', value: `Nivel ${f.level}`, variant: 'gold' },
-                                      { label: 'Clase', value: parentClass.name, variant: 'neutral' },
-                                      { label: 'Subclase', value: subclass.name, variant: 'amber' },
-                                    ],
-                                  })
-                                }
-                                className="p-0.5 text-[#8c672b] hover:text-[#5a4837] rounded cursor-pointer"
-                              >
-                                <Eye className="w-3 h-3" />
-                              </button>
-                            </div>
-                          </div>
-                          <p className="text-[11px] text-[#5e4a36] mt-1 leading-relaxed whitespace-pre-line">{f.desc}</p>
-                        </div>
-                      ))}
-                    </div>
+                    <span className="text-[10px] font-mono text-[#2c221a] bg-[#f5ede0] px-2 py-0.5 rounded-full border border-[#d8c8af]">
+                      {t('Nv', 'Lv')} {parentClass.subclassUnlockLevel || 3}+
+                    </span>
                   </div>
-                )}
-              </div>
-            ))}
+
+                  <p className="text-xs text-[#6e5c4a] leading-relaxed">
+                    {subDescDisplay}
+                  </p>
+
+                  {subclass.features && subclass.features.length > 0 && (
+                    <div className="space-y-1.5 pt-2 border-t border-[#ebdcc7]">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-fantasy font-bold text-[#786450] uppercase block">
+                          {t('Rasgos:', 'Features:')}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setInspectData({
+                              id: subclass.id,
+                              title: subNameDisplay,
+                              subtitle: `${parentNameDisplay} • ${groupNameDisplay}`,
+                              category: groupNameDisplay,
+                              description: subDescDisplay,
+                              traits: subclass.features.map((feat) => ({
+                                name: `${t('Nivel', 'Level')} ${feat.level}: ${isSpanish ? feat.name : translateDndTitle(feat.name)}`,
+                                desc: isSpanish ? feat.desc : translateDndText(feat.desc),
+                              })),
+                            })
+                          }
+                          className="text-[10px] text-[#8c672b] hover:text-[#5a4837] font-bold flex items-center gap-1 cursor-pointer bg-[#faf3e8] px-2 py-0.5 rounded border border-[#ebdcc7]"
+                        >
+                          <Eye className="w-3 h-3" /> {t('Ver pergamino 1:1', 'View 1:1 Scroll')}
+                        </button>
+                      </div>
+                      <div className="space-y-1.5">
+                        {subclass.features.map((f, idx) => {
+                          const fNameDisplay = isSpanish ? f.name : translateDndTitle(f.name);
+                          const fDescDisplay = isSpanish ? f.desc : translateDndText(f.desc);
+                          return (
+                            <div key={idx} className="bg-[#faf3e8] p-2.5 rounded-lg text-xs border border-[#ebdcc7]/60">
+                              <div className="flex items-center justify-between">
+                                <strong className="text-[#2c221a] font-fantasy">{fNameDisplay}</strong>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-[10px] font-mono text-[#8c672b] bg-white px-1.5 py-0.5 rounded border border-[#ebdcc7]">
+                                    {t('Nv', 'Lv')} {f.level}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    title={t('Inspeccionar rasgo 1:1', 'Inspect feature 1:1')}
+                                    onClick={() =>
+                                      setInspectData({
+                                        id: `${subclass.id}-${f.name}`,
+                                        title: fNameDisplay,
+                                        subtitle: `${subNameDisplay} (${t('Nivel', 'Level')} ${f.level})`,
+                                        category: t('Rasgo de Subclase', 'Subclass Feature'),
+                                        description: fDescDisplay,
+                                        badges: [
+                                          { label: t('Nivel Requerido', 'Required Level'), value: `${t('Nivel', 'Level')} ${f.level}`, variant: 'gold' },
+                                          { label: t('Clase', 'Class'), value: parentNameDisplay, variant: 'neutral' },
+                                          { label: t('Subclase', 'Subclass'), value: subNameDisplay, variant: 'amber' },
+                                        ],
+                                      })
+                                    }
+                                    className="p-0.5 text-[#8c672b] hover:text-[#5a4837] rounded cursor-pointer"
+                                  >
+                                    <Eye className="w-3 h-3" />
+                                  </button>
+                                </div>
+                              </div>
+                              <p className="text-[11px] text-[#5e4a36] mt-1 leading-relaxed whitespace-pre-line">{fDescDisplay}</p>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
@@ -1167,7 +1410,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <div className="lg:col-span-1 space-y-2">
             <h3 className="font-fantasy font-bold text-xs uppercase text-[#786450] tracking-wider px-1">
-              Compendio de Razas ({filteredRaces.length})
+              {t('Compendio de Razas', 'Races Compendium')} ({filteredRaces.length})
             </h3>
             <div className="space-y-1.5 max-h-[750px] overflow-y-auto pr-1">
               {filteredRaces.map((r) => {
@@ -1182,8 +1425,12 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                         : 'border-[#d8c8af] bg-[#fcf9f2] hover:border-[#b88c32]'
                     }`}
                   >
-                    <span className="text-xs font-fantasy text-[#2c221a]">{r.name}</span>
-                    <span className="text-[10px] text-[#786450]">{r.speed}</span>
+                    <span className="text-xs font-fantasy text-[#2c221a]">
+                      {isSpanish ? r.name : (r.nameEn || translateDndTitle(r.name))}
+                    </span>
+                    <span className="text-[10px] text-[#786450]">
+                      {isSpanish ? r.speed : r.speed.replace(/pies/gi, 'ft.')}
+                    </span>
                   </button>
                 );
               })}
@@ -1195,47 +1442,53 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
               <div className="flex items-center justify-between border-b border-[#ebdcc7] pb-3">
                 <div>
                   <h3 className="text-xl font-fantasy font-bold text-[#2c221a]">
-                    {selectedRace.name}
+                    {isSpanish ? selectedRace.name : (selectedRace.nameEn || translateDndTitle(selectedRace.name))}
                   </h3>
                   <span className="text-xs text-[#8c672b] font-bold">
-                    {selectedRace.category || 'Raza Oficial 5e'} • Tamaño {selectedRace.size}
+                    {isSpanish
+                      ? `${selectedRace.category || 'Raza Oficial 5e'} • Tamaño ${selectedRace.size}`
+                      : `${selectedRace.categoryEn || 'Official 5e Race'} • Size ${selectedRace.size === 'Pequeño' ? 'Small' : selectedRace.size === 'Mediano' ? 'Medium' : selectedRace.size}`}
                   </span>
                 </div>
                 <div className="text-right">
                   <span className="text-xs font-mono font-bold bg-[#f5ede0] px-2.5 py-1 rounded-lg border border-[#d8c8af]">
-                    Velocidad: {selectedRace.speed}
+                    {t('Velocidad:', 'Speed:')} {isSpanish ? selectedRace.speed : selectedRace.speed.replace(/pies/gi, 'ft.')}
                   </span>
                 </div>
               </div>
 
               <p className="text-xs text-[#6e5c4a] leading-relaxed">
-                {selectedRace.description}
+                {isSpanish ? selectedRace.description : (selectedRace.descriptionEn || translateDndText(selectedRace.description))}
               </p>
 
               {/* Racial Ability Score Bonuses */}
               <div className="p-3 bg-[#faf3e8] rounded-xl border border-[#d8c8af] flex flex-wrap items-center gap-2">
                 <span className="text-xs font-fantasy font-bold text-[#8c672b]">
-                  Aumentos de Característica:
+                  {t('Aumentos de Característica:', 'Ability Score Increases:')}
                 </span>
                 {selectedRace.abilityScoreBonuses && Object.entries(selectedRace.abilityScoreBonuses).filter(([_, v]) => Boolean(v)).length > 0 ? (
                   Object.entries(selectedRace.abilityScoreBonuses)
                     .filter(([_, v]) => Boolean(v))
                     .map(([stat, val]) => {
-                      const statLabels: Record<string, string> = {
+                      const statLabelsEs: Record<string, string> = {
                         str: 'FUE', dex: 'DES', con: 'CON', int: 'INT', wis: 'SAB', cha: 'CAR', any: 'Elección'
                       };
+                      const statLabelsEn: Record<string, string> = {
+                        str: 'STR', dex: 'DEX', con: 'CON', int: 'INT', wis: 'WIS', cha: 'CHA', any: 'Choice'
+                      };
+                      const labels = isSpanish ? statLabelsEs : statLabelsEn;
                       return (
                         <span
                           key={stat}
                           className="bg-[#ede1ce] text-[#4a361c] px-2 py-0.5 rounded-lg border border-[#cfbe9f] text-xs font-mono font-bold"
                         >
-                          +{val} {statLabels[stat] || stat.toUpperCase()}
+                          +{val} {labels[stat] || stat.toUpperCase()}
                         </span>
                       );
                     })
                 ) : (
                   <span className="text-xs text-[#786450] italic">
-                    +2 a una y +1 a otra a tu elección (Regla de Linaje Flexible de Tasha)
+                    {t('+2 a una y +1 a otra a tu elección (Regla de Linaje Flexible de Tasha)', '+2 to one ability and +1 to another of your choice (Tasha Flexible Lineage Rule)')}
                   </span>
                 )}
               </div>
@@ -1243,19 +1496,19 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
               {/* Darkvision & Languages */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                 <div className="bg-[#faf3e8] p-2.5 rounded-xl border border-[#d8c8af]">
-                  <strong className="text-xs text-[#2c221a] block font-fantasy">Visión en la Oscuridad:</strong>
+                  <strong className="text-xs text-[#2c221a] block font-fantasy">{t('Visión en la Oscuridad:', 'Darkvision:')}</strong>
                   <span className="text-[#6e5c4a]">
                     {selectedRace.darkvision && selectedRace.darkvision > 0
-                      ? `${selectedRace.darkvision} pies`
-                      : 'No tiene (Visión normal)'}
+                      ? `${selectedRace.darkvision} ${t('pies', 'ft.')}`
+                      : t('No tiene (Visión normal)', 'None (Normal vision)')}
                   </span>
                 </div>
                 <div className="bg-[#faf3e8] p-2.5 rounded-xl border border-[#d8c8af]">
-                  <strong className="text-xs text-[#2c221a] block font-fantasy">Idiomas Conocidos:</strong>
+                  <strong className="text-xs text-[#2c221a] block font-fantasy">{t('Idiomas Conocidos:', 'Languages Known:')}</strong>
                   <span className="text-[#6e5c4a]">
                     {selectedRace.languages && selectedRace.languages.length > 0
-                      ? selectedRace.languages.join(', ')
-                      : 'Común y 1 adicional'}
+                      ? (isSpanish ? selectedRace.languages.join(', ') : translateLanguageList(selectedRace.languages))
+                      : t('Común y 1 adicional', 'Common and 1 extra')}
                   </span>
                 </div>
               </div>
@@ -1264,7 +1517,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
               {selectedRace.innateSpells && selectedRace.innateSpells.length > 0 && (
                 <div className="p-3 bg-[#f5ede0] rounded-xl border border-[#cfbeaa] space-y-1.5">
                   <span className="font-fantasy font-bold text-xs text-[#7d519e] flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5" /> Magia Innata Racial:
+                    <Sparkles className="w-3.5 h-3.5" /> {t('Magia Innata Racial:', 'Innate Racial Magic:')}
                   </span>
                   <div className="flex flex-wrap gap-2">
                     {selectedRace.innateSpells.map((sp, idx) => (
@@ -1272,7 +1525,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                         key={idx}
                         className="bg-white/80 border border-[#e2d0f0] text-[#5b2d7d] px-2 py-0.5 rounded-md text-xs font-mono"
                       >
-                        {sp.spellName} (Nv {sp.requiredLevel})
+                        {isSpanish ? sp.spellName : translateDndTitle(sp.spellName)} ({t('Nv', 'Lv')} {sp.requiredLevel})
                       </span>
                     ))}
                   </div>
@@ -1282,13 +1535,13 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
               {/* Traits */}
               <div className="space-y-2 pt-2 border-t border-[#ebdcc7]">
                 <h4 className="font-fantasy font-bold text-xs uppercase text-[#8c672b]">
-                  Rasgos Raciales:
+                  {t('Rasgos Raciales:', 'Racial Traits:')}
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {selectedRace.traits.map((t, idx) => (
+                  {selectedRace.traits.map((tr, idx) => (
                     <div key={idx} className="bg-[#faf3e8] p-2.5 rounded-xl border border-[#d8c8af]">
-                      <strong className="text-xs text-[#2c221a] block">{t.name}</strong>
-                      <p className="text-[11px] text-[#6e5c4a] mt-0.5">{t.desc}</p>
+                      <strong className="text-xs text-[#2c221a] block">{isSpanish ? tr.name : translateDndTitle(tr.name)}</strong>
+                      <p className="text-[11px] text-[#6e5c4a] mt-0.5">{isSpanish ? tr.desc : translateDndText(tr.desc)}</p>
                     </div>
                   ))}
                 </div>
@@ -1298,14 +1551,14 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
               {selectedRace.subraces && selectedRace.subraces.length > 0 && (
                 <div className="space-y-3 pt-2 border-t border-[#ebdcc7]">
                   <h4 className="font-fantasy font-bold text-xs uppercase text-[#8c672b]">
-                    Subrazas y Variantes Disponibles ({selectedRace.subraces.length}):
+                    {t('Subrazas y Variantes Disponibles', 'Available Subraces & Variants')} ({selectedRace.subraces.length}):
                   </h4>
                   <div className="space-y-2.5">
                     {selectedRace.subraces.map((sub) => (
                       <div key={sub.id} className="bg-[#faf3e8] p-3.5 rounded-xl border border-[#d8c8af] space-y-2">
                         <div className="flex items-center justify-between">
                           <span className="font-fantasy font-bold text-xs text-[#2c221a]">
-                            {sub.name}
+                            {isSpanish ? sub.name : (sub.nameEn || translateDndTitle(sub.name))}
                           </span>
                           {sub.abilityScoreBonuses && Object.entries(sub.abilityScoreBonuses).filter(([_, v]) => Boolean(v)).length > 0 && (
                             <div className="flex gap-1">
@@ -1322,13 +1575,19 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                             </div>
                           )}
                         </div>
-                        <p className="text-xs text-[#6e5c4a] leading-relaxed">{sub.description}</p>
+                        <p className="text-xs text-[#6e5c4a] leading-relaxed">
+                          {isSpanish ? sub.description : (sub.descriptionEn || translateDndText(sub.description))}
+                        </p>
                         {sub.traits && sub.traits.length > 0 && (
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1">
                             {sub.traits.map((st, sidx) => (
                               <div key={sidx} className="bg-white/60 p-2 rounded-lg border border-[#ebdcc7]">
-                                <strong className="text-[11px] text-[#2c221a] block">{st.name}</strong>
-                                <p className="text-[10px] text-[#6e5c4a] mt-0.5">{st.desc}</p>
+                                <strong className="text-[11px] text-[#2c221a] block">
+                                  {isSpanish ? st.name : translateDndTitle(st.name)}
+                                </strong>
+                                <p className="text-[10px] text-[#6e5c4a] mt-0.5">
+                                  {isSpanish ? st.desc : translateDndText(st.desc)}
+                                </p>
                               </div>
                             ))}
                           </div>
@@ -1350,7 +1609,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <div className="lg:col-span-1 space-y-2">
             <h3 className="font-fantasy font-bold text-xs uppercase text-[#786450] tracking-wider px-1">
-              Trasfondos 5e ({filteredBackgrounds.length})
+              {t('Trasfondos 5e', '5e Backgrounds')} ({filteredBackgrounds.length})
             </h3>
             <div className="space-y-1.5 max-h-[750px] overflow-y-auto pr-1">
               {filteredBackgrounds.map((b) => {
@@ -1365,8 +1624,12 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                         : 'border-[#d8c8af] bg-[#fcf9f2] hover:border-[#b88c32]'
                     }`}
                   >
-                    <span className="text-xs font-fantasy text-[#2c221a]">{b.name}</span>
-                    <span className="text-[10px] text-[#786450]">{b.category}</span>
+                    <span className="text-xs font-fantasy text-[#2c221a]">
+                      {isSpanish ? b.name : (b.nameEn || translateDndTitle(b.name))}
+                    </span>
+                    <span className="text-[10px] text-[#786450]">
+                      {isSpanish ? b.category : translateDndText(b.category)}
+                    </span>
                   </button>
                 );
               })}
@@ -1378,52 +1641,63 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
               <div className="flex items-center justify-between border-b border-[#ebdcc7] pb-3">
                 <div>
                   <h3 className="text-xl font-fantasy font-bold text-[#2c221a]">
-                    {selectedBackground.name}
+                    {isSpanish ? selectedBackground.name : (selectedBackground.nameEn || translateDndTitle(selectedBackground.name))}
                   </h3>
                   <span className="text-xs text-[#8c672b] font-bold">
-                    Categoría: {selectedBackground.category}
+                    {t('Categoría:', 'Category:')} {isSpanish ? selectedBackground.category : translateDndText(selectedBackground.category)}
                   </span>
                 </div>
                 {selectedBackground.orientation && (
                   <span className="text-[11px] font-mono px-2.5 py-1 rounded-full bg-[#ede1ce] text-[#5e4b37] border border-[#cfbeaa] font-bold">
-                    Orientación: {selectedBackground.orientation}
+                    {t('Orientación:', 'Orientation:')} {isSpanish ? selectedBackground.orientation : translateDndText(selectedBackground.orientation)}
                   </span>
                 )}
               </div>
 
               <div className="text-xs text-[#6e5c4a] leading-relaxed whitespace-pre-line space-y-2">
-                {(selectedBackground.detailedDescription || selectedBackground.description)
-                  .split('\n\n')
-                  .map((paragraph, pidx) => (
-                    <p key={pidx}>{paragraph}</p>
-                  ))}
+                {(() => {
+                  if (!isSpanish) {
+                    const enBgDesc = translateBackgroundDescription(selectedBackground.id, selectedBackground.nameEn);
+                    if (enBgDesc) return <p>{enBgDesc}</p>;
+                  }
+                  return (selectedBackground.detailedDescription || selectedBackground.description)
+                    .split('\n\n')
+                    .map((paragraph, pidx) => (
+                      <p key={pidx}>{isSpanish ? paragraph : translateDndText(paragraph)}</p>
+                    ));
+                })()}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-[#ebdcc7]">
                 <div className="bg-[#faf3e8] p-3 rounded-xl border border-[#d8c8af]">
-                  <strong className="text-xs text-[#2c221a] block mb-1 font-fantasy">Competencias en Habilidades:</strong>
+                  <strong className="text-xs text-[#2c221a] block mb-1 font-fantasy">{t('Competencias en Habilidades:', 'Skill Proficiencies:')}</strong>
                   <span className="text-xs text-[#6e5c4a]">
-                    {selectedBackground.skillProficiencies.join(', ')}
+                    {selectedBackground.skillProficiencies
+                      .map((sk) => (isSpanish ? sk : translateSkillName(sk)))
+                      .join(', ')}
                   </span>
                 </div>
 
                 <div className="bg-[#faf3e8] p-3 rounded-xl border border-[#d8c8af]">
-                  <strong className="text-xs text-[#2c221a] block mb-1 font-fantasy">Herramientas & Idiomas:</strong>
+                  <strong className="text-xs text-[#2c221a] block mb-1 font-fantasy">{t('Herramientas & Idiomas:', 'Tools & Languages:')}</strong>
                   <span className="text-xs text-[#6e5c4a]">
-                    {selectedBackground.toolProficiencies?.join(', ') || 'Sin herramientas'} •{' '}
+                    {selectedBackground.toolProficiencies?.length
+                      ? selectedBackground.toolProficiencies.map((tp) => (isSpanish ? tp : translateDndText(tp))).join(', ')
+                      : t('Sin herramientas', 'No tools')}{' '}
+                    •{' '}
                     {selectedBackground.fixedLanguages && selectedBackground.fixedLanguages.length > 0
-                      ? `${selectedBackground.fixedLanguages.join(', ')} (Fijo)${
+                      ? `${isSpanish ? selectedBackground.fixedLanguages.join(', ') : translateLanguageList(selectedBackground.fixedLanguages)} (${t('Fijo', 'Fixed')})${
                           selectedBackground.languagesCount && selectedBackground.languagesCount > selectedBackground.fixedLanguages.length
-                            ? ` + ${selectedBackground.languagesCount - selectedBackground.fixedLanguages.length} a tu elección`
+                            ? ` + ${selectedBackground.languagesCount - selectedBackground.fixedLanguages.length} ${t('a tu elección', 'of your choice')}`
                             : ''
                         }`
                       : selectedBackground.languageOptions && selectedBackground.languageOptions.length > 0
-                      ? `${selectedBackground.languagesCount || 1} a elegir entre: ${selectedBackground.languageOptions.join(', ')}`
+                      ? `${selectedBackground.languagesCount || 1} ${t('a elegir entre:', 'choose from:')} ${isSpanish ? selectedBackground.languageOptions.join(', ') : translateLanguageList(selectedBackground.languageOptions)}`
                       : selectedBackground.languageNote
-                      ? (selectedBackground.languagesCount ? `${selectedBackground.languagesCount} idiomas (${selectedBackground.languageNote})` : selectedBackground.languageNote)
+                      ? (selectedBackground.languagesCount ? `${selectedBackground.languagesCount} ${t('idiomas', 'languages')} (${isSpanish ? selectedBackground.languageNote : translateDndText(selectedBackground.languageNote)})` : (isSpanish ? selectedBackground.languageNote : translateDndText(selectedBackground.languageNote)))
                       : selectedBackground.languagesCount
-                      ? `${selectedBackground.languagesCount} idiomas a tu elección`
-                      : 'Sin idiomas extra'}
+                      ? `${selectedBackground.languagesCount} ${t('idiomas a tu elección', 'languages of your choice')}`
+                      : t('Sin idiomas extra', 'No extra languages')}
                   </span>
                 </div>
               </div>
@@ -1433,10 +1707,13 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                 <div className="bg-[#fef8ea] p-4 rounded-xl border-2 border-[#b88c32] space-y-1 shadow-xs">
                   <span className="font-fantasy font-bold text-xs text-[#9c6a1e] flex items-center gap-1.5">
                     <Star className="w-4 h-4 text-[#b88c32] fill-[#b88c32]" />
-                    Dote Oficial Otorgada: {selectedBackground.bonusFeatName || selectedBackground.bonusFeatId}
+                    {t('Dote Oficial Otorgada:', 'Granted Official Feat:')} {isSpanish ? (selectedBackground.bonusFeatName || selectedBackground.bonusFeatId) : translateDndTitle(selectedBackground.bonusFeatName || selectedBackground.bonusFeatId || '')}
                   </span>
                   <p className="text-xs text-[#6e5c4a] leading-relaxed">
-                    Este trasfondo concede automáticamente una dote oficial de 5e según su manual de ambientación canónico (ej: Bigby Presents: Glory of the Giants).
+                    {t(
+                      'Este trasfondo concede automáticamente una dote oficial de 5e según su manual de ambientación canónico (ej: Bigby Presents: Glory of the Giants).',
+                      'This background automatically grants an official 5e feat according to its canonical setting sourcebook (e.g., Bigby Presents: Glory of the Giants).'
+                    )}
                   </p>
                 </div>
               )}
@@ -1446,16 +1723,18 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                 <div className="bg-[#f5ede0] p-3.5 rounded-xl border border-[#d8c8af] space-y-1">
                   <div className="flex items-center justify-between">
                     <strong className="text-xs text-[#2c221a] block font-fantasy">
-                      Equipo Inicial del Trasfondo:
+                      {t('Equipo Inicial del Trasfondo:', 'Background Starting Equipment:')}
                     </strong>
                     {selectedBackground.gold > 0 && (
                       <span className="text-xs font-mono font-bold text-[#8c672b] bg-[#eddcc4] px-2 py-0.5 rounded-md border border-[#dfcbb3]">
-                        {selectedBackground.gold} piezas de oro (po)
+                        {selectedBackground.gold} {t('piezas de oro (po)', 'gold pieces (gp)')}
                       </span>
                     )}
                   </div>
                   <p className="text-xs text-[#6e5c4a] leading-relaxed">
-                    {selectedBackground.suggestedEquipment || 'Equipo básico de viajero.'}
+                    {selectedBackground.suggestedEquipment
+                      ? (isSpanish ? selectedBackground.suggestedEquipment : translateDndText(selectedBackground.suggestedEquipment))
+                      : t('Equipo básico de viajero.', 'Basic traveler equipment.')}
                   </p>
                 </div>
               )}
@@ -1463,10 +1742,12 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
               {selectedBackground.featureName && (
                 <div className="bg-[#faf3e8] p-4 rounded-xl border border-[#c59b27] space-y-1">
                   <span className="font-fantasy font-bold text-xs text-[#8c672b] flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5" /> Rasgo Especial: {selectedBackground.featureName}
+                    <Sparkles className="w-3.5 h-3.5" /> {t('Rasgo Especial:', 'Background Feature:')} {isSpanish ? selectedBackground.featureName : translateDndTitle(selectedBackground.featureName)}
                   </span>
                   <p className="text-xs text-[#6e5c4a] leading-relaxed">
-                    {selectedBackground.featureDescription}
+                    {selectedBackground.featureDescription
+                      ? (isSpanish ? selectedBackground.featureDescription : translateDndText(selectedBackground.featureDescription))
+                      : ''}
                   </p>
                 </div>
               )}
@@ -1483,7 +1764,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
           {/* Filters Bar */}
           <div className="flex flex-wrap items-center gap-3 bg-[#fcf9f2] p-4 rounded-xl border border-[#d8c8af]">
             <div className="flex items-center gap-1.5">
-              <span className="text-xs font-bold text-[#6e5c4a]">Nivel:</span>
+              <span className="text-xs font-bold text-[#6e5c4a]">{t('Nivel:', 'Level:')}</span>
               <select
                 value={spellLevelFilter}
                 onChange={(e) =>
@@ -1491,55 +1772,55 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                 }
                 className="bg-white border border-[#cfbeaa] rounded-lg px-2.5 py-1 text-xs text-[#2c221a]"
               >
-                <option value="all">Todos los niveles</option>
-                <option value={0}>Trucos (Nivel 0)</option>
+                <option value="all">{t('Todos los niveles', 'All levels')}</option>
+                <option value={0}>{t('Trucos (Nivel 0)', 'Cantrips (Level 0)')}</option>
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((lvl) => (
-                  <option key={lvl} value={lvl}>Nivel {lvl}</option>
+                  <option key={lvl} value={lvl}>{t('Nivel', 'Level')} {lvl}</option>
                 ))}
               </select>
             </div>
 
             <div className="flex items-center gap-1.5">
-              <span className="text-xs font-bold text-[#6e5c4a]">Escuela:</span>
+              <span className="text-xs font-bold text-[#6e5c4a]">{t('Escuela:', 'School:')}</span>
               <select
                 value={spellSchoolFilter}
                 onChange={(e) => setSpellSchoolFilter(e.target.value)}
                 className="bg-white border border-[#cfbeaa] rounded-lg px-2.5 py-1 text-xs text-[#2c221a]"
               >
-                <option value="all">Todas las escuelas</option>
-                <option value="abjuración">Abjuración</option>
-                <option value="conjuración">Conjuración</option>
-                <option value="adivinación">Adivinación</option>
-                <option value="encantamiento">Encantamiento</option>
-                <option value="evocación">Evocación</option>
-                <option value="ilusión">Ilusión</option>
-                <option value="nigromancia">Nigromancia</option>
-                <option value="transmutación">Transmutación</option>
+                <option value="all">{t('Todas las escuelas', 'All schools')}</option>
+                <option value="abjuración">{t('Abjuración', 'Abjuration')}</option>
+                <option value="conjuración">{t('Conjuración', 'Conjuration')}</option>
+                <option value="adivinación">{t('Adivinación', 'Divination')}</option>
+                <option value="encantamiento">{t('Encantamiento', 'Enchantment')}</option>
+                <option value="evocación">{t('Evocación', 'Evocation')}</option>
+                <option value="ilusión">{t('Ilusión', 'Illusion')}</option>
+                <option value="nigromancia">{t('Nigromancia', 'Necromancy')}</option>
+                <option value="transmutación">{t('Transmutación', 'Transmutation')}</option>
               </select>
             </div>
 
             <div className="flex items-center gap-1.5">
-              <span className="text-xs font-bold text-[#6e5c4a]">Clase:</span>
+              <span className="text-xs font-bold text-[#6e5c4a]">{t('Clase:', 'Class:')}</span>
               <select
                 value={spellClassFilter}
                 onChange={(e) => setSpellClassFilter(e.target.value)}
                 className="bg-white border border-[#cfbeaa] rounded-lg px-2.5 py-1 text-xs text-[#2c221a]"
               >
-                <option value="all">Todas las clases</option>
-                <option value="mago">Mago</option>
-                <option value="hechicero">Hechicero</option>
-                <option value="brujo">Brujo</option>
-                <option value="bardo">Bardo</option>
-                <option value="clérigo">Clérigo</option>
-                <option value="druida">Druida</option>
-                <option value="paladín">Paladín</option>
-                <option value="explorador">Explorador</option>
-                <option value="artífice">Artífice</option>
+                <option value="all">{t('Todas las clases', 'All classes')}</option>
+                <option value="mago">{t('Mago', 'Wizard')}</option>
+                <option value="hechicero">{t('Hechicero', 'Sorcerer')}</option>
+                <option value="brujo">{t('Brujo', 'Warlock')}</option>
+                <option value="bardo">{t('Bardo', 'Bard')}</option>
+                <option value="clérigo">{t('Clérigo', 'Cleric')}</option>
+                <option value="druida">{t('Druida', 'Druid')}</option>
+                <option value="paladín">{t('Paladín', 'Paladin')}</option>
+                <option value="explorador">{t('Explorador', 'Ranger')}</option>
+                <option value="artífice">{t('Artífice', 'Artificer')}</option>
               </select>
             </div>
 
             <span className="text-xs font-mono font-bold text-[#8c672b] ml-auto">
-              Mostrando {filteredSpells.length} conjuros
+              {t(`Mostrando ${filteredSpells.length} conjuros`, `Showing ${filteredSpells.length} spells`)}
             </span>
           </div>
 
@@ -1561,25 +1842,25 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                 <div>
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-fantasy font-bold text-xs text-[#2c221a] group-hover:text-[#8c672b] transition-colors flex items-baseline gap-1 flex-wrap">
-                      <span>{sp.name}</span>
-                      {sp.nameEn && sp.nameEn.toLowerCase() !== sp.name.toLowerCase() && (
+                      <span>{isSpanish ? sp.name : (sp.nameEn || translateDndTitle(sp.name))}</span>
+                      {isSpanish && sp.nameEn && sp.nameEn.toLowerCase() !== sp.name.toLowerCase() && (
                         <span className="text-[10px] font-serif font-normal italic text-[#8c672b]">
                           ({sp.nameEn})
                         </span>
                       )}
                     </span>
                     <span className="text-[10px] font-mono text-[#7d519e] bg-white/80 px-1.5 py-0.5 rounded border border-[#e2d0f0] shrink-0 font-bold">
-                      {sp.level === 0 ? 'Truco' : `Nv ${sp.level}`}
+                      {sp.level === 0 ? t('Truco', 'Cantrip') : `${t('Nv', 'Lv')} ${sp.level}`}
                     </span>
                   </div>
                   <div className="text-[10px] text-[#786450] mt-1 flex flex-wrap items-center gap-1.5">
-                    <span>{sp.school}</span>
+                    <span>{isSpanish ? sp.school : translateSpellSchool(sp.school)}</span>
                     <span>•</span>
-                    <span>{sp.castingTime}</span>
+                    <span>{isSpanish ? sp.castingTime : (sp.castingTimeEn || translateSpellMeta(sp.castingTime))}</span>
                     <span>•</span>
-                    <span>{sp.range}</span>
+                    <span>{isSpanish ? sp.range : (sp.rangeEn || translateSpellMeta(sp.range))}</span>
                     {sp.concentration && (
-                      <span className="bg-[#fcedeb] text-[#a13b34] text-[9px] px-1 rounded border border-[#f0c2bd] font-semibold" title="Concentración">
+                      <span className="bg-[#fcedeb] text-[#a13b34] text-[9px] px-1 rounded border border-[#f0c2bd] font-semibold" title={t('Concentración', 'Concentration')}>
                         C
                       </span>
                     )}
@@ -1590,13 +1871,13 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                     )}
                   </div>
                   <p className="text-[11px] text-[#6e5c4a] line-clamp-2 mt-1.5 leading-snug">
-                    {sp.description}
+                    {isSpanish ? sp.description : (sp.descriptionEn || translateDndText(sp.description))}
                   </p>
                 </div>
 
                 <div className="mt-2.5 pt-2 border-t border-[#ebdcc7]/70 flex items-center justify-between text-[10px] text-[#8c672b] font-medium group-hover:text-[#5e4113]">
                   <span className="flex items-center gap-1 font-fantasy">
-                    <Eye className="w-3.5 h-3.5 text-[#b88c32]" /> Ver info completa
+                    <Eye className="w-3.5 h-3.5 text-[#b88c32]" /> {t('Ver info completa', 'View full details')}
                   </span>
                   <span className="text-[11px] font-mono opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all">
                     ➔
@@ -1616,35 +1897,35 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
           {/* Filters Bar for Feats */}
           <div className="flex flex-wrap items-center gap-3 bg-[#fcf9f2] p-4 rounded-xl border border-[#d8c8af]">
             <div className="flex items-center gap-1.5">
-              <span className="text-xs font-bold text-[#6e5c4a]">Categoría:</span>
+              <span className="text-xs font-bold text-[#6e5c4a]">{t('Categoría:', 'Category:')}</span>
               <select
                 value={featCategoryFilter}
                 onChange={(e) => setFeatCategoryFilter(e.target.value)}
                 className="bg-white border border-[#cfbeaa] rounded-lg px-2.5 py-1 text-xs text-[#2c221a]"
               >
-                <option value="all">Todas las categorías</option>
-                <option value="Combate">Combate</option>
-                <option value="Magia">Magia</option>
-                <option value="Utilidad">Utilidad</option>
-                <option value="General">General</option>
+                <option value="all">{t('Todas las categorías', 'All categories')}</option>
+                <option value="Combate">{t('Combate', 'Combat')}</option>
+                <option value="Magia">{t('Magia', 'Magic')}</option>
+                <option value="Utilidad">{t('Utilidad', 'Utility')}</option>
+                <option value="General">{t('General', 'General')}</option>
               </select>
             </div>
 
             <div className="flex items-center gap-1.5">
-              <span className="text-xs font-bold text-[#6e5c4a]">Prerrequisito:</span>
+              <span className="text-xs font-bold text-[#6e5c4a]">{t('Prerrequisito:', 'Prerequisite:')}</span>
               <select
                 value={featPrereqFilter}
                 onChange={(e) => setFeatPrereqFilter(e.target.value as any)}
                 className="bg-white border border-[#cfbeaa] rounded-lg px-2.5 py-1 text-xs text-[#2c221a]"
               >
-                <option value="all">Todos los dotes</option>
-                <option value="without">Sin prerrequisito (Universales)</option>
-                <option value="with">Con prerrequisito</option>
+                <option value="all">{t('Todos los dotes', 'All feats')}</option>
+                <option value="without">{t('Sin prerrequisito (Universales)', 'No prerequisite (Universal)')}</option>
+                <option value="with">{t('Con prerrequisito', 'With prerequisite')}</option>
               </select>
             </div>
 
             <span className="text-xs font-mono font-bold text-[#8c672b] ml-auto">
-              Mostrando {filteredFeats.length} dotes oficiales
+              {t(`Mostrando ${filteredFeats.length} dotes oficiales`, `Showing ${filteredFeats.length} official feats`)}
             </span>
           </div>
 
@@ -1652,7 +1933,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
             {/* Feats Sidebar List */}
             <div className="lg:col-span-1 space-y-2">
               <h3 className="font-fantasy font-bold text-xs uppercase text-[#786450] tracking-wider px-1">
-                Lista de Dotes ({filteredFeats.length})
+                {t('Lista de Dotes', 'Feats List')} ({filteredFeats.length})
               </h3>
               <div className="space-y-1.5 max-h-[750px] overflow-y-auto pr-1">
                 {filteredFeats.map((f) => {
@@ -1669,7 +1950,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                     >
                       <div className="flex items-center justify-between gap-1">
                         <span className="text-xs font-fantasy text-[#2c221a] leading-tight">
-                          {f.name}
+                          {isSpanish ? f.name : (f.nameEn || translateDndTitle(f.name))}
                         </span>
                         {f.prerequisite && (
                           <span className="text-[9px] text-[#8c672b] bg-[#eddcc4] px-1 rounded font-mono shrink-0">
@@ -1678,7 +1959,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                         )}
                       </div>
                       <div className="flex items-center justify-between text-[10px] text-[#786450]">
-                        <span className="italic">{f.category}</span>
+                        <span className="italic">{isSpanish ? f.category : (FEAT_CATEGORY_EN[f.category] || f.category)}</span>
                         {f.abilityBonus && (
                           <span className="text-[#3b663b] font-mono font-bold">+1 Stat</span>
                         )}
@@ -1691,19 +1972,38 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
 
             {/* Feat Detailed Card */}
             <div className="lg:col-span-3 space-y-4">
-              {selectedFeat ? (
+              {selectedFeat ? (() => {
+                const wikiFeat = !isSpanish
+                  ? ALL_WIKIDOT_FEATS.find(
+                      (wf) =>
+                        (wf.id && wf.id.toLowerCase() === selectedFeat.id.toLowerCase()) ||
+                        (wf.nameEn && wf.nameEn.toLowerCase() === (selectedFeat.nameEn || selectedFeat.name).toLowerCase()) ||
+                        (wf.name && wf.name.toLowerCase().includes((selectedFeat.nameEn || selectedFeat.name).toLowerCase()))
+                    )
+                  : null;
+                const featDesc = isSpanish ? selectedFeat.description : (wikiFeat?.description || translateDndText(selectedFeat.description));
+                const featBenefits = isSpanish
+                  ? selectedFeat.benefits
+                  : (wikiFeat?.benefits && wikiFeat.benefits.length > 0 ? wikiFeat.benefits : selectedFeat.benefits.map(translateDndText));
+                const featPrereq = selectedFeat.prerequisite
+                  ? (isSpanish ? selectedFeat.prerequisite : (wikiFeat?.prerequisite || translateDndText(selectedFeat.prerequisite)))
+                  : undefined;
+
+                return (
                 <div className="bg-[#fcf9f2] p-5 sm:p-6 rounded-2xl border-2 border-[#d8c8af] shadow-xs space-y-5">
                   {/* Header */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#ebdcc7] pb-4">
                     <div>
                       <div className="flex items-center gap-2">
                         <h3 className="text-2xl font-fantasy font-bold text-[#2c221a]">
-                          {selectedFeat.name}
+                          {isSpanish ? selectedFeat.name : (selectedFeat.nameEn || translateDndTitle(selectedFeat.name))}
                         </h3>
                       </div>
-                      <span className="text-xs text-[#786450] italic block mt-0.5">
-                        Nombre Original en Inglés: {selectedFeat.nameEn}
-                      </span>
+                      {isSpanish && (
+                        <span className="text-xs text-[#786450] italic block mt-0.5">
+                          Nombre Original en Inglés: {selectedFeat.nameEn}
+                        </span>
+                      )}
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
@@ -1712,16 +2012,18 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                         {selectedFeat.category === 'Magia' && '✨ '}
                         {selectedFeat.category === 'Utilidad' && '🛠️ '}
                         {selectedFeat.category === 'General' && '🌟 '}
-                        Dote de {selectedFeat.category}
+                        {isSpanish
+                          ? `Dote de ${selectedFeat.category}`
+                          : `${FEAT_CATEGORY_EN[selectedFeat.category] || selectedFeat.category} Feat`}
                       </span>
 
-                      {selectedFeat.prerequisite ? (
+                      {featPrereq ? (
                         <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-[#faecd6] text-[#8c591a] border border-[#e0bf79]">
-                          ⚠️ Requiere: {selectedFeat.prerequisite}
+                          ⚠️ {t('Requiere:', 'Requires:')} {featPrereq}
                         </span>
                       ) : (
                         <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-[#e8f5e9] text-[#2e7d32] border border-[#a5d6a7]">
-                          ✓ Sin Prerrequisitos
+                          ✓ {t('Sin Prerrequisitos', 'No Prerequisites')}
                         </span>
                       )}
                     </div>
@@ -1729,7 +2031,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
 
                   {/* Lore / Description */}
                   <div className="p-3.5 bg-[#fbf5eb] border-l-4 border-[#8c672b] rounded-r-xl italic text-xs text-[#5e4b37] leading-relaxed">
-                    "{selectedFeat.description}"
+                    "{featDesc}"
                   </div>
 
                   {/* Ability Score Bonus Banner if any */}
@@ -1740,15 +2042,15 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                       </div>
                       <div>
                         <strong className="text-xs text-[#2c221a] block font-fantasy">
-                          Mejora de Característica (Half-Feat)
+                          {t('Mejora de Característica (Half-Feat)', 'Ability Score Increase (Half-Feat)')}
                         </strong>
                         <p className="text-xs text-[#6e5c4a]">
-                          Aumentas tu{' '}
+                          {t('Aumentas tu ', 'Increase your ')}
                           <span className="font-bold text-[#8c672b]">
                             {selectedFeat.abilityBonus.stats
                               ? selectedFeat.abilityBonus.stats
                                   .map((st) => {
-                                    const map: Record<string, string> = {
+                                    const mapEs: Record<string, string> = {
                                       str: 'Fuerza',
                                       dex: 'Destreza',
                                       con: 'Constitución',
@@ -1756,12 +2058,22 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                                       wis: 'Sabiduría',
                                       cha: 'Carisma',
                                     };
-                                    return map[st] || st;
+                                    const mapEn: Record<string, string> = {
+                                      str: 'Strength',
+                                      dex: 'Dexterity',
+                                      con: 'Constitution',
+                                      int: 'Intelligence',
+                                      wis: 'Wisdom',
+                                      cha: 'Charisma',
+                                    };
+                                    return (isSpanish ? mapEs[st] : mapEn[st]) || st;
                                   })
-                                  .join(selectedFeat.abilityBonus.flexible ? ' o ' : ' y ')
-                              : 'Característica'}
+                                  .join(selectedFeat.abilityBonus.flexible ? t(' o ', ' or ') : t(' y ', ' and '))
+                              : t('Característica', 'Ability Score')}
                           </span>{' '}
-                          en <span className="font-bold font-mono">+{selectedFeat.abilityBonus.amount}</span> (hasta un máximo de 20).
+                          {t('en ', 'by ')}
+                          <span className="font-bold font-mono">+{selectedFeat.abilityBonus.amount}</span>{' '}
+                          {t('(hasta un máximo de 20).', '(to a maximum of 20).')}
                         </p>
                       </div>
                     </div>
@@ -1770,10 +2082,10 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                   {/* Mechanical Benefits */}
                   <div className="space-y-3">
                     <h4 className="font-fantasy font-bold text-xs uppercase text-[#8c672b] tracking-wider flex items-center gap-1.5">
-                      <Check className="w-4 h-4 text-[#8c672b]" /> Beneficios y Reglas Oficiales 5e:
+                      <Check className="w-4 h-4 text-[#8c672b]" /> {t('Beneficios y Reglas Oficiales 5e:', 'Official 5e Benefits & Rules:')}
                     </h4>
                     <div className="space-y-2">
-                      {selectedFeat.benefits.map((b, idx) => (
+                      {featBenefits.map((b, idx) => (
                         <div
                           key={idx}
                           className="bg-[#faf3e8] p-3.5 rounded-xl border border-[#d8c8af] flex items-start gap-3 shadow-2xs"
@@ -1795,14 +2107,14 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                       <div className="flex items-center justify-between">
                         <div>
                           <h4 className="font-fantasy font-bold text-xs uppercase text-[#8c672b]">
-                            {selectedFeat.subChoice.title}
+                            {isSpanish ? selectedFeat.subChoice.title : translateDndTitle(selectedFeat.subChoice.title)}
                           </h4>
                           <p className="text-xs text-[#6e5c4a] mt-0.5">
-                            {selectedFeat.subChoice.description}
+                            {isSpanish ? selectedFeat.subChoice.description : translateDndText(selectedFeat.subChoice.description || '')}
                           </p>
                         </div>
                         <span className="text-xs font-mono font-bold bg-[#ede1ce] text-[#5e4b37] px-2.5 py-1 rounded-lg border border-[#cfbeaa]">
-                          Elige hasta {selectedFeat.subChoice.maxSelections}
+                          {t(`Elige hasta ${selectedFeat.subChoice.maxSelections}`, `Choose up to ${selectedFeat.subChoice.maxSelections}`)}
                         </span>
                       </div>
 
@@ -1813,10 +2125,10 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                             className="bg-[#faf3e8] p-3 rounded-xl border border-[#d8c8af] space-y-1"
                           >
                             <strong className="text-xs text-[#2c221a] block font-fantasy">
-                              {opt.name}
+                              {isSpanish ? opt.name : translateDndTitle(opt.name)}
                             </strong>
                             <p className="text-[11px] text-[#6e5c4a] leading-snug">
-                              {opt.desc}
+                              {isSpanish ? opt.desc : translateDndText(opt.desc)}
                             </p>
                           </div>
                         ))}
@@ -1824,9 +2136,10 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                     </div>
                   )}
                 </div>
-              ) : (
+              );
+            })() : (
                 <div className="p-8 text-center text-xs text-[#8c7b69] bg-[#fcf9f2] rounded-2xl border-2 border-dashed border-[#d8c8af]">
-                  Selecciona una dote de la lista para consultar todos sus detalles y mecánicas oficiales.
+                  {t('Selecciona una dote de la lista para consultar todos sus detalles y mecánicas oficiales.', 'Select a feat from the list to view all its official details and mechanics.')}
                 </div>
               )}
             </div>
@@ -1849,7 +2162,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                     : 'bg-[#faf3e8] text-[#6e5c4a] hover:bg-[#ede1ce]'
                 }`}
               >
-                Armas ({allWeapons.length})
+                {t('Armas', 'Weapons')} ({allWeapons.length})
               </button>
               <button
                 onClick={() => setEquipmentType('armors')}
@@ -1859,7 +2172,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                     : 'bg-[#faf3e8] text-[#6e5c4a] hover:bg-[#ede1ce]'
                 }`}
               >
-                Armaduras & Escudos ({allArmors.length})
+                {t('Armaduras & Escudos', 'Armor & Shields')} ({allArmors.length})
               </button>
               {onOpenEquipmentBuilder && (
                 <button
@@ -1868,15 +2181,15 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                   className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#b88c32] via-[#dfbe7e] to-[#b88c32] hover:brightness-110 text-[#1a1006] text-xs font-bold font-fantasy shadow-sm transition cursor-pointer shrink-0"
                 >
                   <Plus className="w-3.5 h-3.5 text-[#1a1006]" />
-                  <span>Forjar Arma o Armadura</span>
+                  <span>{t('Forjar Arma o Armadura', 'Forge Weapon or Armor')}</span>
                 </button>
               )}
             </div>
 
             <div className="text-[11px] text-[#786450] italic font-mono">
               {equipmentType === 'weapons'
-                ? 'Propiedades: Sutil (Fue o Des) • Versátil (1 o 2 manos) • Pesada • Alcance (+5 pies)'
-                : 'Reglas CA: Ligera (CA + Des) • Media (CA + Des máx +2) • Pesada (CA fija)'}
+                ? t('Propiedades: Sutil (Fue o Des) • Versátil (1 o 2 manos) • Pesada • Alcance (+5 pies)', 'Properties: Finesse (STR or DEX) • Versatile (1 or 2 hands) • Heavy • Reach (+5 ft.)')
+                : t('Reglas CA: Ligera (CA + Des) • Media (CA + Des máx +2) • Pesada (CA fija)', 'AC Rules: Light (AC + DEX) • Medium (AC + DEX max +2) • Heavy (Fixed AC)')}
             </div>
           </div>
 
@@ -1891,21 +2204,21 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                     <div className="flex items-center gap-2 min-w-0">
                       <EquipmentBadge name={w.name} category={w.category} size="md" />
                       <span className="font-fantasy font-bold text-xs text-[#2c221a] truncate">
-                        {w.name}
+                        {isSpanish ? w.name : (w.nameEn || translateDndTitle(w.name))}
                       </span>
                     </div>
                     <span className="text-xs font-mono font-bold text-[#8c672b] shrink-0">
-                      {w.damageDice} {w.damageType}
+                      {w.damageDice} {isSpanish ? w.damageType : translateDndText(w.damageType)}
                     </span>
                   </div>
                   <div className="text-[10px] text-[#786450]">
-                    {w.range} • {w.weight} • {w.cost}
+                    {isSpanish ? w.range : translateDndText(w.range)} • {w.weight} • {isSpanish ? w.cost : w.cost.replace(/po/g, 'gp').replace(/pp/g, 'sp').replace(/pc/g, 'cp')}
                   </div>
                   <div className="text-[10px] text-[#5c3a70] font-semibold">
-                    Propiedades: {w.properties.join(', ')}
+                    {t('Propiedades:', 'Properties:')} {w.properties.map((p) => (isSpanish ? p : translateDndText(p))).join(', ')}
                   </div>
                   <p className="text-[11px] text-[#6e5c4a] leading-snug">
-                    {w.description}
+                    {isSpanish ? w.description : translateDndText(w.description)}
                   </p>
                 </div>
               ))}
@@ -1921,23 +2234,23 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                     <div className="flex items-center gap-2 min-w-0">
                       <EquipmentBadge name={a.name} category={a.category} size="md" />
                       <span className="font-fantasy font-bold text-xs text-[#2c221a] truncate">
-                        {a.name}
+                        {isSpanish ? a.name : (a.nameEn || translateDndTitle(a.name))}
                       </span>
                     </div>
                     <span className="text-xs font-mono font-bold text-[#8c672b] shrink-0">
-                      CA {a.baseAc}
+                      {t('CA', 'AC')} {a.baseAc}
                     </span>
                   </div>
                   <div className="text-[10px] text-[#786450]">
-                    Tipo: {a.category} • Peso: {a.weight} • Coste: {a.cost}
+                    {t('Tipo:', 'Type:')} {isSpanish ? a.category : translateDndText(a.category)} • {t('Peso:', 'Weight:')} {a.weight} • {t('Coste:', 'Cost:')} {isSpanish ? a.cost : a.cost.replace(/po/g, 'gp').replace(/pp/g, 'sp').replace(/pc/g, 'cp')}
                   </div>
                   {a.stealthDisadvantage && (
                     <span className="text-[10px] text-[#a8423d] font-bold block">
-                      ⚠️ Desventaja en Sigilo
+                      ⚠️ {t('Desventaja en Sigilo', 'Stealth Disadvantage')}
                     </span>
                   )}
                   <p className="text-[11px] text-[#6e5c4a] leading-snug">
-                    {a.description}
+                    {isSpanish ? a.description : translateDndText(a.description)}
                   </p>
                 </div>
               ))}
@@ -1962,7 +2275,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                     : 'bg-[#faf3e8] text-[#6e5c4a] hover:bg-[#ede1ce]'
                 }`}
               >
-                Condiciones Oficiales ({filteredConditions.length})
+                {t('Condiciones Oficiales', 'Official Conditions')} ({filteredConditions.length})
               </button>
               <button
                 onClick={() => setConditionsTab('tactical')}
@@ -1972,25 +2285,33 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                     : 'bg-[#faf3e8] text-[#6e5c4a] hover:bg-[#ede1ce]'
                 }`}
               >
-                Reglas Tácticas Esenciales ({filteredTacticalRules.length})
+                {t('Reglas Tácticas Esenciales', 'Essential Tactical Rules')} ({filteredTacticalRules.length})
               </button>
             </div>
 
             {conditionsTab === 'tactical' && (
               <div className="flex items-center gap-1.5 overflow-x-auto text-xs">
-                {(['all', 'Combate', 'Magia', 'Descanso'] as const).map((cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => setTacticalCategoryFilter(cat)}
-                    className={`px-2.5 py-1 rounded-md text-[11px] font-sans transition cursor-pointer ${
-                      tacticalCategoryFilter === cat
-                        ? 'bg-[#5c3a70] text-white font-bold'
-                        : 'bg-[#ede1ce] text-[#786450] hover:bg-[#dfbe7e]/30'
-                    }`}
-                  >
-                    {cat === 'all' ? 'Todas las Reglas' : cat}
-                  </button>
-                ))}
+                {(['all', 'Combate', 'Magia', 'Descanso'] as const).map((cat) => {
+                  const catLabelEn: Record<string, string> = {
+                    all: 'All Rules',
+                    Combate: 'Combat',
+                    Magia: 'Magic',
+                    Descanso: 'Rest',
+                  };
+                  return (
+                    <button
+                      key={cat}
+                      onClick={() => setTacticalCategoryFilter(cat)}
+                      className={`px-2.5 py-1 rounded-md text-[11px] font-sans transition cursor-pointer ${
+                        tacticalCategoryFilter === cat
+                          ? 'bg-[#5c3a70] text-white font-bold'
+                          : 'bg-[#ede1ce] text-[#786450] hover:bg-[#dfbe7e]/30'
+                      }`}
+                    >
+                      {isSpanish ? (cat === 'all' ? 'Todas las Reglas' : cat) : catLabelEn[cat]}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -1998,103 +2319,118 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
           {/* Tab 1: Condiciones */}
           {conditionsTab === 'conditions' && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredConditions.map((cond) => (
-                <div
-                  key={cond.id}
-                  className="bg-[#faf3e8] rounded-2xl border-2 border-[#d8c8af] p-5 shadow-sm hover:border-[#b88c32] hover:shadow-md transition space-y-3 flex flex-col justify-between"
-                >
-                  <div className="space-y-2">
-                    <div className="flex items-start justify-between gap-2 border-b border-[#d8c8af]/60 pb-2">
-                      <div>
-                        <h4 className="font-fantasy font-bold text-sm text-[#2c221a]">
-                          {cond.name}
-                        </h4>
-                        <span className="text-[10px] text-[#8c7b69] font-mono uppercase tracking-wider">
-                          Estado Oficial 5e • {cond.nameEn}
+              {filteredConditions.map((cond) => {
+                const condEn = CONDITIONS_EN[cond.id];
+                const condTitle = isSpanish ? cond.name : cond.nameEn;
+                const condSummary = isSpanish ? cond.summary : (condEn?.summary || translateDndText(cond.summary));
+                const condEffects = isSpanish ? cond.effects : (condEn?.effects || cond.effects.map(translateDndText));
+
+                return (
+                  <div
+                    key={cond.id}
+                    className="bg-[#faf3e8] rounded-2xl border-2 border-[#d8c8af] p-5 shadow-sm hover:border-[#b88c32] hover:shadow-md transition space-y-3 flex flex-col justify-between"
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-start justify-between gap-2 border-b border-[#d8c8af]/60 pb-2">
+                        <div>
+                          <h4 className="font-fantasy font-bold text-sm text-[#2c221a]">
+                            {condTitle}
+                          </h4>
+                          <span className="text-[10px] text-[#8c7b69] font-mono uppercase tracking-wider">
+                            {isSpanish ? `Estado Oficial 5e • ${cond.nameEn}` : 'Official 5e Condition'}
+                          </span>
+                        </div>
+                        <span className="w-8 h-8 rounded-lg bg-[#a8423d]/10 text-[#a8423d] flex items-center justify-center shrink-0 border border-[#a8423d]/20">
+                          <ShieldAlert className="w-4 h-4" />
                         </span>
                       </div>
-                      <span className="w-8 h-8 rounded-lg bg-[#a8423d]/10 text-[#a8423d] flex items-center justify-center shrink-0 border border-[#a8423d]/20">
-                        <ShieldAlert className="w-4 h-4" />
-                      </span>
+
+                      <p className="text-xs text-[#5c3a70] font-medium bg-[#5c3a70]/5 p-2 rounded-lg border border-[#5c3a70]/10">
+                        {condSummary}
+                      </p>
+
+                      <div className="space-y-1.5 pt-1">
+                        <span className="text-[10px] font-fantasy font-bold uppercase tracking-wider text-[#786450]">
+                          {t('Efectos Mecánicos:', 'Mechanical Effects:')}
+                        </span>
+                        <ul className="space-y-1 text-xs text-[#4a3b32]">
+                          {condEffects.map((eff, i) => (
+                            <li key={i} className="flex items-start gap-1.5 leading-relaxed">
+                              <span className="text-[#a8423d] font-bold shrink-0">•</span>
+                              <span>{eff}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     </div>
 
-                    <p className="text-xs text-[#5c3a70] font-medium bg-[#5c3a70]/5 p-2 rounded-lg border border-[#5c3a70]/10">
-                      {cond.summary}
-                    </p>
-
-                    <div className="space-y-1.5 pt-1">
-                      <span className="text-[10px] font-fantasy font-bold uppercase tracking-wider text-[#786450]">
-                        Efectos Mecánicos:
-                      </span>
-                      <ul className="space-y-1 text-xs text-[#4a3b32]">
-                        {cond.effects.map((eff, i) => (
-                          <li key={i} className="flex items-start gap-1.5 leading-relaxed">
-                            <span className="text-[#a8423d] font-bold shrink-0">•</span>
-                            <span>{eff}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                    <button
+                      onClick={() =>
+                        setInspectData({
+                          title: condTitle,
+                          englishTitle: isSpanish ? cond.nameEn : undefined,
+                          category: t('Condición Oficial 5e', 'Official 5e Condition'),
+                          iconType: 'feature',
+                          description: condSummary,
+                          benefits: condEffects,
+                          badges: [{ label: t('Tipo', 'Type'), value: t('Condición de Combate', 'Combat Condition'), variant: 'amber' }],
+                        })
+                      }
+                      className="w-full mt-2 py-1.5 text-center text-xs font-fantasy font-bold bg-[#fcf9f2] text-[#8c672b] hover:bg-[#8c672b] hover:text-white rounded-lg border border-[#d8c8af] transition cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      <BookOpen className="w-3.5 h-3.5" />
+                      {t('Inspeccionar en Pergamino', 'Inspect on Scroll')}
+                    </button>
                   </div>
-
-                  <button
-                    onClick={() =>
-                      setInspectData({
-                        title: cond.name,
-                        englishTitle: cond.nameEn,
-                        category: 'Condición Oficial 5e',
-                        iconType: 'feature',
-                        description: cond.summary,
-                        benefits: cond.effects,
-                        badges: [{ label: 'Tipo', value: 'Condición de Combate', variant: 'amber' }],
-                      })
-                    }
-                    className="w-full mt-2 py-1.5 text-center text-xs font-fantasy font-bold bg-[#fcf9f2] text-[#8c672b] hover:bg-[#8c672b] hover:text-white rounded-lg border border-[#d8c8af] transition cursor-pointer flex items-center justify-center gap-1.5"
-                  >
-                    <BookOpen className="w-3.5 h-3.5" />
-                    Inspeccionar en Pergamino
-                  </button>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
 
           {/* Tab 2: Reglas Tácticas */}
           {conditionsTab === 'tactical' && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {filteredTacticalRules.map((rule) => (
-                <div
-                  key={rule.id}
-                  className="bg-[#faf3e8] rounded-2xl border-2 border-[#d8c8af] p-5 shadow-sm hover:border-[#b88c32] hover:shadow-md transition space-y-3"
-                >
-                  <div className="flex items-start justify-between gap-2 border-b border-[#d8c8af]/60 pb-2">
-                    <div>
-                      <h4 className="font-fantasy font-bold text-sm text-[#2c221a]">
-                        {rule.title}
-                      </h4>
-                      <span className="text-[10px] text-[#8c7b69] font-mono uppercase tracking-wider">
-                        Regla Táctica Oficial
+              {filteredTacticalRules.map((rule) => {
+                const ruleEn = TACTICAL_RULES_EN[rule.id];
+                const ruleTitle = isSpanish ? rule.title : (ruleEn?.title || translateDndTitle(rule.title));
+                const ruleCategory = isSpanish ? rule.category : (ruleEn?.category || rule.category);
+                const ruleSummary = isSpanish ? rule.summary : (ruleEn?.summary || translateDndText(rule.summary));
+                const ruleDetails = isSpanish ? rule.details : (ruleEn?.details || rule.details.map(translateDndText));
+
+                return (
+                  <div
+                    key={rule.id}
+                    className="bg-[#faf3e8] rounded-2xl border-2 border-[#d8c8af] p-5 shadow-sm hover:border-[#b88c32] hover:shadow-md transition space-y-3"
+                  >
+                    <div className="flex items-start justify-between gap-2 border-b border-[#d8c8af]/60 pb-2">
+                      <div>
+                        <h4 className="font-fantasy font-bold text-sm text-[#2c221a]">
+                          {ruleTitle}
+                        </h4>
+                        <span className="text-[10px] text-[#8c7b69] font-mono uppercase tracking-wider">
+                          {t('Regla Táctica Oficial', 'Official Tactical Rule')}
+                        </span>
+                      </div>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#8c672b]/15 text-[#8c672b] border border-[#8c672b]/30">
+                        {ruleCategory}
                       </span>
                     </div>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#8c672b]/15 text-[#8c672b] border border-[#8c672b]/30">
-                      {rule.category}
-                    </span>
+
+                    <p className="text-xs text-[#2c221a] font-medium bg-[#8c672b]/5 p-2 rounded-lg border border-[#8c672b]/10">
+                      {ruleSummary}
+                    </p>
+
+                    <ul className="space-y-1.5 text-xs text-[#4a3b32] pt-1">
+                      {ruleDetails.map((detail, idx) => (
+                        <li key={idx} className="flex items-start gap-1.5 leading-relaxed">
+                          <span className="text-[#8c672b] font-bold shrink-0">▸</span>
+                          <span>{detail}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-
-                  <p className="text-xs text-[#2c221a] font-medium bg-[#8c672b]/5 p-2 rounded-lg border border-[#8c672b]/10">
-                    {rule.summary}
-                  </p>
-
-                  <ul className="space-y-1.5 text-xs text-[#4a3b32] pt-1">
-                    {rule.details.map((detail, idx) => (
-                      <li key={idx} className="flex items-start gap-1.5 leading-relaxed">
-                        <span className="text-[#8c672b] font-bold shrink-0">▸</span>
-                        <span>{detail}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -2109,12 +2445,12 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
           <div className="bg-[#fcf9f2] p-4 rounded-2xl border border-[#d8c8af] space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <span className="text-xs font-fantasy font-bold uppercase tracking-wider text-[#786450]">
-                Filtros de Objetos Mágicos ({filteredMagicItems.length} encontrados)
+                {t(`Filtros de Objetos Mágicos (${filteredMagicItems.length} encontrados)`, `Magic Item Filters (${filteredMagicItems.length} found)`)}
               </span>
 
               {/* Attunement Selector */}
               <div className="flex items-center gap-1.5 text-xs">
-                <span className="text-[11px] text-[#8c7b69]">Sintonización:</span>
+                <span className="text-[11px] text-[#8c7b69]">{t('Sintonización:', 'Attunement:')}</span>
                 <button
                   onClick={() => setMagicItemAttunementFilter('all')}
                   className={`px-2 py-1 rounded text-[11px] transition cursor-pointer ${
@@ -2123,7 +2459,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                       : 'bg-[#faf3e8] text-[#6e5c4a]'
                   }`}
                 >
-                  Todos
+                  {t('Todos', 'All')}
                 </button>
                 <button
                   onClick={() => setMagicItemAttunementFilter('yes')}
@@ -2133,7 +2469,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                       : 'bg-[#faf3e8] text-[#6e5c4a]'
                   }`}
                 >
-                  Requiere Sintonización
+                  {t('Requiere Sintonización', 'Requires Attunement')}
                 </button>
                 <button
                   onClick={() => setMagicItemAttunementFilter('no')}
@@ -2143,14 +2479,14 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                       : 'bg-[#faf3e8] text-[#6e5c4a]'
                   }`}
                 >
-                  Sin Sintonización
+                  {t('Sin Sintonización', 'No Attunement')}
                 </button>
               </div>
             </div>
 
             {/* Rarity Pills */}
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
-              <span className="text-[11px] text-[#8c7b69] shrink-0">Rareza:</span>
+              <span className="text-[11px] text-[#8c7b69] shrink-0">{t('Rareza:', 'Rarity:')}</span>
               {(['all', 'Común', 'Poco Común', 'Raro', 'Muy Raro', 'Legendario', 'Artefacto'] as const).map(
                 (rarity) => (
                   <button
@@ -2162,7 +2498,11 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                         : 'bg-[#ede1ce] text-[#786450] hover:bg-[#dfbe7e]/30'
                     }`}
                   >
-                    {rarity === 'all' ? 'Todas' : rarity}
+                    {rarity === 'all'
+                      ? t('Todas', 'All')
+                      : isSpanish
+                      ? rarity
+                      : MAGIC_ITEM_RARITY_EN[rarity] || rarity}
                   </button>
                 )
               )}
@@ -2170,7 +2510,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
 
             {/* Category Pills */}
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
-              <span className="text-[11px] text-[#8c7b69] shrink-0">Categoría:</span>
+              <span className="text-[11px] text-[#8c7b69] shrink-0">{t('Categoría:', 'Category:')}</span>
               {(
                 [
                   'all',
@@ -2192,7 +2532,11 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                       : 'bg-[#ede1ce] text-[#786450] hover:bg-[#dfbe7e]/30'
                   }`}
                 >
-                  {cat === 'all' ? 'Todas' : cat}
+                  {cat === 'all'
+                    ? t('Todas', 'All')
+                    : isSpanish
+                    ? cat
+                    : MAGIC_ITEM_CATEGORY_EN[cat] || cat}
                 </button>
               ))}
             </div>
@@ -2210,6 +2554,12 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                 Artefacto: { bg: 'bg-[#ef4444]/15', text: 'text-[#b91c1c]', border: 'border-[#ef4444]/40' },
               };
               const rStyle = rarityColors[item.rarity] || rarityColors['Común'];
+              const itemTitle = isSpanish ? item.name : (item.nameEn || translateDndTitle(item.name));
+              const itemRarityDisplay = isSpanish ? item.rarity : (MAGIC_ITEM_RARITY_EN[item.rarity] || item.rarity);
+              const itemCatDisplay = isSpanish ? item.category : (MAGIC_ITEM_CATEGORY_EN[item.category] || item.category);
+              const itemSummaryDisplay = isSpanish ? item.summary : translateDndText(item.summary);
+              const itemDescDisplay = isSpanish ? item.description : translateDndText(item.description);
+              const itemEffectsDisplay = item.effects.map((eff) => (isSpanish ? eff : translateDndText(eff)));
 
               return (
                 <div
@@ -2220,48 +2570,50 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                     <div className="flex items-start justify-between gap-2 border-b border-[#d8c8af]/60 pb-2">
                       <div>
                         <h4 className="font-fantasy font-bold text-sm text-[#2c221a]">
-                          {item.name}
+                          {itemTitle}
                         </h4>
-                        <span className="text-[10px] text-[#8c7b69] font-mono tracking-wider">
-                          {item.nameEn}
-                        </span>
+                        {isSpanish && (
+                          <span className="text-[10px] text-[#8c7b69] font-mono tracking-wider">
+                            {item.nameEn}
+                          </span>
+                        )}
                       </div>
                       <span
                         className={`px-2 py-0.5 rounded text-[10px] font-bold border ${rStyle.bg} ${rStyle.text} ${rStyle.border} shrink-0`}
                       >
-                        {item.rarity}
+                        {itemRarityDisplay}
                       </span>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-1.5 text-[10px]">
                       <span className="px-2 py-0.5 bg-[#d8c8af]/40 text-[#4a3b32] rounded font-semibold">
-                        {item.category}
+                        {itemCatDisplay}
                       </span>
                       {item.attunement ? (
                         <span className="px-2 py-0.5 bg-[#5c3a70]/15 text-[#5c3a70] rounded font-semibold border border-[#5c3a70]/30">
-                          ✨ Sintonización
+                          ✨ {t('Sintonización', 'Requires Attunement')}
                         </span>
                       ) : (
                         <span className="px-2 py-0.5 bg-[#2b6748]/15 text-[#2b6748] rounded font-semibold border border-[#2b6748]/30">
-                          ✓ No requiere sintonización
+                          ✓ {t('No requiere sintonización', 'No Attunement Required')}
                         </span>
                       )}
                     </div>
 
                     <p className="text-xs text-[#5c3a70] font-medium bg-[#5c3a70]/5 p-2 rounded-lg border border-[#5c3a70]/10">
-                      {item.summary}
+                      {itemSummaryDisplay}
                     </p>
 
                     <p className="text-[11px] text-[#6e5c4a] italic leading-snug">
-                      "{item.description}"
+                      "{itemDescDisplay}"
                     </p>
 
                     <div className="space-y-1 pt-1">
                       <span className="text-[10px] font-fantasy font-bold uppercase tracking-wider text-[#786450]">
-                        Efectos y Propiedades:
+                        {t('Efectos y Propiedades:', 'Effects & Properties:')}
                       </span>
                       <ul className="space-y-1 text-xs text-[#4a3b32]">
-                        {item.effects.map((eff, i) => (
+                        {itemEffectsDisplay.map((eff, i) => (
                           <li key={i} className="flex items-start gap-1.5 leading-relaxed">
                             <span className="text-[#8c672b] font-bold shrink-0">•</span>
                             <span>{eff}</span>
@@ -2274,19 +2626,19 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                   <button
                     onClick={() =>
                       setInspectData({
-                        title: item.name,
-                        englishTitle: item.nameEn,
-                        category: `Objeto Mágico • ${item.category}`,
+                        title: itemTitle,
+                        englishTitle: isSpanish ? item.nameEn : undefined,
+                        category: `${t('Objeto Mágico', 'Magic Item')} • ${itemCatDisplay}`,
                         iconType: 'generic',
-                        description: item.summary,
-                        quote: item.description,
-                        benefits: item.effects,
+                        description: itemSummaryDisplay,
+                        quote: itemDescDisplay,
+                        benefits: itemEffectsDisplay,
                         badges: [
-                          { label: 'Rareza', value: item.rarity, variant: 'gold' },
-                          { label: 'Categoría', value: item.category, variant: 'neutral' },
+                          { label: t('Rareza', 'Rarity'), value: itemRarityDisplay, variant: 'gold' },
+                          { label: t('Categoría', 'Category'), value: itemCatDisplay, variant: 'neutral' },
                           {
-                            label: 'Sintonización',
-                            value: item.attunement ? 'Sí' : 'No',
+                            label: t('Sintonización', 'Attunement'),
+                            value: item.attunement ? t('Sí', 'Yes') : 'No',
                             variant: item.attunement ? 'amber' : 'green',
                           },
                         ],
@@ -2295,7 +2647,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                     className="w-full mt-2 py-1.5 text-center text-xs font-fantasy font-bold bg-[#fcf9f2] text-[#8c672b] hover:bg-[#8c672b] hover:text-white rounded-lg border border-[#d8c8af] transition cursor-pointer flex items-center justify-center gap-1.5"
                   >
                     <BookOpen className="w-3.5 h-3.5" />
-                    Inspeccionar en Pergamino
+                    {t('Inspeccionar en Pergamino', 'Inspect on Scroll')}
                   </button>
                 </div>
               );
@@ -2314,7 +2666,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
             <div className="bg-[#fcf9f2] p-3.5 rounded-2xl border border-[#d8c8af] space-y-2.5">
               <div className="flex items-center justify-between pb-1 border-b border-[#ebdcc7]">
                 <span className="text-xs font-fantasy font-bold uppercase tracking-wider text-[#786450]">
-                  Criaturas ({filteredMonsters.length})
+                  {t('Criaturas', 'Creatures')} ({filteredMonsters.length})
                 </span>
                 <div className="flex items-center gap-1.5">
                   {onOpenMonsterBuilder && (
@@ -2322,10 +2674,10 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                       type="button"
                       onClick={() => onOpenMonsterBuilder(null)}
                       className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-gradient-to-r from-[#8c672b] to-[#b88c32] hover:brightness-110 text-white text-[11px] font-bold font-fantasy shadow-xs transition cursor-pointer"
-                      title="Crear un nuevo monstruo o statblock personalizado"
+                      title={t('Crear un nuevo monstruo o statblock personalizado', 'Create a new custom monster or statblock')}
                     >
                       <Plus className="w-3 h-3" />
-                      <span>Crear Statblock</span>
+                      <span>{t('Crear Statblock', 'Create Statblock')}</span>
                     </button>
                   )}
                   {onOpenImporter && (
@@ -2333,7 +2685,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                       type="button"
                       onClick={onOpenImporter}
                       className="flex items-center gap-1 px-2 py-1 rounded-lg bg-[#2e1908] hover:bg-[#42250d] border border-[#a87c2b]/60 text-[#dfbe7e] text-[11px] font-bold font-fantasy shadow-xs transition cursor-pointer"
-                      title="Importar Monstruos desde Obsidian Vault o Markdown"
+                      title={t('Importar Monstruos desde Obsidian Vault o Markdown', 'Import Monsters from Obsidian Vault or Markdown')}
                     >
                       <Upload className="w-3 h-3" />
                       <span>Vault</span>
@@ -2344,7 +2696,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
 
               {/* CR Filter */}
               <div className="flex items-center gap-1 overflow-x-auto pb-1 text-xs">
-                <span className="text-[11px] text-[#8c7b69] shrink-0 font-bold">VD (CR):</span>
+                <span className="text-[11px] text-[#8c7b69] shrink-0 font-bold">{t('VD (CR):', 'CR:')}</span>
                 {(['all', '0', '1/8', '1/4', '1/2', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '15', '16', '17', '18', '19', '20', '21', '23', '30'] as const).map(
                   (crVal) => (
                     <button
@@ -2356,7 +2708,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                           : 'bg-[#faf3e8] text-[#6e5c4a] hover:bg-[#ede1ce]'
                       }`}
                     >
-                      {crVal === 'all' ? 'Todos' : crVal}
+                      {crVal === 'all' ? t('Todos', 'All') : crVal}
                     </button>
                   )
                 )}
@@ -2364,7 +2716,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
 
               {/* Type Filter */}
               <div className="flex items-center gap-1 overflow-x-auto pb-1 text-xs">
-                <span className="text-[11px] text-[#8c7b69] shrink-0 font-bold">Tipo:</span>
+                <span className="text-[11px] text-[#8c7b69] shrink-0 font-bold">{t('Tipo:', 'Type:')}</span>
                 {(
                   [
                     'all',
@@ -2383,17 +2735,21 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                     'Planta',
                     'No-muerto',
                   ] as const
-                ).map((t) => (
+                ).map((mType) => (
                   <button
-                    key={t}
-                    onClick={() => setMonsterTypeFilter(t)}
+                    key={mType}
+                    onClick={() => setMonsterTypeFilter(mType)}
                     className={`px-2 py-0.5 rounded text-[11px] transition cursor-pointer shrink-0 ${
-                      monsterTypeFilter === t
+                      monsterTypeFilter === mType
                         ? 'bg-[#5c3a70] text-white font-bold shadow-xs'
                         : 'bg-[#faf3e8] text-[#6e5c4a] hover:bg-[#ede1ce]'
                     }`}
                   >
-                    {t === 'all' ? 'Todos' : t}
+                    {mType === 'all'
+                      ? t('Todos', 'All')
+                      : isSpanish
+                      ? mType
+                      : MONSTER_TYPE_EN[mType] || mType}
                   </button>
                 ))}
               </div>
@@ -2403,6 +2759,8 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
             <div className="space-y-1.5 max-h-[650px] overflow-y-auto pr-1">
               {filteredMonsters.map((monster) => {
                 const isSelected = selectedMonster?.id === monster.id;
+                const mSizeDisplay = isSpanish ? monster.size : (MONSTER_SIZE_EN[monster.size] || monster.size);
+                const mTypeDisplay = isSpanish ? monster.type : (MONSTER_TYPE_EN[monster.type] || translateDndText(monster.type));
                 return (
                   <button
                     key={monster.id}
@@ -2415,14 +2773,14 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                   >
                     <div className="space-y-0.5 min-w-0">
                       <h4 className="font-fantasy font-bold text-xs truncate">
-                        {monster.name}
+                        {isSpanish ? monster.name : translateDndTitle(monster.name)}
                       </h4>
                       <p
                         className={`text-[10px] truncate ${
                           isSelected ? 'text-[#f5ebdc]' : 'text-[#786450]'
                         }`}
                       >
-                        {monster.size} {monster.type}
+                        {mSizeDisplay} {mTypeDisplay}
                       </p>
                     </div>
 
@@ -2441,7 +2799,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                           isSelected ? 'text-[#f5ebdc]' : 'text-[#8c7b69]'
                         }`}
                       >
-                        CA {monster.ac} • {monster.hp} PG
+                        {t('CA', 'AC')} {monster.ac} • {monster.hp} {t('PG', 'HP')}
                       </span>
                     </div>
                   </button>
@@ -2459,37 +2817,39 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <h3 className="text-xl sm:text-2xl font-bold font-fantasy text-[#7a201c] tracking-wide">
-                        {selectedMonster.name}
+                        {isSpanish ? selectedMonster.name : translateDndTitle(selectedMonster.name)}
                       </h3>
                       <p className="text-xs italic text-[#6e5c4a]">
-                        {selectedMonster.size} {selectedMonster.type}, {selectedMonster.alignment}
+                        {isSpanish ? selectedMonster.size : (MONSTER_SIZE_EN[selectedMonster.size] || selectedMonster.size)}{' '}
+                        {isSpanish ? selectedMonster.type : (MONSTER_TYPE_EN[selectedMonster.type] || translateDndText(selectedMonster.type))},{' '}
+                        {isSpanish ? selectedMonster.alignment : translateDndText(selectedMonster.alignment)}
                       </p>
                     </div>
                     <div className="text-right flex items-center gap-2">
                       <span className="px-3 py-1 rounded-lg text-xs font-mono font-bold bg-[#7a201c] text-white shadow-sm inline-block">
-                        VD / CR {selectedMonster.cr} ({selectedMonster.xp?.toLocaleString()} PX)
+                        {t('VD / CR', 'CR')} {selectedMonster.cr} ({selectedMonster.xp?.toLocaleString()} {t('PX', 'XP')})
                       </span>
                       {onOpenMonsterBuilder && (
                         <button
                           type="button"
                           onClick={() => onOpenMonsterBuilder(selectedMonster)}
                           className="px-2.5 py-1 rounded-lg bg-[#2e1908] hover:bg-[#452712] border border-[#a87c2b] text-[#ffd56b] text-xs font-bold font-fantasy flex items-center gap-1 shadow-xs transition cursor-pointer"
-                          title="Editar este statblock"
+                          title={t('Editar este statblock', 'Edit this statblock')}
                         >
                           <Edit2 className="w-3 h-3 text-[#ffd56b]" />
-                          <span>Editar</span>
+                          <span>{t('Editar', 'Edit')}</span>
                         </button>
                       )}
                       {onDeleteMonster && ((selectedMonster as any).isCustom || !SRD_MONSTERS_COMPENDIUM.some((s) => s.id === selectedMonster.id)) && (
                         <button
                           type="button"
                           onClick={() => {
-                            if (window.confirm(`¿Eliminar el monstruo "${selectedMonster.name}"?`)) {
+                            if (window.confirm(t(`¿Eliminar el monstruo "${selectedMonster.name}"?`, `Delete monster "${selectedMonster.name}"?`))) {
                               onDeleteMonster(selectedMonster.id);
                             }
                           }}
                           className="p-1 rounded-lg bg-red-950/80 hover:bg-red-900 border border-red-700 text-red-200 text-xs font-bold shadow-xs transition cursor-pointer"
-                          title="Eliminar este monstruo"
+                          title={t('Eliminar este monstruo', 'Delete this monster')}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -2501,20 +2861,20 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                 {/* Combat Stats: AC, HP, Speed */}
                 <div className="space-y-1 text-xs border-b border-[#d8c8af] pb-3">
                   <div className="flex items-center gap-1.5">
-                    <strong className="text-[#7a201c] font-fantasy">Clase de Armadura:</strong>
+                    <strong className="text-[#7a201c] font-fantasy">{t('Clase de Armadura:', 'Armor Class:')}</strong>
                     <span>
-                      {selectedMonster.ac} {selectedMonster.acDescription ? `(${selectedMonster.acDescription})` : ''}
+                      {selectedMonster.ac} {selectedMonster.acDescription ? `(${isSpanish ? selectedMonster.acDescription : translateDndText(selectedMonster.acDescription)})` : ''}
                     </span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <strong className="text-[#7a201c] font-fantasy">Puntos de Golpe:</strong>
+                    <strong className="text-[#7a201c] font-fantasy">{t('Puntos de Golpe:', 'Hit Points:')}</strong>
                     <span>
                       {selectedMonster.hp} {selectedMonster.hitDice ? `(${selectedMonster.hitDice})` : ''}
                     </span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <strong className="text-[#7a201c] font-fantasy">Velocidad:</strong>
-                    <span>{selectedMonster.speed}</span>
+                    <strong className="text-[#7a201c] font-fantasy">{t('Velocidad:', 'Speed:')}</strong>
+                    <span>{isSpanish ? selectedMonster.speed : translateDndText(selectedMonster.speed)}</span>
                   </div>
                 </div>
 
@@ -2524,7 +2884,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                     const val = selectedMonster.stats[statKey];
                     const mod = Math.floor((val - 10) / 2);
                     const modSign = mod >= 0 ? `+${mod}` : `${mod}`;
-                    const labels: Record<string, string> = {
+                    const labelsEs: Record<string, string> = {
                       str: 'FUE',
                       dex: 'DES',
                       con: 'CON',
@@ -2532,6 +2892,15 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                       wis: 'SAB',
                       cha: 'CAR',
                     };
+                    const labelsEn: Record<string, string> = {
+                      str: 'STR',
+                      dex: 'DEX',
+                      con: 'CON',
+                      int: 'INT',
+                      wis: 'WIS',
+                      cha: 'CHA',
+                    };
+                    const labels = isSpanish ? labelsEs : labelsEn;
                     return (
                       <div key={statKey} className="space-y-0.5">
                         <span className="text-[10px] font-fantasy font-bold text-[#7a201c] block">
@@ -2549,39 +2918,47 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                 <div className="space-y-1 text-xs border-b border-[#d8c8af] pb-3 leading-relaxed">
                   {selectedMonster.saves && (
                     <div>
-                      <strong className="text-[#7a201c]">Tiradas de Salvación:</strong> {selectedMonster.saves}
+                      <strong className="text-[#7a201c]">{t('Tiradas de Salvación:', 'Saving Throws:')}</strong>{' '}
+                      {isSpanish ? selectedMonster.saves : translateDndText(selectedMonster.saves)}
                     </div>
                   )}
                   {selectedMonster.skills && (
                     <div>
-                      <strong className="text-[#7a201c]">Habilidades:</strong> {selectedMonster.skills}
+                      <strong className="text-[#7a201c]">{t('Habilidades:', 'Skills:')}</strong>{' '}
+                      {isSpanish ? selectedMonster.skills : translateDndText(selectedMonster.skills)}
                     </div>
                   )}
                   {selectedMonster.damageVulnerabilities && (
                     <div>
-                      <strong className="text-[#7a201c]">Vulnerabilidades:</strong> {selectedMonster.damageVulnerabilities}
+                      <strong className="text-[#7a201c]">{t('Vulnerabilidades:', 'Damage Vulnerabilities:')}</strong>{' '}
+                      {isSpanish ? selectedMonster.damageVulnerabilities : translateDndText(selectedMonster.damageVulnerabilities)}
                     </div>
                   )}
                   {selectedMonster.damageResistances && (
                     <div>
-                      <strong className="text-[#7a201c]">Resistencias al Daño:</strong> {selectedMonster.damageResistances}
+                      <strong className="text-[#7a201c]">{t('Resistencias al Daño:', 'Damage Resistances:')}</strong>{' '}
+                      {isSpanish ? selectedMonster.damageResistances : translateDndText(selectedMonster.damageResistances)}
                     </div>
                   )}
                   {selectedMonster.damageImmunities && (
                     <div>
-                      <strong className="text-[#7a201c]">Inmunidades al Daño:</strong> {selectedMonster.damageImmunities}
+                      <strong className="text-[#7a201c]">{t('Inmunidades al Daño:', 'Damage Immunities:')}</strong>{' '}
+                      {isSpanish ? selectedMonster.damageImmunities : translateDndText(selectedMonster.damageImmunities)}
                     </div>
                   )}
                   {selectedMonster.conditionImmunities && (
                     <div>
-                      <strong className="text-[#7a201c]">Inmunidades a Estados:</strong> {selectedMonster.conditionImmunities}
+                      <strong className="text-[#7a201c]">{t('Inmunidades a Estados:', 'Condition Immunities:')}</strong>{' '}
+                      {isSpanish ? selectedMonster.conditionImmunities : translateDndText(selectedMonster.conditionImmunities)}
                     </div>
                   )}
                   <div>
-                    <strong className="text-[#7a201c]">Sentidos:</strong> {selectedMonster.senses}
+                    <strong className="text-[#7a201c]">{t('Sentidos:', 'Senses:')}</strong>{' '}
+                    {isSpanish ? selectedMonster.senses : translateDndText(selectedMonster.senses)}
                   </div>
                   <div>
-                    <strong className="text-[#7a201c]">Idiomas:</strong> {selectedMonster.languages}
+                    <strong className="text-[#7a201c]">{t('Idiomas:', 'Languages:')}</strong>{' '}
+                    {isSpanish ? selectedMonster.languages : translateDndText(selectedMonster.languages)}
                   </div>
                 </div>
 
@@ -2589,13 +2966,17 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                 {selectedMonster.traits && selectedMonster.traits.length > 0 && (
                   <div className="space-y-2 border-b border-[#d8c8af] pb-3">
                     <span className="text-xs font-fantasy font-bold uppercase tracking-wider text-[#7a201c] block">
-                      Rasgos Especiales
+                      {t('Rasgos Especiales', 'Special Traits')}
                     </span>
                     <div className="space-y-2 text-xs">
                       {selectedMonster.traits.map((trait, idx) => (
                         <div key={idx} className="leading-relaxed">
-                          <strong className="text-[#2c221a] font-serif italic">{trait.name}. </strong>
-                          <span className="text-[#4a3b32]">{trait.desc}</span>
+                          <strong className="text-[#2c221a] font-serif italic">
+                            {isSpanish ? trait.name : translateDndTitle(trait.name)}.{' '}
+                          </strong>
+                          <span className="text-[#4a3b32]">
+                            {isSpanish ? trait.desc : translateDndText(trait.desc)}
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -2605,13 +2986,17 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                 {/* Actions */}
                 <div className="space-y-2 border-b border-[#d8c8af] pb-3">
                   <span className="text-xs font-fantasy font-bold uppercase tracking-wider text-[#7a201c] block">
-                    Acciones
+                    {t('Acciones', 'Actions')}
                   </span>
                   <div className="space-y-2 text-xs">
                     {selectedMonster.actions.map((act, idx) => (
                       <div key={idx} className="leading-relaxed">
-                        <strong className="text-[#2c221a] font-serif italic">{act.name}. </strong>
-                        <span className="text-[#4a3b32]">{act.desc}</span>
+                        <strong className="text-[#2c221a] font-serif italic">
+                          {isSpanish ? act.name : translateDndTitle(act.name)}.{' '}
+                        </strong>
+                        <span className="text-[#4a3b32]">
+                          {isSpanish ? act.desc : translateDndText(act.desc)}
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -2621,13 +3006,17 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                 {selectedMonster.reactions && selectedMonster.reactions.length > 0 && (
                   <div className="space-y-2 border-b border-[#d8c8af] pb-3">
                     <span className="text-xs font-fantasy font-bold uppercase tracking-wider text-[#7a201c] block">
-                      Reacciones
+                      {t('Reacciones', 'Reactions')}
                     </span>
                     <div className="space-y-2 text-xs">
                       {selectedMonster.reactions.map((react, idx) => (
                         <div key={idx} className="leading-relaxed">
-                          <strong className="text-[#2c221a] font-serif italic">{react.name}. </strong>
-                          <span className="text-[#4a3b32]">{react.desc}</span>
+                          <strong className="text-[#2c221a] font-serif italic">
+                            {isSpanish ? react.name : translateDndTitle(react.name)}.{' '}
+                          </strong>
+                          <span className="text-[#4a3b32]">
+                            {isSpanish ? react.desc : translateDndText(react.desc)}
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -2638,16 +3027,23 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
                 {selectedMonster.legendaryActions && selectedMonster.legendaryActions.length > 0 && (
                   <div className="space-y-2">
                     <span className="text-xs font-fantasy font-bold uppercase tracking-wider text-[#7a201c] block">
-                      Acciones Legendarias
+                      {t('Acciones Legendarias', 'Legendary Actions')}
                     </span>
                     <p className="text-[11px] text-[#6e5c4a] italic">
-                      La criatura puede realizar hasta 3 acciones legendarias al final del turno de otra criatura. Recupera las acciones gastadas al inicio de su turno.
+                      {t(
+                        'La criatura puede realizar hasta 3 acciones legendarias al final del turno de otra criatura. Recupera las acciones gastadas al inicio de su turno.',
+                        'The creature can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature’s turn. The creature regains spent legendary actions at the start of its turn.'
+                      )}
                     </p>
                     <div className="space-y-2 text-xs">
                       {selectedMonster.legendaryActions.map((leg, idx) => (
                         <div key={idx} className="leading-relaxed">
-                          <strong className="text-[#2c221a] font-serif italic">{leg.name}. </strong>
-                          <span className="text-[#4a3b32]">{leg.desc}</span>
+                          <strong className="text-[#2c221a] font-serif italic">
+                            {isSpanish ? leg.name : translateDndTitle(leg.name)}.{' '}
+                          </strong>
+                          <span className="text-[#4a3b32]">
+                            {isSpanish ? leg.desc : translateDndText(leg.desc)}
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -2656,11 +3052,13 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
               </div>
             ) : (
               <div className="p-8 text-center text-xs text-[#8c7b69] bg-[#fcf9f2] rounded-2xl border-2 border-dashed border-[#d8c8af]">
-                Selecciona una criatura del bestiario para visualizar su ficha completa con estadísticas oficiales 5e.
+                {t('Selecciona una criatura del bestiario para visualizar su ficha completa con estadísticas oficiales 5e.', 'Select a creature from the bestiary to view its full official 5e statblock.')}
               </div>
             )}
           </div>
         </div>
+      )}
+        </>
       )}
 
       {/* Modal Pergamino Completo del Conjuro */}

@@ -1,0 +1,497 @@
+[
+  {
+    "id": "acolyte",
+    "nameEn": "Acolyte",
+    "descriptionEs": "Has pasado tu vida al servicio de un templo dedicado a un dios específico o a un panteón divino, oficiando ritos sagrados y acogiendo a los fieles en la presencia de lo divino."
+  },
+  {
+    "id": "house-agent",
+    "nameEn": "House Agent",
+    "descriptionEs": "Representas los intereses comerciales, diplomáticos o de espionaje de una influyente Casa del Dragón Marcado en Eberron."
+  },
+  {
+    "id": "faction-agent",
+    "nameEn": "Faction Agent",
+    "descriptionEs": "Operas como emisario, observador o brazo ejecutor de una de las grandes facciones del mundo (como los Arpistas, la Orden del Guantelete, el Enclave Esmeralda, la Alianza de los Señores o los Zhentarim)."
+  },
+  {
+    "id": "golgari-agent",
+    "nameEn": "Golgari Agent",
+    "descriptionEs": "Perteneces al Enjambre Golgari en Ravnica, una vasta sociedad subterránea que recicla los desechos urbanos y canaliza los ciclos de putrefacción y renacimiento."
+  },
+  {
+    "id": "volstrucker-agent",
+    "nameEn": "Volstrucker Agent",
+    "descriptionEs": "Eres un agente encubierto o asesino arcano de los Volstrucker (los \\"
+  },
+  {
+    "id": "trade-sheriff",
+    "nameEn": "Trade Sheriff",
+    "descriptionEs": "Fuiste designado como alguacil de caminos y mercados en las tierras comerciales de Hillsfar, encargado de vigilar las rutas de caravanas, cobrar peajes y aplicar la ley mercantil."
+  },
+  {
+    "id": "gruul-anarch",
+    "nameEn": "Gruul Anarch",
+    "descriptionEs": "Eres un guerrero salvaje de los Clanes Gruul de Ravnica, rebelado contra la civilización opresiva, el asfalto y las leyes asfixiantes de la urbe."
+  },
+  {
+    "id": "entertainer",
+    "nameEn": "Entertainer",
+    "descriptionEs": "Vives frente al público, deleitando a multitudes con tu música, narraciones, danzas, acrobacias o poesía en tabernas, ferias y cortes nobiliarias."
+  },
+  {
+    "id": "anthropologist",
+    "nameEn": "Anthropologist",
+    "descriptionEs": "Has dedicado tu carrera a viajar a tierras remotas para convivir con pueblos aislados, aprender sus dialectos, registrar sus costumbres y descifrar sus mitos."
+  },
+  {
+    "id": "gambler",
+    "nameEn": "Gambler",
+    "descriptionEs": "Vives al límite de la fortuna, desafiando las probabilidades en garitos clandestinos, salones de lujo y mesas de dados donde una sola tirada puede arruinarte o coronarte."
+  },
+  {
+    "id": "mulmaster-aristocrat",
+    "nameEn": "Mulmaster Aristocrat",
+    "descriptionEs": "Perteneces a la nobleza corrupta y despiadada de Mulmaster, donde la intriga cortesana, la magia prohibida y los puñales en la espalda son moneda corriente."
+  },
+  {
+    "id": "archaeologist",
+    "nameEn": "Archaeologist",
+    "descriptionEs": "Exploras ruinas olvidadas, templos enterrados y tumbas ancestrales para desenterrar los secretos y artefactos de civilizaciones perdidas."
+  },
+  {
+    "id": "clan-crafter",
+    "nameEn": "Clan Crafter",
+    "descriptionEs": "Fuiste aprendiz en las grandes forjas o talleres de un clan enano, dominando los secretos tradicionales de la forja, la cantería o la orfebrería."
+  },
+  {
+    "id": "guild-artisan",
+    "nameEn": "Guild Artisan",
+    "descriptionEs": "Eres miembro de pleno derecho de un gremio comercial urbano, especializado en un oficio manufacturero que abastece a la sociedad."
+  },
+  {
+    "id": "ashari",
+    "nameEn": "Ashari",
+    "descriptionEs": "Eres un guardián de las tribus Ashari, consagrado a custodiar una de las cuatro grandes fisuras entre el Plano Material y los Planos Elementales de Aire, Tierra, Fuego o Agua."
+  },
+  {
+    "id": "athlete",
+    "nameEn": "Athlete",
+    "descriptionEs": "Has forjado tu cuerpo y tu espíritu en competiciones atléticas de élite, maratones, juegos olímpicos o arenas de pugilismo."
+  },
+  {
+    "id": "haunted-one",
+    "nameEn": "Haunted One",
+    "descriptionEs": "Sobreviviste a un horror indescriptible en tu pasado: un encuentro con demonios, no-muertos o licántropos que destrozó tu inocencia y marcó tu alma para siempre."
+  },
+  {
+    "id": "iron-route-bandit",
+    "nameEn": "Iron Route Bandit",
+    "descriptionEs": "Acechabas los bosques y calzadas de la peligrosa Ruta de Hierro, asaltando caravanas mal defendidas y viviendo en campamentos ocultos bajo el dosel arbóreo."
+  },
+  {
+    "id": "rival-intern",
+    "nameEn": "Rival Intern",
+    "descriptionEs": "Iniciaste tu carrera como aprendiz o becario en una corporación aventurera rival (como Dran & Courtier o Sixpence), compitiendo a muerte por ascensos, recomendaciones y presupuestos."
+  },
+  {
+    "id": "noble_toc1",
+    "nameEn": "Knight",
+    "descriptionEs": "Perteneces a la más selecta estirpe guerrera de la nobleza, investido con espuelas de caballero, un escudo de armas propio y sirvientes leales que atienden tus necesidades."
+  },
+  {
+    "id": "knight-of-the-order",
+    "nameEn": "Knight of the Order",
+    "descriptionEs": "Perteneces a una orden de caballería consagrada a un ideal religioso, moral o cívico (como los Caballeros de la Espada de Plata, la Orden del Guantelete o los Defensores de Yelmo)."
+  },
+  {
+    "id": "knight-of-solamnia",
+    "nameEn": "Knight of Solamnia",
+    "descriptionEs": "Eres un caballero juramentado de Solamnia en el mundo de Krynn, guiado por la Medida y el Código: \\"
+  },
+  {
+    "id": "urban-bounty-hunter",
+    "nameEn": "Urban Bounty Hunter",
+    "descriptionEs": "Te ganas la vida persiguiendo prófugos, forajidos con precio por su cabeza y desertores en los intrincados callejones de las grandes metrópolis."
+  },
+  {
+    "id": "charlatan",
+    "nameEn": "Charlatan",
+    "descriptionEs": "Vives del arte del engaño, la prestidigitación y la labia, estafando a ilusos con identidades falsas, pociones milagrosas fraudulentas y timos de salón."
+  },
+  {
+    "id": "simic-scientist",
+    "nameEn": "Simic Scientist",
+    "descriptionEs": "Perteneces al Sindicato Simic de Ravnica, consagrado a la investigación biológica, la adaptación acelerada y la mejora genética de formas de vida para la supervivencia urbana."
+  },
+  {
+    "id": "hillsfar-merchant",
+    "nameEn": "Hillsfar Merchant",
+    "descriptionEs": "Hiciste fortuna en los bulliciosos muelles y bazares de Hillsfar, navegando las estrictas leyes contra no-humanos y las intrigas comerciales del Mar de la Luna."
+  },
+  {
+    "id": "failed-merchant",
+    "nameEn": "Failed Merchant",
+    "descriptionEs": "Tuviste un próspero negocio comercial que quebró estrepitosamente debido a malas inversiones, piratería, monstruos o competencia desleal, empujándote al camino de la aventura."
+  },
+  {
+    "id": "guild-artisan_toc1",
+    "nameEn": "Guild Merchant",
+    "descriptionEs": "Perteneces a la rama comercial de un gremio mercantil, especializado en la compra, transporte y venta de mercancías en caravanas y flotas navales."
+  },
+  {
+    "id": "shipwright",
+    "nameEn": "Shipwright",
+    "descriptionEs": "Eres un maestro artesano naval, ducho en doblar tablones de roble, calafatear cascos y armar arboladuras capaces de resistir las tormentas más fieras del océano."
+  },
+  {
+    "id": "smuggler",
+    "nameEn": "Smuggler",
+    "descriptionEs": "Te especializas en mover mercancías prohibidas, armas o personas a través de costas vigiladas, calas secretas y aduanas corruptas sin pagar impuestos ni ser detectado."
+  },
+  {
+    "id": "hillsfar-smuggler",
+    "nameEn": "Hillsfar Smuggler",
+    "descriptionEs": "Operabas en Hillsfar burlando la Gran Muralla y las leyes xenófobas de la ciudad, introduciendo refugiados no-humanos, armas y suministros prohibidos bajo la nariz de la guardia roja."
+  },
+  {
+    "id": "courtier",
+    "nameEn": "Courtier",
+    "descriptionEs": "Te has criado y desenvuelto en los refinados palacios, cancillerías y cortes nobiliarias del reino, dominando el sutil arte del protocolo, las intrigas cortesanas y la diplomacia."
+  },
+  {
+    "id": "criminal",
+    "nameEn": "Criminal",
+    "descriptionEs": "Eres un delincuente experimentado con un largo historial de infringir la ley: carterista, ladrón de casas, contrabandista, matón a sueldo o estafador callejero."
+  },
+  {
+    "id": "rakdos-cultist",
+    "nameEn": "Rakdos Cultist",
+    "descriptionEs": "Eres un artista del caos y acróbata del fuego del Culto de Rakdos en Ravnica, donde la comedia negra, el espectáculo sangriento y la devoción al demonio se fusionan en un carnaval desenfrenado."
+  },
+  {
+    "id": "plaintiff",
+    "nameEn": "Plaintiff",
+    "descriptionEs": "Has interpuesto incontables demandas, litigios y reclamaciones contra corporaciones aventureras, gremios codiciosos o nobles negligentes por daños y perjuicios."
+  },
+  {
+    "id": "dissenter",
+    "nameEn": "Dissenter",
+    "descriptionEs": "En el mundo de Amonkhet cuestionaste las Cinco Pruebas y la supuesta benevolencia del Dios Faraón, pasando a la clandestinidad para evitar ser silenciado o momificado."
+  },
+  {
+    "id": "black-fist-double-agent",
+    "nameEn": "Black Fist Double Agent",
+    "descriptionEs": "Serviste como soldado en la brutal milicia del Puño Negro de Phlan, pero en secreto pasabas informes, armas y rutas de patrulla a la resistencia clandestina."
+  },
+  {
+    "id": "ruined",
+    "nameEn": "Ruined",
+    "descriptionEs": "Lo tuviste todo —riqueza, títulos, familia, honor— hasta que el destino te lo arrebató de golpe debido a una catástrofe mágica, la Baraja de las Ilusiones o una traición devastadora."
+  },
+  {
+    "id": "hermit",
+    "nameEn": "Hermit",
+    "descriptionEs": "Viviste en reclusión voluntaria en una comunidad aislada, un monasterio en la cima de una montaña o en soledad completa en parajes salvajes."
+  },
+  {
+    "id": "cloistered-scholar",
+    "nameEn": "Cloistered Scholar",
+    "descriptionEs": "Pasaste tus años formativos entre las inmensas estanterías de una gran biblioteca monástica o archivo sagrado (como la biblioteca de Candelero o la Biblioteca Real de Silverymoon)."
+  },
+  {
+    "id": "caravan-specialist",
+    "nameEn": "Caravan Specialist",
+    "descriptionEs": "Eres un experto en conducir carromatos, aparejar mulas y guiar largas caravanas de comerciantes a través de pasos montañosos traicioneros y desiertos hostiles."
+  },
+  {
+    "id": "criminal_toc1",
+    "nameEn": "Spy",
+    "descriptionEs": "Operas en las sombras recopilando inteligencia militar, política o comercial para un reino, una facción influyente o un señor de la guerra."
+  },
+  {
+    "id": "lorehold-student",
+    "nameEn": "Lorehold Student",
+    "descriptionEs": "Estudias en la facultad de Lorehold en la Universidad de Strixhaven, el colegio de la Arqueomancia, consagrado a invocar espíritus ancestrales y extraer magia del pasado histórico."
+  },
+  {
+    "id": "prismari-student",
+    "nameEn": "Prismari Student",
+    "descriptionEs": "Perteneces al colegio de Prismari en Strixhaven, la facultad de las Artes Elementales, donde la magia del fuego y el hielo se expresa a través de la danza, el teatro y la escultura."
+  },
+  {
+    "id": "quandrix-student",
+    "nameEn": "Quandrix Student",
+    "descriptionEs": "Estudias en la facultad de Quandrix en Strixhaven, el colegio de la Numeromancia, donde los patrones matemáticos, fractales y ecuaciones son el tejido oculto que moldea la realidad física."
+  },
+  {
+    "id": "silverquill-student",
+    "nameEn": "Silverquill Student",
+    "descriptionEs": "Perteneces al colegio de Silverquill en Strixhaven, la facultad de la Elocuencia, donde las palabras habladas y escritas son armas afiladas de luz radiante o tinta sombría."
+  },
+  {
+    "id": "witherbloom-student",
+    "nameEn": "Witherbloom Student",
+    "descriptionEs": "Estudias en la facultad de Witherbloom en Strixhaven, el colegio de la Biología y la Nigromancia, donde la frontera entre la vida floreciente y la muerte marchita es un ciclo sagrado."
+  },
+  {
+    "id": "exposito-gigantes",
+    "nameEn": "Giant Foundling",
+    "descriptionEs": "Creciste entre los gigantes, acogido en sus fortalezas de las nubes, colinas o cavernas de hielo, adoptando sus tradiciones colosales y su visión milenaria."
+  },
+  {
+    "id": "shade-fanatic",
+    "nameEn": "Shade Fanatic",
+    "descriptionEs": "Veneras el poder perdido del caído Imperio de Netheril y la magia sombría de los Príncipes de la Sombra, conspirando en cultos secretos para restaurar su gloria oculta."
+  },
+  {
+    "id": "planar-philosopher",
+    "nameEn": "Planar Philosopher",
+    "descriptionEs": "Perteneces a una de las influyentes facciones ideológicas de Sigil (como los Hombres de Polvo, la Orden Trascendente, los Creyentes de la Fuente o la Mente Harmónica), defendiendo una visión filosófica del multiverso."
+  },
+  {
+    "id": "outlander",
+    "nameEn": "Outlander",
+    "descriptionEs": "Creciste en tierras salvajes, lejos de los caminos trillados y de la comodidad de las ciudades: en estepas infinitas, selvas primigenias o cordilleras escarpadas."
+  },
+  {
+    "id": "azorius-functionary",
+    "nameEn": "Azorius Functionary",
+    "descriptionEs": "Eres un letrado, escriba, alguacil o burócrata del Senado Azorio en Ravnica, consagrado a redactar edictos, aplicar la ley y mantener el orden en la metrópoli."
+  },
+  {
+    "id": "harborfolk",
+    "nameEn": "Harborfolk",
+    "descriptionEs": "Creciste entre los muelles podridos, grúas de carga y barracones de pescadores de un puerto hostil como Mulmaster, ganándote el pan en el fango salino."
+  },
+  {
+    "id": "entertainer_toc1",
+    "nameEn": "Gladiator",
+    "descriptionEs": "Luchaste por tu vida y por el rugido de la multitud en arenas de gladiadores, fosos de arena ensangrentada y espectáculos circenses de combate."
+  },
+  {
+    "id": "rune-carver",
+    "nameEn": "Rune Carver",
+    "descriptionEs": "Dominas el arte ancestral de los gigantes de grabar runas mágicas en piedra, metal y madera, canalizando el poder primordial del cosmos en símbolos sagrados."
+  },
+  {
+    "id": "urchin",
+    "nameEn": "Urchin",
+    "descriptionEs": "Creciste solo en las calles de una gran ciudad, huérfano y desamparado, sobreviviendo gracias a tu astucia, tu rapidez de manos y tu conocimiento de los callejones."
+  },
+  {
+    "id": "gate-urchin",
+    "nameEn": "Gate Urchin",
+    "descriptionEs": "Vivías rondando las inmensas puertas fortificadas de Hillsfar, observando las caravanas entrantes, timando a viajeros desorientados y espiando para contrabandistas."
+  },
+  {
+    "id": "city-watch",
+    "nameEn": "City Watch",
+    "descriptionEs": "Serviste como agente de la ley y el orden patrullando las calles, plazas y murallas de una bulliciosa urbe (como Aguas Profundas, Neverwinter o Puerta de Baldur)."
+  },
+  {
+    "id": "gate-warden",
+    "nameEn": "Gate Warden",
+    "descriptionEs": "Creciste o prestaste servicio custodiando una de las Ciudades de Entrada de las Tierras Exteriores o los enigmáticos portales de Sigil que conectan con los planos exteriores."
+  },
+  {
+    "id": "inheritor",
+    "nameEn": "Inheritor",
+    "descriptionEs": "Eres el legítimo custodio de una herencia misteriosa y de gran significado: un objeto arcano, un mapa encriptado o un linaje oculto que cambió el curso de tu vida."
+  },
+  {
+    "id": "folk-hero",
+    "nameEn": "Folk Hero",
+    "descriptionEs": "Procedente de un origen humilde como campesino, herrero o leñador, te alzaste en armas para defender a tu aldea contra un tirano, un monstruo o un desastre, convirtiéndote en una leyenda popular."
+  },
+  {
+    "id": "secret-identity",
+    "nameEn": "Secret Identity",
+    "descriptionEs": "Llevas una doble vida cuidadosamente compartimentada: de día eres un respetable ciudadano o comerciante, pero bajo la máscara actúas como justiciero, espía o rebelde encubierto."
+  },
+  {
+    "id": "izzet-engineer",
+    "nameEn": "Izzet Engineer",
+    "descriptionEs": "Perteneces a la Liga Izzet de Ravnica, la organización de inventores desquiciados, artífices e investigadores de la energía elemental del vapor, el rayo y el mana."
+  },
+  {
+    "id": "initiate",
+    "nameEn": "Initiate",
+    "descriptionEs": "Te entrenaste desde la niñez en los monumentos de Amonkhet para superar las Cinco Pruebas de los dioses (Solidaridad, Conocimiento, Fuerza, Ambición y Celo) y alcanzar la gloriosa otra vida."
+  },
+  {
+    "id": "selesnya-initiate",
+    "nameEn": "Selesnya Initiate",
+    "descriptionEs": "Eres un devoto del Cónclave Selesnya en Ravnica, una comunidad espiritual que busca la comunión pacífica, la armonía con la naturaleza y el poder del canto coral de Mat’Selesnya."
+  },
+  {
+    "id": "inquisitor",
+    "nameEn": "Inquisitor",
+    "descriptionEs": "Perteneces al brazo judicial y armado de la Iglesia de Avacyn en Innistrad, consagrado a purgar hombres lobo, vampiros, sectarios y nigromantes que acechan a la humanidad."
+  },
+  {
+    "id": "phlan-insurgent",
+    "nameEn": "Phlan Insurgent",
+    "descriptionEs": "Luchaste en la resistencia clandestina cuando la ciudad de Phlan fue ocupada por el dragón verde Vorgansharax y sus hordas de invasores."
+  },
+  {
+    "id": "investigator",
+    "nameEn": "Investigator (VRGR)",
+    "descriptionEs": "Eres un detective profesional, detective privado o consultor forense que resuelve crímenes misteriosos, desapariciones y asesinatos sobrenaturales."
+  },
+  {
+    "id": "city-watch_toc1",
+    "nameEn": "Investigator (SCAG)",
+    "descriptionEs": "Formabas parte de la división de investigación criminal de la guardia urbana, encargado de esclarecer homicidios, fraudes de gremios y conspiraciones palaciegas."
+  },
+  {
+    "id": "boros-legionnaire",
+    "nameEn": "Boros Legionnaire",
+    "descriptionEs": "Eres un soldado juramentado de la Legión Boros en Ravnica, consagrado a la justicia ardiente, el honor marcial y la protección implacable de la ciudad."
+  },
+  {
+    "id": "mage-of-high-sorcery",
+    "nameEn": "Mage of High Sorcery",
+    "descriptionEs": "Perteneces a las venerables Órdenes de Alta Hechicería en el mundo de Krynn, devotas de las tres lunas de la magia: Solinari (Túnicas Blancas), Lunitari (Túnicas Rojas) o Nuitari (Túnicas Negras)."
+  },
+  {
+    "id": "witchlight-hand",
+    "nameEn": "Witchlight Hand",
+    "descriptionEs": "Trabajas como empleado, acróbata, tramoyista o acomodador en el mágico y caprichoso Carnaval de Witchlight, que viaja entre mundos a través de las nieblas del Feywild."
+  },
+  {
+    "id": "sailor",
+    "nameEn": "Sailor",
+    "descriptionEs": "Has navegado en barcos mercantes, balandros o galeras de guerra durante años, desafiando tormentas descomunales, monstruos marinos y la inmensidad del océano."
+  },
+  {
+    "id": "uthgardt-tribe-member",
+    "nameEn": "Uthgardt Tribe Member",
+    "descriptionEs": "Perteneces a una de las fieras tribus bárbaras Uthgardt del norte salvaje (como el Alce Negro, el Lobo Rojo, el Grifo, el León Negro o el Poni del Trueno), devotas de espíritus bestiales ancestrales."
+  },
+  {
+    "id": "earthspur-miner",
+    "nameEn": "Earthspur Miner",
+    "descriptionEs": "Extrajiste oro, hierro y gemas preciosas en las profundas y traicioneras galerías subterráneas de las montañas Earthspur, cerca de Mulmaster."
+  },
+  {
+    "id": "wildspacer",
+    "nameEn": "Wildspacer",
+    "descriptionEs": "Creciste o navegaste en los confines del Espacio Salvaje (Wildspace) y el Mar Astral, tripulando naves mágicas Spelljammer entre esferas de cristal y cinturones de asteroides."
+  },
+  {
+    "id": "noble",
+    "nameEn": "Noble",
+    "descriptionEs": "Naciste en una familia aristocrática privilegiada con tierras, vasallos, blasón heráldico y una gran influencia en los palacios y cortes del reino."
+  },
+  {
+    "id": "waterdhavian-noble",
+    "nameEn": "Waterdhavian Noble",
+    "descriptionEs": "Perteneces a una de las orgullosas familias patricias de Aguas Profundas, la Ciudad de los Esplendores, donde el dinero, la intriga política y el mecenazgo definen el estatus social."
+  },
+  {
+    "id": "ticklebelly-nomad",
+    "nameEn": "Ticklebelly Nomad",
+    "descriptionEs": "Formabas parte de los clanes nómadas que pastoreaban rebaños y cazaban en las colinas de Ticklebelly, al este de la Costa del Dragón y el Mar de la Luna."
+  },
+  {
+    "id": "dimir-operative",
+    "nameEn": "Dimir Operative",
+    "descriptionEs": "Eres un agente encubierto de la Casa Dimir en Ravnica, una red clandestina de espías, asesinos mentales y manipuladores de recuerdos cuya existencia misma muchos niegan."
+  },
+  {
+    "id": "feylost",
+    "nameEn": "Feylost",
+    "descriptionEs": "Siendo un niño o en tu juventud, fuiste transportado al Feywild (el Páramo de las Hadas), viviendo durante años entre criaturas feéricas caprichosas antes de regresar al Plano Material."
+  },
+  {
+    "id": "fisher",
+    "nameEn": "Fisher",
+    "descriptionEs": "Te has ganado la vida sobre aguas costeras, ríos caudalosos o lagos brumosos, remando en tu barca con el amanecer y leyendo los misterios de las profundidades."
+  },
+  {
+    "id": "sailor_toc1",
+    "nameEn": "Pirate",
+    "descriptionEs": "Navegaste bajo la bandera negra del corso y la piratería, asaltando galeones mercantes, saqueando puertos indefensos y bebiendo en refugios de forajidos del mar."
+  },
+  {
+    "id": "stojanow-prisoner",
+    "nameEn": "Stojanow Prisoner",
+    "descriptionEs": "Pasaste años encerrado en las siniestras mazmorras de la Puerta de Stojanow en Phlan, sobreviviendo a la tortura, el hambre y la oscuridad gracias a tu voluntad de hierro."
+  },
+  {
+    "id": "rewarded",
+    "nameEn": "Rewarded",
+    "descriptionEs": "Realizaste una hazaña heroica, salvaste a un ser supremo o fuiste agraciado por una tirada providencial de la Baraja de las Ilusiones, recibiendo una bendición del destino que cambió tu fortuna."
+  },
+  {
+    "id": "cormanthor-refugee",
+    "nameEn": "Cormanthor Refugee",
+    "descriptionEs": "Huyendo de las leyes xenófobas de Hillsfar o de la guerra en el bosque élfico de Cormanthor, encontraste refugio en campamentos fronterizos bajo el follaje ancestral."
+  },
+  {
+    "id": "phlan-refugee",
+    "nameEn": "Phlan Refugee",
+    "descriptionEs": "Tuviste que huir precipitadamente de tu hogar en Phlan cuando la ciudad cayó ante el ataque devastador del dragón verde Vorgansharax, reconstruyendo tu vida desde cero como refugiado."
+  },
+  {
+    "id": "orzhov-representative",
+    "nameEn": "Orzhov Representative",
+    "descriptionEs": "Perteneces al Sindicato Orzhov en Ravnica, una oligarquía que fusiona religión ostentosa, banca usurera y esclavitud de espíritus mediante contratos y deudas kármicas."
+  },
+  {
+    "id": "sage",
+    "nameEn": "Sage",
+    "descriptionEs": "Dedicaste años al estudio meticuloso del saber acumulado por el multiverso en bibliotecas, laboratorios de alquimia o torres de escribas."
+  },
+  {
+    "id": "faceless",
+    "nameEn": "Faceless",
+    "descriptionEs": "Ocultas tu verdadero rostro y tu identidad tras una máscara inexpresiva o teatral, actuando como justiciero nocturno, vengador silencioso o figura folclórica."
+  },
+  {
+    "id": "soldier",
+    "nameEn": "Soldier",
+    "descriptionEs": "Serviste como guerrero profesional en un ejército regular, milicia ciudadana o compañía de infantería, forjado en la disciplina marcial y el horror de la guerra."
+  },
+  {
+    "id": "marine",
+    "nameEn": "Marine",
+    "descriptionEs": "Fuiste entrenado como soldado de asalto anfibio e infante de marina, especializado en desembarcos bajo fuego, combate en cubierta resbaladiza y asaltos navales."
+  },
+  {
+    "id": "grinner",
+    "nameEn": "Grinner",
+    "descriptionEs": "Eres un agente encubierto de los Golden Grins en Wildemount, viajando como trovador o comediante para sembrar semillas de libertad y cantar baladas que desafían la censura y la tiranía imperial."
+  },
+  {
+    "id": "dragon-casualty",
+    "nameEn": "Dragon Casualty",
+    "descriptionEs": "Sobreviviste milagrosamente al ataque abrasador, corrosivo o helado de un dragón verdadero que arrasó tu hogar y dejó en tu cuerpo cicatrices mágicas imborrables."
+  },
+  {
+    "id": "astral-drifter",
+    "nameEn": "Astral Drifter",
+    "descriptionEs": "Derivaste durante décadas o siglos a través de las silenciosas corrientes del Mar Astral, donde el tiempo no transcurre y los pensamientos flotan como nebulosas de plata."
+  },
+  {
+    "id": "celebrity-adventurers-scion",
+    "nameEn": "Celebrity Adventurer’s Scion",
+    "descriptionEs": "Eres el hijo o heredero de un famoso aventurero legendario cuyas gestas son cantadas en tabernas, dramatizadas en obras de teatro y registradas en libros de historia."
+  },
+  {
+    "id": "mercenary-veteran",
+    "nameEn": "Mercenary Veteran",
+    "descriptionEs": "Te ganaste la vida vendiendo tu espada a compañías mercenarias famosas (como los Puños Ardientes, la Compañía Libre o los Zhentarim), luchando en guerras ajenas por una bolsa de oro."
+  },
+  {
+    "id": "far-traveler",
+    "nameEn": "Far Traveler",
+    "descriptionEs": "Provienes de una tierra lejana y exótica, allende los mares o más allá de montañas infranqueables (como Kara-Tur, Zakhara, las selvas de Chult o Maztica), donde las costumbres, ropas e idiomas son radicalmente distintos."
+  },
+  {
+    "id": "vizier",
+    "nameEn": "Vizier",
+    "descriptionEs": "Serviste como sacerdote administrador, canciller y visir en los templos de los cinco dioses de Amonkhet, gestionando los ritos sagrados, las cosechas de grano y la organización de las Pruebas."
+  }
+]

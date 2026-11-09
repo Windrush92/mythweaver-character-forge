@@ -26,6 +26,12 @@ export interface Spell {
   components: string; // e.g. "V, S", "V, S, M (una perla)"
   duration: string; // e.g. "Instantáneo", "Concentración, hasta 1 hora"
   description: string;
+  descriptionEn?: string;
+  higherLevelsEn?: string;
+  castingTimeEn?: string;
+  rangeEn?: string;
+  componentsEn?: string;
+  durationEn?: string;
   higherLevels?: string;
   ritual?: boolean;
   concentration?: boolean;
@@ -117,6 +123,8 @@ export type AvatarFrameStyle =
   | 'royal-ruby';
 
 export interface Character {
+  edition?: '5e' | '5.5e';
+  weaponMasteries?: string[];
   id: string;
   campaignId: string;
   campaignIds?: string[]; // Multiple campaign association / cross-campaign support
@@ -227,6 +235,12 @@ export interface Encounter {
   campaignId: string;
   name: string;
   description: string;
+  descriptionEn?: string;
+  higherLevelsEn?: string;
+  castingTimeEn?: string;
+  rangeEn?: string;
+  componentsEn?: string;
+  durationEn?: string;
   enemies: EncounterEnemy[];
   characterIds?: string[]; // IDs de los PJs participantes en este encuentro específico
   difficulty: 'Trivial' | 'Easy' | 'Medium' | 'Hard' | 'Deadly';
@@ -280,6 +294,12 @@ export interface WorldMapPin {
   y: number; // percentage 0-100
   title: string;
   description: string;
+  descriptionEn?: string;
+  higherLevelsEn?: string;
+  castingTimeEn?: string;
+  rangeEn?: string;
+  componentsEn?: string;
+  durationEn?: string;
   type: 'party' | 'city' | 'dungeon' | 'camp' | 'hazard' | 'quest';
   color?: string;
 }
@@ -288,6 +308,12 @@ export interface Campaign {
   id: string;
   name: string;
   description: string;
+  descriptionEn?: string;
+  higherLevelsEn?: string;
+  castingTimeEn?: string;
+  rangeEn?: string;
+  componentsEn?: string;
+  durationEn?: string;
   createdAt: string;
   dmName: string;
   worldMapUrl?: string;

@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { OFFICIAL_SPELLS_COMPENDIUM } from '../data/spellsData';
 import { Spell } from '../types';
+import { useLanguageStore } from '../hooks/useLanguageStore';
+import { localizeReactNode, translateDndTitle, translateDndText, translateSpellSchool, translateSpellMeta } from '../utils/dndEnglishTranslator';
 import {
   Sparkles,
   Search,
@@ -31,6 +33,7 @@ export const SpellPickerModal: React.FC<SpellPickerModalProps> = ({
   title,
   subtitle,
 }) => {
+  const { isSpanish } = useLanguageStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLevel, setSelectedLevel] = useState<number | 'all'>('all');
   const [selectedSchool, setSelectedSchool] = useState<string>('all');
@@ -55,7 +58,7 @@ export const SpellPickerModal: React.FC<SpellPickerModalProps> = ({
         const q = searchTerm.toLowerCase().trim();
         const matchesName = spell.name.toLowerCase().includes(q);
         const matchesNameEn = spell.nameEn ? spell.nameEn.toLowerCase().includes(q) : false;
-        const matchesDesc = spell.description.toLowerCase().includes(q);
+        const matchesDesc = spell.description.toLowerCase().includes(q) || (spell.descriptionEn ? spell.descriptionEn.toLowerCase().includes(q) : false);
         const matchesSchool = spell.school.toLowerCase().includes(q);
         return matchesName || matchesNameEn || matchesDesc || matchesSchool;
       }
@@ -63,9 +66,9 @@ export const SpellPickerModal: React.FC<SpellPickerModalProps> = ({
       return true;
     }).sort((a, b) => {
       if (a.level !== b.level) return a.level - b.level;
-      return a.name.localeCompare(b.name);
+      return isSpanish ? a.name.localeCompare(b.name) : (a.nameEn || a.name).localeCompare(b.nameEn || b.name);
     });
-  }, [selectedLevel, selectedSchool, searchTerm]);
+  }, [selectedLevel, selectedSchool, searchTerm, isSpanish]);
 
   if (!isOpen) return null;
 
@@ -80,11 +83,14 @@ export const SpellPickerModal: React.FC<SpellPickerModalProps> = ({
             </div>
             <div>
               <h3 className="font-fantasy font-bold text-lg sm:text-xl text-[#e8c37d] tracking-wide flex items-center gap-2">
-                {title || 'Compendio Místico: Catálogo Oficial de Conjuros 5e'}
+                {title ? (isSpanish ? title : translateDndTitle(title)) : (isSpanish ? 'Compendio Místico: Catálogo Oficial de Conjuros 5e' : 'Mystic Compendium: Official 5e Spell Catalog')}
               </h3>
               <p className="text-xs text-[#c4a47c] mt-0.5">
-                {subtitle ||
-                  'Explora todos los trucos y conjuros oficiales de 5e para añadirlos a tu repertorio de linaje, dotes, magia innata o grimorio.'}
+                {subtitle
+                  ? (isSpanish ? subtitle : translateDndText(subtitle))
+                  : (isSpanish
+                    ? 'Explora todos los trucos y conjuros oficiales de 5e para añadirlos a tu repertorio de linaje, dotes, magia innata o grimorio.'
+                    : 'Browse all official 5e cantrips and spells to add to your lineage, feats, innate magic, or spellbook.')}
               </p>
             </div>
           </div>
@@ -92,7 +98,7 @@ export const SpellPickerModal: React.FC<SpellPickerModalProps> = ({
             type="button"
             onClick={onClose}
             className="p-2 text-[#c4a47c] hover:text-white hover:bg-white/10 rounded-xl transition cursor-pointer"
-            title="Cerrar catálogo de conjuros"
+            title={isSpanish ? 'Cerrar catálogo de conjuros' : 'Close spell catalog'}
           >
             <X className="w-5 h-5" />
           </button>
@@ -108,7 +114,7 @@ export const SpellPickerModal: React.FC<SpellPickerModalProps> = ({
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Buscar conjuro por nombre o efecto..."
+                placeholder={isSpanish ? 'Buscar conjuro por nombre o efecto...' : 'Search spells by name or effect...'}
                 className="w-full bg-white border border-[#d6c4aa] rounded-xl pl-9 pr-3 py-1.5 text-xs text-[#3d2a1b] placeholder-[#8c672b]/60 focus:outline-none focus:border-[#8c672b]"
               />
               {searchTerm && (
@@ -125,22 +131,22 @@ export const SpellPickerModal: React.FC<SpellPickerModalProps> = ({
             {/* School Filter */}
             <div className="flex items-center gap-2 w-full sm:w-auto">
               <span className="text-[11px] font-fantasy font-bold text-[#5c4a35] whitespace-nowrap">
-                Escuela:
+                {isSpanish ? 'Escuela:' : 'School:'}
               </span>
               <select
                 value={selectedSchool}
                 onChange={(e) => setSelectedSchool(e.target.value)}
                 className="bg-white border border-[#d6c4aa] rounded-xl px-3 py-1.5 text-xs text-[#3d2a1b] focus:outline-none focus:border-[#8c672b] cursor-pointer"
               >
-                <option value="all">Todas las Escuelas</option>
-                <option value="abjuración">Abjuración</option>
-                <option value="conjuración">Conjuración</option>
-                <option value="adivinación">Adivinación</option>
-                <option value="encantamiento">Encantamiento</option>
-                <option value="evocación">Evocación</option>
-                <option value="ilusión">Ilusión</option>
-                <option value="nigromancia">Nigromancia</option>
-                <option value="transmutación">Transmutación</option>
+                <option value="all">{isSpanish ? 'Todas las Escuelas' : 'All Schools'}</option>
+                <option value="abjuración">{isSpanish ? 'Abjuración' : 'Abjuration'}</option>
+                <option value="conjuración">{isSpanish ? 'Conjuración' : 'Conjuration'}</option>
+                <option value="adivinación">{isSpanish ? 'Adivinación' : 'Divination'}</option>
+                <option value="encantamiento">{isSpanish ? 'Encantamiento' : 'Enchantment'}</option>
+                <option value="evocación">{isSpanish ? 'Evocación' : 'Evocation'}</option>
+                <option value="ilusión">{isSpanish ? 'Ilusión' : 'Illusion'}</option>
+                <option value="nigromancia">{isSpanish ? 'Nigromancia' : 'Necromancy'}</option>
+                <option value="transmutación">{isSpanish ? 'Transmutación' : 'Transmutation'}</option>
               </select>
             </div>
           </div>
@@ -156,7 +162,7 @@ export const SpellPickerModal: React.FC<SpellPickerModalProps> = ({
                   : 'bg-white/80 text-[#5c4a35] hover:bg-white border border-[#d6c4aa]'
               }`}
             >
-              Todos los Niveles
+              {isSpanish ? 'Todos los Niveles' : 'All Levels'}
             </button>
             <button
               type="button"
@@ -167,7 +173,7 @@ export const SpellPickerModal: React.FC<SpellPickerModalProps> = ({
                   : 'bg-white/80 text-[#5c4a35] hover:bg-white border border-[#d6c4aa]'
               }`}
             >
-              Trucos (Nv 0)
+              {isSpanish ? 'Trucos (Nv 0)' : 'Cantrips (Lv 0)'}
             </button>
             {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((lvl) => (
               <button
@@ -180,7 +186,7 @@ export const SpellPickerModal: React.FC<SpellPickerModalProps> = ({
                     : 'bg-white/80 text-[#5c4a35] hover:bg-white border border-[#d6c4aa]'
                 }`}
               >
-                Nv {lvl}
+                {isSpanish ? 'Nv' : 'Lv'} {lvl}
               </button>
             ))}
           </div>
@@ -192,10 +198,10 @@ export const SpellPickerModal: React.FC<SpellPickerModalProps> = ({
             <div className="p-8 text-center bg-[#f5ede0] rounded-2xl border border-dashed border-[#d8c8af] space-y-2">
               <Sparkles className="w-8 h-8 text-[#8c672b]/50 mx-auto" />
               <p className="text-sm font-fantasy font-bold text-[#4a361c]">
-                No se encontraron conjuros con ese criterio.
+                {isSpanish ? 'No se encontraron conjuros con ese criterio.' : 'No spells found matching that criteria.'}
               </p>
               <p className="text-xs text-[#7a6448]">
-                Intenta buscar por otro nombre o ajustar el nivel y escuela.
+                {isSpanish ? 'Intenta buscar por otro nombre o ajustar el nivel y escuela.' : 'Try searching another name or adjusting level and school filters.'}
               </p>
             </div>
           ) : (
@@ -219,15 +225,15 @@ export const SpellPickerModal: React.FC<SpellPickerModalProps> = ({
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
                           <h4 className="font-fantasy font-bold text-sm text-[#2c221a] truncate">
-                            {spell.name}
-                            {spell.nameEn && spell.nameEn.toLowerCase() !== spell.name.toLowerCase() && (
+                            {isSpanish ? spell.name : (spell.nameEn || translateDndTitle(spell.name))}
+                            {isSpanish && spell.nameEn && spell.nameEn.toLowerCase() !== spell.name.toLowerCase() && (
                               <span className="text-[11px] font-serif font-normal italic text-[#8c672b] ml-1.5">
                                 ({spell.nameEn})
                               </span>
                             )}
                           </h4>
                           <span className="text-[10px] text-[#7a6448] font-mono block">
-                            {spell.school}
+                            {isSpanish ? spell.school : translateSpellSchool(spell.school)}
                           </span>
                         </div>
                         <span
@@ -237,21 +243,21 @@ export const SpellPickerModal: React.FC<SpellPickerModalProps> = ({
                               : 'bg-[#8c672b] text-white shadow-xs'
                           }`}
                         >
-                          {spell.level === 0 ? 'Truco' : `Nivel ${spell.level}`}
+                          {spell.level === 0 ? (isSpanish ? 'Truco' : 'Cantrip') : `${isSpanish ? 'Nivel' : 'Level'} ${spell.level}`}
                         </span>
                       </div>
 
                       {/* Spell Specs */}
                       <div className="flex flex-wrap items-center gap-1.5 mt-2 text-[10px] text-[#5e4e3e]">
                         <span className="bg-[#f0e6d6] px-1.5 py-0.5 rounded border border-[#dbcbb2] font-mono">
-                          ⏱️ {spell.castingTime}
+                          ⏱️ {isSpanish ? spell.castingTime : (spell.castingTimeEn || translateSpellMeta(spell.castingTime))}
                         </span>
                         <span className="bg-[#f0e6d6] px-1.5 py-0.5 rounded border border-[#dbcbb2] font-mono">
-                          🎯 {spell.range}
+                          🎯 {isSpanish ? spell.range : (spell.rangeEn || translateSpellMeta(spell.range))}
                         </span>
                         {spell.concentration && (
                           <span className="bg-[#f8dcd9] text-[#8c2e28] px-1.5 py-0.5 rounded font-mono font-bold">
-                            Concentración
+                            {isSpanish ? 'Concentración' : 'Concentration'}
                           </span>
                         )}
                         {spell.ritual && (
@@ -263,14 +269,14 @@ export const SpellPickerModal: React.FC<SpellPickerModalProps> = ({
 
                       {/* Description */}
                       <p className="text-xs text-[#5c4a35] mt-2.5 leading-relaxed line-clamp-3">
-                        {spell.description}
+                        {isSpanish ? spell.description : (spell.descriptionEn || translateDndText(spell.description))}
                       </p>
                     </div>
 
                     {/* Bottom Action */}
                     <div className="mt-3.5 pt-2.5 border-t border-[#e8dcc9] flex items-center justify-between">
                       <span className="text-[10px] text-[#7a6448] font-mono">
-                        {spell.duration}
+                        {isSpanish ? spell.duration : (spell.durationEn || translateSpellMeta(spell.duration))}
                       </span>
                       <button
                         type="button"
@@ -283,11 +289,11 @@ export const SpellPickerModal: React.FC<SpellPickerModalProps> = ({
                       >
                         {isSelected ? (
                           <>
-                            <Check className="w-3.5 h-3.5" /> En Grimorio
+                            <Check className="w-3.5 h-3.5" /> {isSpanish ? 'En Grimorio' : 'In Spellbook'}
                           </>
                         ) : (
                           <>
-                            <Plus className="w-3.5 h-3.5" /> Añadir
+                            <Plus className="w-3.5 h-3.5" /> {isSpanish ? 'Añadir' : 'Add'}
                           </>
                         )}
                       </button>
@@ -302,14 +308,18 @@ export const SpellPickerModal: React.FC<SpellPickerModalProps> = ({
         {/* Footer */}
         <div className="p-3.5 sm:p-4 bg-[#f4ebd9] border-t border-[#d6c4aa] flex items-center justify-between text-xs text-[#5c4a35] shrink-0">
           <span>
-            Mostrando <strong>{filteredSpells.length}</strong> de {OFFICIAL_SPELLS_COMPENDIUM.length} conjuros
+            {isSpanish ? (
+              <>Mostrando <strong>{filteredSpells.length}</strong> de {OFFICIAL_SPELLS_COMPENDIUM.length} conjuros</>
+            ) : (
+              <>Showing <strong>{filteredSpells.length}</strong> of {OFFICIAL_SPELLS_COMPENDIUM.length} spells</>
+            )}
           </span>
           <button
             type="button"
             onClick={onClose}
             className="px-4 py-1.5 bg-[#dfcfb9] hover:bg-[#cfbe9e] text-[#382b20] rounded-lg font-fantasy font-bold transition cursor-pointer"
           >
-            Cerrar
+            {isSpanish ? 'Cerrar' : 'Close'}
           </button>
         </div>
       </div>

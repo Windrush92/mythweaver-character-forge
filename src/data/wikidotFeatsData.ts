@@ -2418,11 +2418,11 @@ export const ALL_WIKIDOT_FEATS: OfficialFeat[] = [
     "nameEn": "Silver-Tongued",
     "source": "Unearthed Arcana 38 - Feats for Skills",
     "category": "Combate",
-    "description": "Desarrollas tu habilidad conversacional para engañar mejor a otros. Obtienes los siguientes beneficios:",
+    "description": "You develop your conversational skill to better deceive others. You gain the following benefits:",
     "benefits": [
-      "Aumenta tu puntuación de Carisma en 1, hasta un máximo de 20.",
-      "Ganas competencia en la habilidad Engaño. Si ya eres competente en ella, sumas el doble de tu bonificador de competencia a las pruebas que hagas con ella.",
-      "Cuando realizas la acción de Atacar en tu turno, puedes reemplazar un ataque por un intento de engañar a un humanoide que puedas ver a 30 pies o menos y que pueda verte y oírte. Haz una prueba de Carisma (Engaño) enfrentada a la prueba de Sabiduría (Perspicacia) del objetivo. Si tienes éxito, tu movimiento no provoca ataques de oportunidad del objetivo y tus tiradas de ataque contra él tienen ventaja; ambos beneficios duran hasta el final de tu siguiente turno o hasta que uses esta habilidad contra un objetivo diferente. Si fallas, el objetivo no puede ser engañado por ti de esta manera durante 1 hora."
+      "Increase your Charisma score by 1, to a maximum of 20.",
+      "You gain proficiency in the Deception skill. If you are already proficient in the skill, you add double your proficiency bonus to checks you make with it.",
+      "When you take the Attack action on your turn, you can replace one attack with an attempt to deceive one humanoid you can see within 30 feet of you that can see and hear you. Make a Charisma (Deception) check contested by the target's Wisdom (Insight) check. If your check succeeds, your movement doesn't provoke opportunity attacks from the target and your attack rolls against it have advantage; both benefits last until the end of your next turn or until you use this ability on a different target. If your check fails, the target can't be deceived by you in this way for 1 hour."
     ],
     "abilityBonus": {
       "stats": [
@@ -2437,12 +2437,12 @@ export const ALL_WIKIDOT_FEATS: OfficialFeat[] = [
     "nameEn": "Spear Mastery",
     "source": "Unearthed Arcana 15 - Feats",
     "category": "Combate",
-    "description": "Aunque la lanza es un arma sencilla de aprender, te recompensa por el tiempo dedicado a dominarla. Obtienes los siguientes beneficios:\n\n• Ganas un bonificador de +1 a las tiradas de ataque que realices con una lanza.\n\n• Cuando usas una lanza, su dado de daño cambia de 1d6 a 1d8, y de 1d8 a 1d10 cuando se empuña a dos manos.\n\n• Puedes preparar tu lanza para recibir una carga. Como acción adicional, elige una criatura a 20 pies o más de ti. Si se mueve al alcance de tu lanza en su siguiente turno, puedes hacer un ataque cuerpo a cuerpo contra ella como reacción (+1d8 de daño perforante extra, o +1d10 a dos manos).\n\n• Como acción adicional en tu turno, puedes aumentar tu alcance con una lanza en 5 pies durante el resto de tu turno.",
+    "description": "Though the spear is a simple weapon to learn, it rewards you for the time you have taken to master it. You gain the following benefits:",
     "benefits": [
-      "Ganas un bonificador de +1 a las tiradas de ataque que realices con una lanza.",
-      "Cuando usas una lanza, su dado de daño cambia de 1d6 a 1d8, y de 1d8 a 1d10 cuando se empuña a dos manos.",
-      "Puedes preparar tu lanza para recibir una carga como acción adicional contra una criatura a 20 pies o más: reacción para atacar si entra en tu alcance (+1d8 o +1d10 de daño).",
-      "Como acción adicional en tu turno, aumentas tu alcance con la lanza en 5 pies durante el resto de tu turno."
+      "You gain a +1 bonus to attack rolls you make with a spear.",
+      "When you use a spear, its damage die changes from a d6 to a d8, and from a d8 to a d10 when wielded with two hands.",
+      "You can set your spear to receive a charge. As a bonus action, choose a creature you can see that is at least 20 feet away from you. If the creature moves within your spear's reach on its next turn, you can make a melee attack against it with your spear as a reaction (+1d8 extra piercing damage, or +1d10 with two hands).",
+      "As a bonus action on your turn, you can increase your reach with a spear by 5 feet for the rest of your turn."
     ]
   },
   {
@@ -2451,11 +2451,11 @@ export const ALL_WIKIDOT_FEATS: OfficialFeat[] = [
     "nameEn": "Stealthy",
     "source": "Unearthed Arcana 38 - Feats for Skills",
     "category": "Utilidad",
-    "description": "Sabes cómo ocultarte de la forma más efectiva. Obtienes los siguientes beneficios:",
+    "description": "You know how best to hide. You gain the following benefits:",
     "benefits": [
-      "Aumenta tu puntuación de Destreza en 1, hasta un máximo de 20.",
-      "Ganas competencia en la habilidad Sigilo. Si ya eres competente en ella, sumas el doble de tu bonificador de competencia a las pruebas que hagas con ella.",
-      "Si estás oculto, puedes moverte hasta 10 pies al descubierto sin revelarte si terminas el movimiento en una posición donde no seas claramente visible."
+      "Increase your Dexterity score by 1, to a maximum of 20.",
+      "You gain proficiency in the Stealth skill. If you are already proficient in the skill, you add double your proficiency bonus to checks you make with it.",
+      "If you are hidden, you can move up to 10 feet in the open without revealing yourself if you end the move in a position where you're not clearly visible."
     ],
     "abilityBonus": {
       "stats": [
@@ -2470,11 +2470,11 @@ export const ALL_WIKIDOT_FEATS: OfficialFeat[] = [
     "nameEn": "Survivalist",
     "source": "Unearthed Arcana 38 - Feats for Skills",
     "category": "Magia",
-    "description": "Dominas el conocimiento de la naturaleza salvaje, obteniendo los siguientes beneficios:",
+    "description": "You master wilderness lore, gaining the following benefits:",
     "benefits": [
-      "Aumenta tu puntuación de Sabiduría en 1, hasta un máximo de 20.",
-      "Ganas competencia en la habilidad Supervivencia. Si ya eres competente en ella, sumas el doble de tu bonificador de competencia a las pruebas que hagas con ella.",
-      "Aprendes el conjuro Alarma. Puedes lanzarlo una vez sin gastar ranuras de conjuro tras cada descanso largo."
+      "Increase your Wisdom score by 1, to a maximum of 20.",
+      "You gain proficiency in the Survival skill. If you are already proficient in the skill, you add double your proficiency bonus to checks you make with it.",
+      "You learn the Alarm spell. You can cast it once without expending a spell slot, and you regain the ability to do so when you finish a long rest."
     ],
     "abilityBonus": {
       "stats": [
@@ -2489,10 +2489,10 @@ export const ALL_WIKIDOT_FEATS: OfficialFeat[] = [
     "nameEn": "Tandem Tactician",
     "source": "Unearthed Arcana 73 - Feats",
     "category": "Combate",
-    "description": "Tu presencia en una escaramuza eleva la efectividad de tus camaradas. Obtienes los siguientes beneficios:",
+    "description": "Your presence in a scrap tends to elevate your comrades. You gain the following benefits:",
     "benefits": [
-      "Puedes usar la acción de Ayudar como acción adicional.",
-      "Cuando usas la acción de Ayudar para asistir a un aliado en atacar a una criatura, aumenta el alcance de la acción de Ayudar en 10 pies. Además, puedes ayudar a dos aliados que ataquen a la misma criatura dentro del alcance."
+      "You can use the Help action as a bonus action.",
+      "When you use the Help action to aid an ally in attacking a creature, increase the range of the Help action by 10 feet. Additionally, you can help two allies targeting the same creature within range when you use the Help action this way."
     ]
   },
   {
@@ -2501,11 +2501,11 @@ export const ALL_WIKIDOT_FEATS: OfficialFeat[] = [
     "nameEn": "Theologian",
     "source": "Unearthed Arcana 38 - Feats for Skills",
     "category": "Magia",
-    "description": "Tu extenso estudio de la religión te recompensa con los siguientes beneficios:",
+    "description": "Your extensive study of religion rewards you with the following benefits:",
     "benefits": [
-      "Aumenta tu puntuación de Inteligencia en 1, hasta un máximo de 20.",
-      "Ganas competencia en la habilidad Religión. Si ya eres competente en ella, sumas el doble de tu bonificador de competencia a las pruebas que hagas con ella.",
-      "Aprendes los trucos Taumaturgia y Detectar el Bien y el Mal. Puedes lanzar Detectar el Bien y el Mal una vez sin gastar ranuras de conjuro tras cada descanso largo."
+      "Increase your Intelligence score by 1, to a maximum of 20.",
+      "You gain proficiency in the Religion skill. If you are already proficient in the skill, you add double your proficiency bonus to checks you make with it.",
+      "You learn the Thaumaturgy and Detect Evil and Good spells. You can cast Detect Evil and Good once without expending a spell slot, and you regain the ability to do so when you finish a long rest."
     ],
     "abilityBonus": {
       "stats": [
@@ -2520,10 +2520,10 @@ export const ALL_WIKIDOT_FEATS: OfficialFeat[] = [
     "nameEn": "Tower of Iron Will",
     "source": "Unearthed Arcana 71 - Psionic Options Revisited",
     "category": "General",
-    "prerequisite": "Rasgo Talento Psiónico o Dote Talento Salvaje",
-    "description": "Las defensas de tu mente son formidables. Cuando tú u otra criatura que puedas ver a 30 pies o menos falle una tirada de salvación, puedes usar tu reacción para tirar tu dado de Talento Psiónico y sumar el resultado a la tirada de salvación, pudiendo hacer que tenga éxito.",
+    "prerequisite": "Psionic Talent feature or Wild Talent feat",
+    "description": "Your mind's defenses are formidable. After you or another creature you can see within 30 feet of you fails a saving throw, you can use your reaction to roll your Psionic Talent die and add the number rolled to the saving throw, potentially causing it to succeed.",
     "benefits": [
-      "Cuando tú u otra criatura a 30 pies falle una tirada de salvación, usa tu reacción para tirar tu dado de Talento Psiónico y sumarlo a la salvación."
+      "When you or another creature you can see within 30 feet of you fails a saving throw, you can use your reaction to roll your Psionic Talent die and add the number rolled to the saving throw, potentially causing it to succeed."
     ]
   },
   {
@@ -2532,11 +2532,11 @@ export const ALL_WIKIDOT_FEATS: OfficialFeat[] = [
     "nameEn": "Tracker",
     "source": "Unearthed Arcana 73 - Feats",
     "category": "Magia",
-    "description": "Has dedicado tiempo a cazar presas y perfeccionar tus sentidos, obteniendo los siguientes beneficios:",
+    "description": "You have spent time hunting creatures and honed your senses, gaining the following benefits:",
     "benefits": [
-      "Aumenta tu puntuación de Sabiduría en 1, hasta un máximo de 20.",
-      "Aprendes el conjuro Marca del Cazador. Puedes lanzarlo una vez sin gastar ranura de conjuro por descanso largo, y también usando tus ranuras normales. Sabiduría es tu característica de lanzamiento.",
-      "Tienes ventaja en las pruebas de Sabiduría (Supervivencia) para rastrear criaturas."
+      "Increase your Wisdom score by 1, to a maximum of 20.",
+      "You learn the Hunter's Mark spell. You can cast it once without expending a spell slot, and you must finish a long rest before you can cast it in this way again. You can also cast the spell using any spell slots you have. Wisdom is your spellcasting ability for this spell.",
+      "You have advantage on Wisdom (Survival) checks to track creatures."
     ],
     "abilityBonus": {
       "stats": [
@@ -2551,17 +2551,44 @@ export const ALL_WIKIDOT_FEATS: OfficialFeat[] = [
     "nameEn": "Wild Talent",
     "source": "Unearthed Arcana 71 - Psionic Options Revisited",
     "category": "Combate",
-    "description": "Despiertas tu potencial psiónico latente, potenciando tu mente o cuerpo. Aumenta una puntuación de característica a tu elección en 1 (hasta un máximo de 20). Además, obtienes un Dado de Talento Psiónico (inicialmente 1d6) que puedes usar para potenciar pruebas de característica o impactos guiados en combate.",
+    "description": "You awaken to your psionic potential, which enhances your mind or body. Increase one ability score of your choice by 1, to a maximum of 20. You also harbor a wellspring of psionic power within yourself, represented by your Psionic Talent die (starting at 1d6).",
     "benefits": [
-      "Aumenta una característica a tu elección en 1, hasta un máximo de 20.",
-      "Obtienes un Dado de Talento Psiónico (1d6) que escala a 1d8 (nv 5), 1d10 (nv 11) y 1d12 (nv 17).",
-      "Característica Psio-Potenciada: Puedes tirar tu dado de Talento Psiónico y sumarlo a pruebas de la característica elegida.",
-      "Impacto Guiado Psiónico: Una vez por turno al impactar, puedes reemplazar un dado de daño por el resultado de tu dado de Talento Psiónico.",
-      "Reabastecimiento Psiónico: Como acción adicional, restablece tu dado a su tamaño inicial una vez por descanso largo."
+      "Increase one ability score of your choice by 1, to a maximum of 20.",
+      "You gain a Psionic Talent die (1d6), which scales to 1d8 at 5th level, 1d10 at 11th level, and 1d12 at 17th level.",
+      "Psi-Boosted Ability: When you make an ability check using the ability increased by this feat, you can roll your Psionic Talent die and add the number rolled to the check.",
+      "Psi-Guided Strike: Once on each of your turns when you hit with an attack roll using the ability increased by this feat, you can replace one of the damage dice with the roll of your Psionic Talent die.",
+      "Psionic Replenishment: As a bonus action, you can calm your mind and restore your Psionic Talent die to its starting size once per long rest."
     ],
     "abilityBonus": {
       "flexible": true,
       "amount": 1
     }
+  },
+  {
+    "id": "dual-wielder",
+    "name": "Combatiente con Dos Armas (Dual Wielder)",
+    "nameEn": "Dual Wielder",
+    "source": "Player's Handbook",
+    "category": "Combate",
+    "description": "You master fighting with two weapons, gaining the following benefits:",
+    "benefits": [
+      "You gain a +1 bonus to AC while you are wielding a separate melee weapon in each hand.",
+      "You can use two-weapon fighting even when the one-handed melee weapons you are wielding aren't light.",
+      "You can draw or stow two one-handed weapons when you would normally be able to draw or stow only one."
+    ]
+  },
+  {
+    "id": "ritual-caster",
+    "name": "Lanzador de Rituales (Ritual Caster)",
+    "nameEn": "Ritual Caster",
+    "source": "Player's Handbook",
+    "category": "Magia",
+    "prerequisite": "Intelligence or Wisdom 13 or higher",
+    "description": "You have learned a number of spells that you can cast as rituals. These spells are written in a ritual book, which you must have in hand while casting one of them.",
+    "benefits": [
+      "When you choose this feat, you acquire a ritual book holding two 1st-level spells of your choice with the ritual tag from a chosen class list (bard, cleric, druid, sorcerer, warlock, or wizard).",
+      "Your spellcasting ability for these ritual spells is the same as the chosen class (Charisma for bard, sorcerer, or warlock; Wisdom for cleric or druid; Intelligence for wizard).",
+      "If you come across a spell in written form (such as a spell scroll or a wizard's spellbook), you might be able to add it to your ritual book if it is on the spell list for the class you chose, the spell's level can be no higher than half your level (rounded up), and it has the ritual tag (2 hours and 50 gp per level of the spell)."
+    ]
   }
 ];

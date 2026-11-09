@@ -4,6 +4,14 @@ import { formatModifier } from '../utils/crCalculator';
 import { isSpellcasterClass } from '../data/spellsData';
 import { getBarbarianMaxRages, getBarbarianRageDamageBonus } from '../data/characterRulesEngine';
 import { FantasyAvatarFrame } from './FantasyAvatarFrame';
+import { useLanguageStore } from '../hooks/useLanguageStore';
+import {
+  localizeReactNode,
+  localizeString,
+  translateCharacterClassName,
+  translateCharacterRaceName,
+  translateDndTitle,
+} from '../utils/dndEnglishTranslator';
 import {
   Shield,
   Heart,
@@ -20,7 +28,6 @@ import {
   Flame,
   FileDown,
   ArrowUp,
-  FolderKanban,
   Save,
 } from 'lucide-react';
 
@@ -47,6 +54,27 @@ interface PathfinderGothicCardProps {
   exportingCharId: string | null;
 }
 
+const getClassAbbrev = (rawName: string, isSpanish: boolean): string => {
+  const lower = (rawName || '').toLowerCase();
+  if (lower.includes('barbar') || lower.includes('bárbar')) return isSpanish ? 'Bár' : 'Bar';
+  if (lower.includes('bard')) return 'Brd';
+  if (lower.includes('cler') || lower.includes('clér')) return 'Clr';
+  if (lower.includes('druid')) return 'Dru';
+  if (lower.includes('guerr') || lower.includes('fight')) return isSpanish ? 'Gue' : 'Ftr';
+  if (lower.includes('monk') || lower.includes('monj')) return isSpanish ? 'Mon' : 'Mnk';
+  if (lower.includes('palad')) return 'Pal';
+  if (lower.includes('explor') || lower.includes('rang')) return isSpanish ? 'Exp' : 'Rgr';
+  if (lower.includes('picar') || lower.includes('pícar') || lower.includes('rogue')) return isSpanish ? 'Píc' : 'Rog';
+  if (lower.includes('hechic') || lower.includes('sorcer')) return isSpanish ? 'Hec' : 'Sor';
+  if (lower.includes('bruj') || lower.includes('warlock')) return isSpanish ? 'Bru' : 'Wlk';
+  if (lower.includes('mago') || lower.includes('wizard')) return isSpanish ? 'Mag' : 'Wiz';
+  if (lower.includes('artif') || lower.includes('artíf')) return 'Art';
+  if (lower.includes('pugil')) return 'Pug';
+  if (lower.includes('blood') || lower.includes('sangre')) return isSpanish ? 'Caz' : 'Bld';
+  const clean = rawName.split('(')[0].trim();
+  return clean.slice(0, 3);
+};
+
 export const PathfinderGothicCard: React.FC<PathfinderGothicCardProps> = ({
   char,
   activeCampaign,
@@ -69,6 +97,8 @@ export const PathfinderGothicCard: React.FC<PathfinderGothicCardProps> = ({
   handleToggleBarbarianRage,
   exportingCharId,
 }) => {
+  const { isSpanish } = useLanguageStore();
+
   const hpPercentage = Math.round(
     Math.max(0, Math.min(100, (char.currentHp / (char.maxHp || 1)) * 100))
   );
@@ -89,35 +119,103 @@ export const PathfinderGothicCard: React.FC<PathfinderGothicCardProps> = ({
   const isFighter = classLower.includes('guerr') || classLower.includes('fight');
   const isRogue = classLower.includes('pícaro') || classLower.includes('picaro') || classLower.includes('rogue');
 
-  let folioButtonText = 'Abrir Grimorio →';
-  let folioTitle = 'Grimorio Místico';
+  let folioButtonText = isSpanish ? 'Abrir Grimorio →' : 'Open Grimoire →';
+  let folioTitle = isSpanish ? 'Grimorio Místico' : 'Mystic Grimoire';
   let FolioIcon = BookOpen;
 
   if (isPugilist) {
-    folioButtonText = 'Cuadrilátero & Flujo →';
-    folioTitle = 'Club de la Pelea';
+    folioButtonText = isSpanish ? 'Cuadrilátero & Flujo →' : 'Ring & Flow →';
+    folioTitle = isSpanish ? 'Club de la Pelea' : 'Fight Club';
     FolioIcon = Shield;
   } else if (isBarbarian) {
-    folioButtonText = 'Furia & Combate →';
-    folioTitle = 'Códice de Furia';
+    folioButtonText = isSpanish ? 'Furia & Combate →' : 'Rage & Combat →';
+    folioTitle = isSpanish ? 'Códice de Furia' : 'Rage Codex';
     FolioIcon = Flame;
   } else if (isMonk) {
-    folioButtonText = 'Ki & Habilidades →';
-    folioTitle = 'Disciplina del Ki';
+    folioButtonText = isSpanish ? 'Ki & Habilidades →' : 'Ki & Abilities →';
+    folioTitle = isSpanish ? 'Disciplina del Ki' : 'Ki Discipline';
     FolioIcon = Zap;
   } else if (isFighter) {
-    folioButtonText = 'Tácticas & Segundo Aire →';
-    folioTitle = 'Manual de Combate';
+    folioButtonText = isSpanish ? 'Tácticas & Segundo Aire →' : 'Tactics & Second Wind →';
+    folioTitle = isSpanish ? 'Manual de Combate' : 'Combat Manual';
     FolioIcon = Sword;
   } else if (isRogue) {
-    folioButtonText = 'Furtivo & Artimañas →';
-    folioTitle = 'Manual de Subterfugio';
+    folioButtonText = isSpanish ? 'Furtivo & Artimañas →' : 'Sneak & Cunning →';
+    folioTitle = isSpanish ? 'Manual de Subterfugio' : 'Subterfuge Manual';
     FolioIcon = Eye;
   } else if (isCaster) {
-    folioButtonText = 'Abrir Grimorio →';
-    folioTitle = `Grimorio de ${char.class.split(' ')[0]}`;
+    folioButtonText = isSpanish ? 'Abrir Grimorio →' : 'Open Grimoire →';
+    folioTitle = isSpanish
+      ? `Grimorio de ${char.class.split(' ')[0]}`
+      : `${translateCharacterClassName(char.class.split(' ')[0])} Grimoire`;
     FolioIcon = Sparkles;
   }
+
+  const is2024 =
+    char.edition === '5.5e' ||
+    (char.creatorState as any)?.selectedEdition === '5.5e' ||
+    (char as any).rulesEdition === '2024' ||
+    (char as any).edition === '2024';
+
+  // Multiclass & Class Breakdown extraction
+  const classBreakdown = React.useMemo(() => {
+    if (char.multiclass && char.multiclass.length > 1) {
+      const items = char.multiclass.map((mc) => {
+        const fullClassName = isSpanish ? mc.className : translateCharacterClassName(mc.className);
+        const sub = mc.subclass ? (isSpanish ? mc.subclass : translateDndTitle(mc.subclass)) : '';
+        const abbr = getClassAbbrev(mc.className, isSpanish);
+        return {
+          abbr,
+          className: fullClassName,
+          subclass: sub,
+          level: mc.level,
+        };
+      });
+
+      const shortSummary = items.map((it) => `${it.abbr} ${it.level}`).join(' / ');
+      return {
+        isMulticlass: true,
+        shortSummary,
+        items,
+      };
+    }
+
+    // Single class
+    const cleanPrimary = (char.class || '').split('/')[0].split('(')[0].trim() || (isSpanish ? 'Aventurero' : 'Adventurer');
+    const fullClassName = isSpanish ? char.class : translateCharacterClassName(char.class);
+    const sub = char.subclass ? (isSpanish ? char.subclass : translateDndTitle(char.subclass)) : '';
+    const abbr = getClassAbbrev(cleanPrimary, isSpanish);
+
+    return {
+      isMulticlass: false,
+      shortSummary: `${abbr} ${char.level}`,
+      items: [
+        {
+          abbr,
+          className: fullClassName,
+          subclass: sub,
+          level: char.level,
+        },
+      ],
+    };
+  }, [char.multiclass, char.class, char.subclass, char.level, isSpanish]);
+
+  const detailedClassTitle = React.useMemo(() => {
+    if (classBreakdown.isMulticlass) {
+      return (
+        (isSpanish
+          ? `Multiclase (Nivel Total ${char.level}):\n`
+          : `Multiclass (Total Level ${char.level}):\n`) +
+        classBreakdown.items
+          .map((it) => `• ${it.className} ${isSpanish ? 'Nivel' : 'Level'} ${it.level}${it.subclass ? ` (${it.subclass})` : ''}`)
+          .join('\n')
+      );
+    }
+    const single = classBreakdown.items[0];
+    return isSpanish
+      ? `${single?.className || char.class} Nivel ${char.level}${single?.subclass ? ` (${single.subclass})` : ''}`
+      : `${single?.className || char.class} Level ${char.level}${single?.subclass ? ` (${single.subclass})` : ''}`;
+  }, [classBreakdown, char.level, char.class, isSpanish]);
 
   const isInActiveCampaign =
     char.campaignId === activeCampaignId ||
@@ -125,7 +223,7 @@ export const PathfinderGothicCard: React.FC<PathfinderGothicCardProps> = ({
     char.campaignIds?.includes('all');
   const isGlobalForAll = char.campaignIds?.includes('all');
 
-  return (
+  return localizeReactNode(
     <div
       className="relative flex flex-col justify-between transition-transform duration-300 hover:-translate-y-1 group"
       style={{
@@ -174,74 +272,112 @@ export const PathfinderGothicCard: React.FC<PathfinderGothicCardProps> = ({
                         : (onOpenCustomSheet ? onOpenCustomSheet(char) : onEditCharacter(char))
                     }
                     className="text-base font-bold font-fantasy text-[#241308] hover:text-[#8c501c] cursor-pointer transition flex items-center gap-1.5 leading-snug break-words"
-                    title={char.isDraft ? "Reanudar borrador en el Creador" : "Abrir Hoja Completa"}
+                    title={
+                      char.isDraft
+                        ? isSpanish
+                          ? 'Reanudar borrador en el Creador'
+                          : 'Resume draft in Creator'
+                        : isSpanish
+                        ? 'Abrir Hoja Completa'
+                        : 'Open Full Sheet'
+                    }
                   >
-                    <span>{char.name}</span>
+                    <span>{isSpanish ? char.name : localizeString(char.name, false)}</span>
                   </h3>
                   <p className="text-xs text-[#5c3e28] font-medium mt-0.5 leading-snug break-words">
-                    {char.race} • {char.class} {char.subclass ? `(${char.subclass})` : ''}
+                    {isSpanish ? char.race : translateCharacterRaceName(char.race)} •{' '}
+                    {isSpanish ? char.class : translateCharacterClassName(char.class)}{' '}
+                    {char.subclass
+                      ? `(${isSpanish ? char.subclass : translateDndTitle(char.subclass)})`
+                      : ''}
                   </p>
                 </div>
 
-                {/* Stamped Ink Utility Icons (Directly on Parchment, No Plastic Box) */}
-                <div className="flex items-center gap-0.5 shrink-0 text-[#5c3e28]">
-                  {char.isDraft ? (
-                    <>
-                      <button
-                        onClick={() => onEditCharacterInCreator ? onEditCharacterInCreator(char) : onEditCharacter(char)}
-                        className="p-1 hover:text-[#8c3514] hover:bg-[#8c3514]/10 rounded transition cursor-pointer"
-                        title="Reanudar Borrador"
-                      >
-                        <Sparkles className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => onDeleteCharacter(char.id)}
-                        className="p-1 hover:text-[#9e2a2b] hover:bg-[#9e2a2b]/10 rounded transition cursor-pointer"
-                        title="Eliminar"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button
-                        onClick={() => handleExportPdf(char)}
-                        disabled={exportingCharId === char.id}
-                        className="p-1 hover:text-[#1e140d] hover:bg-[#8c5e31]/15 rounded transition cursor-pointer disabled:opacity-30"
-                        title="Exportar Hoja Oficial de D&D 5e (PDF)"
-                      >
-                        <FileDown className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => handleExportJson(char)}
-                        className="p-1 hover:text-[#321c40] hover:bg-[#8c5e31]/15 rounded transition cursor-pointer"
-                        title="Exportar Archivo .JSON"
-                      >
-                        <Save className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => onEditCharacterInCreator ? onEditCharacterInCreator(char) : onEditCharacter(char)}
-                        className="p-1 hover:text-[#8c501c] hover:bg-[#8c5e31]/15 rounded transition cursor-pointer"
-                        title="Editar en Creador"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => onDeleteCharacter(char.id)}
-                        className="p-1 hover:text-[#9e2a2b] hover:bg-[#9e2a2b]/10 rounded transition cursor-pointer"
-                        title="Eliminar"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </>
-                  )}
+                {/* Stamped Ink Utility Icons + Rules Edition Badge (Noticeable Emblem) */}
+                <div className="flex flex-col items-end gap-1.5 shrink-0">
+                  <div className="flex items-center gap-0.5 text-[#5c3e28]">
+                    {char.isDraft ? (
+                      <>
+                        <button
+                          onClick={() => onEditCharacterInCreator ? onEditCharacterInCreator(char) : onEditCharacter(char)}
+                          className="p-1 hover:text-[#8c3514] hover:bg-[#8c3514]/10 rounded transition cursor-pointer"
+                          title={isSpanish ? 'Reanudar Borrador' : 'Resume Draft'}
+                        >
+                          <Sparkles className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => onDeleteCharacter(char.id)}
+                          className="p-1 hover:text-[#9e2a2b] hover:bg-[#9e2a2b]/10 rounded transition cursor-pointer"
+                          title={isSpanish ? 'Eliminar' : 'Delete'}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => handleExportPdf(char)}
+                          disabled={exportingCharId === char.id}
+                          className="p-1 hover:text-[#1e140d] hover:bg-[#8c5e31]/15 rounded transition cursor-pointer disabled:opacity-30"
+                          title={isSpanish ? 'Exportar Hoja Oficial de D&D 5e (PDF)' : 'Export Official D&D 5e Sheet (PDF)'}
+                        >
+                          <FileDown className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleExportJson(char)}
+                          className="p-1 hover:text-[#321c40] hover:bg-[#8c5e31]/15 rounded transition cursor-pointer"
+                          title={isSpanish ? 'Exportar Archivo .JSON' : 'Export .JSON File'}
+                        >
+                          <Save className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => onEditCharacterInCreator ? onEditCharacterInCreator(char) : onEditCharacter(char)}
+                          className="p-1 hover:text-[#8c501c] hover:bg-[#8c5e31]/15 rounded transition cursor-pointer"
+                          title={isSpanish ? 'Editar en Creador' : 'Edit in Creator'}
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => onDeleteCharacter(char.id)}
+                          className="p-1 hover:text-[#9e2a2b] hover:bg-[#9e2a2b]/10 rounded transition cursor-pointer"
+                          title={isSpanish ? 'Eliminar' : 'Delete'}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Rules Edition Badge (Notable fantasy stamp) */}
+                  <div
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded font-fantasy font-black text-[10.5px] uppercase tracking-wider border select-none transition-transform hover:scale-105 shadow-xs ${
+                      is2024
+                        ? 'bg-gradient-to-r from-[#6e410e] via-[#a86b1f] to-[#6e410e] text-[#fff0be] border-[#f0c058] shadow-[0_2px_6px_rgba(168,107,31,0.45)]'
+                        : 'bg-gradient-to-r from-[#2c2016] via-[#423020] to-[#2c2016] text-[#e5d1a8] border-[#8a6834] shadow-[0_2px_4px_rgba(0,0,0,0.4)]'
+                    }`}
+                    title={
+                      is2024
+                        ? (isSpanish ? 'Reglas Oficiales 2024 Revisadas (5.5e)' : 'Official 2024 Revised Rules (5.5e)')
+                        : (isSpanish ? 'Reglas Oficiales 2014 Clásicas (5e)' : 'Official 2014 Classic Rules (5e)')
+                    }
+                  >
+                    <span className="text-[10px]">{is2024 ? '✨' : '⚔️'}</span>
+                    <span>{is2024 ? '5.5E (2024)' : '5E (2014)'}</span>
+                  </div>
                 </div>
               </div>
 
               {(char.playerName || char.ownerUsername) && (
                 <p className="text-[10.5px] text-[#734e32] font-semibold truncate flex items-center gap-1 mt-1">
                   <User className="w-3 h-3 text-[#96673d]" />
-                  <span>Jugador: <strong>{char.ownerUsername || char.playerName}</strong></span>
+                  <span>
+                    {isSpanish ? 'Jugador:' : 'Player:'}{' '}
+                    <strong>
+                      {!isSpanish && (char.ownerUsername || char.playerName) === 'Aventurero'
+                        ? 'Adventurer'
+                        : char.ownerUsername || char.playerName}
+                    </strong>
+                  </span>
                 </p>
               )}
 
@@ -259,7 +395,7 @@ export const PathfinderGothicCard: React.FC<PathfinderGothicCardProps> = ({
                         backgroundRepeat: 'no-repeat',
                         backgroundColor: 'transparent',
                       }}
-                      title="Abrir Hoja Completa"
+                      title={isSpanish ? 'Abrir Hoja Completa' : 'Open Full Sheet'}
                     >
                       <span
                         className="ml-6 text-[11.5px] font-fantasy font-extrabold tracking-wider uppercase drop-shadow-[0_1px_2px_rgba(0,0,0,0.95)]"
@@ -269,7 +405,7 @@ export const PathfinderGothicCard: React.FC<PathfinderGothicCardProps> = ({
                           WebkitTextFillColor: 'transparent',
                         }}
                       >
-                        Hoja de Héroe
+                        {isSpanish ? 'Hoja de Héroe' : 'Hero Sheet'}
                       </span>
                     </button>
                   )}
@@ -284,7 +420,7 @@ export const PathfinderGothicCard: React.FC<PathfinderGothicCardProps> = ({
                       backgroundColor: 'transparent',
                       minWidth: '84px',
                     }}
-                    title="Subir Nivel (+1)"
+                    title={isSpanish ? 'Subir Nivel (+1)' : 'Level Up (+1)'}
                   >
                     <span
                       className="ml-5 text-[11.5px] font-fantasy font-extrabold tracking-wide uppercase drop-shadow-[0_1px_2px_rgba(0,0,0,0.95)]"
@@ -294,7 +430,7 @@ export const PathfinderGothicCard: React.FC<PathfinderGothicCardProps> = ({
                         WebkitTextFillColor: 'transparent',
                       }}
                     >
-                      Nv+1
+                      {isSpanish ? 'Nv+1' : 'Lv+1'}
                     </span>
                   </button>
                 </div>
@@ -320,8 +456,12 @@ export const PathfinderGothicCard: React.FC<PathfinderGothicCardProps> = ({
                 </span>
               </div>
               <div className="flex flex-col text-left leading-tight min-w-0">
-                <span className="text-[8.5px] uppercase font-bold text-[#6b472e] tracking-wider">Armadura</span>
-                <span className="font-fantasy font-bold text-xs text-[#241308]">CA {char.ac}</span>
+                <span className="text-[8.5px] uppercase font-bold text-[#6b472e] tracking-wider">
+                  {isSpanish ? 'Armadura' : 'Armor'}
+                </span>
+                <span className="font-fantasy font-bold text-xs text-[#241308]">
+                  {isSpanish ? 'CA' : 'AC'} {char.ac}
+                </span>
               </div>
             </div>
 
@@ -339,7 +479,9 @@ export const PathfinderGothicCard: React.FC<PathfinderGothicCardProps> = ({
                 <Zap className="relative z-10 w-3.5 h-3.5 text-[#f0c869] drop-shadow-[0_1px_2px_rgba(0,0,0,0.95)]" />
               </div>
               <div className="flex flex-col text-left leading-tight min-w-0">
-                <span className="text-[8.5px] uppercase font-bold text-[#6b472e] tracking-wider">Iniciativa</span>
+                <span className="text-[8.5px] uppercase font-bold text-[#6b472e] tracking-wider">
+                  {isSpanish ? 'Iniciativa' : 'Initiative'}
+                </span>
                 <span className="font-fantasy font-bold text-xs text-[#241308]">
                   {char.initiativeBonus >= 0 ? `+${char.initiativeBonus}` : char.initiativeBonus}
                 </span>
@@ -360,7 +502,9 @@ export const PathfinderGothicCard: React.FC<PathfinderGothicCardProps> = ({
                 <Eye className="relative z-10 w-3.5 h-3.5 text-[#f0c869] drop-shadow-[0_1px_2px_rgba(0,0,0,0.95)]" />
               </div>
               <div className="flex flex-col text-left leading-tight min-w-0">
-                <span className="text-[8.5px] uppercase font-bold text-[#6b472e] tracking-wider">Percepción</span>
+                <span className="text-[8.5px] uppercase font-bold text-[#6b472e] tracking-wider">
+                  {isSpanish ? 'Percepción' : 'Perception'}
+                </span>
                 <span className="font-fantasy font-bold text-xs text-[#241308]">{char.passivePerception}</span>
               </div>
             </div>
@@ -372,7 +516,8 @@ export const PathfinderGothicCard: React.FC<PathfinderGothicCardProps> = ({
           <div className="p-3 my-2 border border-[#8c5e31]/30 rounded-lg bg-[#8c3514]/5 space-y-2.5">
             <div className="flex items-center justify-between text-xs">
               <span className="font-fantasy font-bold text-[#803814] flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-[#b8501c]" /> Borrador en Pausa
+                <Sparkles className="w-3.5 h-3.5 text-[#b8501c]" />{' '}
+                {isSpanish ? 'Borrador en Pausa' : 'Draft Paused'}
               </span>
               <span className="font-mono font-bold text-[#803814] text-sm">
                 {char.draftProgress || 0}%
@@ -389,7 +534,7 @@ export const PathfinderGothicCard: React.FC<PathfinderGothicCardProps> = ({
               className="w-full py-2 bg-gradient-to-r from-[#803814] via-[#9e481c] to-[#803814] hover:from-[#944218] hover:to-[#b05322] text-[#fff2e5] font-fantasy font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer border border-[#59260d]"
             >
               <Sparkles className="w-4 h-4 text-[#ffd8b8]" />
-              <span>Reanudar en la Forja de Héroes</span>
+              <span>{isSpanish ? 'Reanudar en la Forja de Héroes' : 'Resume in Hero Forge'}</span>
             </button>
           </div>
         ) : (
@@ -464,14 +609,14 @@ export const PathfinderGothicCard: React.FC<PathfinderGothicCardProps> = ({
                   <button
                     onClick={() => onUpdateHp(char.id, char.currentHp - 5)}
                     className="px-2.5 py-0.5 bg-[#421d19] hover:bg-[#592621] text-[#f7d7d5] border border-[#7a2e27] rounded text-[11px] font-mono font-bold transition cursor-pointer shadow-xs"
-                    title="Restar 5 HP"
+                    title={isSpanish ? 'Restar 5 HP' : 'Subtract 5 HP'}
                   >
                     -5
                   </button>
                   <button
                     onClick={() => onUpdateHp(char.id, char.currentHp - 1)}
                     className="px-2 py-0.5 bg-[#421d19] hover:bg-[#592621] text-[#f7d7d5] border border-[#7a2e27] rounded text-[11px] font-mono font-bold transition cursor-pointer shadow-xs"
-                    title="Restar 1 HP"
+                    title={isSpanish ? 'Restar 1 HP' : 'Subtract 1 HP'}
                   >
                     -1
                   </button>
@@ -482,7 +627,7 @@ export const PathfinderGothicCard: React.FC<PathfinderGothicCardProps> = ({
                     <input
                       type="number"
                       autoFocus
-                      placeholder="cant"
+                      placeholder={isSpanish ? 'cant' : 'amt'}
                       value={quickAmount}
                       onChange={(e) => setQuickAmount(e.target.value)}
                       className="w-12 bg-white text-xs text-center border border-[#6b4728] rounded px-1 py-0.5 text-[#2c1a0e] font-bold"
@@ -490,14 +635,14 @@ export const PathfinderGothicCard: React.FC<PathfinderGothicCardProps> = ({
                     <button
                       onClick={() => applyQuickAdjustment(char, true)}
                       className="p-1 bg-[#80221c] hover:bg-[#992a23] text-white rounded text-[10px]"
-                      title="Aplicar Daño"
+                      title={isSpanish ? 'Aplicar Daño' : 'Apply Damage'}
                     >
                       <Minus className="w-3 h-3" />
                     </button>
                     <button
                       onClick={() => applyQuickAdjustment(char, false)}
                       className="p-1 bg-[#265934] hover:bg-[#327344] text-white rounded text-[10px]"
-                      title="Aplicar Curación"
+                      title={isSpanish ? 'Aplicar Curación' : 'Apply Healing'}
                     >
                       <Plus className="w-3 h-3" />
                     </button>
@@ -510,7 +655,7 @@ export const PathfinderGothicCard: React.FC<PathfinderGothicCardProps> = ({
                     }}
                     className="text-[11px] font-fantasy font-bold text-[#694324] hover:text-[#2e190a] underline cursor-pointer"
                   >
-                    ± Daño / Cura
+                    {isSpanish ? '± Daño / Cura' : '± Dmg / Heal'}
                   </button>
                 )}
 
@@ -518,14 +663,14 @@ export const PathfinderGothicCard: React.FC<PathfinderGothicCardProps> = ({
                   <button
                     onClick={() => onUpdateHp(char.id, char.currentHp + 1)}
                     className="px-2 py-0.5 bg-[#1b3d24] hover:bg-[#255231] text-[#d6f2dc] border border-[#346b42] rounded text-[11px] font-mono font-bold transition cursor-pointer shadow-xs"
-                    title="Curar 1 HP"
+                    title={isSpanish ? 'Curar 1 HP' : 'Heal 1 HP'}
                   >
                     +1
                   </button>
                   <button
                     onClick={() => onUpdateHp(char.id, char.currentHp + 5)}
                     className="px-2.5 py-0.5 bg-[#1b3d24] hover:bg-[#255231] text-[#d6f2dc] border border-[#346b42] rounded text-[11px] font-mono font-bold transition cursor-pointer shadow-xs"
-                    title="Curar 5 HP"
+                    title={isSpanish ? 'Curar 5 HP' : 'Heal 5 HP'}
                   >
                     +5
                   </button>
@@ -542,13 +687,14 @@ export const PathfinderGothicCard: React.FC<PathfinderGothicCardProps> = ({
                   <span className="font-bold font-fantasy truncate">{folioTitle}</span>
                   {isCaster && spellCount > 0 && (
                     <span className="text-[9.5px] bg-[#8c5e31]/15 text-[#422917] px-2 py-0.5 rounded-full border border-[#8c5e31]/30 font-mono font-bold whitespace-nowrap">
-                      {spellCount} hechizos
+                      {spellCount} {isSpanish ? 'hechizos' : 'spells'}
                     </span>
                   )}
                   {isBarbarian && (
                     <div className="flex items-center gap-1 flex-wrap">
                       <span className="text-[9.5px] bg-[#debcae] text-[#632219] px-2 py-0.5 rounded-full border border-[#c48d7c] font-mono font-bold">
-                        {availableRages}/{maxRages === 999 ? '∞' : maxRages} Furias
+                        {availableRages}/{maxRages === 999 ? '∞' : maxRages}{' '}
+                        {isSpanish ? 'Furias' : 'Rages'}
                       </span>
                       {onUpdateCharacter && (
                         <button
@@ -564,7 +710,13 @@ export const PathfinderGothicCard: React.FC<PathfinderGothicCardProps> = ({
                           }`}
                         >
                           <Flame className="w-2.5 h-2.5" />
-                          {isRaging ? 'Calmar Furia' : 'Furia'}
+                          {isRaging
+                            ? isSpanish
+                              ? 'Calmar Furia'
+                              : 'End Rage'
+                            : isSpanish
+                            ? 'Furia'
+                            : 'Rage'}
                         </button>
                       )}
                     </div>
@@ -611,23 +763,57 @@ export const PathfinderGothicCard: React.FC<PathfinderGothicCardProps> = ({
       </div>
 
       {/* Dossier Footer: Stamped Inscription Directly on Bottom of Parchment */}
-      <div className="mt-3 pt-2.5 border-t border-[#8c5e31]/30 flex flex-wrap items-center justify-between gap-1.5 text-xs text-[#52331c]">
-        <div className="flex items-center gap-1.5 text-[11px]">
-          <FolderKanban className="w-3.5 h-3.5 text-[#8c5e31]" />
-          {isGlobalForAll ? (
-            <span className="text-[#1b4d24] font-bold">Registro Global (Todas las Campañas)</span>
-          ) : isInActiveCampaign ? (
-            <span>
-              Activo en: <strong className="text-[#200e05]">{activeCampaign?.name || 'Campaña'}</strong>
-            </span>
-          ) : (
-            <span className="italic">Asignado a otra campaña</span>
-          )}
+      <div className="mt-3 pt-2.5 border-t border-[#8c5e31]/30 flex items-center justify-between gap-2 text-xs text-[#52331c]">
+        {/* Left: Class Breakdown (Abbreviated, Interactive with Rich Hover Details) */}
+        <div
+          className="group/cls relative flex items-center gap-1.5 cursor-help select-none"
+          title={detailedClassTitle}
+        >
+          <span className="text-[10px] text-[#8c5e31]">⚔️</span>
+          <span className="text-[10.5px] font-fantasy font-bold text-[#5c3e28] hover:text-[#8c3514] transition-colors border-b border-dotted border-[#8c5e31]/60 tracking-wide uppercase">
+            {classBreakdown.shortSummary}
+          </span>
+
+          {/* Floating Fantasy Tooltip on Hover */}
+          <div className="pointer-events-none absolute bottom-full left-0 mb-2 z-50 opacity-0 group-hover/cls:opacity-100 group-hover/cls:pointer-events-auto transition-all duration-200 transform translate-y-1 group-hover/cls:translate-y-0 w-64 p-3 bg-[#1e1309] text-[#f7e6c4] border border-[#c59b27] rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.9)] text-left">
+            <div className="flex items-center justify-between border-b border-[#8c5e31]/40 pb-1.5 mb-2">
+              <span className="font-fantasy font-bold text-[11px] text-[#ffd56b] tracking-wider uppercase">
+                {classBreakdown.isMulticlass
+                  ? (isSpanish ? 'Progresión Multiclase' : 'Multiclass Progression')
+                  : (isSpanish ? 'Detalle de Clase' : 'Class Details')}
+              </span>
+              <span className="font-fantasy font-black text-[10px] text-[#d4af37] px-1.5 py-0.5 bg-[#301c0b] rounded border border-[#8c5e31]/50">
+                {isSpanish ? 'Total Nv.' : 'Total Lv.'} {char.level}
+              </span>
+            </div>
+            <div className="space-y-1.5">
+              {classBreakdown.items.map((it, idx) => (
+                <div key={idx} className="flex items-start justify-between gap-2 text-xs">
+                  <div className="min-w-0">
+                    <div className="font-bold text-[#fff3db] leading-snug truncate">
+                      {it.className}
+                    </div>
+                    {it.subclass && (
+                      <div className="text-[10px] text-[#d4b07b] italic leading-tight truncate">
+                        {it.subclass}
+                      </div>
+                    )}
+                  </div>
+                  <div className="shrink-0 font-fantasy font-extrabold text-[#ffd56b] text-xs">
+                    {isSpanish ? 'Nv.' : 'Lv.'} {it.level}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-        <div className="text-[10.5px] font-fantasy font-bold text-[#6b472e]">
-          Nivel {char.level}
+
+        {/* Right: Total Level */}
+        <div className="text-[10.5px] font-fantasy font-bold text-[#6b472e] tracking-wider uppercase shrink-0">
+          {isSpanish ? 'Nivel' : 'Level'} {char.level}
         </div>
       </div>
-    </div>
-  );
+    </div>,
+    isSpanish
+  ) as React.ReactElement;
 };

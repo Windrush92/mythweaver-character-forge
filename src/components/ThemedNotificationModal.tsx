@@ -1,4 +1,6 @@
 import React from 'react';
+import { useLanguageStore } from '../hooks/useLanguageStore';
+import { localizeReactNode } from '../utils/dndEnglishTranslator';
 import {
   AlertTriangle,
   CheckCircle2,
@@ -46,6 +48,7 @@ export const ThemedNotificationModal: React.FC<ThemedNotificationModalProps> = (
   onConfirm,
   extraContent,
 }) => {
+  const { isSpanish } = useLanguageStore();
   if (!isOpen) return null;
 
   const handleConfirm = () => {
@@ -106,7 +109,7 @@ export const ThemedNotificationModal: React.FC<ThemedNotificationModalProps> = (
 
   const style = getIconAndStyle();
 
-  return (
+  return localizeReactNode(
     <div
       role="dialog"
       aria-modal="true"
@@ -183,6 +186,7 @@ export const ThemedNotificationModal: React.FC<ThemedNotificationModalProps> = (
           </button>
         </div>
       </div>
-    </div>
-  );
+    </div>,
+    isSpanish
+  ) as React.ReactElement;
 };

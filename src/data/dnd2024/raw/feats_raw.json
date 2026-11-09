@@ -1,0 +1,200 @@
+[
+  {
+    "id": "feat-2024-alert",
+    "slug": "alert",
+    "name": "Alert",
+    "rawHtml": "\n\n<p>Source: Player's Handbook</p>\n<p>You gain the following benefits.</p>\n<p><strong>Initiative Proficiency.</strong> When you roll Initiative, you can add your Proficiency Bonus to the roll.</p>\n<p><strong>Initiative Swap.</strong> Immediately after you roll Initiative, you can swap your Initiative with the Initiative of one willing ally in the same combat. You can't make this swap if you or the ally has the Incapacitated condition.</p>\n",
+    "cleanText": "Source: Player's Handbook You gain the following benefits. Initiative Proficiency. When you roll Initiative, you can add your Proficiency Bonus to the roll. Initiative Swap. Immediately after you roll Initiative, you can swap your Initiative with the Initiative of one willing ally in the same combat. You can't make this swap if you or the ally has the Incapacitated condition.",
+    "url": "https://dnd2024.wikidot.com/feat:alert",
+    "edition": "5.5e"
+  },
+  {
+    "id": "feat-2024-arcane-artist",
+    "slug": "arcane-artist",
+    "name": "Arcane Artist",
+    "rawHtml": "\n\n<p>Source: Arcana Unleashed</p>\n<p><em>Origin Feat</em></p>\n<p>You gain the following benefits.</p>\n<p><strong>Cantrip.</strong> You learn the <a href=\"/spell:minor-illusion\">Minor Illusion</a> cantrip. Intelligence, Wisdom, or Charisma is your spellcasting ability for this spell (choose when you select this feat).</p>\n<p><strong>Inspiring Magic.</strong> When you cast a spell from the Illusion school, you can choose one ally within 30 feet of yourself who can see you. That ally gains Heroic Inspiration. Once you use this benefit, you can’t use it again until you finish a Long Rest.</p>\n",
+    "cleanText": "Source: Arcana Unleashed Origin Feat You gain the following benefits. Cantrip. You learn the Minor Illusion cantrip. Intelligence, Wisdom, or Charisma is your spellcasting ability for this spell (choose when you select this feat). Inspiring Magic. When you cast a spell from the Illusion school, you can choose one ally within 30 feet of yourself who can see you. That ally gains Heroic Inspiration. Once you use this benefit, you can’t use it again until you finish a Long Rest.",
+    "url": "https://dnd2024.wikidot.com/feat:arcane-artist",
+    "edition": "5.5e"
+  },
+  {
+    "id": "feat-2024-arcane-eloquence",
+    "slug": "arcane-eloquence",
+    "name": "Arcane Eloquence",
+    "rawHtml": "\n\n<p>Source: Arcana Unleashed</p>\n<p><em>Origin Feat</em></p>\n<p>You gain the following benefits.</p>\n<p><strong>Cantrip.</strong> You learn the <a href=\"/spell:vicious-mockery\">Vicious Mockery</a> cantrip. Intelligence, Wisdom, or Charisma is your spellcasting ability for this spell (choose when you select this feat).</p>\n<p><strong>Smooth Talker.</strong> When you make a Charisma (Deception, Intimidation, or Persuasion) check, you can roll 1d4 and add the number rolled to the ability check.</p>\n",
+    "cleanText": "Source: Arcana Unleashed Origin Feat You gain the following benefits. Cantrip. You learn the Vicious Mockery cantrip. Intelligence, Wisdom, or Charisma is your spellcasting ability for this spell (choose when you select this feat). Smooth Talker. When you make a Charisma (Deception, Intimidation, or Persuasion) check, you can roll 1d4 and add the number rolled to the ability check.",
+    "url": "https://dnd2024.wikidot.com/feat:arcane-eloquence",
+    "edition": "5.5e"
+  },
+  {
+    "id": "feat-2024-arcane-infiltrator",
+    "slug": "arcane-infiltrator",
+    "name": "Arcane Infiltrator",
+    "rawHtml": "\n\n<p>Source: Arcana Unleashed</p>\n<p><em>Origin Feat</em></p>\n<p>You gain the following benefits.</p>\n<p><strong>Cantrip.</strong> You learn the <a href=\"/spell:friends\">Friends</a> cantrip. Intelligence, Wisdom, or Charisma is your spellcasting ability for this spell (choose when you select this feat).</p>\n<p><strong>Cunning Diversion.</strong> You can take the Dodge action as a Bonus Action. You can use this benefit a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Long Rest.</p>\n",
+    "cleanText": "Source: Arcana Unleashed Origin Feat You gain the following benefits. Cantrip. You learn the Friends cantrip. Intelligence, Wisdom, or Charisma is your spellcasting ability for this spell (choose when you select this feat). Cunning Diversion. You can take the Dodge action as a Bonus Action. You can use this benefit a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Long Rest.",
+    "url": "https://dnd2024.wikidot.com/feat:arcane-infiltrator",
+    "edition": "5.5e"
+  },
+  {
+    "id": "feat-2024-arcane-omens",
+    "slug": "arcane-omens",
+    "name": "Arcane Omens",
+    "rawHtml": "\n\n<p>Source: Arcana Unleashed</p>\n<p><em>Origin Feat</em></p>\n<p>You gain the following benefits.</p>\n<p><strong>Cantrip.</strong> You learn the <a href=\"/spell:guidance\">Guidance</a> cantrip. Intelligence, Wisdom, or Charisma is your spellcasting ability for this spell (choose when you select this feat).</p>\n<p><strong>Helpful Premonition.</strong> When you or a creature you can see within 30 feet of yourself fails a saving throw, you can take a Reaction to roll 1d4 and add the number rolled to the save’s total, potentially turning the failure into a success. You can use this benefit a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Long Rest.</p>\n",
+    "cleanText": "Source: Arcana Unleashed Origin Feat You gain the following benefits. Cantrip. You learn the Guidance cantrip. Intelligence, Wisdom, or Charisma is your spellcasting ability for this spell (choose when you select this feat). Helpful Premonition. When you or a creature you can see within 30 feet of yourself fails a saving throw, you can take a Reaction to roll 1d4 and add the number rolled to the save’s total, potentially turning the failure into a success. You can use this benefit a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Long Rest.",
+    "url": "https://dnd2024.wikidot.com/feat:arcane-omens",
+    "edition": "5.5e"
+  },
+  {
+    "id": "feat-2024-arcane-overload",
+    "slug": "arcane-overload",
+    "name": "Arcane Overload",
+    "rawHtml": "\n\n<p>Source: Arcana Unleashed</p>\n<p><em>Origin Feat</em></p>\n<p>You gain the following benefits.</p>\n<p><strong>Cantrip.</strong> You learn the <a href=\"/spell:fire-bolt\">Fire Bolt</a> cantrip. Intelligence, Wisdom, or Charisma is your spellcasting ability for this spell (choose when you select this feat).</p>\n<p><strong>Power Surge.</strong> When you cast an Evocation spell and deal damage with it, you can add your Proficiency Bonus to one damage roll of that spell. Once you use this benefit, you can’t do so again until you finish a Long Rest.</p>\n",
+    "cleanText": "Source: Arcana Unleashed Origin Feat You gain the following benefits. Cantrip. You learn the Fire Bolt cantrip. Intelligence, Wisdom, or Charisma is your spellcasting ability for this spell (choose when you select this feat). Power Surge. When you cast an Evocation spell and deal damage with it, you can add your Proficiency Bonus to one damage roll of that spell. Once you use this benefit, you can’t do so again until you finish a Long Rest.",
+    "url": "https://dnd2024.wikidot.com/feat:arcane-overload",
+    "edition": "5.5e"
+  },
+  {
+    "id": "feat-2024-arcane-safeguard",
+    "slug": "arcane-safeguard",
+    "name": "Arcane Safeguard",
+    "rawHtml": "\n\n<p>Source: Arcana Unleashed</p>\n<p><em>Origin Feat</em></p>\n<p>You gain the following benefits.</p>\n<p><strong>Cantrip.</strong> You learn the <a href=\"/spell:resistance\">Resistance</a> cantrip. Intelligence, Wisdom, or Charisma is your spellcasting ability for this spell (choose when you select this feat).</p>\n<p>You can cast the <a href=\"/spell:resistance\">Resistance</a> cantrip as a Bonus Action. You can do so a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Long Rest.</p>\n<p><strong>Sheltering Aid.</strong> When you take the Help action to assist with an ally’s ability check, that ally gains a number of Temporary Hit Points equal to your Proficiency Bonus.</p>\n",
+    "cleanText": "Source: Arcana Unleashed Origin Feat You gain the following benefits. Cantrip. You learn the Resistance cantrip. Intelligence, Wisdom, or Charisma is your spellcasting ability for this spell (choose when you select this feat). You can cast the Resistance cantrip as a Bonus Action. You can do so a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Long Rest. Sheltering Aid. When you take the Help action to assist with an ally’s ability check, that ally gains a number of Temporary Hit Points equal to your Proficiency Bonus.",
+    "url": "https://dnd2024.wikidot.com/feat:arcane-safeguard",
+    "edition": "5.5e"
+  },
+  {
+    "id": "feat-2024-arcane-undertaker",
+    "slug": "arcane-undertaker",
+    "name": "Arcane Undertaker",
+    "rawHtml": "\n\n<p>Source: Arcana Unleashed</p>\n<p><em>Origin Feat</em></p>\n<p>You gain the following benefits.</p>\n<p><strong>Cantrip.</strong> You learn one Cleric or Wizard cantrip of your choice. The cantrip must be from the Necromancy school. Intelligence, Wisdom, or Charisma is your spellcasting ability for this spell (choose when you select this feat).</p>\n<p><strong>Knowledge from the Dead.</strong> When you make an Intelligence (History) or Wisdom (Medicine) check, you can roll 1d4 and add the number rolled to the ability check.</p>\n<p><strong>Understanding of Death.</strong> When you take the Help action to stabilize a creature with 0 Hit Points, you gain Heroic Inspiration. Once you use this benefit, you can’t use it again until you finish a Long Rest.</p>\n",
+    "cleanText": "Source: Arcana Unleashed Origin Feat You gain the following benefits. Cantrip. You learn one Cleric or Wizard cantrip of your choice. The cantrip must be from the Necromancy school. Intelligence, Wisdom, or Charisma is your spellcasting ability for this spell (choose when you select this feat). Knowledge from the Dead. When you make an Intelligence (History) or Wisdom (Medicine) check, you can roll 1d4 and add the number rolled to the ability check. Understanding of Death. When you take the Help action to stabilize a creature with 0 Hit Points, you gain Heroic Inspiration. Once you use this benefit, you can’t use it again until you finish a Long Rest.",
+    "url": "https://dnd2024.wikidot.com/feat:arcane-undertaker",
+    "edition": "5.5e"
+  },
+  {
+    "id": "feat-2024-crafter",
+    "slug": "crafter",
+    "name": "Crafter",
+    "rawHtml": "\n\n<p>Source: Player's Handbook</p>\n<p>You gain the following benefits.</p>\n<p><strong>Tool Proficiency</strong>. You gain proficiency with three different Artisan's Tools of your choice from the Fast Crafting table.</p>\n<p><strong>Discount</strong>. Whenever you buy a nonmagical item, you receive a 20 percent discount on it.</p>\n<p><strong>Fast Crafting</strong>. When you finish a Long Rest, you can craft one piece of gear from the Fast Crafting table, provided you have the Artisan's Tools associated with that item and have proficiency with those tools. The item lasts until you finish another Long Rest, at which point the item falls apart.</p>\n<h4 id=\"toc0\"><span>Fast Crafting</span></h4>\n<table class=\"wiki-content-table\">\n<tr>\n<th>Artisan's Tools</th>\n<th>Crafted Gear</th>\n</tr>\n<tr>\n<td>Carpenter's Tools</td>\n<td>Ladder, Torch</td>\n</tr>\n<tr>\n<td>Leatherworker's Tools</td>\n<td>Case, Pouch</td>\n</tr>\n<tr>\n<td>Mason's Tools</td>\n<td>Block and Tackle</td>\n</tr>\n<tr>\n<td>Potter's Tools</td>\n<td>Jug, Lamp</td>\n</tr>\n<tr>\n<td>Smith's Tools</td>\n<td>Ball Bearings, Bucket, Caltrops, Grappling Hook, Iron Pot</td>\n</tr>\n<tr>\n<td>Tinker's Tools</td>\n<td>Bell, Shovel, Tinder Box</td>\n</tr>\n<tr>\n<td>Weaver's Tools</td>\n<td>Basket, Rope, Net, Tent</td>\n</tr>\n<tr>\n<td>Woodcarver's Tools</td>\n<td>Club, Greatclub, Quarterstaff</td>\n</tr>\n</table>\n",
+    "cleanText": "Source: Player's Handbook You gain the following benefits. Tool Proficiency . You gain proficiency with three different Artisan's Tools of your choice from the Fast Crafting table. Discount . Whenever you buy a nonmagical item, you receive a 20 percent discount on it. Fast Crafting . When you finish a Long Rest, you can craft one piece of gear from the Fast Crafting table, provided you have the Artisan's Tools associated with that item and have proficiency with those tools. The item lasts until you finish another Long Rest, at which point the item falls apart. Fast Crafting Artisan's Tools Crafted Gear Carpenter's Tools Ladder, Torch Leatherworker's Tools Case, Pouch Mason's Tools Block and Tackle Potter's Tools Jug, Lamp Smith's Tools Ball Bearings, Bucket, Caltrops, Grappling Hook, Iron Pot Tinker's Tools Bell, Shovel, Tinder Box Weaver's Tools Basket, Rope, Net, Tent Woodcarver's Tools Club, Greatclub, Quarterstaff",
+    "url": "https://dnd2024.wikidot.com/feat:crafter",
+    "edition": "5.5e"
+  },
+  {
+    "id": "feat-2024-familiar-friend",
+    "slug": "familiar-friend",
+    "name": "Familiar Friend",
+    "rawHtml": "\n\n<p>Source: Arcana Unleashed</p>\n<p><em>Origin Feat</em></p>\n<p>You gain the following benefits.</p>\n<p><strong>Faithful Companion.</strong> You always have the <a href=\"/spell:find-familiar\">Find Familiar</a> spell prepared. Intelligence, Wisdom, or Charisma is your spellcasting ability for this spell (choose when you select this feat). You can cast it once without a spell slot or Material components, and you regain the ability to cast it in this way when you finish a Long Rest. You can also cast the spell using any spell slots you have.</p>\n<p><strong>Fortified Familiar.</strong> When you cast the <a href=\"/spell:find-familiar\">Find Familiar</a> spell, your familiar’s Hit Point maximum and current Hit Points are increased by an amount equal to twice your character level.</p>\n<p><strong>Helpful Friend.</strong> When you make an ability check using a skill in which you have proficiency while your familiar is within 5 feet of you, you gain Advantage on the check. You can use this benefit a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Long Rest.</p>\n",
+    "cleanText": "Source: Arcana Unleashed Origin Feat You gain the following benefits. Faithful Companion. You always have the Find Familiar spell prepared. Intelligence, Wisdom, or Charisma is your spellcasting ability for this spell (choose when you select this feat). You can cast it once without a spell slot or Material components, and you regain the ability to cast it in this way when you finish a Long Rest. You can also cast the spell using any spell slots you have. Fortified Familiar. When you cast the Find Familiar spell, your familiar’s Hit Point maximum and current Hit Points are increased by an amount equal to twice your character level. Helpful Friend. When you make an ability check using a skill in which you have proficiency while your familiar is within 5 feet of you, you gain Advantage on the check. You can use this benefit a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Long Rest.",
+    "url": "https://dnd2024.wikidot.com/feat:familiar-friend",
+    "edition": "5.5e"
+  },
+  {
+    "id": "feat-2024-healer",
+    "slug": "healer",
+    "name": "Healer",
+    "rawHtml": "\n\n<p>Source: Player's Handbook</p>\n<p>You gain the following benefits.</p>\n<p><strong>Battle Medic.</strong> If you have a Healer's Kit, you can expend one use of it and tend to a creature within 5 feet of yourself as a Utilize action. That creature can expend one of its Hit Point Dice, and you then roll that die. The creature regains a number of Hit Points equal to the roll plus your Proficiency Bonus.</p>\n<p><strong>Healing Rerolls.</strong> Whenever you roll a die to determine the number of Hit Points you restore with a spell or with this feat's Battle Medic benefit, you can reroll the die if it rolls a 1, and you must use the new roll.</p>\n",
+    "cleanText": "Source: Player's Handbook You gain the following benefits. Battle Medic. If you have a Healer's Kit, you can expend one use of it and tend to a creature within 5 feet of yourself as a Utilize action. That creature can expend one of its Hit Point Dice, and you then roll that die. The creature regains a number of Hit Points equal to the roll plus your Proficiency Bonus. Healing Rerolls. Whenever you roll a die to determine the number of Hit Points you restore with a spell or with this feat's Battle Medic benefit, you can reroll the die if it rolls a 1, and you must use the new roll.",
+    "url": "https://dnd2024.wikidot.com/feat:healer",
+    "edition": "5.5e"
+  },
+  {
+    "id": "feat-2024-lucky",
+    "slug": "lucky",
+    "name": "Lucky",
+    "rawHtml": "\n\n<p>Source: Player's Handbook</p>\n<p>You gain the following benefits.</p>\n<p><strong>Luck Points.</strong> You have a number of Luck Points equal to your Proficiency Bonus and can spend the points on the benefits below. You regain your expended Luck Points when you finish a Long Rest.</p>\n<p><strong>Advantage.</strong> When you roll a d20 for a D20 Test, you can spend 1 Luck Point to give yourself Advantage on the roll.</p>\n<p><strong>Disadvantage.</strong> When a creature rolls a d20 for an attack roll against you, you can spend 1 Luck Point to impose Disadvantage on that roll.</p>\n",
+    "cleanText": "Source: Player's Handbook You gain the following benefits. Luck Points. You have a number of Luck Points equal to your Proficiency Bonus and can spend the points on the benefits below. You regain your expended Luck Points when you finish a Long Rest. Advantage. When you roll a d20 for a D20 Test, you can spend 1 Luck Point to give yourself Advantage on the roll. Disadvantage. When a creature rolls a d20 for an attack roll against you, you can spend 1 Luck Point to impose Disadvantage on that roll.",
+    "url": "https://dnd2024.wikidot.com/feat:lucky",
+    "edition": "5.5e"
+  },
+  {
+    "id": "feat-2024-magic-initiate",
+    "slug": "magic-initiate",
+    "name": "Magic Initiate",
+    "rawHtml": "\n\n<p>Source: Player's Handbook</p>\n<p>You gain the following benefits.</p>\n<p><strong>Two Cantrips.</strong> You learn two cantrips of your choice from the <a href=\"/cleric:spell-list\">Cleric</a>, <a href=\"/druid:spell-list\">Druid</a>, or <a href=\"/wizard:spell-list\">Wizard</a> spell list. Intelligence, Wisdom, or Charisma is your spellcasting ability for this feat's spells (choose when you select this feat).</p>\n<p><strong>Level 1 Spell.</strong> Choose a level 1 spell from the same list you selected for this feat's cantrips. You always have that spell prepared. You can cast it once without a spell slot, and you regain the ability to cast it in that way when you finish a Long Rest. You can also cast the spell using any spell slots you have.</p>\n<p><strong>Spell Change.</strong> Whenever you gain a new level, you can replace one of the spells you chose for this feat with a different spell of the same level from the chosen spell list.</p>\n<p><strong>Repeatable.</strong> You can take this feat more than once, but you must choose a different spell list each time.</p>\n",
+    "cleanText": "Source: Player's Handbook You gain the following benefits. Two Cantrips. You learn two cantrips of your choice from the Cleric , Druid , or Wizard spell list. Intelligence, Wisdom, or Charisma is your spellcasting ability for this feat's spells (choose when you select this feat). Level 1 Spell. Choose a level 1 spell from the same list you selected for this feat's cantrips. You always have that spell prepared. You can cast it once without a spell slot, and you regain the ability to cast it in that way when you finish a Long Rest. You can also cast the spell using any spell slots you have. Spell Change. Whenever you gain a new level, you can replace one of the spells you chose for this feat with a different spell of the same level from the chosen spell list. Repeatable. You can take this feat more than once, but you must choose a different spell list each time.",
+    "url": "https://dnd2024.wikidot.com/feat:magic-initiate",
+    "edition": "5.5e"
+  },
+  {
+    "id": "feat-2024-musician",
+    "slug": "musician",
+    "name": "Musician",
+    "rawHtml": "\n\n<p>Source: Player's Handbook</p>\n<p>You gain the following benefits.</p>\n<p><strong>Instrument Training.</strong> You gain proficiency with three Musical Instruments of your choice.</p>\n<p><strong>Encouraging Song.</strong> As you finish a Short or Long Rest, you can play a song on a Musical Instrument with which you have proficiency and give Heroic Inspiration to allies who hear the song. The number of allies you can affect in this way equals your Proficiency Bonus.</p>\n",
+    "cleanText": "Source: Player's Handbook You gain the following benefits. Instrument Training. You gain proficiency with three Musical Instruments of your choice. Encouraging Song. As you finish a Short or Long Rest, you can play a song on a Musical Instrument with which you have proficiency and give Heroic Inspiration to allies who hear the song. The number of allies you can affect in this way equals your Proficiency Bonus.",
+    "url": "https://dnd2024.wikidot.com/feat:musician",
+    "edition": "5.5e"
+  },
+  {
+    "id": "feat-2024-portal-jumper",
+    "slug": "portal-jumper",
+    "name": "Portal Jumper",
+    "rawHtml": "\n\n<p>Source: Arcana Unleashed</p>\n<p><em>Origin Feat</em></p>\n<p>You gain the following benefits.</p>\n<p><strong>Otherworldly Resilience.</strong> You have Resistance to one of the following damage types: Necrotic, Psychic, or Radiant (choose when you select this feat).</p>\n<p><strong>Portal Step.</strong> You can spend 15 feet of movement to teleport to an unoccupied space you can see within 15 feet of yourself. You can use this benefit a number of times equal to your Proficiency Bonus but only once per turn, and you regain all expended uses when you finish a Long Rest.</p>\n",
+    "cleanText": "Source: Arcana Unleashed Origin Feat You gain the following benefits. Otherworldly Resilience. You have Resistance to one of the following damage types: Necrotic, Psychic, or Radiant (choose when you select this feat). Portal Step. You can spend 15 feet of movement to teleport to an unoccupied space you can see within 15 feet of yourself. You can use this benefit a number of times equal to your Proficiency Bonus but only once per turn, and you regain all expended uses when you finish a Long Rest.",
+    "url": "https://dnd2024.wikidot.com/feat:portal-jumper",
+    "edition": "5.5e"
+  },
+  {
+    "id": "feat-2024-savage-attacker",
+    "slug": "savage-attacker",
+    "name": "Savage Attacker",
+    "rawHtml": "\n\n<p>Source: Player's Handbook</p>\n<p>You've trained to deal particularly damaging strikes. Once per turn when you hit a target with a weapon, you can roll the weapon's damage dice twice and use either roll against the target.</p>\n",
+    "cleanText": "Source: Player's Handbook You've trained to deal particularly damaging strikes. Once per turn when you hit a target with a weapon, you can roll the weapon's damage dice twice and use either roll against the target.",
+    "url": "https://dnd2024.wikidot.com/feat:savage-attacker",
+    "edition": "5.5e"
+  },
+  {
+    "id": "feat-2024-sharp-eye",
+    "slug": "sharp-eye",
+    "name": "Sharp Eye",
+    "rawHtml": "\n\n<p>Source: Ravenloft - The Horrors Within</p>\n<p><em>Origin Feat</em></p>\n<p>When you take the Search or Study action, you can give yourself Advantage on any ability check made as part of that action. You can use this feature a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Long Rest. If the check fails, the use of this feature isn't expended.</p>\n",
+    "cleanText": "Source: Ravenloft - The Horrors Within Origin Feat When you take the Search or Study action, you can give yourself Advantage on any ability check made as part of that action. You can use this feature a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Long Rest. If the check fails, the use of this feature isn't expended.",
+    "url": "https://dnd2024.wikidot.com/feat:sharp-eye",
+    "edition": "5.5e"
+  },
+  {
+    "id": "feat-2024-skilled",
+    "slug": "skilled",
+    "name": "Skilled",
+    "rawHtml": "\n\n<p>Source: Player's Handbook</p>\n<p>You gain proficiency in any combination of three skills or tools of your choice.</p>\n<p><strong>Repeatable.</strong> You can take this feat more than once.</p>\n",
+    "cleanText": "Source: Player's Handbook You gain proficiency in any combination of three skills or tools of your choice. Repeatable. You can take this feat more than once.",
+    "url": "https://dnd2024.wikidot.com/feat:skilled",
+    "edition": "5.5e"
+  },
+  {
+    "id": "feat-2024-survivor",
+    "slug": "survivor",
+    "name": "Survivor",
+    "rawHtml": "\n\n<p>Source: Ravenloft - The Horrors Within</p>\n<p><em>Origin Feat</em></p>\n<p>You gain the following benefits.<br />\n<strong>Hypervigilance.</strong> Whenever you roll Initiative, you can reroll the d20 if the number rolled is 9 or lower. You must use the new roll.<br />\n<strong>Steel Yourself.</strong> When you fail a saving throw to avoid or end the Charmed or Frightened condition, you can take a Reaction to add a bonus to the roll potentially causing it to succeed. The bonus is equal to your Proficiency Bonus.<br />\nOnce you take this Reaction, you can't do so again until you finish a Long Rest.</p>\n",
+    "cleanText": "Source: Ravenloft - The Horrors Within Origin Feat You gain the following benefits. Hypervigilance. Whenever you roll Initiative, you can reroll the d20 if the number rolled is 9 or lower. You must use the new roll. Steel Yourself. When you fail a saving throw to avoid or end the Charmed or Frightened condition, you can take a Reaction to add a bonus to the roll potentially causing it to succeed. The bonus is equal to your Proficiency Bonus. Once you take this Reaction, you can't do so again until you finish a Long Rest.",
+    "url": "https://dnd2024.wikidot.com/feat:survivor",
+    "edition": "5.5e"
+  },
+  {
+    "id": "feat-2024-tavern-brawler",
+    "slug": "tavern-brawler",
+    "name": "Tavern Brawler",
+    "rawHtml": "\n\n<p>Source: Player's Handbook</p>\n<p>You gain the following benefits.</p>\n<p><strong>Enhanced Unarmed Strike.</strong> When you hit with your Unarmed Strike and deal damage, you can deal Bludgeoning damage equal to 1d4 plus your Strength modifier instead of the normal damage of an Unarmed Strike.</p>\n<p><strong>Damage Rerolls.</strong> Whenever you roll a damage die for your Unarmed Strike, you can reroll the die if it rolls a 1, and you must use the new roll.</p>\n<p><strong>Improvised Weaponry.</strong> You have proficiency with improvised weapons.</p>\n<p><strong>Push.</strong> When you hit a creature with an Unarmed Strike as part of the Attack action on your turn, you can deal damage to the target and also push it 5 feet away from you. You can use this benefit only once per turn.</p>\n",
+    "cleanText": "Source: Player's Handbook You gain the following benefits. Enhanced Unarmed Strike. When you hit with your Unarmed Strike and deal damage, you can deal Bludgeoning damage equal to 1d4 plus your Strength modifier instead of the normal damage of an Unarmed Strike. Damage Rerolls. Whenever you roll a damage die for your Unarmed Strike, you can reroll the die if it rolls a 1, and you must use the new roll. Improvised Weaponry. You have proficiency with improvised weapons. Push. When you hit a creature with an Unarmed Strike as part of the Attack action on your turn, you can deal damage to the target and also push it 5 feet away from you. You can use this benefit only once per turn.",
+    "url": "https://dnd2024.wikidot.com/feat:tavern-brawler",
+    "edition": "5.5e"
+  },
+  {
+    "id": "feat-2024-tough",
+    "slug": "tough",
+    "name": "Tough",
+    "rawHtml": "\n\n<p>Source: Player's Handbook</p>\n<p>Your Hit Point maximum increases by an amount equal to twice your character level when you gain this feat. Whenever you gain a character level thereafter, your Hit Point maximum increases by an additional 2 Hit Points.</p>\n",
+    "cleanText": "Source: Player's Handbook Your Hit Point maximum increases by an amount equal to twice your character level when you gain this feat. Whenever you gain a character level thereafter, your Hit Point maximum increases by an additional 2 Hit Points.",
+    "url": "https://dnd2024.wikidot.com/feat:tough",
+    "edition": "5.5e"
+  },
+  {
+    "id": "feat-2024-transmuted-anatomy",
+    "slug": "transmuted-anatomy",
+    "name": "Transmuted Anatomy",
+    "rawHtml": "\n\n<p>Source: Arcana Unleashed</p>\n<p><em>Origin Feat</em></p>\n<p>You gain the following benefits.</p>\n<p><strong>Lengthened Stride.</strong> Your Speed increases by 5 feet.</p>\n<p><strong>Resilient Anatomy.</strong> You have Advantage on saving throws against effects that would compel you to shape-shift against your will.</p>\n<p>Additionally, when you fail a Constitution saving throw, you can take a Reaction to roll 1d4 and add the number rolled to the save, potentially turning the failure into a success. You can use this benefit a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Long Rest.</p>\n",
+    "cleanText": "Source: Arcana Unleashed Origin Feat You gain the following benefits. Lengthened Stride. Your Speed increases by 5 feet. Resilient Anatomy. You have Advantage on saving throws against effects that would compel you to shape-shift against your will. Additionally, when you fail a Constitution saving throw, you can take a Reaction to roll 1d4 and add the number rolled to the save, potentially turning the failure into a success. You can use this benefit a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Long Rest.",
+    "url": "https://dnd2024.wikidot.com/feat:transmuted-anatomy",
+    "edition": "5.5e"
+  }
+]

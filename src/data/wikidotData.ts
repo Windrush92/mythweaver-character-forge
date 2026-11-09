@@ -2,6 +2,8 @@
 // Razas, Subrazas, Clases, Subclases y Trasfondos oficiales de D&D 5e en Español
 
 export interface WikidotSubrace {
+  nameEn?: string;
+  descriptionEn?: string;
   id: string;
   name: string;
   description: string;
@@ -22,6 +24,9 @@ export interface WikidotSubrace {
 export type WikidotRaceCategory = 'Común' | 'Exótica' | 'Monstruosa' | 'Planar';
 
 export interface WikidotRace {
+  nameEn?: string;
+  categoryEn?: string;
+  descriptionEn?: string;
   id: string;
   name: string;
   category?: WikidotRaceCategory;
@@ -45,6 +50,8 @@ export interface WikidotRace {
 }
 
 export interface WikidotClass {
+  nameEn?: string;
+  descriptionEn?: string;
   id: string;
   name: string;
   description: string;
@@ -98,6 +105,8 @@ const BASE_WIKIDOT_CLASSES: WikidotClass[] = [
   {
     id: 'barbaro',
     name: 'Bárbaro',
+    nameEn: 'Barbarian',
+    descriptionEn: 'A fierce warrior of primitive background who can enter a battle rage.',
     description: 'Un guerrero feroz de extracción primitiva capaz de entrar en una furia de batalla devastadora.',
     hitDie: 12,
     primaryAbility: 'Fuerza',
@@ -171,6 +180,8 @@ const BASE_WIKIDOT_CLASSES: WikidotClass[] = [
   {
     id: 'mago',
     name: 'Mago (Wizard)',
+    nameEn: 'Wizard',
+    descriptionEn: 'A scholarly magic-user capable of manipulating the structures of reality.',
     description: 'Un estudiante erudito de la magia arcana que conjura hechizos mediante el estudio riguroso y su libro de conjuros.',
     hitDie: 6,
     primaryAbility: 'Inteligencia',
@@ -378,6 +389,8 @@ const BASE_WIKIDOT_CLASSES: WikidotClass[] = [
   {
     id: 'clerigo',
     name: 'Clérigo',
+    nameEn: 'Cleric',
+    descriptionEn: 'A priestly champion who wields divine magic in service of a higher power.',
     description: 'Un campeón sacerdotal que ejerce magia divina otorgada por una deidad o causa sagrada.',
     hitDie: 8,
     primaryAbility: 'Sabiduría',
@@ -472,6 +485,8 @@ const BASE_WIKIDOT_CLASSES: WikidotClass[] = [
   {
     id: 'guerrero',
     name: 'Guerrero (Fighter)',
+    nameEn: 'Fighter',
+    descriptionEn: 'A master of martial combat, skilled with a variety of weapons and armor.',
     description: 'Un maestro del combate marcial, perito en el uso de una gran variedad de armas y armaduras.',
     hitDie: 10,
     primaryAbility: 'Fuerza o Destreza',
@@ -569,6 +584,8 @@ const BASE_WIKIDOT_CLASSES: WikidotClass[] = [
   {
     id: 'picaro',
     name: 'Pícaro (Rogue)',
+    nameEn: 'Rogue',
+    descriptionEn: 'A scoundrel who uses stealth and trickery to overcome obstacles and enemies.',
     description: 'Un bribón sigiloso y letal que utiliza el engaño, la agilidad y la precisión para superar obstáculos.',
     hitDie: 8,
     primaryAbility: 'Destreza',
@@ -666,6 +683,8 @@ const BASE_WIKIDOT_CLASSES: WikidotClass[] = [
   {
     id: 'paladin',
     name: 'Paladín',
+    nameEn: 'Paladin',
+    descriptionEn: 'A holy warrior bound to a sacred oath.',
     description: 'Un guerrero sagrado vinculado a un juramento solemne que canaliza el poder de la justicia y la luz radiante.',
     hitDie: 10,
     primaryAbility: 'Fuerza y Carisma',
@@ -750,6 +769,8 @@ const BASE_WIKIDOT_CLASSES: WikidotClass[] = [
   {
     id: 'monje',
     name: 'Monje',
+    nameEn: 'Monk',
+    descriptionEn: 'A master of martial arts, harnessing the power of the body in pursuit of physical and spiritual perfection.',
     description: 'Un maestro de las artes marciales que canaliza la energía espiritual mística del Ki que fluye por su cuerpo.',
     hitDie: 8,
     primaryAbility: 'Destreza y Sabiduría',
@@ -833,6 +854,8 @@ const BASE_WIKIDOT_CLASSES: WikidotClass[] = [
   {
     id: 'bardo',
     name: 'Bardo',
+    nameEn: 'Bard',
+    descriptionEn: 'An inspiring magician whose power echoes the music of creation.',
     description: 'Un maestro de la canción, el discurso y la magia que teje melodías para inspirar aliados y manipular el tejido de la realidad.',
     hitDie: 8,
     primaryAbility: 'Carisma',
@@ -924,6 +947,8 @@ const BASE_WIKIDOT_CLASSES: WikidotClass[] = [
   {
     id: 'druida',
     name: 'Druida',
+    nameEn: 'Druid',
+    descriptionEn: 'A priest of the Old Faith, wielding the powers of nature and adopting animal forms.',
     description: 'Un sacerdote de la naturaleza ancestral que adopta formas de bestias y canaliza las fuerzas elementales.',
     hitDie: 8,
     primaryAbility: 'Sabiduría',
@@ -1003,6 +1028,8 @@ const BASE_WIKIDOT_CLASSES: WikidotClass[] = [
   {
     id: 'hechicero',
     name: 'Hechicero (Sorcerer)',
+    nameEn: 'Sorcerer',
+    descriptionEn: 'A spellcaster who draws on inherent magic from a gift or bloodline.',
     description: 'Un lanzador de conjuros que posee magia innata debida a una herencia exótica, anomalía planar o toque del destino.',
     hitDie: 6,
     primaryAbility: 'Carisma',
@@ -1078,6 +1105,8 @@ const BASE_WIKIDOT_CLASSES: WikidotClass[] = [
   {
     id: 'brujo',
     name: 'Brujo (Warlock)',
+    nameEn: 'Warlock',
+    descriptionEn: 'A wielder of magic that is derived from a bargain with an otherworldly entity.',
     description: 'Un practicante de la magia ligada a un pacto con un ser de poder sobrenatural de planos lejanos.',
     hitDie: 8,
     primaryAbility: 'Carisma',
@@ -1158,6 +1187,8 @@ const BASE_WIKIDOT_CLASSES: WikidotClass[] = [
   {
     id: 'explorador',
     name: 'Explorador (Ranger)',
+    nameEn: 'Ranger',
+    descriptionEn: 'A warrior who uses martial prowess and nature magic to combat threats on the edges of civilization.',
     description: 'Un cazador y rastreador avezado que protege la frontera civilizada de las amenazas de las tierras salvajes.',
     hitDie: 10,
     primaryAbility: 'Destreza y Sabiduría',
@@ -1227,6 +1258,8 @@ const BASE_WIKIDOT_CLASSES: WikidotClass[] = [
   {
     id: 'pugilista',
     name: 'Pugilista (Homebrew 5e)',
+    nameEn: 'Pugilist (Homebrew 5e)',
+    descriptionEn: 'A street fighter and master of the ring who takes punishment only to dish it back twofold. Builds Flow Points to unleash brutal combinations, dirty tricks, and knockout counterattacks.',
     description: 'Un combatiente callejero y maestro del cuadrilátero que no teme recibir castigo para devolverlo duplicado. Acumula Puntos de Flujo (Flow Points) para desatar combinaciones brutales, trucos sucios y contraataques noqueadores.',
     hitDie: 10,
     primaryAbility: 'Fuerza o Destreza',

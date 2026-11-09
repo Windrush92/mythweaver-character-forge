@@ -1,5 +1,12 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { OfficialFeat } from '../data/characterCreatorData';
+import { ALL_WIKIDOT_FEATS } from '../data/wikidotFeatsData';
+import { useLanguageStore } from '../hooks/useLanguageStore';
+import {
+  translateDndTitle,
+  translateDndText,
+  FEAT_CATEGORY_EN,
+} from '../utils/dndEnglishTranslator';
 import { Award, X, Check, Zap, Sparkles, Sword, Shield, BookOpen } from 'lucide-react';
 
 interface FeatDetailModalProps {
@@ -15,6 +22,8 @@ export const FeatDetailModal: React.FC<FeatDetailModalProps> = ({
   onSelect,
   isSelected,
 }) => {
+  const { isSpanish, t } = useLanguageStore();
+
   useEffect(() => {
     if (!feat) return;
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -24,16 +33,36 @@ export const FeatDetailModal: React.FC<FeatDetailModalProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [feat, onClose]);
 
+  const wikiFeat = useMemo(() => {
+    if (isSpanish || !feat) return null;
+    const nameToMatch = (feat.nameEn || feat.name || '').toLowerCase();
+    const idToMatch = (feat.id || '').toLowerCase();
+    return ALL_WIKIDOT_FEATS.find(
+      (wf) =>
+        (wf.id && wf.id.toLowerCase() === idToMatch) ||
+        (wf.nameEn && wf.nameEn.toLowerCase() === nameToMatch) ||
+        (wf.name && wf.name.toLowerCase().includes(nameToMatch))
+    );
+  }, [feat, isSpanish]);
+
   if (!feat) return null;
 
   const statLabels: Record<string, string> = {
-    str: 'Fuerza',
-    dex: 'Destreza',
-    con: 'Constitución',
-    int: 'Inteligencia',
-    wis: 'Sabiduría',
-    cha: 'Carisma',
+    str: isSpanish ? 'Fuerza' : 'Strength',
+    dex: isSpanish ? 'Destreza' : 'Dexterity',
+    con: isSpanish ? 'Constitución' : 'Constitution',
+    int: isSpanish ? 'Inteligencia' : 'Intelligence',
+    wis: isSpanish ? 'Sabiduría' : 'Wisdom',
+    cha: isSpanish ? 'Carisma' : 'Charisma',
   };
+
+  const catLabel = isSpanish ? feat.category : (FEAT_CATEGORY_EN[feat.category] || feat.category);
+  const featTitle = isSpanish ? feat.name : (feat.nameEn || wikiFeat?.nameEn || translateDndTitle(feat.name));
+  const featDescription = isSpanish ? feat.description : (wikiFeat?.description || translateDndText(feat.description));
+  const featBenefits = isSpanish ? feat.benefits : (wikiFeat?.benefits && wikiFeat.benefits.length > 0 ? wikiFeat.benefits : feat.benefits.map(translateDndText));
+  const featPrereq = feat.prerequisite
+    ? (isSpanish ? feat.prerequisite : (wikiFeat?.prerequisite || translateDndText(feat.prerequisite)))
+    : undefined;
 
   return (
     <div
@@ -52,14 +81,20 @@ export const FeatDetailModal: React.FC<FeatDetailModalProps> = ({
             </div>
             <div>
               <h3 className="text-lg font-bold font-fantasy text-[#f7f2ea] tracking-wide">
-                {feat.name}
+                {featTitle}
               </h3>
               <div className="flex flex-wrap items-center gap-2 text-xs text-[#c7b9a5] mt-0.5">
-                <span className="font-mono text-[#d4ab59] italic">
-                  {feat.nameEn}
+                {isSpanish && feat.nameEn && (
+                  <>
+                    <span className="font-mono text-[#d4ab59] italic">
+                      {feat.nameEn}
+                    </span>
+                    <span>•</span>
+                  </>
+                )}
+                <span className="font-fantasy font-medium">
+                  {isSpanish ? `Dote de ${feat.category}` : `Official ${catLabel} Feat`}
                 </span>
-                <span>•</span>
-                <span className="font-fantasy font-medium">Dote de {feat.category}</span>
                 {feat.abilityBonus && (
                   <span className="bg-[#244227] text-[#c9efcc] px-1.5 py-0.2 rounded text-[10px] border border-[#3e6b43] font-mono">
                     +1 Stat (Half-Feat)
@@ -72,7 +107,7 @@ export const FeatDetailModal: React.FC<FeatDetailModalProps> = ({
           <button
             onClick={onClose}
             className="p-1.5 text-[#c7b9a5] hover:text-white hover:bg-[#4a3a2a] rounded-lg transition cursor-pointer"
-            title="Cerrar detalles"
+            title={t('Cerrar detalles', 'Close details')}
           >
             <X className="w-5 h-5" />
           </button>
@@ -88,28 +123,28 @@ export const FeatDetailModal: React.FC<FeatDetailModalProps> = ({
                 {feat.category === 'Magia' && '✨ '}
                 {feat.category === 'Utilidad' && '🛠️ '}
                 {feat.category === 'General' && '🌟 '}
-                {feat.category}
+                {catLabel}
               </span>
 
-              {feat.prerequisite ? (
+              {featPrereq ? (
                 <span className="px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-[#faecd6] text-[#8c591a] border border-[#e0bf79]">
-                  ⚠️ Prerrequisito: {feat.prerequisite}
+                  {isSpanish ? `⚠️ Prerrequisito: ${featPrereq}` : `⚠️ Prerequisite: ${featPrereq}`}
                 </span>
               ) : (
                 <span className="px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-[#e8f5e9] text-[#2e7d32] border border-[#a5d6a7]">
-                  ✓ Sin Prerrequisitos
+                  {isSpanish ? '✓ Sin Prerrequisitos' : '✓ No Prerequisites'}
                 </span>
               )}
             </div>
 
             <span className="text-[11px] font-mono text-[#8c7457] italic">
-              Compendio Oficial 5e
+              {isSpanish ? 'Compendio Oficial 5e' : 'Official 5e Compendium'}
             </span>
           </div>
 
           {/* Lore / Description */}
           <div className="p-3.5 bg-[#f8f2e4] border-l-4 border-[#8c672b] rounded-r-xl italic text-xs text-[#5e4b37] leading-relaxed shadow-inner">
-            "{feat.description}"
+            "{featDescription}"
           </div>
 
           {/* Ability Score Bonus (Half-Feat) */}
@@ -120,18 +155,34 @@ export const FeatDetailModal: React.FC<FeatDetailModalProps> = ({
               </div>
               <div className="text-xs">
                 <strong className="text-[#2c221a] block font-fantasy">
-                  Mejora de Característica Integrada (+{feat.abilityBonus.amount})
+                  {isSpanish ? `Mejora de Característica Integrada (+${feat.abilityBonus.amount})` : `Ability Score Increase (+${feat.abilityBonus.amount})`}
                 </strong>
                 <p className="text-[#6e5c4a] mt-0.5">
-                  Aumentas tu{' '}
-                  <span className="font-bold text-[#8c672b]">
-                    {feat.abilityBonus.stats
-                      ? feat.abilityBonus.stats
-                          .map((st) => statLabels[st] || st)
-                          .join(feat.abilityBonus.flexible ? ' o ' : ' y ')
-                      : 'Característica'}
-                  </span>{' '}
-                  en +{feat.abilityBonus.amount} (hasta un máximo de 20).
+                  {isSpanish ? (
+                    <>
+                      Aumentas tu{' '}
+                      <span className="font-bold text-[#8c672b]">
+                        {feat.abilityBonus.stats
+                          ? feat.abilityBonus.stats
+                              .map((st) => statLabels[st] || st)
+                              .join(feat.abilityBonus.flexible ? ' o ' : ' y ')
+                          : 'Característica'}
+                      </span>{' '}
+                      en +{feat.abilityBonus.amount} (hasta un máximo de 20).
+                    </>
+                  ) : (
+                    <>
+                      Increase your{' '}
+                      <span className="font-bold text-[#8c672b]">
+                        {feat.abilityBonus.stats
+                          ? feat.abilityBonus.stats
+                              .map((st) => statLabels[st] || st)
+                              .join(feat.abilityBonus.flexible ? ' or ' : ' and ')
+                          : 'Ability Score'}
+                      </span>{' '}
+                      by +{feat.abilityBonus.amount} (to a maximum of 20).
+                    </>
+                  )}
                 </p>
               </div>
             </div>
@@ -140,10 +191,10 @@ export const FeatDetailModal: React.FC<FeatDetailModalProps> = ({
           {/* Mechanical Benefits */}
           <div className="space-y-2.5">
             <h4 className="font-fantasy font-bold text-xs uppercase text-[#8c672b] tracking-wider flex items-center gap-1.5">
-              <Check className="w-4 h-4 text-[#8c672b]" /> Beneficios y Reglas Oficiales:
+              <Check className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? 'Beneficios y Reglas Oficiales:' : 'Official Benefits & Rules:'}
             </h4>
             <div className="space-y-2">
-              {feat.benefits.map((benefit, idx) => (
+              {featBenefits.map((benefit, idx) => (
                 <div
                   key={idx}
                   className="bg-[#faf3e8] p-3 rounded-xl border border-[#d8c8af] flex items-start gap-2.5 text-xs text-[#3b2b1b] leading-relaxed shadow-2xs font-sans font-medium"
@@ -163,14 +214,14 @@ export const FeatDetailModal: React.FC<FeatDetailModalProps> = ({
               <div className="flex items-center justify-between">
                 <div>
                   <h4 className="font-fantasy font-bold text-xs uppercase text-[#8c672b]">
-                    {feat.subChoice.title}
+                    {feat.subChoice.title ? (isSpanish ? feat.subChoice.title : translateDndTitle(feat.subChoice.title)) : ''}
                   </h4>
                   <p className="text-xs text-[#6e5c4a] mt-0.5">
-                    {feat.subChoice.description}
+                    {feat.subChoice.description ? (isSpanish ? feat.subChoice.description : translateDndText(feat.subChoice.description)) : ''}
                   </p>
                 </div>
                 <span className="text-xs font-mono font-bold bg-[#ede1ce] text-[#5e4b37] px-2.5 py-1 rounded-lg border border-[#cfbeaa] shrink-0">
-                  Elige hasta {feat.subChoice.maxSelections}
+                  {isSpanish ? `Elige hasta ${feat.subChoice.maxSelections}` : `Choose up to ${feat.subChoice.maxSelections}`}
                 </span>
               </div>
 
@@ -181,10 +232,10 @@ export const FeatDetailModal: React.FC<FeatDetailModalProps> = ({
                     className="bg-[#faf3e8] p-2.5 rounded-xl border border-[#d8c8af] space-y-0.5"
                   >
                     <strong className="text-xs text-[#2c221a] block font-fantasy">
-                      {opt.name}
+                      {isSpanish ? opt.name : translateDndTitle(opt.name)}
                     </strong>
                     <p className="text-[11px] text-[#6e5c4a] leading-snug">
-                      {opt.desc}
+                      {opt.desc ? (isSpanish ? opt.desc : translateDndText(opt.desc)) : ''}
                     </p>
                   </div>
                 ))}
@@ -195,7 +246,7 @@ export const FeatDetailModal: React.FC<FeatDetailModalProps> = ({
           {/* Footer Actions */}
           <div className="pt-3 flex items-center justify-between gap-2 border-t border-[#d8c8af]">
             <span className="text-xs text-[#8c7457] italic">
-              Reglas Oficiales 5e • Manual del Jugador & Suplementos
+              {isSpanish ? 'Reglas Oficiales 5e • Manual del Jugador & Suplementos' : "Official 5e Rules • Player's Handbook & Supplements"}
             </span>
 
             <div className="flex items-center gap-2">
@@ -213,7 +264,7 @@ export const FeatDetailModal: React.FC<FeatDetailModalProps> = ({
                   }`}
                 >
                   <Check className="w-3.5 h-3.5" />
-                  {isSelected ? 'Dote Ya Seleccionada' : 'Elegir esta Dote'}
+                  {isSelected ? (isSpanish ? 'Dote Ya Seleccionada' : 'Feat Already Selected') : (isSpanish ? 'Elegir esta Dote' : 'Choose this Feat')}
                 </button>
               )}
 
@@ -222,7 +273,7 @@ export const FeatDetailModal: React.FC<FeatDetailModalProps> = ({
                 onClick={onClose}
                 className="px-3.5 py-1.5 bg-[#ede1ce] hover:bg-[#dfd0ba] text-[#4a361c] rounded-lg text-xs font-semibold transition cursor-pointer"
               >
-                Cerrar
+                {isSpanish ? 'Cerrar' : 'Close'}
               </button>
             </div>
           </div>

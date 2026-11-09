@@ -2,6 +2,7 @@ import React from 'react';
 import { User, ZoomIn } from 'lucide-react';
 import { AvatarFrameStyle } from '../types';
 import { getAvatarFrame } from '../data/avatarFramesData';
+import { useLanguageStore } from '../hooks/useLanguageStore';
 
 interface FantasyAvatarFrameProps {
   avatarUrl?: string;
@@ -32,6 +33,7 @@ export const FantasyAvatarFrame: React.FC<FantasyAvatarFrameProps> = ({
   avatarScale,
   avatarOffsetY,
 }) => {
+  const { isSpanish } = useLanguageStore();
   const frame = getAvatarFrame(frameStyle);
 
   // Dimensions configuration per size
@@ -532,15 +534,15 @@ export const FantasyAvatarFrame: React.FC<FantasyAvatarFrameProps> = ({
   return (
     <div
       onClick={interactive ? onClick : undefined}
-      className={`relative inline-block select-none group ${sizeConfig.box} ${className} ${
+      className={`relative inline-block select-none group/avatar ${sizeConfig.box} ${className} ${
         interactive ? 'cursor-pointer active:scale-95 transition-transform duration-150' : ''
       }`}
-      title={interactive ? `Ampliar retrato de ${name} y personalizar marco` : name}
+      title={interactive ? (isSpanish ? `Ampliar retrato de ${name} y personalizar marco` : `Enlarge ${name}'s portrait and customize frame`) : name}
     >
       {/* Outer Ambient Glow */}
       <div
         className={`absolute inset-0 rounded-full transition-all duration-300 ${frame.glowColor} ${
-          interactive ? 'group-hover:opacity-100 group-hover:scale-105' : ''
+          interactive ? 'group-hover/avatar:opacity-100 group-hover/avatar:scale-105' : ''
         }`}
       />
 
@@ -568,10 +570,10 @@ export const FantasyAvatarFrame: React.FC<FantasyAvatarFrameProps> = ({
         {/* Subtle Vignette on Image */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20 pointer-events-none" />
 
-        {/* Expand / Zoom Icon Overlay on Hover (if interactive) */}
+        {/* Expand / Zoom Icon Overlay on Hover (if interactive - only triggers when hovering avatar directly) */}
         {interactive && (showExpandHint || size !== 'sm') && (
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-            <div className="p-1.5 rounded-full bg-black/70 border border-[#c59b27] text-[#ffd56b] shadow-md transform scale-90 group-hover:scale-100 transition-transform">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px] opacity-0 group-hover/avatar:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+            <div className="p-1.5 rounded-full bg-black/70 border border-[#c59b27] text-[#ffd56b] shadow-md transform scale-90 group-hover/avatar:scale-100 transition-transform">
               <ZoomIn className="w-4 h-4" />
             </div>
           </div>
@@ -586,7 +588,7 @@ export const FantasyAvatarFrame: React.FC<FantasyAvatarFrameProps> = ({
         <span
           className={`absolute ${sizeConfig.badgeText} ${frame.badgeBg} ${frame.badgeText} border border-[#c59b27] font-bold font-mono rounded-full shadow-md z-20 flex items-center gap-0.5 whitespace-nowrap`}
         >
-          <span>Nv</span>
+          <span>{isSpanish ? 'Nv' : 'Lv'}</span>
           <span>{level}</span>
         </span>
       )}

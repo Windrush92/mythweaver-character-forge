@@ -1,5 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Character, ClassResource } from '../types';
+import { useLanguageStore } from '../hooks/useLanguageStore';
+import { localizeReactNode } from '../utils/dndEnglishTranslator';
 import {
   Moon,
   Coffee,
@@ -68,6 +70,7 @@ export const RestModal: React.FC<RestModalProps> = ({
   initialRestType = 'short',
   onConfirmRest,
 }) => {
+  const { isSpanish } = useLanguageStore();
   const [restType, setRestType] = useState<'short' | 'long'>(initialRestType);
   const [rollMethod, setRollMethod] = useState<'virtual' | 'manual'>('virtual');
   const [hitDiceToSpend, setHitDiceToSpend] = useState<number>(1);
@@ -229,7 +232,7 @@ export const RestModal: React.FC<RestModalProps> = ({
 
   if (!isOpen) return null;
 
-  return (
+  return localizeReactNode(
     <div
       role="dialog"
       aria-modal="true"
@@ -766,6 +769,7 @@ export const RestModal: React.FC<RestModalProps> = ({
           </button>
         </div>
       </div>
-    </div>
-  );
+    </div>,
+    isSpanish
+  ) as React.ReactElement;
 };

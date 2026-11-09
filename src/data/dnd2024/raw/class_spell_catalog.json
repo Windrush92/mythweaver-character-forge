@@ -1,0 +1,579 @@
+[
+  {
+    "slug": "blade-ward",
+    "name": "Blade Ward",
+    "link": "/spell:blade-ward",
+    "classes": [
+      "bard",
+      "sorcerer",
+      "warlock",
+      "wizard"
+    ]
+  },
+  {
+    "slug": "dancing-lights",
+    "name": "Dancing Lights",
+    "link": "/spell:dancing-lights",
+    "classes": [
+      "bard",
+      "sorcerer",
+      "wizard",
+      "artificer"
+    ]
+  },
+  {
+    "slug": "friends",
+    "name": "Friends",
+    "link": "/spell:friends",
+    "classes": [
+      "bard",
+      "sorcerer",
+      "warlock",
+      "wizard"
+    ]
+  },
+  {
+    "slug": "light",
+    "name": "Light",
+    "link": "/spell:light",
+    "classes": [
+      "bard",
+      "cleric",
+      "sorcerer",
+      "wizard",
+      "artificer"
+    ]
+  },
+  {
+    "slug": "mage-hand",
+    "name": "Mage Hand",
+    "link": "/spell:mage-hand",
+    "classes": [
+      "bard",
+      "sorcerer",
+      "warlock",
+      "wizard",
+      "artificer"
+    ]
+  },
+  {
+    "slug": "mending",
+    "name": "Mending",
+    "link": "/spell:mending",
+    "classes": [
+      "bard",
+      "cleric",
+      "druid",
+      "sorcerer",
+      "wizard"
+    ]
+  },
+  {
+    "slug": "message",
+    "name": "Message",
+    "link": "/spell:message",
+    "classes": [
+      "bard",
+      "druid",
+      "sorcerer",
+      "wizard",
+      "artificer"
+    ]
+  },
+  {
+    "slug": "minor-illusion",
+    "name": "Minor Illusion",
+    "link": "/spell:minor-illusion",
+    "classes": [
+      "bard",
+      "sorcerer",
+      "warlock",
+      "wizard"
+    ]
+  },
+  {
+    "slug": "prestidigitation",
+    "name": "Prestidigitation",
+    "link": "/spell:prestidigitation",
+    "classes": [
+      "bard",
+      "sorcerer",
+      "warlock",
+      "wizard",
+      "artificer"
+    ]
+  },
+  {
+    "slug": "starry-wisp",
+    "name": "Starry Wisp",
+    "link": "/spell:starry-wisp",
+    "classes": [
+      "bard",
+      "druid"
+    ]
+  },
+  {
+    "slug": "thunderclap",
+    "name": "Thunderclap",
+    "link": "/spell:thunderclap",
+    "classes": [
+      "bard",
+      "druid",
+      "sorcerer",
+      "warlock",
+      "wizard",
+      "artificer"
+    ]
+  },
+  {
+    "slug": "true-strike",
+    "name": "True Strike",
+    "link": "/spell:true-strike",
+    "classes": [
+      "bard",
+      "sorcerer",
+      "warlock",
+      "wizard",
+      "artificer"
+    ]
+  },
+  {
+    "slug": "vicious-mockery",
+    "name": "Vicious Mockery",
+    "link": "/spell:vicious-mockery",
+    "classes": [
+      "bard"
+    ]
+  },
+  {
+    "slug": "guidance",
+    "name": "Guidance",
+    "link": "/spell:guidance",
+    "classes": [
+      "cleric",
+      "druid",
+      "artificer"
+    ]
+  },
+  {
+    "slug": "resistance",
+    "name": "Resistance",
+    "link": "/spell:resistance",
+    "classes": [
+      "cleric",
+      "druid",
+      "artificer"
+    ]
+  },
+  {
+    "slug": "sacred-flame",
+    "name": "Sacred Flame",
+    "link": "/spell:sacred-flame",
+    "classes": [
+      "cleric"
+    ]
+  },
+  {
+    "slug": "spare-the-dying",
+    "name": "Spare the Dying",
+    "link": "/spell:spare-the-dying",
+    "classes": [
+      "cleric",
+      "druid",
+      "artificer"
+    ]
+  },
+  {
+    "slug": "thaumaturgy",
+    "name": "Thaumaturgy",
+    "link": "/spell:thaumaturgy",
+    "classes": [
+      "cleric"
+    ]
+  },
+  {
+    "slug": "toll-the-dead",
+    "name": "Toll the Dead",
+    "link": "/spell:toll-the-dead",
+    "classes": [
+      "cleric",
+      "warlock",
+      "wizard"
+    ]
+  },
+  {
+    "slug": "word-of-radiance",
+    "name": "Word of Radiance",
+    "link": "/spell:word-of-radiance",
+    "classes": [
+      "cleric"
+    ]
+  },
+  {
+    "slug": "druidcraft",
+    "name": "Druidcraft",
+    "link": "/spell:druidcraft",
+    "classes": [
+      "druid"
+    ]
+  },
+  {
+    "slug": "elementalism",
+    "name": "Elementalism",
+    "link": "/spell:elementalism",
+    "classes": [
+      "druid",
+      "sorcerer",
+      "wizard",
+      "artificer"
+    ]
+  },
+  {
+    "slug": "poison-spray",
+    "name": "Poison Spray",
+    "link": "/spell:poison-spray",
+    "classes": [
+      "druid",
+      "sorcerer",
+      "warlock",
+      "wizard",
+      "artificer"
+    ]
+  },
+  {
+    "slug": "produce-flame",
+    "name": "Produce Flame",
+    "link": "/spell:produce-flame",
+    "classes": [
+      "druid"
+    ]
+  },
+  {
+    "slug": "shillelagh",
+    "name": "Shillelagh",
+    "link": "/spell:shillelagh",
+    "classes": [
+      "druid"
+    ]
+  },
+  {
+    "slug": "thorn-whip",
+    "name": "Thorn Whip",
+    "link": "/spell:thorn-whip",
+    "classes": [
+      "druid",
+      "artificer"
+    ]
+  },
+  {
+    "slug": "bless",
+    "name": "Bless",
+    "link": "/spell:bless",
+    "classes": [
+      "paladin"
+    ]
+  },
+  {
+    "slug": "command",
+    "name": "Command",
+    "link": "/spell:command",
+    "classes": [
+      "paladin"
+    ]
+  },
+  {
+    "slug": "compelled-duel",
+    "name": "Compelled Duel",
+    "link": "/spell:compelled-duel",
+    "classes": [
+      "paladin"
+    ]
+  },
+  {
+    "slug": "cure-wounds",
+    "name": "Cure Wounds",
+    "link": "/spell:cure-wounds",
+    "classes": [
+      "paladin",
+      "ranger"
+    ]
+  },
+  {
+    "slug": "detect-evil-and-good",
+    "name": "Detect Evil and Good",
+    "link": "/spell:detect-evil-and-good",
+    "classes": [
+      "paladin"
+    ]
+  },
+  {
+    "slug": "detect-magic",
+    "name": "Detect Magic",
+    "link": "/spell:detect-magic",
+    "classes": [
+      "paladin",
+      "ranger"
+    ]
+  },
+  {
+    "slug": "detect-poison-and-disease",
+    "name": "Detect Poison and Disease",
+    "link": "/spell:detect-poison-and-disease",
+    "classes": [
+      "paladin",
+      "ranger"
+    ]
+  },
+  {
+    "slug": "divine-favor",
+    "name": "Divine Favor",
+    "link": "/spell:divine-favor",
+    "classes": [
+      "paladin"
+    ]
+  },
+  {
+    "slug": "divine-smite",
+    "name": "Divine Smite",
+    "link": "/spell:divine-smite",
+    "classes": [
+      "paladin"
+    ]
+  },
+  {
+    "slug": "heroism",
+    "name": "Heroism",
+    "link": "/spell:heroism",
+    "classes": [
+      "paladin"
+    ]
+  },
+  {
+    "slug": "protection-from-evil-and-good",
+    "name": "Protection from Evil and Good",
+    "link": "/spell:protection-from-evil-and-good",
+    "classes": [
+      "paladin"
+    ]
+  },
+  {
+    "slug": "purify-food-and-drink",
+    "name": "Purify Food and Drink",
+    "link": "/spell:purify-food-and-drink",
+    "classes": [
+      "paladin"
+    ]
+  },
+  {
+    "slug": "searing-smite",
+    "name": "Searing Smite",
+    "link": "/spell:searing-smite",
+    "classes": [
+      "paladin"
+    ]
+  },
+  {
+    "slug": "shield-of-faith",
+    "name": "Shield of Faith",
+    "link": "/spell:shield-of-faith",
+    "classes": [
+      "paladin"
+    ]
+  },
+  {
+    "slug": "thunderous-smite",
+    "name": "Thunderous Smite",
+    "link": "/spell:thunderous-smite",
+    "classes": [
+      "paladin"
+    ]
+  },
+  {
+    "slug": "wardaway",
+    "name": "Wardaway",
+    "link": "/spell:wardaway",
+    "classes": [
+      "paladin"
+    ]
+  },
+  {
+    "slug": "wrathful-smite",
+    "name": "Wrathful Smite",
+    "link": "/spell:wrathful-smite",
+    "classes": [
+      "paladin"
+    ]
+  },
+  {
+    "slug": "alarm",
+    "name": "Alarm",
+    "link": "/spell:alarm",
+    "classes": [
+      "ranger"
+    ]
+  },
+  {
+    "slug": "animal-friendship",
+    "name": "Animal Friendship",
+    "link": "/spell:animal-friendship",
+    "classes": [
+      "ranger"
+    ]
+  },
+  {
+    "slug": "buzzing-bee",
+    "name": "Buzzing Bee",
+    "link": "/spell:buzzing-bee",
+    "classes": [
+      "ranger"
+    ]
+  },
+  {
+    "slug": "ensnaring-strike",
+    "name": "Ensnaring Strike",
+    "link": "/spell:ensnaring-strike",
+    "classes": [
+      "ranger"
+    ]
+  },
+  {
+    "slug": "entangle",
+    "name": "Entangle",
+    "link": "/spell:entangle",
+    "classes": [
+      "ranger"
+    ]
+  },
+  {
+    "slug": "fog-cloud",
+    "name": "Fog Cloud",
+    "link": "/spell:fog-cloud",
+    "classes": [
+      "ranger"
+    ]
+  },
+  {
+    "slug": "goodberry",
+    "name": "Goodberry",
+    "link": "/spell:goodberry",
+    "classes": [
+      "ranger"
+    ]
+  },
+  {
+    "slug": "hail-of-thorns",
+    "name": "Hail of Thorns",
+    "link": "/spell:hail-of-thorns",
+    "classes": [
+      "ranger"
+    ]
+  },
+  {
+    "slug": "hunter-s-mark",
+    "name": "Hunter's Mark",
+    "link": "/spell:hunter-s-mark",
+    "classes": [
+      "ranger"
+    ]
+  },
+  {
+    "slug": "jump",
+    "name": "Jump",
+    "link": "/spell:jump",
+    "classes": [
+      "ranger"
+    ]
+  },
+  {
+    "slug": "longstrider",
+    "name": "Longstrider",
+    "link": "/spell:longstrider",
+    "classes": [
+      "ranger"
+    ]
+  },
+  {
+    "slug": "speak-with-animals",
+    "name": "Speak with Animals",
+    "link": "/spell:speak-with-animals",
+    "classes": [
+      "ranger"
+    ]
+  },
+  {
+    "slug": "acid-splash",
+    "name": "Acid Splash",
+    "link": "/spell:acid-splash",
+    "classes": [
+      "sorcerer",
+      "wizard",
+      "artificer"
+    ]
+  },
+  {
+    "slug": "chill-touch",
+    "name": "Chill Touch",
+    "link": "/spell:chill-touch",
+    "classes": [
+      "sorcerer",
+      "warlock",
+      "wizard"
+    ]
+  },
+  {
+    "slug": "fire-bolt",
+    "name": "Fire Bolt",
+    "link": "/spell:fire-bolt",
+    "classes": [
+      "sorcerer",
+      "wizard",
+      "artificer"
+    ]
+  },
+  {
+    "slug": "mind-sliver",
+    "name": "Mind Sliver",
+    "link": "/spell:mind-sliver",
+    "classes": [
+      "sorcerer",
+      "warlock",
+      "wizard"
+    ]
+  },
+  {
+    "slug": "ray-of-frost",
+    "name": "Ray of Frost",
+    "link": "/spell:ray-of-frost",
+    "classes": [
+      "sorcerer",
+      "wizard",
+      "artificer"
+    ]
+  },
+  {
+    "slug": "shocking-grasp",
+    "name": "Shocking Grasp",
+    "link": "/spell:shocking-grasp",
+    "classes": [
+      "sorcerer",
+      "wizard",
+      "artificer"
+    ]
+  },
+  {
+    "slug": "sorcerous-burst",
+    "name": "Sorcerous Burst",
+    "link": "/spell:sorcerous-burst",
+    "classes": [
+      "sorcerer"
+    ]
+  },
+  {
+    "slug": "eldritch-blast",
+    "name": "Eldritch Blast",
+    "link": "/spell:eldritch-blast",
+    "classes": [
+      "warlock"
+    ]
+  }
+]

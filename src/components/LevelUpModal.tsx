@@ -42,6 +42,8 @@ import { FeatDetailModal } from './FeatDetailModal';
 import { SpellDetailModal } from './SpellDetailModal';
 import { CompendiumInspectModal, CompendiumInspectData } from './CompendiumInspectModal';
 import { ThemedNotificationModal, ThemedModalType } from './ThemedNotificationModal';
+import { useLanguageStore } from '../hooks/useLanguageStore';
+import { localizeReactNode } from '../utils/dndEnglishTranslator';
 import {
   calculateCharacterSpeed,
   getProficiencyBonus,
@@ -90,6 +92,7 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
   onSave,
   onClose,
 }) => {
+  const { isSpanish } = useLanguageStore();
   const currentLevel = character.level || 1;
   const newLevel = Math.min(20, currentLevel + 1);
 
@@ -1130,7 +1133,7 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
     onClose();
   };
 
-  return (
+  return localizeReactNode(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-sm animate-fadeIn font-serif text-[#2c241b]">
       <div className="relative w-full max-w-4xl max-h-[92vh] flex flex-col rounded-2xl overflow-hidden shadow-2xl border-4 border-[#8c672b] bg-[#fbf7ee]">
         {/* Header */}
@@ -2930,6 +2933,7 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
         cancelText={themedAlert.cancelText}
         onConfirm={themedAlert.onConfirm}
       />
-    </div>
-  );
+    </div>,
+    isSpanish
+  ) as React.ReactElement;
 };

@@ -13,6 +13,8 @@ import {
   HelpCircle
 } from 'lucide-react';
 import { WeaponDef, ArmorDef, WeaponCategory, ArmorCategory } from '../data/weaponsAndArmorData';
+import { useLanguageStore } from '../hooks/useLanguageStore';
+import { localizeReactNode } from '../utils/dndEnglishTranslator';
 
 interface EquipmentBuilderModalProps {
   isOpen: boolean;
@@ -23,51 +25,51 @@ interface EquipmentBuilderModalProps {
   onSaveArmor: (armor: ArmorDef) => void;
 }
 
-const WEAPON_CATEGORIES: { id: WeaponCategory; label: string }[] = [
-  { id: 'simple-melee', label: 'Simple Cuerpo a Cuerpo' },
-  { id: 'simple-ranged', label: 'Simple a Distancia' },
-  { id: 'martial-melee', label: 'Marcial Cuerpo a Cuerpo' },
-  { id: 'martial-ranged', label: 'Marcial a Distancia' },
+const WEAPON_CATEGORIES: { id: WeaponCategory; labelEs: string; labelEn: string }[] = [
+  { id: 'simple-melee', labelEs: 'Simple Cuerpo a Cuerpo', labelEn: 'Simple Melee' },
+  { id: 'simple-ranged', labelEs: 'Simple a Distancia', labelEn: 'Simple Ranged' },
+  { id: 'martial-melee', labelEs: 'Marcial Cuerpo a Cuerpo', labelEn: 'Martial Melee' },
+  { id: 'martial-ranged', labelEs: 'Marcial a Distancia', labelEn: 'Martial Ranged' },
 ];
 
-const ARMOR_CATEGORIES: { id: ArmorCategory; label: string }[] = [
-  { id: 'light', label: 'Armadura Ligera' },
-  { id: 'medium', label: 'Armadura Media' },
-  { id: 'heavy', label: 'Armadura Pesada' },
-  { id: 'shield', label: 'Escudo (+2 CA)' },
+const ARMOR_CATEGORIES: { id: ArmorCategory; labelEs: string; labelEn: string }[] = [
+  { id: 'light', labelEs: 'Armadura Ligera', labelEn: 'Light Armor' },
+  { id: 'medium', labelEs: 'Armadura Media', labelEn: 'Medium Armor' },
+  { id: 'heavy', labelEs: 'Armadura Pesada', labelEn: 'Heavy Armor' },
+  { id: 'shield', labelEs: 'Escudo (+2 CA)', labelEn: 'Shield (+2 AC)' },
 ];
 
 const DAMAGE_TYPES = [
-  'Cortante',
-  'Perforante',
-  'Contundente',
-  'Fuego',
-  'Frío',
-  'Relámpago',
-  'Trueno',
-  'Radiante',
-  'Necrótico',
-  'Fuerza',
-  'Veneno',
-  'Ácido',
-  'Psíquico',
+  { es: 'Cortante', en: 'Slashing' },
+  { es: 'Perforante', en: 'Piercing' },
+  { es: 'Contundente', en: 'Bludgeoning' },
+  { es: 'Fuego', en: 'Fire' },
+  { es: 'Frío', en: 'Cold' },
+  { es: 'Relámpago', en: 'Lightning' },
+  { es: 'Trueno', en: 'Thunder' },
+  { es: 'Radiante', en: 'Radiant' },
+  { es: 'Necrótico', en: 'Necrotic' },
+  { es: 'Fuerza', en: 'Force' },
+  { es: 'Veneno', en: 'Poison' },
+  { es: 'Ácido', en: 'Acid' },
+  { es: 'Psíquico', en: 'Psychic' },
 ];
 
 const DAMAGE_DICE_OPTIONS = ['1d4', '1d6', '1d8', '1d10', '1d12', '2d6', '2d8', '3d6', '1d20', 'Personalizado'];
 
 const COMMON_PROPERTIES = [
-  { id: 'Sutil (Finesse)', label: 'Sutil (Finesse)', desc: 'Permite elegir FUE o DES para ataque y daño.' },
-  { id: 'Ligera (Light)', label: 'Ligera (Light)', desc: 'Ideal para blandir dos armas a la vez.' },
-  { id: 'Versátil', label: 'Versátil (Versatile)', desc: 'Puede usarse con 1 o 2 manos para más daño.' },
-  { id: 'Pesada (Heavy)', label: 'Pesada (Heavy)', desc: 'Criaturas pequeñas tienen desventaja al usarla.' },
-  { id: 'Dos Manos (Two-Handed)', label: 'Dos Manos (Two-Handed)', desc: 'Requiere ambas manos para atacar.' },
-  { id: 'Alcance (Reach)', label: 'Alcance (Reach)', desc: 'Agrega +5 pies al rango de ataque.' },
-  { id: 'Arrojadiza (Thrown)', label: 'Arrojadiza (Thrown)', desc: 'Puede lanzarse para ataque a distancia.' },
-  { id: 'Munición (Ammunition)', label: 'Munición (Ammunition)', desc: 'Requiere proyectiles para disparar.' },
-  { id: 'Recarga (Loading)', label: 'Recarga (Loading)', desc: 'Solo un ataque por acción sin dotes especiales.' },
-  { id: 'Mágica +1', label: 'Mágica (+1)', desc: 'Otorga +1 a tiradas de ataque y daño.' },
-  { id: 'Mágica +2', label: 'Mágica (+2)', desc: 'Otorga +2 a tiradas de ataque y daño.' },
-  { id: 'Mágica +3', label: 'Mágica (+3)', desc: 'Otorga +3 a tiradas de ataque y daño.' },
+  { id: 'Sutil (Finesse)', labelEs: 'Sutil (Finesse)', labelEn: 'Finesse', descEs: 'Permite elegir FUE o DES para ataque y daño.', descEn: 'Allows choosing STR or DEX for attack and damage rolls.' },
+  { id: 'Ligera (Light)', labelEs: 'Ligera (Light)', labelEn: 'Light', descEs: 'Ideal para blandir dos armas a la vez.', descEn: 'Ideal for two-weapon fighting.' },
+  { id: 'Versátil', labelEs: 'Versátil (Versatile)', labelEn: 'Versatile', descEs: 'Puede usarse con 1 o 2 manos para más daño.', descEn: 'Can be used with 1 or 2 hands for higher damage.' },
+  { id: 'Pesada (Heavy)', labelEs: 'Pesada (Heavy)', labelEn: 'Heavy', descEs: 'Criaturas pequeñas tienen desventaja al usarla.', descEn: 'Small creatures have disadvantage on attack rolls.' },
+  { id: 'Dos Manos (Two-Handed)', labelEs: 'Dos Manos (Two-Handed)', labelEn: 'Two-Handed', descEs: 'Requiere ambas manos para atacar.', descEn: 'Requires two hands to make an attack.' },
+  { id: 'Alcance (Reach)', labelEs: 'Alcance (Reach)', labelEn: 'Reach', descEs: 'Agrega +5 pies al rango de ataque.', descEn: 'Adds 5 feet to your attack reach.' },
+  { id: 'Arrojadiza (Thrown)', labelEs: 'Arrojadiza (Thrown)', labelEn: 'Thrown', descEs: 'Puede lanzarse para ataque a distancia.', descEn: 'Can be thrown to make a ranged attack.' },
+  { id: 'Munición (Ammunition)', labelEs: 'Munición (Ammunition)', labelEn: 'Ammunition', descEs: 'Requiere proyectiles para disparar.', descEn: 'Requires ammunition to make a ranged attack.' },
+  { id: 'Recarga (Loading)', labelEs: 'Recarga (Loading)', labelEn: 'Loading', descEs: 'Solo un ataque por acción sin dotes especiales.', descEn: 'Only one piece of ammunition can be fired per action/bonus/reaction.' },
+  { id: 'Mágica +1', labelEs: 'Mágica (+1)', labelEn: 'Magic (+1)', descEs: 'Otorga +1 a tiradas de ataque y daño.', descEn: 'Grants +1 bonus to attack and damage rolls.' },
+  { id: 'Mágica +2', labelEs: 'Mágica (+2)', labelEn: 'Magic (+2)', descEs: 'Otorga +2 a tiradas de ataque y daño.', descEn: 'Grants +2 bonus to attack and damage rolls.' },
+  { id: 'Mágica +3', labelEs: 'Mágica (+3)', labelEn: 'Magic (+3)', descEs: 'Otorga +3 a tiradas de ataque y daño.', descEn: 'Grants +3 bonus to attack and damage rolls.' },
 ];
 
 export const EquipmentBuilderModal: React.FC<EquipmentBuilderModalProps> = ({
@@ -78,6 +80,7 @@ export const EquipmentBuilderModal: React.FC<EquipmentBuilderModalProps> = ({
   onSaveWeapon,
   onSaveArmor,
 }) => {
+  const { isSpanish, t } = useLanguageStore();
   if (!isOpen) return null;
 
   const [mode, setMode] = useState<'weapon' | 'armor'>(initialArmor ? 'armor' : 'weapon');
@@ -89,9 +92,9 @@ export const EquipmentBuilderModal: React.FC<EquipmentBuilderModalProps> = ({
   const [wDamageDice, setWDamageDice] = useState(initialWeapon?.damageDice || '1d8');
   const [wCustomDice, setWCustomDice] = useState('');
   const [wDamageType, setWDamageType] = useState<any>(initialWeapon?.damageType || 'Cortante');
-  const [wRange, setWRange] = useState(initialWeapon?.range || 'Alcance 5 pies');
+  const [wRange, setWRange] = useState(initialWeapon?.range || (isSpanish ? 'Alcance 5 pies' : 'Range 5 ft.'));
   const [wWeight, setWWeight] = useState(initialWeapon?.weight || '3 lb.');
-  const [wCost, setWCost] = useState(initialWeapon?.cost || '15 po');
+  const [wCost, setWCost] = useState(initialWeapon?.cost || (isSpanish ? '15 po' : '15 gp'));
   const [wProperties, setWProperties] = useState<string[]>(initialWeapon?.properties || ['Versátil (1d10)']);
   const [wVersatileDice, setWVersatileDice] = useState('1d10');
   const [wDescription, setWDescription] = useState(initialWeapon?.description || '');
@@ -105,7 +108,7 @@ export const EquipmentBuilderModal: React.FC<EquipmentBuilderModalProps> = ({
   const [aStrengthReq, setAStrengthReq] = useState<number>(initialArmor?.strengthReq ?? 0);
   const [aStealthDisadvantage, setAStealthDisadvantage] = useState<boolean>(initialArmor?.stealthDisadvantage ?? false);
   const [aWeight, setAWeight] = useState(initialArmor?.weight || '20 lb.');
-  const [aCost, setACost] = useState(initialArmor?.cost || '50 po');
+  const [aCost, setACost] = useState(initialArmor?.cost || (isSpanish ? '50 po' : '50 gp'));
   const [aDescription, setADescription] = useState(initialArmor?.description || '');
 
   const [errorMsg, setErrorMsg] = useState('');
@@ -149,7 +152,7 @@ export const EquipmentBuilderModal: React.FC<EquipmentBuilderModalProps> = ({
 
     if (mode === 'weapon') {
       if (!wName.trim()) {
-        setErrorMsg('El nombre del arma es obligatorio.');
+        setErrorMsg(isSpanish ? 'El nombre del arma es obligatorio.' : 'Weapon name is required.');
         return;
       }
       const dice = wDamageDice === 'Personalizado' ? (wCustomDice.trim() || '1d8') : wDamageDice;
@@ -161,18 +164,18 @@ export const EquipmentBuilderModal: React.FC<EquipmentBuilderModalProps> = ({
         category: wCategory,
         damageDice: dice,
         damageType: wDamageType,
-        range: wRange.trim() || 'Alcance 5 pies',
+        range: wRange.trim() || (isSpanish ? 'Alcance 5 pies' : 'Range 5 ft.'),
         weight: wWeight.trim() || '3 lb.',
-        cost: wCost.trim() || '10 po',
+        cost: wCost.trim() || (isSpanish ? '10 po' : '10 gp'),
         properties: wProperties,
-        description: wDescription.trim() || 'Arma forjada artesanalmente.',
+        description: wDescription.trim() || (isSpanish ? 'Arma forjada artesanalmente.' : 'Handcrafted weapon.'),
       };
 
       onSaveWeapon(newWeapon);
       onClose();
     } else {
       if (!aName.trim()) {
-        setErrorMsg('El nombre de la armadura o escudo es obligatorio.');
+        setErrorMsg(isSpanish ? 'El nombre de la armadura o escudo es obligatorio.' : 'Armor or shield name is required.');
         return;
       }
 
@@ -186,8 +189,8 @@ export const EquipmentBuilderModal: React.FC<EquipmentBuilderModalProps> = ({
         strengthReq: Number(aStrengthReq) || 0,
         stealthDisadvantage: aStealthDisadvantage,
         weight: aWeight.trim() || '10 lb.',
-        cost: aCost.trim() || '20 po',
-        description: aDescription.trim() || 'Armadura forjada artesanalmente.',
+        cost: aCost.trim() || (isSpanish ? '20 po' : '20 gp'),
+        description: aDescription.trim() || (isSpanish ? 'Armadura forjada artesanalmente.' : 'Handcrafted armor.'),
       };
 
       onSaveArmor(newArmor);
@@ -215,13 +218,17 @@ export const EquipmentBuilderModal: React.FC<EquipmentBuilderModalProps> = ({
             </div>
             <div>
               <h2 className="text-xl font-bold font-fantasy text-[#ffd56b] tracking-wide flex items-center gap-2">
-                {mode === 'weapon' ? 'Forja de Armas Personalizadas' : 'Taller de Armaduras & Escudos'}
+                {mode === 'weapon'
+                  ? (isSpanish ? 'Forja de Armas Personalizadas' : 'Custom Weapon Forge')
+                  : (isSpanish ? 'Taller de Armaduras & Escudos' : 'Armor & Shield Workshop')}
                 <span className="text-xs px-2 py-0.5 rounded bg-[#4a1f10] text-[#ffbe76] border border-[#7a391f] font-mono uppercase">
                   Homebrew 5e
                 </span>
               </h2>
               <p className="text-xs text-[#a89279]">
-                Crea equipo con estadísticas oficiales, dados de daño, propiedades tácticas y efectos mágicos.
+                {isSpanish
+                  ? 'Crea equipo con estadísticas oficiales, dados de daño, propiedades tácticas y efectos mágicos.'
+                  : 'Create custom equipment with official stats, damage dice, tactical properties, and magical effects.'}
               </p>
             </div>
           </div>
@@ -229,8 +236,8 @@ export const EquipmentBuilderModal: React.FC<EquipmentBuilderModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="w-9 h-9 rounded-lg bg-[#26150b] hover:bg-[#3d2011] border border-[#523924] hover:border-[#dfbe7e] flex items-center justify-center text-[#dfbe7e] transition"
-            title="Cerrar forja"
+            className="w-9 h-9 rounded-lg bg-[#26150b] hover:bg-[#3d2011] border border-[#523924] hover:border-[#dfbe7e] flex items-center justify-center text-[#dfbe7e] transition cursor-pointer"
+            title={isSpanish ? "Cerrar forja" : "Close forge"}
           >
             <X className="w-5 h-5" />
           </button>
@@ -241,27 +248,27 @@ export const EquipmentBuilderModal: React.FC<EquipmentBuilderModalProps> = ({
           <button
             type="button"
             onClick={() => setMode('weapon')}
-            className={`flex items-center gap-2 px-5 py-3 text-sm font-bold tracking-wider uppercase transition border-b-2 ${
+            className={`flex items-center gap-2 px-5 py-3 text-sm font-bold tracking-wider uppercase transition border-b-2 cursor-pointer ${
               mode === 'weapon'
                 ? 'border-[#ffd56b] text-[#ffd56b] bg-[#291a0e]/60 shadow-[inset_0_-2px_6px_rgba(255,213,107,0.2)]'
                 : 'border-transparent text-[#a89279] hover:text-[#e4cfb2]'
             }`}
           >
             <Swords className="w-4 h-4" />
-            <span>Crear Arma</span>
+            <span>{isSpanish ? 'Crear Arma' : 'Create Weapon'}</span>
           </button>
 
           <button
             type="button"
             onClick={() => setMode('armor')}
-            className={`flex items-center gap-2 px-5 py-3 text-sm font-bold tracking-wider uppercase transition border-b-2 ${
+            className={`flex items-center gap-2 px-5 py-3 text-sm font-bold tracking-wider uppercase transition border-b-2 cursor-pointer ${
               mode === 'armor'
                 ? 'border-[#ffd56b] text-[#ffd56b] bg-[#291a0e]/60 shadow-[inset_0_-2px_6px_rgba(255,213,107,0.2)]'
                 : 'border-transparent text-[#a89279] hover:text-[#e4cfb2]'
             }`}
           >
             <Shield className="w-4 h-4" />
-            <span>Crear Armadura o Escudo</span>
+            <span>{isSpanish ? 'Crear Armadura o Escudo' : 'Create Armor or Shield'}</span>
           </button>
         </div>
 
@@ -283,13 +290,13 @@ export const EquipmentBuilderModal: React.FC<EquipmentBuilderModalProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="sm:col-span-2 space-y-1">
                   <label className="text-xs font-bold uppercase tracking-wider text-[#dfbe7e]">
-                    Nombre del Arma *
+                    {isSpanish ? 'Nombre del Arma *' : 'Weapon Name *'}
                   </label>
                   <input
                     type="text"
                     value={wName}
                     onChange={(e) => setWName(e.target.value)}
-                    placeholder="Ej. Espada Larga de Fuegosangre, Lanza Dracónica..."
+                    placeholder={isSpanish ? "Ej. Espada Larga de Fuegosangre, Lanza Dracónica..." : "E.g. Bloodfire Longsword, Draconic Spear..."}
                     className="w-full px-3.5 py-2.5 rounded-lg bg-[#110b07] border border-[#523924] focus:border-[#ffd56b] text-[#f7ecd8] text-sm focus:outline-none transition"
                     required
                   />
@@ -297,16 +304,16 @@ export const EquipmentBuilderModal: React.FC<EquipmentBuilderModalProps> = ({
 
                 <div className="space-y-1">
                   <label className="text-xs font-bold uppercase tracking-wider text-[#dfbe7e]">
-                    Categoría de 5e *
+                    {isSpanish ? 'Categoría de 5e *' : '5e Category *'}
                   </label>
                   <select
                     value={wCategory}
                     onChange={(e) => setWCategory(e.target.value as WeaponCategory)}
-                    className="w-full px-3 py-2.5 rounded-lg bg-[#110b07] border border-[#523924] focus:border-[#ffd56b] text-[#f7ecd8] text-sm focus:outline-none"
+                    className="w-full px-3 py-2.5 rounded-lg bg-[#110b07] border border-[#523924] focus:border-[#ffd56b] text-[#f7ecd8] text-sm focus:outline-none cursor-pointer"
                   >
                     {WEAPON_CATEGORIES.map((c) => (
                       <option key={c.id} value={c.id} className="bg-[#1c1209]">
-                        {c.label}
+                        {isSpanish ? c.labelEs : c.labelEn}
                       </option>
                     ))}
                   </select>
@@ -317,23 +324,23 @@ export const EquipmentBuilderModal: React.FC<EquipmentBuilderModalProps> = ({
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                 <div className="space-y-1">
                   <label className="text-xs font-bold uppercase tracking-wider text-[#dfbe7e]">
-                    Dado Daño *
+                    {isSpanish ? 'Dado Daño *' : 'Damage Die *'}
                   </label>
                   <select
                     value={wDamageDice}
                     onChange={(e) => setWDamageDice(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-[#110b07] border border-[#523924] text-[#ffd56b] font-mono font-bold text-sm focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg bg-[#110b07] border border-[#523924] text-[#ffd56b] font-mono font-bold text-sm focus:outline-none cursor-pointer"
                   >
                     {DAMAGE_DICE_OPTIONS.map((d) => (
                       <option key={d} value={d} className="bg-[#1c1209]">
-                        {d}
+                        {d === 'Personalizado' ? (isSpanish ? 'Personalizado' : 'Custom') : d}
                       </option>
                     ))}
                   </select>
                   {wDamageDice === 'Personalizado' && (
                     <input
                       type="text"
-                      placeholder="Ej. 2d10"
+                      placeholder={isSpanish ? "Ej. 2d10" : "E.g. 2d10"}
                       value={wCustomDice}
                       onChange={(e) => setWCustomDice(e.target.value)}
                       className="w-full mt-1 px-2.5 py-1 text-xs rounded bg-[#110b07] border border-[#ffd56b] text-[#ffd56b] font-mono"
@@ -343,16 +350,16 @@ export const EquipmentBuilderModal: React.FC<EquipmentBuilderModalProps> = ({
 
                 <div className="space-y-1">
                   <label className="text-xs font-bold uppercase tracking-wider text-[#dfbe7e]">
-                    Tipo de Daño *
+                    {isSpanish ? 'Tipo de Daño *' : 'Damage Type *'}
                   </label>
                   <select
                     value={wDamageType}
                     onChange={(e) => setWDamageType(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-[#110b07] border border-[#523924] text-[#f7ecd8] text-sm focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg bg-[#110b07] border border-[#523924] text-[#f7ecd8] text-sm focus:outline-none cursor-pointer"
                   >
                     {DAMAGE_TYPES.map((t) => (
-                      <option key={t} value={t} className="bg-[#1c1209]">
-                        {t}
+                      <option key={t.es} value={t.es} className="bg-[#1c1209]">
+                        {isSpanish ? t.es : t.en}
                       </option>
                     ))}
                   </select>
@@ -360,20 +367,20 @@ export const EquipmentBuilderModal: React.FC<EquipmentBuilderModalProps> = ({
 
                 <div className="space-y-1">
                   <label className="text-xs font-bold uppercase tracking-wider text-[#dfbe7e]">
-                    Alcance
+                    {isSpanish ? 'Alcance' : 'Range'}
                   </label>
                   <input
                     type="text"
                     value={wRange}
                     onChange={(e) => setWRange(e.target.value)}
-                    placeholder="Ej. 5 pies, 20/60"
+                    placeholder={isSpanish ? "Ej. 5 pies, 20/60" : "E.g. 5 ft., 20/60"}
                     className="w-full px-3 py-2 rounded-lg bg-[#110b07] border border-[#523924] text-[#f7ecd8] text-sm focus:outline-none"
                   />
                 </div>
 
                 <div className="space-y-1">
                   <label className="text-xs font-bold uppercase tracking-wider text-[#dfbe7e]">
-                    Peso
+                    {isSpanish ? 'Peso' : 'Weight'}
                   </label>
                   <input
                     type="text"
@@ -386,13 +393,13 @@ export const EquipmentBuilderModal: React.FC<EquipmentBuilderModalProps> = ({
 
                 <div className="space-y-1 col-span-2 sm:col-span-1">
                   <label className="text-xs font-bold uppercase tracking-wider text-[#dfbe7e]">
-                    Precio / Costo
+                    {isSpanish ? 'Precio / Costo' : 'Price / Cost'}
                   </label>
                   <input
                     type="text"
                     value={wCost}
                     onChange={(e) => setWCost(e.target.value)}
-                    placeholder="Ej. 25 po"
+                    placeholder={isSpanish ? "Ej. 25 po" : "E.g. 25 gp"}
                     className="w-full px-3 py-2 rounded-lg bg-[#110b07] border border-[#523924] text-[#ffd56b] font-mono text-sm focus:outline-none"
                   />
                 </div>
@@ -401,9 +408,9 @@ export const EquipmentBuilderModal: React.FC<EquipmentBuilderModalProps> = ({
               {/* Row 3: Properties Checkboxes */}
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-wider text-[#dfbe7e] flex items-center justify-between">
-                  <span>Propiedades Oficiales de 5e & Etiquetas</span>
+                  <span>{isSpanish ? 'Propiedades Oficiales de 5e & Etiquetas' : 'Official 5e Properties & Tags'}</span>
                   <span className="text-[11px] text-[#a89279] font-normal lowercase">
-                    {wProperties.length} seleccionadas
+                    {wProperties.length} {isSpanish ? 'seleccionadas' : 'selected'}
                   </span>
                 </label>
 
@@ -415,18 +422,18 @@ export const EquipmentBuilderModal: React.FC<EquipmentBuilderModalProps> = ({
                         key={prop.id}
                         type="button"
                         onClick={() => toggleProperty(prop.id)}
-                        className={`text-left p-2.5 rounded-lg border text-xs transition flex flex-col justify-between ${
+                        className={`text-left p-2.5 rounded-lg border text-xs transition flex flex-col justify-between cursor-pointer ${
                           selected
                             ? 'bg-[#3b2311] border-[#ffd56b] text-[#fff4d1] shadow-[0_2px_8px_rgba(255,213,107,0.15)]'
                             : 'bg-[#18100a] border-[#382414] text-[#b39e87] hover:border-[#6b4728]'
                         }`}
                       >
                         <div className="flex items-center justify-between w-full mb-1">
-                          <span className="font-bold">{prop.label}</span>
+                          <span className="font-bold">{isSpanish ? prop.labelEs : prop.labelEn}</span>
                           {selected && <Check className="w-3.5 h-3.5 text-[#ffd56b] shrink-0" />}
                         </div>
                         <span className="text-[10px] text-[#8c745d] line-clamp-2 leading-tight">
-                          {prop.desc}
+                          {isSpanish ? prop.descEs : prop.descEn}
                         </span>
                       </button>
                     );
@@ -436,7 +443,9 @@ export const EquipmentBuilderModal: React.FC<EquipmentBuilderModalProps> = ({
                 {/* Versatile Damage Selector if Versatile is selected */}
                 {isPropSelected('Versátil') && (
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-[#24170d] border border-[#6b4825] mt-2">
-                    <span className="text-xs text-[#ffd56b] font-bold">Daño Versátil a Dos Manos:</span>
+                    <span className="text-xs text-[#ffd56b] font-bold">
+                      {isSpanish ? 'Daño Versátil a Dos Manos:' : 'Two-Handed Versatile Damage:'}
+                    </span>
                     <select
                       value={wVersatileDice}
                       onChange={(e) => {
@@ -446,7 +455,7 @@ export const EquipmentBuilderModal: React.FC<EquipmentBuilderModalProps> = ({
                           prev.map((p) => (p.startsWith('Versátil') ? `Versátil (${newDice})` : p))
                         );
                       }}
-                      className="px-2.5 py-1 text-xs rounded bg-[#110b07] border border-[#8a5d2e] text-[#ffd56b] font-mono font-bold"
+                      className="px-2.5 py-1 text-xs rounded bg-[#110b07] border border-[#8a5d2e] text-[#ffd56b] font-mono font-bold cursor-pointer"
                     >
                       <option value="1d8">1d8</option>
                       <option value="1d10">1d10</option>
@@ -460,13 +469,17 @@ export const EquipmentBuilderModal: React.FC<EquipmentBuilderModalProps> = ({
               {/* Row 4: Description & Magical Effects */}
               <div className="space-y-1">
                 <label className="text-xs font-bold uppercase tracking-wider text-[#dfbe7e]">
-                  Descripción, Leyenda & Propiedades Mágicas Especiales
+                  {isSpanish ? 'Descripción, Leyenda & Propiedades Mágicas Especiales' : 'Description, Lore & Special Magical Properties'}
                 </label>
                 <textarea
                   rows={4}
                   value={wDescription}
                   onChange={(e) => setWDescription(e.target.value)}
-                  placeholder="Describe la forja, el material (acero enano, mitral, obsidiana), o cualquier habilidad mágica (ej. 'Al impactar inflige 1d6 extra de fuego. Una vez por día permite conjurar Luz')..."
+                  placeholder={
+                    isSpanish
+                      ? "Describe la forja, el material (acero enano, mitral, obsidiana), o cualquier habilidad mágica (ej. 'Al impactar inflige 1d6 extra de fuego. Una vez por día permite conjurar Luz')..."
+                      : "Describe the forge, materials (dwarven steel, mithral, obsidian), or any magical traits (e.g. 'On a hit deals an extra 1d6 fire damage. Once per day allows casting Light')..."
+                  }
                   className="w-full p-3 rounded-lg bg-[#110b07] border border-[#523924] focus:border-[#ffd56b] text-[#f7ecd8] text-sm focus:outline-none leading-relaxed"
                 />
               </div>
@@ -480,13 +493,13 @@ export const EquipmentBuilderModal: React.FC<EquipmentBuilderModalProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="sm:col-span-2 space-y-1">
                   <label className="text-xs font-bold uppercase tracking-wider text-[#dfbe7e]">
-                    Nombre de la Armadura o Escudo *
+                    {isSpanish ? 'Nombre de la Armadura o Escudo *' : 'Armor or Shield Name *'}
                   </label>
                   <input
                     type="text"
                     value={aName}
                     onChange={(e) => setAName(e.target.value)}
-                    placeholder="Ej. Cota de Mallas Reforzada, Escudo del Roble Guardián..."
+                    placeholder={isSpanish ? "Ej. Cota de Mallas Reforzada, Escudo del Roble Guardián..." : "E.g. Reinforced Chain Mail, Guardian Oak Shield..."}
                     className="w-full px-3.5 py-2.5 rounded-lg bg-[#110b07] border border-[#523924] focus:border-[#ffd56b] text-[#f7ecd8] text-sm focus:outline-none transition"
                     required
                   />
@@ -494,7 +507,7 @@ export const EquipmentBuilderModal: React.FC<EquipmentBuilderModalProps> = ({
 
                 <div className="space-y-1">
                   <label className="text-xs font-bold uppercase tracking-wider text-[#dfbe7e]">
-                    Tipo de Protección *
+                    {isSpanish ? 'Tipo de Protección *' : 'Protection Type *'}
                   </label>
                   <select
                     value={aCategory}
@@ -515,11 +528,11 @@ export const EquipmentBuilderModal: React.FC<EquipmentBuilderModalProps> = ({
                         setADexBonus('none');
                       }
                     }}
-                    className="w-full px-3 py-2.5 rounded-lg bg-[#110b07] border border-[#523924] focus:border-[#ffd56b] text-[#f7ecd8] text-sm focus:outline-none"
+                    className="w-full px-3 py-2.5 rounded-lg bg-[#110b07] border border-[#523924] focus:border-[#ffd56b] text-[#f7ecd8] text-sm focus:outline-none cursor-pointer"
                   >
                     {ARMOR_CATEGORIES.map((c) => (
                       <option key={c.id} value={c.id} className="bg-[#1c1209]">
-                        {c.label}
+                        {isSpanish ? c.labelEs : c.labelEn}
                       </option>
                     ))}
                   </select>
@@ -530,7 +543,7 @@ export const EquipmentBuilderModal: React.FC<EquipmentBuilderModalProps> = ({
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div className="space-y-1">
                   <label className="text-xs font-bold uppercase tracking-wider text-[#dfbe7e]">
-                    {aCategory === 'shield' ? 'Bonificador CA' : 'CA Base *'}
+                    {aCategory === 'shield' ? (isSpanish ? 'Bonificador CA' : 'AC Bonus') : (isSpanish ? 'CA Base *' : 'Base AC *')}
                   </label>
                   <input
                     type="number"
@@ -542,29 +555,37 @@ export const EquipmentBuilderModal: React.FC<EquipmentBuilderModalProps> = ({
                     required
                   />
                   <p className="text-[10px] text-[#8c745d]">
-                    {aCategory === 'shield' ? '+2 CA estándar' : 'Valor base de CA'}
+                    {aCategory === 'shield'
+                      ? (isSpanish ? '+2 CA estándar' : '+2 standard AC')
+                      : (isSpanish ? 'Valor base de CA' : 'Base AC value')}
                   </p>
                 </div>
 
                 <div className="space-y-1">
                   <label className="text-xs font-bold uppercase tracking-wider text-[#dfbe7e]">
-                    Bono de Destreza
+                    {isSpanish ? 'Bono de Destreza' : 'Dexterity Bonus'}
                   </label>
                   <select
                     value={aDexBonus}
                     disabled={aCategory === 'shield'}
                     onChange={(e) => setADexBonus(e.target.value as any)}
-                    className="w-full px-3 py-2 rounded-lg bg-[#110b07] border border-[#523924] text-[#f7ecd8] text-sm focus:outline-none disabled:opacity-50"
+                    className="w-full px-3 py-2 rounded-lg bg-[#110b07] border border-[#523924] text-[#f7ecd8] text-sm focus:outline-none disabled:opacity-50 cursor-pointer"
                   >
-                    <option value="full" className="bg-[#1c1209]">Completo (+ Mod DES)</option>
-                    <option value="max2" className="bg-[#1c1209]">Limitado (+ DES máx 2)</option>
-                    <option value="none" className="bg-[#1c1209]">Ninguno (Sin bono)</option>
+                    <option value="full" className="bg-[#1c1209]">
+                      {isSpanish ? 'Completo (+ Mod DES)' : 'Full (+ DEX Mod)'}
+                    </option>
+                    <option value="max2" className="bg-[#1c1209]">
+                      {isSpanish ? 'Limitado (+ DES máx 2)' : 'Capped (+ DEX max 2)'}
+                    </option>
+                    <option value="none" className="bg-[#1c1209]">
+                      {isSpanish ? 'Ninguno (Sin bono)' : 'None (No bonus)'}
+                    </option>
                   </select>
                 </div>
 
                 <div className="space-y-1">
                   <label className="text-xs font-bold uppercase tracking-wider text-[#dfbe7e]">
-                    Fuerza Mínima (FUE)
+                    {isSpanish ? 'Fuerza Mínima (FUE)' : 'Minimum Strength (STR)'}
                   </label>
                   <input
                     type="number"
@@ -574,17 +595,19 @@ export const EquipmentBuilderModal: React.FC<EquipmentBuilderModalProps> = ({
                     onChange={(e) => setAStrengthReq(Number(e.target.value))}
                     className="w-full px-3 py-2 rounded-lg bg-[#110b07] border border-[#523924] text-[#f7ecd8] text-sm focus:outline-none"
                   />
-                  <p className="text-[10px] text-[#8c745d]">0 = Sin requisito</p>
+                  <p className="text-[10px] text-[#8c745d]">
+                    {isSpanish ? '0 = Sin requisito' : '0 = No requirement'}
+                  </p>
                 </div>
 
                 <div className="space-y-1">
                   <label className="text-xs font-bold uppercase tracking-wider text-[#dfbe7e]">
-                    Desventaja Sigilo
+                    {isSpanish ? 'Desventaja Sigilo' : 'Stealth Disadvantage'}
                   </label>
                   <button
                     type="button"
                     onClick={() => setAStealthDisadvantage(!aStealthDisadvantage)}
-                    className={`w-full py-2 px-3 rounded-lg border text-xs font-bold transition flex items-center justify-center gap-2 ${
+                    className={`w-full py-2 px-3 rounded-lg border text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer ${
                       aStealthDisadvantage
                         ? 'bg-red-950/70 border-red-700 text-red-200'
                         : 'bg-[#18100a] border-[#382414] text-[#a89279]'
@@ -593,12 +616,12 @@ export const EquipmentBuilderModal: React.FC<EquipmentBuilderModalProps> = ({
                     {aStealthDisadvantage ? (
                       <>
                         <AlertCircle className="w-3.5 h-3.5 text-red-400" />
-                        <span>Sí (Desventaja)</span>
+                        <span>{isSpanish ? 'Sí (Desventaja)' : 'Yes (Disadvantage)'}</span>
                       </>
                     ) : (
                       <>
                         <Check className="w-3.5 h-3.5 text-emerald-400" />
-                        <span>No (Silenciosa)</span>
+                        <span>{isSpanish ? 'No (Silenciosa)' : 'No (Quiet)'}</span>
                       </>
                     )}
                   </button>
@@ -609,7 +632,7 @@ export const EquipmentBuilderModal: React.FC<EquipmentBuilderModalProps> = ({
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-xs font-bold uppercase tracking-wider text-[#dfbe7e]">
-                    Peso
+                    {isSpanish ? 'Peso' : 'Weight'}
                   </label>
                   <input
                     type="text"
@@ -622,13 +645,13 @@ export const EquipmentBuilderModal: React.FC<EquipmentBuilderModalProps> = ({
 
                 <div className="space-y-1">
                   <label className="text-xs font-bold uppercase tracking-wider text-[#dfbe7e]">
-                    Precio / Costo
+                    {isSpanish ? 'Precio / Costo' : 'Price / Cost'}
                   </label>
                   <input
                     type="text"
                     value={aCost}
                     onChange={(e) => setACost(e.target.value)}
-                    placeholder="Ej. 75 po"
+                    placeholder={isSpanish ? "Ej. 75 po" : "E.g. 75 gp"}
                     className="w-full px-3 py-2 rounded-lg bg-[#110b07] border border-[#523924] text-[#ffd56b] font-mono text-sm focus:outline-none"
                   />
                 </div>
@@ -637,13 +660,17 @@ export const EquipmentBuilderModal: React.FC<EquipmentBuilderModalProps> = ({
               {/* Row 4: Description */}
               <div className="space-y-1">
                 <label className="text-xs font-bold uppercase tracking-wider text-[#dfbe7e]">
-                  Descripción, Material & Efectos Especiales
+                  {isSpanish ? 'Descripción, Material & Efectos Especiales' : 'Description, Material & Special Effects'}
                 </label>
                 <textarea
                   rows={4}
                   value={aDescription}
                   onChange={(e) => setADescription(e.target.value)}
-                  placeholder="Detalla si es de escamas de dragón, mitral (sin desventaja en sigilo), adamandina (inmune a críticos) o si otorga resistencias a daños..."
+                  placeholder={
+                    isSpanish
+                      ? "Detalla si es de escamas de dragón, mitral (sin desventaja en sigilo), adamandina (inmune a críticos) o si otorga resistencias a daños..."
+                      : "Details on materials (dragon scales, mithral, adamantine) or special properties (damage resistance, critical immunity)..."
+                  }
                   className="w-full p-3 rounded-lg bg-[#110b07] border border-[#523924] focus:border-[#ffd56b] text-[#f7ecd8] text-sm focus:outline-none leading-relaxed"
                 />
               </div>
@@ -654,36 +681,40 @@ export const EquipmentBuilderModal: React.FC<EquipmentBuilderModalProps> = ({
           <div className="p-4 rounded-xl border border-[#523924] bg-[#110b07] shadow-inner space-y-2">
             <span className="text-[11px] font-bold uppercase tracking-wider text-[#a89279] flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-[#ffd56b]" />
-              Vista Previa en el Compendio
+              {isSpanish ? 'Vista Previa en el Compendio' : 'Compendium Live Preview'}
             </span>
 
             {mode === 'weapon' ? (
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-lg bg-[#1a110a] border border-[#3d2614]">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-[#ffd56b] text-base">{wName || 'Arma sin nombre'}</span>
+                    <span className="font-bold text-[#ffd56b] text-base">{wName || (isSpanish ? 'Arma sin nombre' : 'Unnamed Weapon')}</span>
                     <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#452712] text-[#ffcf70] border border-[#6b421f] font-mono">
-                      {wCategory}
+                      {isSpanish ? WEAPON_CATEGORIES.find((c) => c.id === wCategory)?.labelEs : WEAPON_CATEGORIES.find((c) => c.id === wCategory)?.labelEn}
                     </span>
                   </div>
                   <div className="text-xs text-[#d8c5ad] mt-0.5 flex flex-wrap gap-2">
                     <span className="text-red-400 font-mono font-bold">
-                      {wDamageDice === 'Personalizado' ? (wCustomDice || '1d8') : wDamageDice} {wDamageType}
+                      {wDamageDice === 'Personalizado' ? (wCustomDice || '1d8') : wDamageDice} {isSpanish ? wDamageType : (DAMAGE_TYPES.find((t) => t.es === wDamageType)?.en || wDamageType)}
                     </span>
                     <span>•</span>
-                    <span>{wRange || '5 pies'}</span>
+                    <span>{wRange || (isSpanish ? '5 pies' : '5 ft.')}</span>
                     <span>•</span>
                     <span>{wWeight || '3 lb.'}</span>
                     <span>•</span>
-                    <span className="text-amber-300">{wCost || '10 po'}</span>
+                    <span className="text-amber-300">{wCost || (isSpanish ? '10 po' : '10 gp')}</span>
                   </div>
                   {wProperties.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-1.5">
-                      {wProperties.map((p) => (
-                        <span key={p} className="text-[10px] px-1.5 py-0.2 rounded bg-[#2a1a0e] text-[#dfbe7e] border border-[#4d321d]">
-                          {p}
-                        </span>
-                      ))}
+                      {wProperties.map((p) => {
+                        const matchedProp = COMMON_PROPERTIES.find((cp) => cp.id === p || p.startsWith(cp.labelEs));
+                        const displayProp = isSpanish ? p : (matchedProp?.labelEn || p.replace('Versátil', 'Versatile'));
+                        return (
+                          <span key={p} className="text-[10px] px-1.5 py-0.2 rounded bg-[#2a1a0e] text-[#dfbe7e] border border-[#4d321d]">
+                            {displayProp}
+                          </span>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -692,21 +723,23 @@ export const EquipmentBuilderModal: React.FC<EquipmentBuilderModalProps> = ({
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-lg bg-[#1a110a] border border-[#3d2614]">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-[#ffd56b] text-base">{aName || 'Armadura sin nombre'}</span>
+                    <span className="font-bold text-[#ffd56b] text-base">{aName || (isSpanish ? 'Armadura sin nombre' : 'Unnamed Armor')}</span>
                     <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#2b1f47] text-[#cbb6f7] border border-[#483770] font-mono uppercase">
-                      {aCategory}
+                      {isSpanish ? ARMOR_CATEGORIES.find((c) => c.id === aCategory)?.labelEs : ARMOR_CATEGORIES.find((c) => c.id === aCategory)?.labelEn}
                     </span>
                   </div>
                   <div className="text-xs text-[#d8c5ad] mt-0.5 flex flex-wrap gap-2">
                     <span className="text-emerald-400 font-mono font-bold">
-                      {aCategory === 'shield' ? `+${aBaseAc} CA` : `${aBaseAc} CA Base`}
+                      {aCategory === 'shield'
+                        ? (isSpanish ? `+${aBaseAc} CA` : `+${aBaseAc} AC`)
+                        : (isSpanish ? `${aBaseAc} CA Base` : `${aBaseAc} Base AC`)}
                     </span>
                     <span>•</span>
-                    <span>Bono DES: {aCategory === 'shield' ? 'N/A' : aDexBonus}</span>
+                    <span>{isSpanish ? `Bono DES: ${aCategory === 'shield' ? 'N/A' : aDexBonus}` : `DEX Bonus: ${aCategory === 'shield' ? 'N/A' : aDexBonus}`}</span>
                     <span>•</span>
-                    <span>FUE: {aStrengthReq ? `Mín ${aStrengthReq}` : 'Sin requisito'}</span>
+                    <span>{isSpanish ? `FUE: ${aStrengthReq ? `Mín ${aStrengthReq}` : 'Sin requisito'}` : `STR: ${aStrengthReq ? `Min ${aStrengthReq}` : 'No req'}`}</span>
                     <span>•</span>
-                    <span className="text-amber-300">{aCost || '20 po'}</span>
+                    <span className="text-amber-300">{aCost || (isSpanish ? '20 po' : '20 gp')}</span>
                   </div>
                 </div>
               </div>
@@ -718,16 +751,16 @@ export const EquipmentBuilderModal: React.FC<EquipmentBuilderModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 rounded-lg border border-[#523924] hover:bg-[#26170d] text-[#c9b49b] text-sm font-semibold transition"
+              className="px-5 py-2.5 rounded-lg border border-[#523924] hover:bg-[#26170d] text-[#c9b49b] text-sm font-semibold transition cursor-pointer"
             >
-              Cancelar
+              {isSpanish ? 'Cancelar' : 'Cancel'}
             </button>
             <button
               type="submit"
               className="px-6 py-2.5 rounded-lg bg-gradient-to-r from-[#b88c32] via-[#dfbe7e] to-[#b88c32] hover:brightness-110 text-[#1a1006] text-sm font-bold tracking-wide uppercase shadow-[0_4px_15px_rgba(223,190,126,0.35)] transition flex items-center gap-2 cursor-pointer"
             >
               <Sparkles className="w-4 h-4 text-[#1a1006]" />
-              <span>Guardar en el Compendio</span>
+              <span>{isSpanish ? 'Guardar en el Compendio' : 'Save to Compendium'}</span>
             </button>
           </div>
         </form>

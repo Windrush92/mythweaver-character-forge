@@ -18,6 +18,8 @@ import {
   Search,
 } from 'lucide-react';
 import { ALL_5E_SKILLS } from '../data/characterCreatorData';
+import { useLanguageStore } from '../hooks/useLanguageStore';
+import { localizeReactNode } from '../utils/dndEnglishTranslator';
 
 export type RuleCategory = 'ac' | 'init' | 'speed' | 'prof' | 'saves' | 'skills' | 'rage';
 
@@ -44,6 +46,7 @@ export const RulesInspectorModal: React.FC<RulesInspectorModalProps> = ({
   profBonus,
   initialCategory = 'ac',
 }) => {
+  const { isSpanish } = useLanguageStore();
   const [activeCategory, setActiveCategory] = useState<RuleCategory>(initialCategory);
 
   // Sync initial category when modal opens
@@ -135,7 +138,7 @@ export const RulesInspectorModal: React.FC<RulesInspectorModalProps> = ({
     ...(isBarbarian ? [{ id: 'rage' as RuleCategory, label: 'Furia & Combate', icon: Flame, badge: `+${rageDmg}` }] : []),
   ];
 
-  return (
+  return localizeReactNode(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
       <div className="bg-[#fcf9f2] border-2 border-[#8c672b] rounded-2xl w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden font-serif">
         {/* Header */}
@@ -672,6 +675,7 @@ export const RulesInspectorModal: React.FC<RulesInspectorModalProps> = ({
           </button>
         </div>
       </div>
-    </div>
-  );
+    </div>,
+    isSpanish
+  ) as React.ReactElement;
 };

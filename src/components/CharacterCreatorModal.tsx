@@ -80,6 +80,24 @@ import {
 } from '../data/levelUpDecisionsData';
 import { PolyhedralDie } from './PolyhedralDie';
 import { useUserStore } from '../hooks/useUserStore';
+import { useLanguageStore } from '../hooks/useLanguageStore';
+import {
+  localizeReactNode,
+  translateDndTitle,
+  translateDndText,
+  translateSpellSchool,
+  translateSpellMeta,
+  translateSkillName,
+  FEAT_CATEGORY_EN,
+} from '../utils/dndEnglishTranslator';
+import {
+  translateLanguageScript,
+  translateLanguageName,
+  translateLanguageList,
+  translateRoleplayOptionText,
+  translateBackgroundEquipment,
+  translateBackgroundDescription,
+} from '../utils/dndEnglishRoleplayAndBackgrounds';
 import {
   FeatCard,
   SubraceCard,
@@ -135,6 +153,17 @@ import {
 } from 'lucide-react';
 import { exportCharacterToOfficialPdf } from '../utils/pdfCharacterExporter';
 import { SkillTooltip } from './SkillTooltip';
+import { Creator2024SpeciesPicker } from './Creator2024SpeciesPicker';
+import { Creator2024BackgroundPicker } from './Creator2024BackgroundPicker';
+import { Creator2024WeaponMasteryPicker } from './Creator2024WeaponMasteryPicker';
+import {
+  DND_2024_SPECIES,
+  DND_2024_BACKGROUNDS,
+  DND_2024_FEATS,
+  DND_2024_CLASSES,
+  DND_2024_WEAPONS,
+  DND_2024_WEAPON_MASTERIES,
+} from '../data/dnd2024';
 
 interface DiceRollResult {
   dice: number[];
@@ -366,10 +395,168 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
 }) => {
   const userStore = useUserStore();
   const currentLoggedUserName = userStore.currentUser?.username || '';
+  const { language, isSpanish, isEnglish, setLanguage, t } = useLanguageStore();
+
+  const getAbilityAbbr = (st: string) => isSpanish ? ABILITY_SCORE_EXPLANATIONS[st]?.abbreviation || st.toUpperCase() : (st === 'str' ? 'STR' : st === 'dex' ? 'DEX' : st === 'con' ? 'CON' : st === 'int' ? 'INT' : st === 'wis' ? 'WIS' : 'CHA');
+  const getAbilityName = (st: string) => isSpanish ? ABILITY_SCORE_EXPLANATIONS[st]?.name || st : (st === 'str' ? 'Strength' : st === 'dex' ? 'Dexterity' : st === 'con' ? 'Constitution' : st === 'int' ? 'Intelligence' : st === 'wis' ? 'Wisdom' : 'Charisma');
+  const getAbilityDesc = (st: string) => {
+    if (isSpanish) return ABILITY_SCORE_EXPLANATIONS[st]?.description || '';
+    const map: Record<string, string> = {
+      str: 'Natural muscular power, athletic prowess, and raw physical force in melee combat.',
+      dex: 'Physical agility, feline reflexes, balance, stealth, and precision with ranged or finesse weapons.',
+      con: 'Vitality, endurance, physical toughness, resistance to poison, and hit point pool.',
+      int: 'Mental acuity, deductive reasoning, memory, and mastery of arcane lore and wizardry.',
+      wis: 'Perceptive awareness of your surroundings, intuition, willpower, and divine or primal connection.',
+      cha: 'Force of personality, persuasive eloquence, leadership presence, and innate magical projection.',
+    };
+    return map[st] || ABILITY_SCORE_EXPLANATIONS[st]?.description || '';
+  };
+
+  const SKILL_TRANSLATIONS_5E: Record<string, string> = {
+    'Acrobacias': 'Acrobatics',
+    'Atletismo': 'Athletics',
+    'Conocimiento Arcano': 'Arcana',
+    'Arcanos': 'Arcana',
+    'Engaño': 'Deception',
+    'Historia': 'History',
+    'Interpretación': 'Performance',
+    'Intimidación': 'Intimidation',
+    'Investigación': 'Investigation',
+    'Juego de Manos': 'Sleight of Hand',
+    'Medicina': 'Medicine',
+    'Naturaleza': 'Nature',
+    'Percepción': 'Perception',
+    'Perspicacia': 'Insight',
+    'Persuasión': 'Persuasion',
+    'Religión': 'Religion',
+    'Sigilo': 'Stealth',
+    'Supervivencia': 'Survival',
+    'Trato con Animales': 'Animal Handling',
+  };
+  const displaySkillName = (name: string) => isSpanish ? name : (SKILL_TRANSLATIONS_5E[name] || name);
+
+  const SUBCLASS_GROUP_EN: Record<string, string> = {
+    'Senda Primitiva': 'Primal Path',
+    'Colegio de Bardo': 'Bard College',
+    'Dominio Divino': 'Divine Domain',
+    'Círculo Druídico': 'Druid Circle',
+    'Arquetipo Marcial': 'Martial Archetype',
+    'Tradición Monástica': 'Monastic Tradition',
+    'Juramento Sagrado': 'Sacred Oath',
+    'Arquetipo de Explorador': 'Ranger Archetype',
+    'Arquetipo Picaresco': 'Roguish Archetype',
+    'Origen Hechicero': 'Sorcerous Origin',
+    'Patrón Sobrenatural': 'Otherworldly Patron',
+    'Tradición Arcana': 'Arcane Tradition',
+    'Especializaciones de Artífice': 'Artificer Specialist',
+    'Estilo de Boxeo (Boxing Style)': 'Boxing Style',
+  };
+  const getSubclassesGroupName = (cls?: { subclassesName?: string } | null) => {
+    if (!cls?.subclassesName) return isSpanish ? 'Subclase' : 'Subclass';
+    return isSpanish ? cls.subclassesName : (SUBCLASS_GROUP_EN[cls.subclassesName] || cls.subclassesName);
+  };
+  const getClassDisplayName = (cls?: { name: string; nameEn?: string } | null) => {
+    if (!cls) return '';
+    return isSpanish ? cls.name : (cls.nameEn || cls.name);
+  };
+  const getRaceDisplayName = (r?: { name: string; nameEn?: string } | null) => {
+    if (!r) return '';
+    return isSpanish ? r.name : (r.nameEn || r.name);
+  };
+  const getBgDisplayName = (b?: { name: string; nameEn?: string } | null) => {
+    if (!b) return '';
+    return isSpanish ? b.name : (b.nameEn || b.name);
+  };
+  const getSubclassDisplayName = (sub?: { name: string; nameEn?: string } | null) => {
+    if (!sub) return '';
+    if (isSpanish) return sub.name.split('(')[0].trim();
+    if (sub.nameEn) return sub.nameEn;
+    const paren = sub.name.match(/\(([^)]+)\)/);
+    if (paren && /[A-Za-z]/.test(paren[1])) {
+      return paren[1].trim();
+    }
+    return translateDndTitle(sub.name);
+  };
+
+  const DAMAGE_TRANSLATIONS_5E: Record<string, string> = {
+    'Contundente Mágico': 'Magical Bludgeoning',
+    'Perforante Mágico': 'Magical Piercing',
+    'Cortante Mágico': 'Magical Slashing',
+    'Contundente': 'Bludgeoning',
+    'Perforante': 'Piercing',
+    'Cortante': 'Slashing',
+    'Fuego': 'Fire',
+    'Frío': 'Cold',
+    'Relámpago': 'Lightning',
+    'Trueno': 'Thunder',
+    'Veneno': 'Poison',
+    'Ácido': 'Acid',
+    'Radiante': 'Radiant',
+    'Necrótico': 'Necrotic',
+    'Fuerza': 'Force',
+    'Psíquico': 'Psychic',
+    'Sutil': 'Finesse',
+    'Ligera': 'Light',
+    'Pesada': 'Heavy',
+    'A dos manos': 'Two-Handed',
+    'Versátil': 'Versatile',
+    'Arrojadiza': 'Thrown',
+    'Alcance': 'Reach',
+    'Carga': 'Loading',
+    'Munición': 'Ammunition',
+    'Especial': 'Special',
+  };
+
+  const displayAttackName = (name: string) => {
+    if (isSpanish) return name;
+    if (name.toLowerCase().includes('desarmado') || name.toLowerCase().includes('unarmed')) return 'Unarmed Strike';
+    const weapon = findWeaponByName(name);
+    if (weapon && weapon.nameEn) return weapon.nameEn;
+    return name;
+  };
+
+  const displayAttackType = (typeStr: string) => {
+    if (isSpanish) return typeStr;
+    let res = typeStr;
+    Object.entries(DAMAGE_TRANSLATIONS_5E).forEach(([es, en]) => {
+      res = res.replaceAll(es, en);
+    });
+    return res;
+  };
+
+  const ALIGNMENT_LABELS_EN: Record<string, { name: string; abbr: string; tagline: string; desc: string }> = {
+    'LB': { name: 'Lawful Good', abbr: 'LG', tagline: 'The Crusader', desc: 'Acts with compassion, honor, and a sense of duty. Believes that an orderly, lawful society is the best way to protect the innocent.' },
+    'NB': { name: 'Neutral Good', abbr: 'NG', tagline: 'The Benefactor', desc: 'Does the best that a good person can do according to their needs, without feeling bound by strict orders or open rebellion.' },
+    'CB': { name: 'Chaotic Good', abbr: 'CG', tagline: 'The Rebel', desc: 'Follows their own moral compass with a noble heart. Detests tyranny, oppressive rules, and unjust bureaucracies.' },
+    'LN': { name: 'Lawful Neutral', abbr: 'LN', tagline: 'The Judge', desc: 'Law, tradition, and personal oaths stand above compassion or whim. Keeps their word without hesitation.' },
+    'N': { name: 'True Neutral', abbr: 'N', tagline: 'The Undecided', desc: 'Prefers to steer clear of moral questions and doesn\'t take sides, or seeks to preserve the cosmic balance of nature.' },
+    'CN': { name: 'Chaotic Neutral', abbr: 'CN', tagline: 'The Free Spirit', desc: 'Values their own personal freedom above all else. Follows their whims and does not easily commit to others\' causes.' },
+    'LM': { name: 'Lawful Evil', abbr: 'LE', tagline: 'The Dominator', desc: 'Methodically takes what they want within the limits of a code of tradition, loyalty, or order, using hierarchy to rule.' },
+    'LE': { name: 'Lawful Evil', abbr: 'LE', tagline: 'The Dominator', desc: 'Methodically takes what they want within the limits of a code of tradition, loyalty, or order, using hierarchy to rule.' },
+    'NM': { name: 'Neutral Evil', abbr: 'NE', tagline: 'The Malefactor', desc: 'Does whatever they can get away with, without compassion or qualms, betraying anyone for personal gain.' },
+    'NE': { name: 'Neutral Evil', abbr: 'NE', tagline: 'The Malefactor', desc: 'Does whatever they can get away with, without compassion or qualms, betraying anyone for personal gain.' },
+    'CM': { name: 'Chaotic Evil', abbr: 'CE', tagline: 'The Destroyer', desc: 'Actuated by greed, hatred, and bloodlust. Enjoys sowing chaos and destruction across the world.' },
+    'CE': { name: 'Chaotic Evil', abbr: 'CE', tagline: 'The Destroyer', desc: 'Actuated by greed, hatred, and bloodlust. Enjoys sowing chaos and destruction across the world.' },
+  };
 
   const initState = useMemo(() => getInitialCreatorState(initialCharacter), [initialCharacter]);
 
   const [currentStep, setCurrentStep] = useState<CreatorStep>(initState?.currentStep || 'identity');
+  const [selectedEdition, setSelectedEdition] = useState<'5e' | '5.5e'>(
+    (initState as any)?.selectedEdition || (initialCharacter?.creatorState as any)?.selectedEdition || (initialCharacter?.edition) || '5e'
+  );
+  const [bgAsiMode2024, setBgAsiMode2024] = useState<'+2+1' | '+1+1+1'>(
+    (initState as any)?.bgAsiMode2024 || (initialCharacter?.creatorState as any)?.bgAsiMode2024 || '+2+1'
+  );
+  const [bgAsiStatPlusTwo, setBgAsiStatPlusTwo] = useState<keyof AbilityScores | ''>(
+    (initState as any)?.bgAsiStatPlusTwo || (initialCharacter?.creatorState as any)?.bgAsiStatPlusTwo || ''
+  );
+  const [bgAsiStatPlusOne, setBgAsiStatPlusOne] = useState<keyof AbilityScores | ''>(
+    (initState as any)?.bgAsiStatPlusOne || (initialCharacter?.creatorState as any)?.bgAsiStatPlusOne || ''
+  );
+  const [selectedWeaponMasteries, setSelectedWeaponMasteries] = useState<string[]>(
+    (initState as any)?.selectedWeaponMasteries || (initialCharacter?.creatorState as any)?.selectedWeaponMasteries || (initialCharacter?.weaponMasteries) || []
+  );
 
   // STEP 1: IDENTITY & ROLEPLAY
   const [characterName, setCharacterName] = useState<string>(initState?.characterName || '');
@@ -380,9 +567,17 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
   // Sync logged in user if playerName was empty or pending userStore load
   useEffect(() => {
     if (!playerName && currentLoggedUserName && !initialCharacter?.playerName) {
-      setPlayerName(currentLoggedUserName);
+      setPlayerName(!isSpanish && currentLoggedUserName === 'Aventurero' ? 'Adventurer' : currentLoggedUserName);
     }
-  }, [currentLoggedUserName, initialCharacter?.playerName]);
+  }, [currentLoggedUserName, initialCharacter?.playerName, isSpanish]);
+
+  useEffect(() => {
+    if (!isSpanish && playerName === 'Aventurero') {
+      setPlayerName('Adventurer');
+    } else if (isSpanish && playerName === 'Adventurer') {
+      setPlayerName('Aventurero');
+    }
+  }, [isSpanish, playerName]);
   const [avatarUrl, setAvatarUrl] = useState<string>(initState?.avatarUrl || '');
   const [customAvatarInput, setCustomAvatarInput] = useState<string>('');
   const [customUploadedAvatar, setCustomUploadedAvatar] = useState<string | null>(null);
@@ -569,10 +764,118 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
     };
   }, []);
 
+  const activeSpecies2024 = useMemo(() => {
+    if (selectedEdition !== '5.5e' || !selectedRaceId) return null;
+    return DND_2024_SPECIES.find((s) => s.id === selectedRaceId) || null;
+  }, [selectedEdition, selectedRaceId]);
+
+  const activeBackground2024 = useMemo(() => {
+    if (selectedEdition !== '5.5e' || !selectedBackgroundId) return null;
+    return DND_2024_BACKGROUNDS.find((b) => b.id === selectedBackgroundId) || null;
+  }, [selectedEdition, selectedBackgroundId]);
+
+  const background2024Bonuses = useMemo(() => {
+    const bonuses: Record<keyof AbilityScores, number> = { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 };
+    if (selectedEdition !== '5.5e' || !activeBackground2024) return bonuses;
+    const allowed = activeBackground2024.abilityScores;
+    if (bgAsiMode2024 === '+2+1') {
+      const st2 = (bgAsiStatPlusTwo && allowed.includes(bgAsiStatPlusTwo) ? bgAsiStatPlusTwo : allowed[0]) as keyof AbilityScores;
+      const validSt1 = allowed.filter((s) => s !== st2);
+      const st1 = (bgAsiStatPlusOne && bgAsiStatPlusOne !== st2 && allowed.includes(bgAsiStatPlusOne) ? bgAsiStatPlusOne : (validSt1[0] || allowed[1])) as keyof AbilityScores;
+      if (st2 in bonuses) bonuses[st2] += 2;
+      if (st1 in bonuses) bonuses[st1] += 1;
+    } else {
+      allowed.forEach((st) => {
+        if (st in bonuses) bonuses[st as keyof AbilityScores] += 1;
+      });
+    }
+    return bonuses;
+  }, [selectedEdition, activeBackground2024, bgAsiMode2024, bgAsiStatPlusTwo, bgAsiStatPlusOne]);
+
+  useEffect(() => {
+    if (selectedEdition === '5.5e') {
+      if (selectedRaceId) {
+        if (!DND_2024_SPECIES.some((s) => s.id === selectedRaceId)) {
+          const map5eTo2024Species: Record<string, string> = {
+            'humano': 'species-2024-human',
+            'elfo': 'species-2024-elf',
+            'enano': 'species-2024-dwarf',
+            'gnomo': 'species-2024-gnome',
+            'mediano': 'species-2024-halfling',
+            'draconido': 'species-2024-dragonborn',
+            'tiflin': 'species-2024-tiefling',
+            'goliat': 'species-2024-goliath',
+            'aasimar': 'species-2024-aasimar',
+            'orco': 'species-2024-orc',
+            'semiorco': 'species-2024-orc',
+          };
+          setSelectedRaceId(map5eTo2024Species[selectedRaceId] || '');
+          setSelectedSubraceId('');
+        }
+      }
+      if (selectedBackgroundId) {
+        if (!DND_2024_BACKGROUNDS.some((b) => b.id === selectedBackgroundId)) {
+          const found = DND_2024_BACKGROUNDS.find((b) => selectedBackgroundId.includes(b.slug) || b.id.includes(selectedBackgroundId));
+          setSelectedBackgroundId(found ? found.id : '');
+        }
+      }
+    } else {
+      if (selectedRaceId) {
+        if (!WIKIDOT_RACES.some((r) => r.id === selectedRaceId)) {
+          const map2024To5eSpecies: Record<string, string> = {
+            'species-2024-human': 'humano',
+            'species-2024-elf': 'elfo',
+            'species-2024-dwarf': 'enano',
+            'species-2024-gnome': 'gnomo',
+            'species-2024-halfling': 'mediano',
+            'species-2024-dragonborn': 'draconido',
+            'species-2024-tiefling': 'tiflin',
+            'species-2024-goliath': 'goliat',
+            'species-2024-aasimar': 'aasimar',
+            'species-2024-orc': 'semiorco',
+          };
+          setSelectedRaceId(map2024To5eSpecies[selectedRaceId] || '');
+          setSelectedSubraceId('');
+        }
+      }
+      if (selectedBackgroundId) {
+        if (!WIKIDOT_BACKGROUNDS.some((b) => b.id === selectedBackgroundId)) {
+          const slug = selectedBackgroundId.replace('bg-2024-', '');
+          const found = WIKIDOT_BACKGROUNDS.find((b) => b.id.includes(slug));
+          setSelectedBackgroundId(found ? found.id : '');
+        }
+      }
+    }
+  }, [selectedEdition]);
+
   const activeRace = useMemo(() => {
     if (!selectedRaceId) return null;
+    if (selectedEdition === '5.5e') {
+      const sp = DND_2024_SPECIES.find((s) => s.id === selectedRaceId);
+      if (sp) {
+        return {
+          id: sp.id,
+          name: isSpanish ? sp.name : (sp.nameEn || sp.name),
+          nameEn: sp.nameEn || sp.name,
+          category: 'Común' as const,
+          description: isSpanish ? sp.description : (sp.descriptionEn || sp.description),
+          traits: (sp.traits || []).map((t) => ({
+            name: isSpanish ? t.name : (t.nameEn || t.name),
+            desc: isSpanish ? t.desc : (t.descEn || t.desc),
+          })),
+          size: (sp.size.includes('Pequeño') || sp.sizeEn?.toLowerCase().includes('small') ? 'Pequeño' : 'Mediano') as 'Pequeño' | 'Mediano',
+          speed: isSpanish ? sp.speed : sp.speed.replace('pies', 'feet'),
+          languages: isSpanish ? ['Común'] : ['Common'],
+          abilityScoreBonuses: {},
+          darkvision: sp.darkvision || 0,
+          subraces: [],
+          innateSpells: [],
+          spellcastingConfig: undefined,
+        } as unknown as (typeof WIKIDOT_RACES)[number];
+      }
+    }
     return WIKIDOT_RACES.find((r) => r.id === selectedRaceId) || null;
-  }, [selectedRaceId]);
+  }, [selectedRaceId, selectedEdition, isSpanish]);
 
   const activeSubrace = useMemo(() => {
     if (!activeRace || !activeRace.subraces || activeRace.subraces.length === 0 || !selectedSubraceId) return null;
@@ -585,8 +888,9 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
   }, [selectedClassId]);
 
   const subclassUnlockLevel = useMemo(() => {
+    if (selectedEdition === '5.5e') return 3;
     return activeClass ? getClassSubclassLevel(activeClass) : 3;
-  }, [activeClass]);
+  }, [selectedEdition, activeClass]);
 
   const isSubclassUnlocked = characterLevel >= subclassUnlockLevel;
 
@@ -650,8 +954,30 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
 
   const activeBackground = useMemo(() => {
     if (!selectedBackgroundId) return null;
+    if (selectedEdition === '5.5e') {
+      const bg = DND_2024_BACKGROUNDS.find((b) => b.id === selectedBackgroundId);
+      if (bg) {
+        return {
+          id: bg.id,
+          name: bg.name,
+          nameEn: bg.nameEn,
+          orientation: 'PHB 2024',
+          description: isSpanish
+            ? `${bg.description}\n\n**Dote de Origen (2024):** ${bg.feat}\n**Atributos Permitidos:** ${bg.abilityScores.map((a) => a.toUpperCase()).join(', ')}`
+            : `${bg.descriptionEn || bg.description}\n\n**Origin Feat (2024):** ${bg.featEn || bg.feat}\n**Allowed Abilities:** ${bg.abilityScores.map((a) => a.toUpperCase()).join(', ')}`,
+          skillProficiencies: bg.skillProficiencies.split(',').map((s) => s.trim()),
+          toolProficiencies: [bg.toolProficiency],
+          equipmentText: bg.equipment,
+          fixedLanguages: [],
+          copper: 0,
+          silver: 0,
+          gold: 50,
+          platinum: 0,
+        } as unknown as (typeof WIKIDOT_BACKGROUNDS)[number];
+      }
+    }
     return WIKIDOT_BACKGROUNDS.find((b) => b.id === selectedBackgroundId) || null;
-  }, [selectedBackgroundId]);
+  }, [selectedBackgroundId, selectedEdition, isSpanish]);
 
   const knownRacialLanguages = useMemo(() => {
     return activeRace?.languages && activeRace.languages.length > 0
@@ -991,8 +1317,8 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
   // Total flexible racial bonus points (any)
   const raceAnyCount = useMemo(() => {
     let count = 0;
-    if (activeRace?.abilityScoreBonuses?.any) count += activeRace.abilityScoreBonuses.any;
-    if (activeSubrace?.abilityScoreBonuses?.any) count += activeSubrace.abilityScoreBonuses.any;
+    if ((activeRace?.abilityScoreBonuses as any)?.any) count += (activeRace!.abilityScoreBonuses as any).any;
+    if ((activeSubrace?.abilityScoreBonuses as any)?.any) count += (activeSubrace!.abilityScoreBonuses as any).any;
     return count;
   }, [activeRace, activeSubrace]);
 
@@ -1082,15 +1408,16 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
 
   // Final Total Stats (Base + Racial Bonus + ASI/Feat Bonus, max 20)
   const finalStats: AbilityScores = useMemo(() => {
+    const is2024 = selectedEdition === '5.5e';
     return {
-      str: Math.min(20, baseStats.str + racialBonuses.str + asiStatBonuses.str),
-      dex: Math.min(20, baseStats.dex + racialBonuses.dex + asiStatBonuses.dex),
-      con: Math.min(20, baseStats.con + racialBonuses.con + asiStatBonuses.con),
-      int: Math.min(20, baseStats.int + racialBonuses.int + asiStatBonuses.int),
-      wis: Math.min(20, baseStats.wis + racialBonuses.wis + asiStatBonuses.wis),
-      cha: Math.min(20, baseStats.cha + racialBonuses.cha + asiStatBonuses.cha),
+      str: Math.min(20, baseStats.str + (is2024 ? 0 : racialBonuses.str) + asiStatBonuses.str + background2024Bonuses.str),
+      dex: Math.min(20, baseStats.dex + (is2024 ? 0 : racialBonuses.dex) + asiStatBonuses.dex + background2024Bonuses.dex),
+      con: Math.min(20, baseStats.con + (is2024 ? 0 : racialBonuses.con) + asiStatBonuses.con + background2024Bonuses.con),
+      int: Math.min(20, baseStats.int + (is2024 ? 0 : racialBonuses.int) + asiStatBonuses.int + background2024Bonuses.int),
+      wis: Math.min(20, baseStats.wis + (is2024 ? 0 : racialBonuses.wis) + asiStatBonuses.wis + background2024Bonuses.wis),
+      cha: Math.min(20, baseStats.cha + (is2024 ? 0 : racialBonuses.cha) + asiStatBonuses.cha + background2024Bonuses.cha),
     };
-  }, [baseStats, racialBonuses, asiStatBonuses]);
+  }, [baseStats, racialBonuses, asiStatBonuses, background2024Bonuses, selectedEdition]);
 
   const getMod = (val: number) => Math.floor((val - 10) / 2);
   const getModStr = (val: number) => {
@@ -1673,10 +2000,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
       : (classConfig?.defaultAttacks || [
           {
             id: 'unarmed-strike',
-            name: 'Ataque Desarmado',
+            name: isSpanish ? 'Ataque Desarmado' : 'Unarmed Strike',
             bonus: `+${Math.max(0, getMod(finalStats.str) + profBonus)}`,
             damage: `1 + ${getMod(finalStats.str)}`,
-            type: 'Contundente',
+            type: isSpanish ? 'Contundente' : 'Bludgeoning',
           },
         ]);
 
@@ -1694,10 +2021,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
       return [
         {
           id: 'unarmed-strike',
-          name: 'Ataque Desarmado',
+          name: isSpanish ? 'Ataque Desarmado' : 'Unarmed Strike',
           bonus: `+${Math.max(0, getMod(finalStats.str) + profBonus)}`,
           damage: `1 + ${getMod(finalStats.str)}`,
-          type: 'Contundente',
+          type: isSpanish ? 'Contundente' : 'Bludgeoning',
         },
       ];
     }
@@ -1720,21 +2047,22 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
   // Saving Throw details with numeric bonus
   const savingThrowDetails = useMemo(() => {
     return (['str', 'dex', 'con', 'int', 'wis', 'cha'] as (keyof AbilityScores)[]).map((stat) => {
-      const statName = ABILITY_SCORE_EXPLANATIONS[stat].name;
-      const isProficient = savingThrows.includes(statName);
+      const statName = getAbilityName(stat);
+      const esStatName = ABILITY_SCORE_EXPLANATIONS[stat].name;
+      const isProficient = savingThrows.includes(esStatName) || savingThrows.includes(statName);
       const statMod = getMod(finalStats[stat]);
       const totalBonus = statMod + (isProficient ? profBonus : 0);
       const bonusStr = totalBonus >= 0 ? `+${totalBonus}` : `${totalBonus}`;
       return {
         stat,
         statName,
-        abbreviation: ABILITY_SCORE_EXPLANATIONS[stat].abbreviation,
+        abbreviation: getAbilityAbbr(stat),
         isProficient,
         totalBonus,
         bonusStr,
       };
     });
-  }, [finalStats, savingThrows, profBonus]);
+  }, [finalStats, savingThrows, profBonus, isSpanish]);
 
   // 18 Skills list with calculated numeric bonus and origin
   const skillDetails = useMemo(() => {
@@ -1748,10 +2076,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
       const isRace = racialSkills.includes(sk.name) || bonusRacialSkills.includes(sk.name);
       const isClass = selectedClassSkills.includes(sk.name);
       let origin = '';
-      if (isBg) origin = 'Trasfondo';
-      else if (isRace) origin = 'Raza';
-      else if (isClass) origin = 'Clase';
-      else if (isProficient) origin = 'Dote/Otro';
+      if (isBg) origin = isSpanish ? 'Trasfondo' : 'Background';
+      else if (isRace) origin = isSpanish ? 'Raza' : 'Race';
+      else if (isClass) origin = isSpanish ? 'Clase' : 'Class';
+      else if (isProficient) origin = isSpanish ? 'Dote/Otro' : 'Feat/Other';
 
       return {
         ...sk,
@@ -1972,10 +2300,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
       attacks: equippedAttacks.length > 0 ? equippedAttacks : (classConfig?.defaultAttacks || [
         {
           id: 'unarmed-strike',
-          name: 'Ataque Desarmado',
+          name: isSpanish ? 'Ataque Desarmado' : 'Unarmed Strike',
           bonus: `+${Math.max(0, getMod(finalStats.str) + profBonus)}`,
           damage: `1 + ${getMod(finalStats.str)}`,
-          type: 'Contundente',
+          type: isSpanish ? 'Contundente' : 'Bludgeoning',
         },
       ]),
       spellSlots: isCaster ? casterSlots : undefined,
@@ -2004,9 +2332,16 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
       tools: backgroundTools.length > 0 ? backgroundTools : (initialCharacter?.tools || []),
       languages: finalLanguagesList,
       classDecisions: creatorClassDecisions,
+      edition: selectedEdition,
+      weaponMasteries: selectedWeaponMasteries,
       isDraft: false,
       lastSavedAt: new Date().toISOString(),
       creatorState: {
+        selectedEdition,
+        bgAsiMode2024,
+        bgAsiStatPlusTwo,
+        bgAsiStatPlusOne,
+        selectedWeaponMasteries,
         currentStep,
         characterName,
         playerName,
@@ -2120,7 +2455,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
     if (characterName.trim()) {
       score += 15;
     } else {
-      pendingItems.push('Nombre');
+      pendingItems.push(isSpanish ? 'Nombre' : 'Name');
     }
 
     // 2. Raza & Subraza si aplica (15%)
@@ -2130,13 +2465,13 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
           score += 15;
         } else {
           score += 8;
-          pendingItems.push('Subraza');
+          pendingItems.push(isSpanish ? 'Subraza' : 'Subrace');
         }
       } else {
         score += 15;
       }
     } else {
-      pendingItems.push('Raza');
+      pendingItems.push(isSpanish ? 'Raza' : 'Race');
     }
 
     // 3. Clase & Habilidades (20%)
@@ -2146,10 +2481,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
       if (selectedClassSkills.length >= skillsRequired) {
         score += 8;
       } else {
-        pendingItems.push(`Habilidades (${selectedClassSkills.length}/${skillsRequired})`);
+        pendingItems.push(`${isSpanish ? 'Habilidades' : 'Skills'} (${selectedClassSkills.length}/${skillsRequired})`);
       }
     } else {
-      pendingItems.push('Clase');
+      pendingItems.push(isSpanish ? 'Clase' : 'Class');
     }
 
     // 4. Características (6 stats) (25%)
@@ -2158,27 +2493,27 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
     ).length;
     score += Math.round((assignedCount / 6) * 25);
     if (assignedCount < 6) {
-      pendingItems.push(`Características (${assignedCount}/6)`);
+      pendingItems.push(`${isSpanish ? 'Características' : 'Ability Scores'} (${assignedCount}/6)`);
     }
 
     // 5. Trasfondo (15%)
     if (selectedBackgroundId) {
       score += 15;
     } else {
-      pendingItems.push('Trasfondo');
+      pendingItems.push(isSpanish ? 'Trasfondo' : 'Background');
     }
 
     // 6. Alineamiento & Avatar / Roleplay (10%)
     let roleplayScore = 0;
     if (alignment) roleplayScore += 4;
-    else pendingItems.push('Alineamiento');
+    else pendingItems.push(isSpanish ? 'Alineamiento' : 'Alignment');
     if (avatarUrl) roleplayScore += 3;
     if (personalityTraits || ideals || bonds || flaws) roleplayScore += 3;
     score += roleplayScore;
 
     return {
       percentage: Math.min(100, Math.max(0, score)),
-      pendingSummary: pendingItems.length > 0 ? `Falta: ${pendingItems.slice(0, 3).join(', ')}${pendingItems.length > 3 ? '...' : ''}` : '¡Héroe listo para la batalla!',
+      pendingSummary: pendingItems.length > 0 ? `${isSpanish ? 'Falta: ' : 'Missing: '}${pendingItems.slice(0, 3).join(', ')}${pendingItems.length > 3 ? '...' : ''}` : (isSpanish ? '¡Héroe listo para la batalla!' : 'Hero ready for battle!'),
     };
   }, [
     characterName,
@@ -2195,7 +2530,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
     personalityTraits,
     ideals,
     bonds,
-    flaws,
+    flaws, isSpanish,
   ]);
 
   // Roleplay options helper based on selected background
@@ -2204,12 +2539,13 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
   }, [selectedBackgroundId]);
 
   const handleTogglePersonalityTrait = (traitText: string) => {
-    const clean = traitText.trim();
-    if (personalityTraits.includes(clean)) {
+    const clean = isSpanish ? traitText.trim() : (translateRoleplayOptionText(traitText) || traitText).trim();
+    const cleanEs = traitText.trim();
+    if (personalityTraits.includes(clean) || personalityTraits.includes(cleanEs)) {
       const remaining = personalityTraits
         .split('\n')
         .map((l) => l.trim())
-        .filter((l) => l && !l.includes(clean));
+        .filter((l) => l && !l.includes(clean) && !l.includes(cleanEs));
       setPersonalityTraits(remaining.join('\n\n'));
     } else {
       const currentLines = personalityTraits
@@ -2229,8 +2565,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
   };
 
   const handleSelectIdeal = (idealText: string, tag?: string) => {
-    const fullText = tag ? `${idealText} [${tag}]` : idealText;
-    if (ideals.includes(idealText.trim())) {
+    const clean = isSpanish ? idealText.trim() : (translateRoleplayOptionText(idealText) || idealText).trim();
+    const tagDisplay = tag ? (isSpanish ? tag : translateDndTitle(tag)) : undefined;
+    const fullText = tagDisplay ? `${clean} [${tagDisplay}]` : clean;
+    if (ideals.includes(clean) || ideals.includes(idealText.trim())) {
       setIdeals('');
     } else {
       setIdeals(fullText);
@@ -2238,8 +2576,8 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
   };
 
   const handleSelectBond = (bondText: string) => {
-    const clean = bondText.trim();
-    if (bonds.includes(clean)) {
+    const clean = isSpanish ? bondText.trim() : (translateRoleplayOptionText(bondText) || bondText).trim();
+    if (bonds.includes(clean) || bonds.includes(bondText.trim())) {
       setBonds('');
     } else {
       setBonds(clean);
@@ -2247,8 +2585,8 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
   };
 
   const handleSelectFlaw = (flawText: string) => {
-    const clean = flawText.trim();
-    if (flaws.includes(clean)) {
+    const clean = isSpanish ? flawText.trim() : (translateRoleplayOptionText(flawText) || flawText).trim();
+    if (flaws.includes(clean) || flaws.includes(flawText.trim())) {
       setFlaws('');
     } else {
       setFlaws(clean);
@@ -2259,23 +2597,29 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
     const opt1 = rollRandomOption(currentRoleplayOptions.personalityTraits);
     const available = currentRoleplayOptions.personalityTraits.filter((o) => o.text !== opt1.text);
     const opt2 = available.length > 0 ? rollRandomOption(available) : opt1;
-    setPersonalityTraits(`• ${opt1.text}\n\n• ${opt2.text}`);
+    const t1 = isSpanish ? opt1.text : translateRoleplayOptionText(opt1.text);
+    const t2 = isSpanish ? opt2.text : translateRoleplayOptionText(opt2.text);
+    setPersonalityTraits(`• ${t1}\n\n• ${t2}`);
   };
 
   const handleRollIdeal = () => {
     const opt = rollRandomOption(currentRoleplayOptions.ideals);
-    const textWithTag = opt.tag ? `${opt.text} [${opt.tag}]` : opt.text;
+    const text = isSpanish ? opt.text : translateRoleplayOptionText(opt.text);
+    const tag = opt.tag ? (isSpanish ? opt.tag : translateDndTitle(opt.tag)) : '';
+    const textWithTag = tag ? `${text} [${tag}]` : text;
     setIdeals(textWithTag);
   };
 
   const handleRollBond = () => {
     const opt = rollRandomOption(currentRoleplayOptions.bonds);
-    setBonds(opt.text);
+    const text = isSpanish ? opt.text : translateRoleplayOptionText(opt.text);
+    setBonds(text);
   };
 
   const handleRollFlaw = () => {
     const opt = rollRandomOption(currentRoleplayOptions.flaws);
-    setFlaws(opt.text);
+    const text = isSpanish ? opt.text : translateRoleplayOptionText(opt.text);
+    setFlaws(text);
   };
 
   const handleRollAllRoleplay = () => {
@@ -2286,25 +2630,32 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
     const bd = rollRandomOption(currentRoleplayOptions.bonds);
     const fl = rollRandomOption(currentRoleplayOptions.flaws);
 
-    setPersonalityTraits(`• ${pt1.text}\n\n• ${pt2.text}`);
-    setIdeals(id.tag ? `${id.text} [${id.tag}]` : id.text);
-    setBonds(bd.text);
-    setFlaws(fl.text);
+    const t1 = isSpanish ? pt1.text : translateRoleplayOptionText(pt1.text);
+    const t2 = isSpanish ? pt2.text : translateRoleplayOptionText(pt2.text);
+    const idText = isSpanish ? id.text : translateRoleplayOptionText(id.text);
+    const idTag = id.tag ? (isSpanish ? id.tag : translateDndTitle(id.tag)) : '';
+    const bdText = isSpanish ? bd.text : translateRoleplayOptionText(bd.text);
+    const flText = isSpanish ? fl.text : translateRoleplayOptionText(fl.text);
+
+    setPersonalityTraits(`• ${t1}\n\n• ${t2}`);
+    setIdeals(idTag ? `${idText} [${idTag}]` : idText);
+    setBonds(bdText);
+    setFlaws(flText);
   };
 
   const STEPS: { id: CreatorStep; num: number; title: string; subtitle: string; icon: any }[] = useMemo(() => {
     return [
-      { id: 'identity', num: 1, title: 'Identidad', subtitle: 'Nombre & Apariencia', icon: User },
-      { id: 'race', num: 2, title: 'Raza & Linaje', subtitle: 'Atributos & Rasgos', icon: Award },
-      { id: 'background', num: 3, title: 'Trasfondo & Rol', subtitle: 'Historia & Convicciones', icon: BookOpen },
-      { id: 'class', num: 4, title: 'Clase & Nivel', subtitle: 'Clase, Rasgos & Hab.', icon: Sword },
-      { id: 'abilities', num: 5, title: 'Puntuaciones', subtitle: 'Tirada 4d6 & Stats', icon: Dices },
-      { id: 'asi_feats', num: 6, title: 'Dotes & Stats', subtitle: 'Puntuaciones & Dotes', icon: Star },
-      { id: 'spells', num: 7, title: 'Conjuración', subtitle: isCaster ? 'Trucos & Grimorio' : 'Magia Innata / Opcional', icon: Sparkles },
-      { id: 'equipment', num: 8, title: 'Inventario', subtitle: 'Equipo Inicial & Oro', icon: Backpack },
-      { id: 'review', num: 9, title: 'Forjar Personaje', subtitle: 'Ficha Final & Dossier', icon: Check },
+      { id: 'identity', num: 1, title: isSpanish ? 'Identidad' : 'Identity', subtitle: isSpanish ? 'Nombre & Apariencia' : 'Name & Appearance', icon: User },
+      { id: 'race', num: 2, title: isSpanish ? 'Raza & Linaje' : 'Race & Species', subtitle: isSpanish ? 'Atributos & Rasgos' : 'Traits & Biology', icon: Award },
+      { id: 'background', num: 3, title: isSpanish ? 'Trasfondo & Rol' : 'Background', subtitle: isSpanish ? 'Historia & Convicciones' : 'History & Ability Scores', icon: BookOpen },
+      { id: 'class', num: 4, title: isSpanish ? 'Clase & Nivel' : 'Class & Level', subtitle: isSpanish ? 'Clase, Rasgos & Hab.' : 'Features & Proficiencies', icon: Sword },
+      { id: 'abilities', num: 5, title: isSpanish ? 'Puntuaciones' : 'Ability Scores', subtitle: isSpanish ? 'Tirada 4d6 & Stats' : 'Roll 4d6 / Standard Array', icon: Dices },
+      { id: 'asi_feats', num: 6, title: isSpanish ? 'Dotes & Stats' : 'Feats & ASI', subtitle: isSpanish ? 'Puntuaciones & Dotes' : 'Scores & Feats', icon: Star },
+      { id: 'spells', num: 7, title: isSpanish ? 'Conjuración' : 'Spellcasting', subtitle: isCaster ? (isSpanish ? 'Trucos & Grimorio' : 'Cantrips & Spellbook') : (isSpanish ? 'Magia Innata / Opcional' : 'Innate Magic / Optional'), icon: Sparkles },
+      { id: 'equipment', num: 8, title: isSpanish ? 'Inventario' : 'Inventory & Equipment', subtitle: isSpanish ? 'Equipo Inicial & Oro' : 'Starting Gear & Gold', icon: Backpack },
+      { id: 'review', num: 9, title: isSpanish ? 'Forjar Personaje' : 'Forge Character', subtitle: isSpanish ? 'Ficha Final & Dossier' : 'Final Sheet & Dossier', icon: Check },
     ];
-  }, [isCaster]);
+  }, [isCaster, isSpanish]);
 
   const isStepCompleted = (stepId: CreatorStep): boolean => {
     switch (stepId) {
@@ -2402,7 +2753,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
     }, 80);
   };
 
-  return (
+  return localizeReactNode(
     <div className="fixed inset-0 z-50 flex flex-col w-screen h-screen overflow-hidden bg-[#100905] animate-fadeIn font-serif text-[#2c241b]">
       {/* Outer Container Filling Full Screen */}
       <div className="relative w-full h-full flex flex-col overflow-hidden bg-[#100905] text-[#2c241b]">
@@ -2436,8 +2787,47 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   WebkitTextFillColor: 'transparent',
                 }}
               >
-                Creador de Héroes 5e
+                {isSpanish ? 'Creador de Héroes' : 'Hero Forge'} {selectedEdition === '5.5e' ? '5.5e' : '5e'}
               </span>
+
+              {/* Edition Selector in Creator Header */}
+              <div className="flex items-center gap-1 p-0.5 bg-[#180e07]/90 rounded-lg border border-[#8c672b]/60 shadow-xs">
+                <button
+                  type="button"
+                  onClick={() => setSelectedEdition('5e')}
+                  style={{
+                    backgroundImage: `url(${selectedEdition === '5e' ? './assets/ui/sheet_small_btn_active.png' : './assets/ui/sheet_small_btn.png'})`,
+                    backgroundSize: '100% 100%',
+                    backgroundRepeat: 'no-repeat',
+                  }}
+                  className={`px-2.5 py-1 text-[11px] font-fantasy font-bold transition cursor-pointer flex items-center justify-center gap-1 ${
+                    selectedEdition === '5e'
+                      ? 'text-[#ffe8a3] drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]'
+                      : 'text-[#c7b59e] opacity-80 hover:opacity-100 hover:text-white'
+                  }`}
+                >
+                  ⚔️ 5e (2014)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedEdition('5.5e')}
+                  style={{
+                    backgroundImage: `url(${selectedEdition === '5.5e' ? './assets/ui/sheet_small_btn_active.png' : './assets/ui/sheet_small_btn.png'})`,
+                    backgroundSize: '100% 100%',
+                    backgroundRepeat: 'no-repeat',
+                  }}
+                  className={`px-2.5 py-1 text-[11px] font-fantasy font-bold transition cursor-pointer flex items-center justify-center gap-1 ${
+                    selectedEdition === '5.5e'
+                      ? 'text-[#ffe8a3] drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]'
+                      : 'text-[#c7b59e] opacity-80 hover:opacity-100 hover:text-white'
+                  }`}
+                >
+                  <span>✨ 5.5e (2024)</span>
+                  <span className="text-[8px] bg-amber-400 text-stone-900 px-0.5 rounded font-black font-mono">PHB</span>
+                </button>
+              </div>
+
+
 
               {initialCharacter && !initialCharacter.isDraft && (
                 <span className="text-[10px] bg-[#24170d] text-[#ffd56b] px-2 py-0.5 rounded-lg border border-[#8c672b]/80 font-mono font-bold flex items-center gap-1 shadow-xs truncate max-w-[130px] sm:max-w-xs">
@@ -2447,7 +2837,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
               )}
               {initialCharacter?.isDraft && (
                 <span className="text-[10px] bg-[#24170d] text-[#fcd34d] px-2 py-0.5 rounded-lg border border-[#d97706]/80 font-mono font-bold flex items-center gap-1 shadow-xs">
-                  <span>📝 Borrador</span>
+                  <span>📝 {isSpanish ? 'Borrador' : 'Draft'}</span>
                 </span>
               )}
 
@@ -2468,7 +2858,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
           {/* Right Action Controls: Forged Bronze Buttons */}
           {/* Center Live Quick Stats in Top Bar */}
           <div className="hidden md:flex items-center gap-2.5 font-mono font-bold text-[11px] px-3 py-1 rounded-full bg-[#180e07]/85 border border-[#8c672b]/60 text-[#dfbe7e] shadow-xs">
-            <span className="text-[#ffd56b] font-fantasy font-semibold truncate max-w-[140px]">{characterName || 'Héroe'} (Nv {characterLevel})</span>
+            <span className="text-[#ffd56b] font-fantasy font-semibold truncate max-w-[140px]">{characterName || (isSpanish ? 'Héroe' : 'Hero')} ({isSpanish ? 'Nv' : 'Lv'} {characterLevel})</span>
             <span className="text-[#8c672b]">•</span>
             <span className="text-[#5ce68b] flex items-center gap-0.5"><Heart className="w-3 h-3 fill-[#5ce68b]" /> {activeClass ? calculatedMaxHp : '-'}</span>
             <span className="text-[#ffd56b] flex items-center gap-0.5"><Shield className="w-3 h-3" /> {calculatedAc}</span>
@@ -2486,7 +2876,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                 title="Descargar Hoja Oficial 5e (PDF editable de 3 páginas)"
               >
                 <FileDown className="w-3.5 h-3.5 text-[#ffd56b]" />
-                <span className="hidden md:inline">{isExportingPdf ? 'Exportando PDF...' : 'Exportar PDF'}</span>
+                <span className="hidden md:inline">{isExportingPdf ? (isSpanish ? 'Exportando PDF...' : 'Exporting PDF...') : (isSpanish ? 'Exportar PDF' : 'Export PDF')}</span>
               </button>
             )}
             <button
@@ -2497,7 +2887,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
               title="Guardar progreso actual como borrador y continuar en otro momento"
             >
               <Save className="w-3.5 h-3.5 text-[#dfbe7e]" />
-              <span className="hidden sm:inline">Borrador</span>
+              <span className="hidden sm:inline">{isSpanish ? 'Borrador' : 'Draft'}</span>
             </button>
 
             {/* Live Sheet Preview Toggle Button */}
@@ -2513,7 +2903,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
               title={isSidebarOpen ? "Colapsar previsualización de hoja (más espacio)" : "Ver previsualización de hoja"}
             >
               <Scroll className="w-3.5 h-3.5 text-[#dfbe7e]" />
-              <span className="hidden sm:inline">{isSidebarOpen ? 'Ocultar Hoja' : 'Ver Hoja'}</span>
+              <span className="hidden sm:inline">{isSidebarOpen ? (isSpanish ? 'Ocultar Hoja' : 'Hide Sheet') : (isSpanish ? 'Ver Hoja' : 'Show Sheet')}</span>
             </button>
 
             <button
@@ -2554,7 +2944,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
             >
               <ChevronLeft className="w-4 h-4 text-[#ffd56b] group-hover:-translate-x-0.5 transition-transform" />
               <span className="text-[9px] font-fantasy font-bold uppercase tracking-widest [writing-mode:vertical-rl] rotate-180">
-                Hoja en Vivo
+                {isSpanish ? 'Hoja en Vivo' : 'Live Sheet'}
               </span>
             </button>
           )}
@@ -2591,24 +2981,24 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                 // Dynamic snippet preview for the hover card
                 let dynamicPreview = '';
                 if (step.id === 'identity') {
-                  dynamicPreview = characterName.trim() ? characterName : 'Sin definir';
+                  dynamicPreview = characterName.trim() ? characterName : (isSpanish ? 'Sin definir' : 'Not set');
                 } else if (step.id === 'race') {
-                  dynamicPreview = activeRace ? activeRace.name + (activeSubrace ? ` (${activeSubrace.name})` : '') : 'Sin seleccionar';
+                  dynamicPreview = activeRace ? (isSpanish ? activeRace.name : ((activeRace as any).nameEn || activeRace.name)) + (activeSubrace ? ` (${isSpanish ? activeSubrace.name : ((activeSubrace as any).nameEn || activeSubrace.name)})` : '') : (isSpanish ? 'Sin seleccionar' : 'Unselected');
                 } else if (step.id === 'background') {
-                  dynamicPreview = activeBackground ? activeBackground.name : 'Sin seleccionar';
+                  dynamicPreview = activeBackground ? (isSpanish ? activeBackground.name : (activeBackground.nameEn || activeBackground.name)) : (isSpanish ? 'Sin seleccionar' : 'Unselected');
                 } else if (step.id === 'class') {
-                  dynamicPreview = activeClass ? `${activeClass.name} Nv${characterLevel}` : 'Sin seleccionar';
+                  dynamicPreview = activeClass ? `${isSpanish ? activeClass.name : ((activeClass as any).nameEn || activeClass.name)} ${isSpanish ? 'Nv' : 'Lv'}${characterLevel}` : (isSpanish ? 'Sin seleccionar' : 'Unselected');
                 } else if (step.id === 'abilities') {
                   const assigned = Object.keys(assignedStats).length;
-                  dynamicPreview = `${assigned}/6 Atributos listos`;
+                  dynamicPreview = isSpanish ? `${assigned}/6 Atributos listos` : `${assigned}/6 Scores ready`;
                 } else if (step.id === 'asi_feats') {
-                  dynamicPreview = chosenFeatsList.length > 0 ? `${chosenFeatsList.length} Dotes elegidas` : 'Dotes & Mejoras';
+                  dynamicPreview = chosenFeatsList.length > 0 ? (isSpanish ? `${chosenFeatsList.length} Dotes elegidas` : `${chosenFeatsList.length} Feats chosen`) : (isSpanish ? 'Dotes & Mejoras' : 'Feats & ASI');
                 } else if (step.id === 'spells') {
-                  dynamicPreview = !isCaster ? 'Opcional (No lanzador)' : `${selectedSpells.length} Conjuros listos`;
+                  dynamicPreview = !isCaster ? (isSpanish ? 'Opcional (No lanzador)' : 'Optional (Non-caster)') : (isSpanish ? `${selectedSpells.length} Conjuros listos` : `${selectedSpells.length} Spells ready`);
                 } else if (step.id === 'equipment') {
-                  dynamicPreview = `${chosenEquipmentList.length} Objetos • ${startingGoldTotal} po`;
+                  dynamicPreview = isSpanish ? `${chosenEquipmentList.length} Objetos • ${startingGoldTotal} po` : `${chosenEquipmentList.length} Items • ${startingGoldTotal} gp`;
                 } else if (step.id === 'review') {
-                  dynamicPreview = `${completionMetrics.percentage}% Completado`;
+                  dynamicPreview = isSpanish ? `${completionMetrics.percentage}% Completado` : `${completionMetrics.percentage}% Completed`;
                 }
 
                 return (
@@ -2681,22 +3071,22 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                         {/* Header Row: Step number & Status Tag */}
                         <div className="flex items-center justify-between gap-2 border-b border-[#4d3620] pb-1 mb-1.5">
                           <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#ffd56b] flex items-center gap-1">
-                            <span>Paso {step.num}</span>
+                            <span>{isSpanish ? 'Paso' : 'Step'} {step.num}</span>
                             <span className="text-[#786450]">/ 9</span>
                           </span>
                           {isCurrent ? (
                             <span className="text-[9px] bg-amber-950/90 text-amber-300 border border-amber-500/50 px-1.5 py-0.2 rounded-full font-bold flex items-center gap-1">
                               <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping inline-block" />
-                              Actual
+                              {isSpanish ? 'Actual' : 'Current'}
                             </span>
                           ) : isCompleted ? (
                             <span className="text-[9px] bg-emerald-950/90 text-emerald-300 border border-emerald-500/50 px-1.5 py-0.2 rounded-full font-bold flex items-center gap-0.5">
                               <Check className="w-2.5 h-2.5" />
-                              Listo
+                              {isSpanish ? 'Listo' : 'Ready'}
                             </span>
                           ) : (
                             <span className="text-[9px] bg-[#291e15] text-[#9c8975] border border-[#4d3620] px-1.5 py-0.2 rounded-full font-mono">
-                              Pendiente
+                              {isSpanish ? 'Pendiente' : 'Pending'}
                             </span>
                           )}
                         </div>
@@ -2712,7 +3102,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                         {/* Dynamic Selection Preview */}
                         {dynamicPreview && (
                           <div className="mt-2 pt-1.5 border-t border-[#3a2818] flex items-center justify-between gap-1 text-[10px]">
-                            <span className="text-[#8c7862] text-[9px] uppercase font-mono">Estado:</span>
+                            <span className="text-[#8c7862] text-[9px] uppercase font-mono">{isSpanish ? 'Estado:' : 'Status:'}</span>
                             <span className="text-[#e0b04a] font-semibold truncate max-w-[150px]">
                               {dynamicPreview}
                             </span>
@@ -2763,7 +3153,60 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   <div className="py-0.5 px-2.5 rounded-lg bg-[#f5ede0]/90 border border-[#d6c4aa] flex items-center justify-between gap-2 shadow-2xs">
                     <div className="flex items-center gap-1.5 text-xs text-[#5c4a35] min-w-0">
                       <Info className="w-3.5 h-3.5 text-[#8c672b] shrink-0" />
-                      <span className="truncate"><strong>Paso 1: Identidad & Apariencia</strong> — Define nombre, nivel, retrato y alineamiento.</span>
+                      <span className="truncate"><strong>{isSpanish ? 'Paso 1: Identidad & Apariencia' : 'Step 1: Identity & Appearance'}</strong> — {isSpanish ? 'Define nombre, nivel, retrato y alineamiento.' : 'Define name, level, portrait, and alignment.'}</span>
+                    </div>
+                  </div>
+
+                  {/* Edition Switcher Bar in Step 1 */}
+                  <div className="py-2.5 px-3 bg-[#ede2cf] rounded-xl border-2 border-[#b88c32]/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                    <div className="flex items-center gap-2">
+                      <Award className="w-4 h-4 text-[#8c672b] shrink-0" />
+                      <div>
+                        <span className="text-xs font-fantasy font-bold text-[#4a361c] block">
+                          {isSpanish ? 'Edición de Reglas de Juego:' : 'Game Rules Edition:'}
+                        </span>
+                        <span className="text-[10px] text-[#7a6448]">
+                          {selectedEdition === '5.5e' 
+                            ? (isSpanish ? '✨ Reglas 2024 (5.5e): Especies sin ASI fijo, Trasfondos con Dotes de Origen y Subclases a nivel 3.' : '✨ 2024 Rules (5.5e): Species without fixed ASI, Backgrounds with Origin Feats & Level 3 Subclasses.')
+                            : (isSpanish ? '⚔️ Quinta Edición 2014 (5e): Razas con atributos fijos y trasfondos tradicionales.' : '⚔️ 2014 5th Edition (5e): Races with fixed ability score bonuses and traditional backgrounds.')}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 p-1 bg-[#1c140e]/90 rounded-xl border border-[#b88c32]/50 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedEdition('5e')}
+                        style={{
+                          backgroundImage: `url(${selectedEdition === '5e' ? './assets/ui/sheet_small_btn_active.png' : './assets/ui/sheet_small_btn.png'})`,
+                          backgroundSize: '100% 100%',
+                          backgroundRepeat: 'no-repeat',
+                        }}
+                        className={`px-4 py-2 text-xs font-fantasy font-bold transition cursor-pointer flex items-center justify-center gap-1.5 min-w-[125px] ${
+                          selectedEdition === '5e'
+                            ? 'text-[#ffe8a3] drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]'
+                            : 'text-[#d8c8af] opacity-85 hover:opacity-100 hover:text-white'
+                        }`}
+                      >
+                        <span>⚔️ 5e (2014)</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedEdition('5.5e')}
+                        style={{
+                          backgroundImage: `url(${selectedEdition === '5.5e' ? './assets/ui/sheet_small_btn_active.png' : './assets/ui/sheet_small_btn.png'})`,
+                          backgroundSize: '100% 100%',
+                          backgroundRepeat: 'no-repeat',
+                        }}
+                        className={`px-4 py-2 text-xs font-fantasy font-bold transition cursor-pointer flex items-center justify-center gap-1.5 min-w-[145px] ${
+                          selectedEdition === '5.5e'
+                            ? 'text-[#ffe8a3] drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]'
+                            : 'text-[#d8c8af] opacity-85 hover:opacity-100 hover:text-white'
+                        }`}
+                      >
+                        <span>✨ 5.5e (2024)</span>
+                        <span className="text-[9px] bg-amber-400 text-stone-900 px-1 rounded font-mono font-black uppercase">PHB</span>
+                      </button>
                     </div>
                   </div>
 
@@ -2771,33 +3214,33 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   <div id="creator-identity-names" className={`grid grid-cols-1 ${isSidebarOpen ? 'md:grid-cols-2 xl:grid-cols-3' : 'md:grid-cols-3'} gap-2.5 min-w-0 mt-6 sm:mt-7`}>
                     <div className="py-1 px-2 bg-[#f5ede0] rounded-lg border border-[#d6c4aa] space-y-0.5 shadow-2xs min-w-0">
                       <label className="block text-[10.5px] font-bold font-fantasy text-[#4a361c] uppercase leading-tight">
-                        Nombre del Personaje *
+                        {isSpanish ? 'Nombre del Personaje *' : 'Character Name *'}
                       </label>
                       <input
                         type="text"
                         value={characterName}
                         onChange={(e) => setCharacterName(e.target.value)}
-                        placeholder="Nombre del personaje..."
+                        placeholder={isSpanish ? "Nombre del personaje..." : "Character name..."}
                         className="w-full bg-white border border-[#d6c4aa] rounded-lg px-2.5 py-1 text-xs text-[#2c241b] focus:outline-none focus:border-[#8c672b] shadow-inner font-serif"
                       />
                       <span className="text-[10px] text-[#7a6448] block truncate">
-                        El nombre con el que te conocerán en la campaña.
+                        {isSpanish ? 'El nombre con el que te conocerán en la campaña.' : 'The name by which you will be known in the campaign.'}
                       </span>
                     </div>
 
                     <div className="py-1 px-2 bg-[#f5ede0] rounded-lg border border-[#d6c4aa] space-y-0.5 shadow-2xs min-w-0">
                       <label className="block text-[10.5px] font-bold font-fantasy text-[#4a361c] uppercase leading-tight">
-                        Nombre del Jugador (Tú)
+                        {isSpanish ? 'Nombre del Jugador (Tú)' : 'Player Name (You)'}
                       </label>
                       <input
                         type="text"
                         value={playerName}
                         onChange={(e) => setPlayerName(e.target.value)}
-                        placeholder="Nombre del jugador..."
+                        placeholder={isSpanish ? "Nombre del jugador..." : "Player name..."}
                         className="w-full bg-white border border-[#d6c4aa] rounded-lg px-2.5 py-1 text-xs text-[#2c241b] focus:outline-none focus:border-[#8c672b] shadow-inner font-serif"
                       />
                       <span className="text-[10px] text-[#7a6448] block truncate">
-                        Para identificar qué jugador controla al héroe.
+                        {isSpanish ? 'Para identificar qué jugador controla al héroe.' : 'Identifies which player controls the hero.'}
                       </span>
                     </div>
 
@@ -2805,7 +3248,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                     <div id="creator-identity-level" className="py-1 px-2 bg-[#f5ede0] rounded-lg border border-[#d6c4aa] space-y-0.5 shadow-2xs min-w-0">
                       <div className="flex items-center justify-between">
                         <label className="block text-[10.5px] font-bold font-fantasy text-[#4a361c] uppercase leading-tight">
-                          Nivel del Personaje *
+                          {isSpanish ? 'Nivel del Personaje *' : 'Character Level *'}
                         </label>
                         <span className="text-[9.5px] bg-[#8c672b] text-white px-1.5 py-0.2 rounded font-mono font-bold">
                           PB +{profBonus}
@@ -2829,7 +3272,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             const pb = Math.floor((lvl - 1) / 4) + 2;
                             return (
                               <option key={lvl} value={lvl}>
-                                Nivel {lvl} (PB +{pb})
+                                {isSpanish ? 'Nivel' : 'Level'} {lvl} (PB +{pb})
                               </option>
                             );
                           })}
@@ -2844,10 +3287,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                         </button>
                       </div>
                       <span className="text-[10px] text-[#7a6448] block truncate">
-                        {characterLevel <= 4 ? 'Tier 1: Héroes Locales (1-4)' :
-                         characterLevel <= 10 ? 'Tier 2: Héroes del Reino (5-10)' :
-                         characterLevel <= 16 ? 'Tier 3: Maestros del Reino (11-16)' :
-                         'Tier 4: Leyendas del Multiverso (17-20)'}
+                        {characterLevel <= 4 ? (isSpanish ? 'Tier 1: Héroes Locales (1-4)' : 'Tier 1: Local Heroes (1-4)') :
+                         characterLevel <= 10 ? (isSpanish ? 'Tier 2: Héroes del Reino (5-10)' : 'Tier 2: Heroes of the Realm (5-10)') :
+                         characterLevel <= 16 ? (isSpanish ? 'Tier 3: Maestros del Reino (11-16)' : 'Tier 3: Masters of the Realm (11-16)') :
+                         (isSpanish ? 'Tier 4: Leyendas del Multiverso (17-20)' : 'Tier 4: Multiverse Legends (17-20)')}
                       </span>
                     </div>
                   </div>
@@ -2859,9 +3302,9 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       <div id="creator-identity-avatar" className="p-2 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] space-y-1.5 shadow-2xs">
                         <div className="flex items-center justify-between">
                           <label className="block text-[11px] font-bold font-fantasy text-[#4a361c] uppercase">
-                            Retrato del Héroe
+                            {isSpanish ? 'Retrato del Héroe' : 'Hero Portrait'}
                           </label>
-                          <span className="text-[10px] text-[#7a6448]">Marco personalizable</span>
+                          <span className="text-[10px] text-[#7a6448]">{isSpanish ? 'Marco personalizable' : 'Customizable frame'}</span>
                         </div>
 
                         <input
@@ -2898,7 +3341,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                 className="px-2.5 py-1 bg-[#8c672b] hover:bg-[#a67a33] text-white font-fantasy font-bold text-[11px] rounded-lg shadow-xs transition flex items-center gap-1 cursor-pointer ring-1 ring-[#c59b27]/40 active:scale-95"
                               >
                                 <Upload className="w-3 h-3 text-amber-200" />
-                                <span>Subir</span>
+                                <span>{isSpanish ? 'Subir' : 'Upload'}</span>
                               </button>
 
                               <button
@@ -2908,7 +3351,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                 title="Cambiar marco de fantasía y ajustar escala/encuadre"
                               >
                                 <Sparkles className="w-3 h-3 text-[#ffd56b]" />
-                                <span>Marco</span>
+                                <span>{isSpanish ? 'Marco' : 'Frame'}</span>
                               </button>
 
                               {avatarUrl && (
@@ -2931,7 +3374,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             <div className="space-y-0.5">
                               <input
                                 type="url"
-                                placeholder="O pega URL de imagen..."
+                                placeholder={isSpanish ? "O pega URL de imagen..." : "Or paste image URL..."}
                                 value={customAvatarInput || (avatarUrl && !avatarUrl.startsWith('data:') ? avatarUrl : '')}
                                 onChange={(e) => {
                                   const val = e.target.value;
@@ -2943,7 +3386,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                 className="w-full bg-white border border-[#d6c4aa] rounded-md px-2 py-0.5 text-[11px] text-[#2c241b] focus:outline-none focus:border-[#8c672b] shadow-inner font-mono truncate"
                               />
                             </div>
-                            <span className="text-[9.5px] text-[#7a6448] block leading-tight truncate">JPG, PNG, WEBP, GIF auto-ajustable</span>
+                            <span className="text-[9.5px] text-[#7a6448] block leading-tight truncate">{isSpanish ? 'JPG, PNG, WEBP, GIF auto-ajustable' : 'JPG, PNG, WEBP, GIF auto-scalable'}</span>
                           </div>
                         </div>
                       </div>
@@ -2954,10 +3397,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       <div id="creator-identity-alignment" className="p-2 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] space-y-1 shadow-2xs">
                         <div className="flex items-center justify-between">
                           <label className="block text-[11px] font-bold font-fantasy text-[#4a361c] uppercase">
-                            Alineamiento Moral & Filosófico
+                            {isSpanish ? 'Alineamiento Moral & Filosófico' : 'Moral & Philosophical Alignment'}
                           </label>
                           <span className="text-[10px] text-[#8c672b] font-mono font-bold">
-                            {alignment ? ALIGNMENT_OPTIONS.find((a) => a.id === alignment)?.name : 'Sin seleccionar'}
+                            {alignment ? (isSpanish ? ALIGNMENT_OPTIONS.find((a) => a.id === alignment)?.name : (ALIGNMENT_LABELS_EN[alignment]?.name || alignment)) : (isSpanish ? 'Sin seleccionar' : 'Unselected')}
                           </span>
                         </div>
 
@@ -2973,21 +3416,21 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                               }`}
                             >
                               <div className="font-fantasy font-bold text-[11px] flex items-center justify-between">
-                                <span className="truncate">{al.name.split(' ')[0]} {al.name.split(' ')[1]}</span>
-                                <span className="text-[9px] text-[#8c672b] font-mono font-bold shrink-0">{al.id}</span>
+                                <span className="truncate">{isSpanish ? `${al.name.split(' ')[0]} ${al.name.split(' ')[1]}` : (ALIGNMENT_LABELS_EN[al.id]?.name || al.name)}</span>
+                                <span className="text-[9px] text-[#8c672b] font-mono font-bold shrink-0">{isSpanish ? al.id : (ALIGNMENT_LABELS_EN[al.id]?.abbr || al.id)}</span>
                               </div>
-                              <p className="text-[9px] text-[#7a6448] mt-0.5 leading-tight truncate">{al.tagline}</p>
+                              <p className="text-[9px] text-[#7a6448] mt-0.5 leading-tight truncate">{isSpanish ? al.tagline : (ALIGNMENT_LABELS_EN[al.id]?.tagline || al.tagline)}</p>
                             </div>
                           ))}
                         </div>
 
                         {alignment ? (
                           <p className="text-[10.5px] text-[#4a361c] bg-[#fcf9f2] py-1.5 px-2.5 rounded border border-[#dbcbb2] italic leading-relaxed break-words whitespace-normal shadow-2xs">
-                            "{ALIGNMENT_OPTIONS.find((a) => a.id === alignment)?.description}"
+                            "{isSpanish ? ALIGNMENT_OPTIONS.find((a) => a.id === alignment)?.description : (ALIGNMENT_LABELS_EN[alignment]?.desc || ALIGNMENT_OPTIONS.find((a) => a.id === alignment)?.description)}"
                           </p>
                         ) : (
                           <p className="text-[10.5px] text-[#7a6448] bg-[#fcf9f2] py-1.5 px-2.5 rounded border border-[#dbcbb2] italic leading-relaxed break-words whitespace-normal shadow-2xs">
-                            Selecciona el compás ético y moral que mejor represente las convicciones de tu personaje.
+                            {isSpanish ? 'Selecciona el compás ético y moral que mejor represente las convicciones de tu personaje.' : 'Select the ethical and moral compass that best represents your character\'s convictions.'}
                           </p>
                         )}
                       </div>
@@ -3005,10 +3448,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                     <Dices className="w-5 h-5 text-[#8c672b] shrink-0 mt-0.5" />
                     <div>
                       <h4 className="font-fantasy font-bold text-sm text-[#4a361c] uppercase tracking-wide">
-                        Paso 5: Puntuaciones de Característica (Los 6 Pilares del Héroe)
+                        {isSpanish ? 'Paso 5: Puntuaciones de Característica (Los 6 Pilares del Héroe)' : 'Step 5: Ability Scores (The 6 Pillars of the Hero)'}
                       </h4>
                       <p className="text-xs text-[#5c4a35] mt-1 leading-relaxed">
-                        Tus seis características definen tus capacidades físicas y mentales. Puedes tirar <strong>4d6 descartando el menor</strong> seis veces con el lanzador virtual, escribir los resultados de tus <strong>dados físicos</strong> de la mesa, o usar la <strong>Matriz Estándar</strong> oficial.
+                        {isSpanish ? <>Tus seis características definen tus capacidades físicas y mentales. Puedes tirar <strong>4d6 descartando el menor</strong> seis veces con el lanzador virtual, escribir los resultados de tus <strong>dados físicos</strong> de la mesa, o usar la <strong>Matriz Estándar</strong> oficial.</> : <>Your six ability scores define your physical and mental capabilities. You can roll <strong>4d6 drop lowest</strong> six times with the virtual roller, enter your <strong>physical dice</strong> results from the table, or use the official <strong>Standard Array</strong>.</>}
                       </p>
                     </div>
                   </div>
@@ -3028,7 +3471,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                               : 'text-[#5c4a35] hover:text-[#2c241b]'
                           }`}
                         >
-                          <Dices className="w-4 h-4" /> Lanzador Virtual (4d6 x 6)
+                          <Dices className="w-4 h-4" /> {isSpanish ? 'Lanzador Virtual (4d6 x 6)' : 'Virtual Roller (4d6 x 6)'}
                         </button>
                         <button
                           type="button"
@@ -3039,7 +3482,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                               : 'text-[#5c4a35] hover:text-[#2c241b]'
                           }`}
                         >
-                          🎲 Dados Físicos (Entrada Manual)
+                          🎲 {isSpanish ? 'Dados Físicos (Entrada Manual)' : 'Physical Dice (Manual Entry)'}
                         </button>
                         <button
                           type="button"
@@ -3053,7 +3496,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                               : 'text-[#5c4a35] hover:text-[#2c241b]'
                           }`}
                         >
-                          ⚖️ Matriz Estándar (15, 14, 13, 12, 10, 8)
+                          ⚖️ {isSpanish ? 'Matriz Estándar (15, 14, 13, 12, 10, 8)' : 'Standard Array (15, 14, 13, 12, 10, 8)'}
                         </button>
                       </div>
 
@@ -3063,10 +3506,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                             <div>
                               <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
-                                <Dices className="w-4 h-4 text-[#8c672b]" /> Bandeja de Tiradas (4d6 descartando el menor)
+                                <Dices className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? 'Bandeja de Tiradas (4d6 descartando el menor)' : 'Dice Roll Tray (4d6 drop lowest)'}
                               </h5>
                               <span className="text-[11px] text-[#7a6448]">
-                                Arrastra cada resultado a una característica abajo, o haz clic en un dado y luego en el atributo.
+                                {isSpanish ? 'Arrastra cada resultado a una característica abajo, o haz clic en un dado y luego en el atributo.' : 'Drag each result to an ability score below, or click a roll and then click the target ability.'}
                               </span>
                             </div>
                             <button
@@ -3076,14 +3519,14 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                               className="px-4 py-2 bg-[#8c672b] hover:bg-[#a67a33] text-white font-fantasy font-bold rounded-lg text-xs shadow transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 shrink-0"
                             >
                               <RefreshCw className={`w-3.5 h-3.5 ${isRollingAnimation ? 'animate-spin' : ''}`} />
-                              {isRollingAnimation ? 'Lanzando Dados...' : 'Lanzar Dados 4d6'}
+                              {isRollingAnimation ? (isSpanish ? 'Lanzando Dados...' : 'Rolling Dice...') : (isSpanish ? 'Lanzar Dados 4d6' : 'Roll 4d6 Dice')}
                             </button>
                           </div>
 
                           {diceRolls.length === 0 ? (
                             <div className="p-6 bg-[#fcf9f2] rounded-xl border border-dashed border-[#d6c4aa] text-center space-y-2">
                               <p className="text-xs text-[#5c4a35]">
-                                Aún no has tirado los dados para este personaje. Haz clic en <strong>Lanzar Dados 4d6</strong> arriba o selecciona <strong>Matriz Estándar</strong> para comenzar.
+                                {isSpanish ? <>Aún no has tirado los dados para este personaje. Haz clic en <strong>Lanzar Dados 4d6</strong> arriba o selecciona <strong>Matriz Estándar</strong> para comenzar.</> : <>You haven't rolled the dice for this character yet. Click <strong>Roll 4d6 Dice</strong> above or select <strong>Standard Array</strong> to begin.</>}
                               </p>
                             </div>
                           ) : (
@@ -3108,7 +3551,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                         {roll.total}
                                       </div>
                                       <div className="flex items-center gap-1 bg-[#8c672b] text-white px-2 py-0.5 rounded-full text-[10px] font-fantasy font-bold mt-1 shadow-xs">
-                                        <span>{ABILITY_SCORE_EXPLANATIONS[assignedToStat].abbreviation}</span>
+                                        <span>{getAbilityAbbr(assignedToStat)}</span>
                                         <button
                                           type="button"
                                           onClick={() => unassignStat(assignedToStat)}
@@ -3137,7 +3580,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                     title="Arrastra este valor hacia una característica o haz clic para seleccionarlo"
                                   >
                                     <div className="flex items-center gap-1 text-[10px] text-[#7a6448] font-mono uppercase">
-                                      <GripVertical className="w-3 h-3 text-[#8c672b]" /> Tirada #{idx + 1}
+                                      <GripVertical className="w-3 h-3 text-[#8c672b]" /> {isSpanish ? 'Tirada' : 'Roll'} #{idx + 1}
                                     </div>
                                     <div className="text-2xl font-bold font-fantasy text-[#8c672b] my-1">
                                       {roll.total}
@@ -3167,7 +3610,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                       })}
                                     </div>
                                     <span className="text-[9px] text-[#8c672b] font-mono mt-0.5 font-bold">
-                                      {isSelected ? '✓ Seleccionado' : 'Arrastra o toca'}
+                                      {isSelected ? (isSpanish ? '✓ Seleccionado' : '✓ Selected') : (isSpanish ? 'Arrastra o toca' : 'Drag or tap')}
                                     </span>
                                   </div>
                                 );
@@ -3182,10 +3625,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                         <div className="p-4 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] space-y-4 shadow-xs">
                           <div>
                             <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
-                              ⚖️ Matriz Estándar Oficial (15, 14, 13, 12, 10, 8)
+                              ⚖️ {isSpanish ? 'Matriz Estándar Oficial (15, 14, 13, 12, 10, 8)' : 'Official Standard Array (15, 14, 13, 12, 10, 8)'}
                             </h5>
                             <span className="text-[11px] text-[#7a6448]">
-                              Arrastra los valores estándar a tus características o toca uno para asignarlo.
+                              {isSpanish ? 'Arrastra los valores estándar a tus características o toca uno para asignarlo.' : 'Drag the standard values to your ability scores or tap one to assign it.'}
                             </span>
                           </div>
 
@@ -3204,13 +3647,13 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                     className="p-3 bg-[#e8e0d1] rounded-xl border-2 border-dashed border-[#bda688] flex flex-col items-center justify-center opacity-45 relative select-none shadow-2xs"
                                   >
                                     <span className="text-[10px] text-[#7a6448] font-mono uppercase">
-                                      Valor #{idx + 1}
+                                      {isSpanish ? 'Valor' : 'Score'} #{idx + 1}
                                     </span>
                                     <div className="text-xl font-bold font-fantasy text-[#6a533b] line-through my-1">
                                       {val}
                                     </div>
                                     <div className="flex items-center gap-1 bg-[#8c672b] text-white px-2 py-0.5 rounded-full text-[10px] font-fantasy font-bold mt-1 shadow-xs">
-                                      <span>{ABILITY_SCORE_EXPLANATIONS[assignedToStat].abbreviation}</span>
+                                      <span>{getAbilityAbbr(assignedToStat)}</span>
                                       <button
                                         type="button"
                                         onClick={() => unassignStat(assignedToStat)}
@@ -3239,7 +3682,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                   title="Arrastra este valor hacia una característica o haz clic para seleccionarlo"
                                 >
                                   <div className="flex items-center gap-1 text-[10px] text-[#7a6448] font-mono uppercase">
-                                    <GripVertical className="w-3 h-3 text-[#8c672b]" /> Valor #{idx + 1}
+                                    <GripVertical className="w-3 h-3 text-[#8c672b]" /> {isSpanish ? 'Valor' : 'Score'} #{idx + 1}
                                   </div>
                                   <div className="text-2xl font-bold font-fantasy text-[#8c672b] my-1">
                                     {val}
@@ -3248,7 +3691,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                     <PolyhedralDie type="d20" value={val} size="sm" />
                                   </div>
                                   <span className="text-[9px] text-[#8c672b] font-mono mt-0.5 font-bold">
-                                    {isSelected ? '✓ Seleccionado' : 'Arrastra o toca'}
+                                    {isSelected ? (isSpanish ? '✓ Seleccionado' : '✓ Selected') : (isSpanish ? 'Arrastra o toca' : 'Drag or tap')}
                                   </span>
                                 </div>
                               );
@@ -3262,10 +3705,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                         <div className="p-4 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] space-y-3 shadow-xs">
                           <div>
                             <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase">
-                              Ingreso Manual de Dados Físicos
+                              {isSpanish ? 'Ingreso Manual de Dados Físicos' : 'Manual Physical Dice Entry'}
                             </h5>
                             <span className="text-[11px] text-[#7a6448]">
-                              Escribe directamente los números que obtuviste en tu mesa de juego.
+                              {isSpanish ? 'Escribe directamente los números que obtuviste en tu mesa de juego.' : 'Enter the numbers you rolled at your gaming table directly.'}
                             </span>
                           </div>
 
@@ -3273,7 +3716,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             {(['str', 'dex', 'con', 'int', 'wis', 'cha'] as (keyof AbilityScores)[]).map((st) => (
                               <div key={st} className="p-3 bg-[#fcf9f2] rounded-xl border border-[#d6c4aa] text-center shadow-xs">
                                 <span className="text-xs font-bold font-fantasy text-[#4a361c] uppercase block mb-1">
-                                  {ABILITY_SCORE_EXPLANATIONS[st].abbreviation}
+                                  {getAbilityAbbr(st)}
                                 </span>
                                 <input
                                   type="number"
@@ -3299,20 +3742,20 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                     <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase">
-                        Distribución y Asignación de Características
+                        {isSpanish ? 'Distribución y Asignación de Características' : 'Ability Score Distribution & Assignment'}
                       </h5>
                       <span className="text-[11px] text-[#7a6448]">
                         {activeClass && classConfig ? (
                           <>
-                            Recomendado para {activeClass.name}:{' '}
+                            {isSpanish ? 'Recomendado para' : 'Recommended for'} {isSpanish ? activeClass.name : ((activeClass as any).nameEn || activeClass.name)}:{' '}
                             <strong className="text-[#8c672b]">
                               {classConfig.recommendedPrimaryStats
-                                .map((s) => ABILITY_SCORE_EXPLANATIONS[s].name)
+                                .map((s) => getAbilityName(s))
                                 .join(', ')}
                             </strong>
                           </>
                         ) : (
-                          <span className="italic">Elige una clase en el paso 4 para ver estadísticas primarias recomendadas</span>
+                          <span className="italic">{isSpanish ? 'Elige una clase en el paso 4 para ver estadísticas primarias recomendadas' : 'Choose a class in Step 4 to see recommended primary ability scores'}</span>
                         )}
                       </span>
                     </div>
@@ -3379,16 +3822,16 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                 <div>
                                   <div className="flex items-center gap-1.5">
                                     <h6 className="font-fantasy font-bold text-sm text-[#4a361c]">
-                                      {info.name}
+                                      {getAbilityName(statKey)}
                                     </h6>
                                     {isPrimary && (
                                       <span className="text-[9px] bg-[#8c672b] text-white px-1.5 py-0.2 rounded font-mono font-bold uppercase">
-                                        Primario
+                                        {isSpanish ? 'Primario' : 'Primary'}
                                       </span>
                                     )}
                                   </div>
                                   <p className="text-[11px] text-[#6e5c4a] mt-0.5 leading-relaxed">
-                                    {info.description}
+                                    {getAbilityDesc(statKey)}
                                   </p>
                                 </div>
                               </div>
@@ -3400,8 +3843,8 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                     {isAssigned
                                       ? `Base ${baseVal}${raceBonus > 0 ? ` +${raceBonus}` : ''}`
                                       : raceBonus > 0
-                                      ? `+${raceBonus} Raza`
-                                      : 'Sin asignar'}
+                                      ? (isSpanish ? `+${raceBonus} Raza` : `+${raceBonus} Race`)
+                                      : (isSpanish ? 'Sin asignar' : 'Unassigned')}
                                   </span>
                                   <span
                                     className={`font-fantasy font-bold text-lg ${
@@ -3428,7 +3871,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                               {isAssigned ? (
                                 <>
                                   <span className="text-[11px] text-[#5c4a35]">
-                                    Valor base asignado: <strong className="text-[#8c672b]">{baseVal}</strong>
+                                    {isSpanish ? 'Valor base asignado:' : 'Assigned base score:'} <strong className="text-[#8c672b]">{baseVal}</strong>
                                   </span>
                                   <button
                                     type="button"
@@ -3437,14 +3880,14 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                       unassignStat(statKey);
                                     }}
                                     className="px-2 py-0.5 rounded bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-[10px] font-fantasy font-bold transition flex items-center gap-1 cursor-pointer"
-                                    title="Quitar asignación y devolver tirada"
+                                    title={isSpanish ? "Quitar asignación y devolver tirada" : "Unassign score"}
                                   >
-                                    ✕ Desasignar
+                                    ✕ {isSpanish ? 'Desasignar' : 'Unassign'}
                                   </button>
                                 </>
                               ) : (
                                 <span className="text-[11px] text-[#8c672b] italic flex items-center gap-1">
-                                  ⬇ {selectedRollIndex !== null ? 'Haz clic aquí para asignar el dado seleccionado' : 'Suelta aquí una tirada (Drag & Drop)'}
+                                  ⬇ {selectedRollIndex !== null ? (isSpanish ? 'Haz clic aquí para asignar el dado seleccionado' : 'Click here to assign selected value') : (isSpanish ? 'Suelta aquí una tirada (Drag & Drop)' : 'Drop a roll here (Drag & Drop)')}
                                 </span>
                               )}
                             </div>
@@ -3467,14 +3910,28 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                     <Award className="w-5 h-5 text-[#8c672b] shrink-0 mt-0.5" />
                     <div>
                       <h4 className="font-fantasy font-bold text-sm text-[#4a361c] uppercase tracking-wide">
-                        Paso 2: Raza y Linaje Ancestral
+                        {isSpanish ? 'Paso 2: Raza y Linaje Ancestral' : 'Step 2: Race & Ancestral Lineage'}
                       </h4>
                       <p className="text-xs text-[#5c4a35] mt-1 leading-relaxed">
-                        Tu linaje determina tus bonificadores a las características, tu velocidad básica, sentidos especiales (como visión en la oscuridad) y dones mágicos innatos.
+                        {isSpanish ? 'Tu linaje determina tus bonificadores a las características, tu velocidad básica, sentidos especiales (como visión en la oscuridad) y dones mágicos innatos.' : 'Your lineage determines your ability score bonuses, base speed, special senses (such as Darkvision), and innate magical gifts.'}
                       </p>
                     </div>
                   </div>
 
+                  {/* 2024 SPECIES PICKER vs 5e RACE CATALOG */}
+                  {selectedEdition === '5.5e' ? (
+                    <Creator2024SpeciesPicker
+                      selectedSpeciesId={selectedRaceId}
+                      onSelectSpecies={(id) => {
+                        setSelectedRaceId(id);
+                        setSelectedSubraceId('');
+                        setFlexibleRacialChoices([]);
+                        setBonusRacialSkills([]);
+                      }}
+                      onInspect={(data) => setInspectingCompendium(data)}
+                    />
+                  ) : (
+                    <>
                   {/* Entire Race Selection: Filters + Search + Race Cards Grid */}
                   <div id="creator-race-catalog" className="space-y-3">
                     {/* Race Category Tabs & Search Header */}
@@ -3484,11 +3941,11 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                         <div className="flex items-center gap-1.5 flex-wrap">
                           {(
                             [
-                              { id: 'Todos', label: 'Todas las Razas', count: raceCounts.Todos },
-                              { id: 'Común', label: 'Comunes (PHB)', count: raceCounts.Común },
-                              { id: 'Exótica', label: 'Exóticas', count: raceCounts.Exótica },
-                              { id: 'Monstruosa', label: 'Monstruosas', count: raceCounts.Monstruosa },
-                              { id: 'Planar', label: 'Planares & Entornos', count: raceCounts.Planar },
+                              { id: 'Todos', label: isSpanish ? 'Todas las Razas' : 'All Races', count: raceCounts.Todos },
+                              { id: 'Común', label: isSpanish ? 'Comunes (PHB)' : 'Common (PHB)', count: raceCounts.Común },
+                              { id: 'Exótica', label: isSpanish ? 'Exóticas' : 'Exotic', count: raceCounts.Exótica },
+                              { id: 'Monstruosa', label: isSpanish ? 'Monstruosas' : 'Monstrous', count: raceCounts.Monstruosa },
+                              { id: 'Planar', label: isSpanish ? 'Planares & Entornos' : 'Planar & Settings', count: raceCounts.Planar },
                             ] as const
                           ).map((tab) => (
                             <button
@@ -3519,7 +3976,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                               type="text"
                               value={raceSearchQuery}
                               onChange={(e) => setRaceSearchQuery(e.target.value)}
-                              placeholder="Buscar raza o linaje..."
+                              placeholder={isSpanish ? "Buscar raza o linaje..." : "Search race or lineage..."}
                               className="w-full bg-white border border-[#d6c4aa] rounded-lg pl-8 pr-3 py-1.5 text-xs text-[#2c241b] focus:outline-none focus:border-[#8c672b]"
                             />
                           </div>
@@ -3531,7 +3988,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             title="Maximizar catálogo para ver todas las razas disponibles en pantalla completa"
                           >
                             <Maximize2 className="w-3.5 h-3.5 text-[#8c672b]" />
-                            <span>Maximizar Catálogo</span>
+                            <span>{isSpanish ? 'Maximizar Catálogo' : 'Maximize Catalog'}</span>
                           </button>
                         </div>
                       </div>
@@ -3577,10 +4034,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                     <div id="creator-race-subraces" className="p-4 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] space-y-3 shadow-xs">
                       <div className="flex items-center justify-between">
                         <label className="block text-xs font-bold font-fantasy text-[#4a361c] uppercase">
-                          Subraza / Linaje de {activeRace.name}
+                          {isSpanish ? `Subraza / Linaje de ${activeRace.name}` : `Subrace / Lineage of ${getRaceDisplayName(activeRace)}`}
                         </label>
                         <span className="text-[11px] text-[#8c672b] font-mono font-bold">
-                          {activeSubrace ? activeSubrace.name : '(Opcional / Elige tu linaje)'}
+                          {activeSubrace ? (isSpanish ? activeSubrace.name : (activeSubrace.nameEn || activeSubrace.name)) : (isSpanish ? '(Opcional / Elige tu linaje)' : '(Optional / Choose your lineage)')}
                         </span>
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -3607,14 +4064,14 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       <div className="flex items-center justify-between">
                         <div>
                           <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
-                            <Star className="w-4 h-4 text-[#8c672b]" /> Puntos de Característica a tu Elección ({activeRace.name})
+                            <Star className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? `Puntos de Característica a tu Elección (${activeRace.name})` : `Ability Score Increase of Choice (${getRaceDisplayName(activeRace)})`}
                           </h5>
                           <p className="text-[11px] text-[#5c4a35] mt-0.5">
-                            Tu linaje otorga <strong>+{raceAnyCount} puntos adicionales</strong> a repartir entre diferentes características.
+                            {isSpanish ? <>Tu linaje otorga <strong>+{raceAnyCount} puntos adicionales</strong> a repartir entre diferentes características.</> : <>Your lineage grants <strong>+{raceAnyCount} bonus points</strong> to distribute among different ability scores.</>}
                           </p>
                         </div>
                         <span className="text-[11px] bg-[#8c672b] text-white px-2 py-0.5 rounded font-mono font-bold shrink-0">
-                          {Math.min(raceAnyCount, flexibleRacialChoices.length)} / {raceAnyCount} seleccionados
+                          {Math.min(raceAnyCount, flexibleRacialChoices.length)} / {raceAnyCount} {isSpanish ? 'seleccionados' : 'selected'}
                         </span>
                       </div>
 
@@ -3645,8 +4102,8 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                               }`}
                             >
                               <span className="text-sm">{ABILITY_SCORE_EXPLANATIONS[st].icon}</span>
-                              <span className="mt-0.5">{ABILITY_SCORE_EXPLANATIONS[st].name}</span>
-                              <span className="text-[9px] font-mono opacity-80">{isChosen ? '+1 Activo' : '+1'}</span>
+                              <span className="mt-0.5">{getAbilityName(st)}</span>
+                              <span className="text-[9px] font-mono opacity-80">{isChosen ? (isSpanish ? '+1 Activo' : '+1 Active') : '+1'}</span>
                             </button>
                           );
                         })}
@@ -3664,14 +4121,14 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       <div className="flex items-center justify-between">
                         <div>
                           <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
-                            <Award className="w-4 h-4 text-[#8c672b]" /> Competencias de Habilidad Adicionales ({activeRace.name})
+                            <Award className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? `Competencias de Habilidad Adicionales (${activeRace.name})` : `Bonus Skill Proficiencies (${getRaceDisplayName(activeRace)})`}
                           </h5>
                           <p className="text-[11px] text-[#5c4a35] mt-0.5">
-                            Tu raza te otorga competencia en habilidades a tu elección.
+                            {isSpanish ? 'Tu raza te otorga competencia en habilidades a tu elección.' : 'Your race grants proficiency in skills of your choice.'}
                           </p>
                         </div>
                         <span className="text-[11px] bg-[#8c672b] text-white px-2 py-0.5 rounded font-mono font-bold shrink-0">
-                          {bonusRacialSkills.length} seleccionadas
+                          {bonusRacialSkills.length} {isSpanish ? 'seleccionadas' : 'selected'}
                         </span>
                       </div>
 
@@ -3709,7 +4166,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                   : 'bg-white border-[#d6c4aa] text-[#4a361c] hover:border-[#8c672b]'
                               }`}
                             >
-                              <span className="truncate">{sk.name}</span>
+                              <span className="truncate">{displaySkillName(sk.name)}</span>
                               {isSelectedBonus && <Check className="w-3.5 h-3.5 text-white shrink-0" />}
                             </button>
                           );
@@ -3722,7 +4179,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   {activeRace ? (
                     <div id="creator-race-active-traits" className="p-4 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] space-y-3 shadow-xs">
                       <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
-                        <Award className="w-4 h-4 text-[#8c672b]" /> Rasgos Raciales de {activeRace.name} {activeSubrace ? `(${activeSubrace.name})` : ''}
+                        <Award className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? `Rasgos Raciales de ${activeRace.name}` : `Racial Traits of ${getRaceDisplayName(activeRace)}`} {activeSubrace ? `(${isSpanish ? activeSubrace.name : (activeSubrace.nameEn || activeSubrace.name)})` : ''}
                       </h5>
 
                       <div className="space-y-2">
@@ -3740,7 +4197,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                         {activeSubrace?.traits?.map((st, i) => (
                           <div key={`sub-${i}`} className="p-2.5 bg-[#fcf9f2] rounded-lg border border-[#c5af95] text-xs shadow-xs">
                             <span className="font-fantasy font-bold text-[#8c672b] text-xs block">
-                              {st.name} (Subraza)
+                              {st.name} ({isSpanish ? 'Subraza' : 'Subrace'})
                             </span>
                             <p className="text-[#5c4a35] text-[11px] mt-0.5 leading-relaxed">
                               {st.desc}
@@ -3755,14 +4212,14 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                           <div className="flex items-start justify-between gap-2 border-b border-[#d6c4aa] pb-2.5">
                             <div>
                               <h5 className="font-fantasy font-bold text-xs uppercase text-[#4a361c] flex items-center gap-1.5">
-                                <Sparkles className="w-4 h-4 text-[#8c672b]" /> Magia Innata Ancestral & Dones Arcanos
+                                <Sparkles className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? 'Magia Innata Ancestral & Dones Arcanos' : 'Ancestral Innate Magic & Arcane Gifts'}
                               </h5>
                               <p className="text-[11px] text-[#5c4a35] mt-0.5 leading-relaxed">
-                                Tu linaje ({activeSubrace?.name || activeRace.name}) te otorga conjuros y trucos innatos (conforme a las reglas oficiales 5e). Estos conjuros no consumen ranuras de clase ni cuentan contra tu límite de conjuros preparados/conocidos.
+                                {isSpanish ? `Tu linaje (${activeSubrace?.name || activeRace.name}) te otorga conjuros y trucos innatos (conforme a las reglas oficiales 5e). Estos conjuros no consumen ranuras de clase ni cuentan contra tu límite de conjuros preparados/conocidos.` : `Your lineage (${getRaceDisplayName(activeRace)}) grants innate cantrips and spells under official rules. These spells do not consume class spell slots or count against your prepared/known limit.`}
                               </p>
                             </div>
                             <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-purple-900 text-purple-100 border border-purple-700 shrink-0">
-                              Reglas Oficiales 5e
+                              {isSpanish ? 'Reglas Oficiales 5e' : 'Official 5e Rules'}
                             </span>
                           </div>
 
@@ -3771,14 +4228,14 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             <div className="p-3 bg-[#fcf9f2] rounded-lg border border-[#c5af95] space-y-2">
                               <div className="flex items-center justify-between">
                                 <label className="text-xs font-fantasy font-bold text-[#4a361c] uppercase flex items-center gap-1">
-                                  <span>🧠</span> Característica de Conjuración Racial:
+                                  <span>🧠</span> {isSpanish ? 'Característica de Conjuración Racial:' : 'Racial Spellcasting Ability:'}
                                 </label>
                                 <span className="text-[10px] text-[#7a5a2b] font-mono">
-                                  CD de Salvación: 8 + PB ({profBonus}) + Mod
+                                  {isSpanish ? 'CD de Salvación:' : 'Save DC:'} 8 + PB ({profBonus}) + Mod
                                 </span>
                               </div>
                               <p className="text-[10px] text-[#7a6448]">
-                                Elige qué aptitud mental gobierna tus conjuros de linaje ({racialSpellcastingInfo.config.abilityChoices.map((c) => c.toUpperCase()).join(' / ')}):
+                                {isSpanish ? `Elige qué aptitud mental gobierna tus conjuros de linaje (${racialSpellcastingInfo.config.abilityChoices.map((c) => c.toUpperCase()).join(' / ')}):` : `Choose which mental ability governs your lineage spells (${racialSpellcastingInfo.config.abilityChoices.map((c) => c.toUpperCase()).join(' / ')}):`}
                               </p>
                               <div className="grid grid-cols-3 gap-2">
                                 {(['int', 'wis', 'cha'] as ('int' | 'wis' | 'cha')[])
@@ -3789,7 +4246,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                     const modVal = getMod(statVal);
                                     const modStr = getModStr(statVal);
                                     const dc = 8 + profBonus + modVal;
-                                    const names = { int: 'Inteligencia', wis: 'Sabiduría', cha: 'Carisma' };
+                                    const names = isSpanish ? { int: 'Inteligencia', wis: 'Sabiduría', cha: 'Carisma' } : { int: 'Intelligence', wis: 'Wisdom', cha: 'Charisma' };
 
                                     return (
                                       <button
@@ -3807,7 +4264,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                           {isChosen && <Check className="w-3.5 h-3.5 text-white" />}
                                         </div>
                                         <div className={`text-[10px] font-mono mt-1 ${isChosen ? 'text-amber-100' : 'text-[#7a6448]'}`}>
-                                          Mod: {modStr} • CD {dc}
+                                          Mod: {modStr} • {isSpanish ? 'CD' : 'DC'} {dc}
                                         </div>
                                       </button>
                                     );
@@ -3820,21 +4277,21 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                           {racialSpellcastingInfo.config?.hasCantripChoice && (
                             <div className="p-3 bg-[#fcf9f2] rounded-lg border border-[#c5af95] space-y-2">
                               <label className="text-xs font-fantasy font-bold text-[#4a361c] uppercase flex items-center justify-between">
-                                <span>📖 Truco Racial a Elegir (Lista de {racialSpellcastingInfo.config.cantripChoiceClass || 'Mago'}):</span>
-                                <span className="text-[10px] text-amber-800 font-mono font-bold">1 Truco adicional</span>
+                                <span>📖 {isSpanish ? `Truco Racial a Elegir (Lista de ${racialSpellcastingInfo.config.cantripChoiceClass || 'Mago'}):` : 'Racial Cantrip Choice (Wizard List):'}</span>
+                                <span className="text-[10px] text-amber-800 font-mono font-bold">{isSpanish ? '1 Truco adicional' : '1 Bonus Cantrip'}</span>
                               </label>
                               <p className="text-[10px] text-[#7a6448]">
-                                Conoces un truco de tu elección de la lista de conjuros de Mago:
+                                {isSpanish ? 'Conoces un truco de tu elección de la lista de conjuros de Mago:' : 'You know one cantrip of your choice from the Wizard spell list:'}
                               </p>
                               <select
                                 value={selectedRacialCantrip}
                                 onChange={(e) => setSelectedRacialCantrip(e.target.value)}
                                 className="w-full bg-white border border-[#d6c4aa] rounded-lg p-2 text-xs text-[#2c241b] focus:outline-none focus:border-[#8c672b] cursor-pointer"
                               >
-                                <option value="">-- Selecciona un Truco de Mago --</option>
+                                <option value="">{isSpanish ? '-- Selecciona un Truco de Mago --' : '-- Select a Wizard Cantrip --'}</option>
                                 {wizardCantripsList.map((spl) => (
                                   <option key={spl.id} value={spl.name}>
-                                    {spl.name} ({spl.school})
+                                    {isSpanish ? spl.name : (spl.nameEn || translateDndTitle(spl.name))} ({isSpanish ? spl.school : translateSpellSchool(spl.school)})
                                   </option>
                                 ))}
                               </select>
@@ -3844,7 +4301,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                           {/* 3. Granted & Progressive Innate Spells List */}
                           <div className="space-y-1.5 pt-1">
                             <span className="text-[11px] font-fantasy font-bold text-[#4a361c] uppercase block">
-                              Conjuros Innatos de tu Linaje ({characterLevel >= 1 ? `Nivel de personaje actual: ${characterLevel}` : 'Nivel 1'}):
+                              {isSpanish ? `Conjuros Innatos de tu Linaje (Nivel actual: ${characterLevel}):` : `Innate Lineage Spells (Current Level: ${characterLevel}):`}
                             </span>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                               {racialSpellcastingInfo.innateSpells.map((entry, idx) => {
@@ -3863,7 +4320,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                     <div>
                                       <div className="flex items-center justify-between gap-1">
                                         <span className="font-fantasy font-bold text-[#4a361c]">
-                                          {spellObj?.name || entry.spellName}
+                                          {isSpanish ? (spellObj?.name || entry.spellName) : (spellObj?.nameEn || translateDndTitle(spellObj?.name || entry.spellName))}
                                         </span>
                                         <span
                                           className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold ${
@@ -3872,15 +4329,15 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                               : 'bg-amber-100 text-amber-800 border border-amber-300'
                                           }`}
                                         >
-                                          {isUnlocked ? '✓ Desbloqueado' : `Bloqueado (Nv ${entry.requiredLevel})`}
+                                          {isUnlocked ? (isSpanish ? '✓ Desbloqueado' : '✓ Unlocked') : (isSpanish ? `Bloqueado (Nv ${entry.requiredLevel})` : `Locked (Lv ${entry.requiredLevel})`)}
                                         </span>
                                       </div>
                                       <span className="text-[10px] text-[#7a6448] block mt-0.5">
-                                        {entry.traitName ? `Rasgo: ${entry.traitName}` : `Desbloquea a Nivel ${entry.requiredLevel}`}
+                                        {entry.traitName ? `${isSpanish ? 'Rasgo' : 'Trait'}: ${isSpanish ? entry.traitName : translateDndTitle(entry.traitName)}` : (isSpanish ? `Desbloquea a Nivel ${entry.requiredLevel}` : `Unlocks at Level ${entry.requiredLevel}`)}
                                       </span>
                                       {entry.notes && (
                                         <p className="text-[10px] text-[#5c4a35] mt-1 leading-snug italic">
-                                          {entry.notes}
+                                          {isSpanish ? entry.notes : translateDndText(entry.notes)}
                                         </p>
                                       )}
                                     </div>
@@ -3892,14 +4349,14 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                 <div className="p-2.5 rounded-lg border text-xs flex flex-col justify-between bg-white border-[#8c672b]/50 shadow-2xs">
                                   <div className="flex items-center justify-between gap-1">
                                     <span className="font-fantasy font-bold text-[#4a361c]">
-                                      {selectedRacialCantrip}
+                                      {isSpanish ? selectedRacialCantrip : (findSpellByNameOrAlias(selectedRacialCantrip)?.nameEn || translateDndTitle(selectedRacialCantrip))}
                                     </span>
                                     <span className="text-[9px] px-1.5 py-0.5 rounded font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                                      ✓ Elegido
+                                      {isSpanish ? '✓ Elegido' : '✓ Chosen'}
                                     </span>
                                   </div>
                                   <span className="text-[10px] text-[#7a6448] block mt-0.5">
-                                    Truco de Mago (Linaje Élfico)
+                                    {isSpanish ? 'Truco de Mago (Linaje Élfico)' : 'Wizard Cantrip (Elven Lineage)'}
                                   </span>
                                 </div>
                               )}
@@ -3910,10 +4367,12 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                     </div>
                   ) : (
                     <div className="p-4 bg-[#f5ede0] rounded-xl border border-dashed border-[#d6c4aa] text-center text-xs text-[#7a6448]">
-                      Selecciona una raza de la lista para ver sus rasgos, bonificadores y linajes.
+                      {isSpanish ? 'Selecciona una raza de la lista para ver sus rasgos, bonificadores y linajes.' : 'Select a race from the list to view its traits, bonuses, and lineages.'}
                     </div>
                   )}
                   </div>
+                    </>
+                  )}
                 </div>
               )}
 
@@ -3927,10 +4386,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                     <Star className="w-5 h-5 text-[#8c672b] shrink-0 mt-0.5" />
                     <div>
                       <h4 className="font-fantasy font-bold text-sm text-[#4a361c] uppercase tracking-wide">
-                        Paso 6: Dotes Oficiales & Mejoras de Puntuación (ASI)
+                        {isSpanish ? 'Paso 6: Dotes Oficiales & Mejoras de Puntuación (ASI)' : 'Step 6: Official Feats & Ability Score Improvements (ASI)'}
                       </h4>
                       <p className="text-xs text-[#5c4a35] mt-1 leading-relaxed">
-                        Revisa el cálculo en vivo de tus puntuaciones (Puntuación Base + Bonificaciones Raciales + Dotes/ASI) y asigna tus Mejoras de Característica o Dotes Oficiales de D&D 5e si tienes opciones disponibles.
+                        {isSpanish ? 'Revisa el cálculo en vivo de tus puntuaciones (Puntuación Base + Bonificaciones Raciales + Dotes/ASI) y asigna tus Mejoras de Característica o Dotes Oficiales de D&D 5e si tienes opciones disponibles.' : 'Review the live calculation of your ability scores (Base Score + Racial Bonuses + Feats/ASI) and assign your Ability Score Improvements or Official Feats if available.'}
                       </p>
                     </div>
                   </div>
@@ -3939,10 +4398,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   <div id="creator-asi-summary-table" className="p-4 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] space-y-3 shadow-xs">
                     <div className="flex items-center justify-between">
                       <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
-                        <Compass className="w-4 h-4 text-[#8c672b]" /> Resumen de Atributos & Modificadores Actuales
+                        <Compass className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? 'Resumen de Atributos & Modificadores Actuales' : 'Current Ability Scores & Modifiers Summary'}
                       </h5>
                       <span className="text-[11px] text-[#7a6448] font-mono">
-                        Máximo natural: 20
+                        {isSpanish ? 'Máximo natural: 20' : 'Natural maximum: 20'}
                       </span>
                     </div>
 
@@ -3962,7 +4421,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                           >
                             <span className="text-sm block">{ABILITY_SCORE_EXPLANATIONS[st].icon}</span>
                             <span className="font-fantasy font-bold text-xs text-[#4a361c] uppercase block mt-0.5">
-                              {ABILITY_SCORE_EXPLANATIONS[st].name}
+                              {getAbilityName(st)}
                             </span>
                             <div className="text-lg font-mono font-bold text-[#8c672b] my-0.5">
                               {total}
@@ -3971,7 +4430,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                               {mod}
                             </span>
                             <div className="text-[9px] text-[#7a6448] font-mono mt-1 pt-1 border-t border-[#e2d5c2]">
-                              Base {base}{race > 0 ? ` +${race} Rz` : ''}{asi > 0 ? ` +${asi} Dt` : ''}
+                              Base {base}{race > 0 ? ` +${race} ${isSpanish ? 'Rz' : 'Rc'}` : ''}{asi > 0 ? ` +${asi} ${isSpanish ? 'Dt' : 'Ft'}` : ''}
                             </div>
                           </div>
                         );
@@ -3985,10 +4444,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                     <div id="creator-asi-level1-toggle" className="p-3 bg-[#fcf9f2] rounded-xl border border-[#d6c4aa] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
                       <div>
                         <span className="font-fantasy font-bold text-xs text-[#4a361c] block">
-                          Regla Opcional de Campaña: Dote Inicial a Nivel 1
+                          {isSpanish ? 'Regla Opcional de Campaña: Dote Inicial a Nivel 1' : 'Optional Campaign Rule: Level 1 Starting Feat'}
                         </span>
                       <span className="text-[11px] text-[#7a6448] block mt-0.5">
-                        Habilita o deshabilita esta opción si tu Dungeon Master permite a los personajes comenzar con 1 dote adicional a nivel 1.
+                        {isSpanish ? 'Habilita o deshabilita esta opción si tu Dungeon Master permite a los personajes comenzar con 1 dote adicional a nivel 1.' : 'Enable or disable this option if your Dungeon Master allows characters to start with 1 bonus feat at Level 1.'}
                       </span>
                     </div>
                     <label className="flex items-center gap-2 cursor-pointer font-fantasy font-bold text-xs text-[#8c672b] shrink-0 bg-white px-3 py-1.5 rounded-lg border border-[#d6c4aa] hover:border-[#8c672b]">
@@ -4008,7 +4467,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                         }}
                         className="w-4 h-4 accent-[#8c672b] cursor-pointer"
                       />
-                      {bonusCampaignFeat ? '✓ Dote Nivel 1 Activado' : 'Activar Dote Nivel 1'}
+                      {bonusCampaignFeat ? (isSpanish ? '✓ Dote Nivel 1 Activado' : '✓ Level 1 Feat Enabled') : (isSpanish ? 'Activar Dote Nivel 1' : 'Enable Level 1 Feat')}
                     </label>
                   </div>
 
@@ -4019,10 +4478,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                         <Info className="w-4 h-4 text-[#8c672b] shrink-0 mt-0.5" />
                         <div>
                           <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase">
-                            Sin Mejoras de Característica o Dotes a Nivel {characterLevel}
+                            {isSpanish ? `Sin Mejoras de Característica o Dotes a Nivel ${characterLevel}` : `No Ability Score Improvements or Feats at Level ${characterLevel}`}
                           </h5>
                           <p className="text-xs text-[#5c4a35] mt-0.5 leading-relaxed">
-                            Según las reglas de D&D 5e, las mejoras de característica y dotes se desbloquean en los niveles <strong>4, 8, 12, 16 y 19</strong> (o a nivel 1 si seleccionas la raza <strong>Humano Variante</strong> en el paso 2, o activas la casilla superior si tu DM lo aprueba).
+                            {isSpanish ? <>Según las reglas de D&D 5e, las mejoras de característica y dotes se desbloquean en los niveles <strong>4, 8, 12, 16 y 19</strong> (o a nivel 1 si seleccionas la raza <strong>Humano Variante</strong> en el paso 2, o activas la casilla superior si tu DM lo aprueba).</> : <>According to D&D 5e rules, Ability Score Improvements and Feats unlock at levels <strong>4, 8, 12, 16, and 19</strong> (or at Level 1 if you select <strong>Variant Human</strong> in Step 2, or enable the checkbox above if approved by your DM).</>}
                           </p>
                         </div>
                       </div>
@@ -4035,10 +4494,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       {Array.from({ length: availableAsiCount }).map((_, slotIdx) => {
                         const isVarHumanSlot = isVariantHuman && slotIdx === 0;
                         const slotTitle = isVarHumanSlot
-                          ? 'Dote Inicial (Linaje Humano Variante - Nivel 1)'
+                          ? (isSpanish ? 'Dote Inicial (Linaje Humano Variante - Nivel 1)' : 'Starting Feat (Variant Human - Level 1)')
                           : bonusCampaignFeat && slotIdx === availableAsiCount - 1
-                          ? 'Dote Adicional de Campaña (Regla Opcional de Nivel 1)'
-                          : `Mejora de Característica o Dote #${slotIdx + 1}`;
+                          ? (isSpanish ? 'Dote Adicional de Campaña (Regla Opcional de Nivel 1)' : 'Bonus Campaign Feat (Level 1 Optional Rule)')
+                          : (isSpanish ? `Mejora de Característica o Dote #${slotIdx + 1}` : `Ability Score Improvement or Feat #${slotIdx + 1}`);
 
                         const currentChoice: AsiFeatChoice = asiChoices[slotIdx] || {
                           type: (isVarHumanSlot || (bonusCampaignFeat && slotIdx === availableAsiCount - 1)) ? 'feat' : 'asi',
@@ -4072,8 +4531,8 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                 </h5>
                                 <p className="text-[11px] text-[#5c4a35] mt-0.5">
                                   {isVarHumanSlot
-                                    ? 'Elige la dote oficial adicional otorgada por tu linaje humano variante.'
-                                    : 'Elige entre aumentar tus puntuaciones (+2 o +1/+1) O seleccionar una dote oficial con beneficios tácticos.'}
+                                    ? (isSpanish ? 'Elige la dote oficial adicional otorgada por tu linaje humano variante.' : 'Choose the bonus official feat granted by your Variant Human lineage.')
+                                    : (isSpanish ? 'Elige entre aumentar tus puntuaciones (+2 o +1/+1) O seleccionar una dote oficial con beneficios tácticos.' : 'Choose between increasing your ability scores (+2 or +1/+1) OR selecting an official feat with tactical benefits.')}
                                 </p>
                               </div>
 
@@ -4088,7 +4547,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                         : 'text-[#4a361c] hover:bg-white/50'
                                     }`}
                                   >
-                                    Mejora de Stats (+2 / +1+1)
+                                    {isSpanish ? 'Mejora de Stats (+2 / +1+1)' : 'Stat Increase (+2 / +1+1)'}
                                   </button>
                                   <button
                                     type="button"
@@ -4099,7 +4558,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                         : 'text-[#4a361c] hover:bg-white/50'
                                     }`}
                                   >
-                                    Elegir Dote (Feat)
+                                    {isSpanish ? 'Elegir Dote (Feat)' : 'Choose a Feat'}
                                   </button>
                                 </div>
                               )}
@@ -4109,7 +4568,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             {currentChoice.type === 'asi' && !isVarHumanSlot && (
                               <div className="p-4 bg-[#fcf9f2] rounded-xl border border-[#d6c4aa] space-y-4">
                                 <div className="flex items-center gap-3">
-                                  <label className="text-xs font-fantasy font-bold text-[#4a361c] uppercase">Modo de Distribución:</label>
+                                  <label className="text-xs font-fantasy font-bold text-[#4a361c] uppercase">{isSpanish ? 'Modo de Distribución:' : 'Distribution Mode:'}</label>
                                   <div className="flex items-center gap-2">
                                     <button
                                       type="button"
@@ -4120,7 +4579,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                           : 'bg-white text-[#5c4a35] border-[#d6c4aa]'
                                       }`}
                                     >
-                                      +2 a una Característica
+                                      {isSpanish ? '+2 a una Característica' : '+2 to One Ability'}
                                     </button>
                                     <button
                                       type="button"
@@ -4131,7 +4590,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                           : 'bg-white text-[#5c4a35] border-[#d6c4aa]'
                                       }`}
                                     >
-                                      +1 a dos Características distintas
+                                      {isSpanish ? '+1 a dos Características distintas' : '+1 to Two Different Abilities'}
                                     </button>
                                   </div>
                                 </div>
@@ -4139,7 +4598,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                 {currentChoice.asiType === '+2' ? (
                                   <div>
                                     <label className="block text-xs font-fantasy font-bold text-[#4a361c] uppercase mb-1.5">
-                                      Selecciona la característica que recibirá +2:
+                                      {isSpanish ? 'Selecciona la característica que recibirá +2:' : 'Select the ability score that receives +2:'}
                                     </label>
                                     <div className="grid grid-cols-2 sm:grid-cols-6 gap-2">
                                       {(['str', 'dex', 'con', 'int', 'wis', 'cha'] as (keyof AbilityScores)[]).map((st) => (
@@ -4154,7 +4613,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                           }`}
                                         >
                                           <span>{ABILITY_SCORE_EXPLANATIONS[st].icon}</span>
-                                          <span className="mt-1">{ABILITY_SCORE_EXPLANATIONS[st].name}</span>
+                                          <span className="mt-1">{getAbilityName(st)}</span>
                                           <span className="text-[10px] opacity-80 font-mono mt-0.5">+2</span>
                                         </button>
                                       ))}
@@ -4164,34 +4623,34 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                       <label className="block text-xs font-fantasy font-bold text-[#4a361c] uppercase mb-1.5">
-                                        Primera Característica (+1):
+                                        {isSpanish ? 'Primera Característica (+1):' : 'First Ability (+1):'}
                                       </label>
                                       <select
                                         value={currentChoice.asiStat1 || ''}
                                         onChange={(e) => setSlotChoice({ asiStat1: (e.target.value || undefined) as keyof AbilityScores })}
                                         className="w-full bg-white border border-[#d6c4aa] rounded-lg p-2 text-xs text-[#2c241b] focus:outline-none focus:border-[#8c672b]"
                                       >
-                                        <option value="" disabled>-- Elige característica (+1) --</option>
+                                        <option value="" disabled>{isSpanish ? '-- Elige característica (+1) --' : '-- Choose ability (+1) --'}</option>
                                         {(['str', 'dex', 'con', 'int', 'wis', 'cha'] as (keyof AbilityScores)[]).map((st) => (
                                           <option key={st} value={st} disabled={currentChoice.asiStat2 === st}>
-                                            {ABILITY_SCORE_EXPLANATIONS[st].name} ({ABILITY_SCORE_EXPLANATIONS[st].abbreviation})
+                                            {getAbilityName(st)} ({getAbilityAbbr(st)})
                                           </option>
                                         ))}
                                       </select>
                                     </div>
                                     <div>
                                       <label className="block text-xs font-fantasy font-bold text-[#4a361c] uppercase mb-1.5">
-                                        Segunda Característica (+1):
+                                        {isSpanish ? 'Segunda Característica (+1):' : 'Second Ability (+1):'}
                                       </label>
                                       <select
                                         value={currentChoice.asiStat2 || ''}
                                         onChange={(e) => setSlotChoice({ asiStat2: (e.target.value || undefined) as keyof AbilityScores })}
                                         className="w-full bg-white border border-[#d6c4aa] rounded-lg p-2 text-xs text-[#2c241b] focus:outline-none focus:border-[#8c672b]"
                                       >
-                                        <option value="" disabled>-- Elige característica (+1) --</option>
+                                        <option value="" disabled>{isSpanish ? '-- Elige característica (+1) --' : '-- Choose ability (+1) --'}</option>
                                         {(['str', 'dex', 'con', 'int', 'wis', 'cha'] as (keyof AbilityScores)[]).map((st) => (
                                           <option key={st} value={st} disabled={currentChoice.asiStat1 === st}>
-                                            {ABILITY_SCORE_EXPLANATIONS[st].name} ({ABILITY_SCORE_EXPLANATIONS[st].abbreviation})
+                                            {getAbilityName(st)} ({getAbilityAbbr(st)})
                                           </option>
                                         ))}
                                       </select>
@@ -4217,7 +4676,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                             : 'bg-white text-[#5c4a35] border border-[#d6c4aa]'
                                         }`}
                                       >
-                                        {cat}
+                                        {isSpanish ? cat : ({ Todos: 'All', Combate: 'Combat', Magia: 'Magic', Utilidad: 'Utility', General: 'General' }[cat] || cat)}
                                       </button>
                                     ))}
                                   </div>
@@ -4229,7 +4688,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                         type="text"
                                         value={featSearch}
                                         onChange={(e) => setFeatSearch(e.target.value)}
-                                        placeholder="Buscar dote (ej: Alerta, Tirador)..."
+                                        placeholder={isSpanish ? "Buscar dote (ej: Alerta, Tirador)..." : "Search feat (e.g., Alert, Sharpshooter)..."}
                                         className="w-full bg-white border border-[#d6c4aa] rounded-lg pl-8 pr-3 py-1.5 text-xs text-[#2c241b] focus:outline-none focus:border-[#8c672b]"
                                       />
                                     </div>
@@ -4243,7 +4702,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                       title="Ver compendio de dotes en ventana grande"
                                     >
                                       <Maximize2 className="w-3.5 h-3.5 text-[#8c672b]" />
-                                      <span className="hidden sm:inline">Ampliar</span>
+                                      <span className="hidden sm:inline">{isSpanish ? 'Ampliar' : 'Expand'}</span>
                                     </button>
                                   </div>
                                 </div>
@@ -4316,10 +4775,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                     <Shield className="w-5 h-5 text-[#8c672b] shrink-0 mt-0.5" />
                     <div>
                       <h4 className="font-fantasy font-bold text-sm text-[#4a361c] uppercase tracking-wide">
-                        Paso 4: Tu Clase, Nivel, Estilos & Competencias
+                        {isSpanish ? 'Paso 4: Tu Clase, Nivel, Estilos & Competencias' : 'Step 4: Class, Level, Styles & Proficiencies'}
                       </h4>
                       <p className="text-xs text-[#5c4a35] mt-1 leading-relaxed">
-                        Tu clase determina tu profesión heroica, tu dado de vida, tus competencias con armas y armaduras y la totalidad de tus poderes especiales. Puedes inspeccionar la tabla completa nivel a nivel para planificar tu personaje a futuro.
+                        {isSpanish ? 'Tu clase determina tu profesión heroica, tu dado de vida, tus competencias con armas y armaduras y la totalidad de tus poderes especiales. Puedes inspeccionar la tabla completa nivel a nivel para planificar tu personaje a futuro.' : 'Your class defines your heroic calling, Hit Die, weapon and armor proficiencies, and special features. Inspect the full 1-20 progression table to plan your build.'}
                       </p>
                     </div>
                   </div>
@@ -4330,10 +4789,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                     <div className="p-3 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] flex items-center justify-between shadow-xs">
                       <div>
                         <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase">
-                          Nivel Inicial del Personaje
+                          {isSpanish ? 'Nivel Inicial del Personaje' : 'Starting Character Level'}
                         </h5>
                         <span className="text-[11px] text-[#7a6448]">
-                          La mayoría de las campañas inician en nivel 1, pero puedes empezar a niveles mayores.
+                          {isSpanish ? 'La mayoría de las campañas inician en nivel 1, pero puedes empezar a niveles mayores.' : 'Most campaigns start at Level 1, or you can build a higher-level adventurer.'}
                         </span>
                       </div>
 
@@ -4346,7 +4805,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                           -
                         </button>
                         <span className="font-fantasy font-bold text-base text-[#4a361c] px-2 font-mono">
-                          Nivel {characterLevel}
+                          {isSpanish ? 'Nivel' : 'Level'} {characterLevel}
                         </span>
                         <button
                           type="button"
@@ -4389,14 +4848,14 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                         <div id="creator-class-subclass" className="p-4 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] space-y-3 shadow-xs">
                           <div className="flex items-center justify-between">
                             <label className="block text-xs font-bold font-fantasy text-[#4a361c] uppercase flex items-center gap-1.5">
-                              <Sword className="w-4 h-4 text-[#8c672b]" /> Subclase / Especialización ({activeClass.subclassesName})
+                              <Sword className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? `Subclase / Especialización (${activeClass.subclassesName})` : `Subclass / Specialization (${getSubclassesGroupName(activeClass)})`}
                             </label>
                             <span className="text-[11px] text-[#8c672b] font-mono font-bold">
                               {isSubclassUnlocked
                                 ? activeSubclass
-                                  ? activeSubclass.name
-                                  : `(Opcional / ${activeClass.subclasses.length} sendas disponibles)`
-                                : `Disponible a Nivel ${subclassUnlockLevel}`}
+                                  ? getSubclassDisplayName(activeSubclass)
+                                  : (isSpanish ? `(Opcional / ${activeClass.subclasses.length} sendas disponibles)` : `(Optional / ${activeClass.subclasses.length} subclasses available)`)
+                                : (isSpanish ? `Disponible a Nivel ${subclassUnlockLevel}` : `Unlocks at Level ${subclassUnlockLevel}`)}
                             </span>
                           </div>
 
@@ -4409,26 +4868,26 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                   </div>
                                   <div>
                                     <h4 className="font-fantasy font-bold text-sm text-[#382b20]">
-                                      {activeSubclass.name}
+                                      {getSubclassDisplayName(activeSubclass)}
                                     </h4>
                                     <span className="text-[11px] text-[#7a6448]">
-                                      {activeClass.subclassesName} consagrada de {activeClass.name}
+                                      {isSpanish ? `${activeClass.subclassesName} consagrada de ${activeClass.name}` : `${getSubclassesGroupName(activeClass)} of ${getClassDisplayName(activeClass)}`}
                                     </span>
                                   </div>
                                 </div>
                                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#b88c32] text-white flex items-center gap-1">
-                                  <Check className="w-3 h-3" /> Activa
+                                  <Check className="w-3 h-3" /> {isSpanish ? 'Activa' : 'Active'}
                                 </span>
                               </div>
 
                               <p className="text-xs text-[#5c4a35] leading-relaxed">
-                                {activeSubclass.description}
+                                {isSpanish ? activeSubclass.description : translateDndText(activeSubclass.description)}
                               </p>
 
                               {activeSubclass.features && activeSubclass.features.length > 0 && (
                                 <div className="pt-2 border-t border-[#ebdcc7] space-y-1">
                                   <span className="text-[10px] font-bold uppercase tracking-wider text-[#7a6448]">
-                                    Rasgos desbloqueados para Nivel {characterLevel}:
+                                    {isSpanish ? `Rasgos desbloqueados para Nivel ${characterLevel}:` : `Unlocked features for Level ${characterLevel}:`}
                                   </span>
                                   <div className="flex flex-wrap gap-1.5">
                                     {activeSubclass.features
@@ -4437,14 +4896,14 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                         <span
                                           key={i}
                                           className="px-2 py-0.5 rounded text-[10px] bg-[#ede0cc] text-[#4a361c] border border-[#d6c4aa] font-medium"
-                                          title={f.desc}
+                                          title={isSpanish ? f.desc : translateDndText(f.desc)}
                                         >
-                                          Nv.{f.level}: {f.name}
+                                          {isSpanish ? 'Nv.' : 'Lv.'}{f.level}: {isSpanish ? f.name : translateDndTitle(f.name)}
                                         </span>
                                       ))}
                                     {activeSubclass.features.filter((f) => f.level <= characterLevel).length === 0 && (
                                       <span className="text-[10px] text-[#8c7860] italic">
-                                        Los rasgos de esta senda se activarán al subir a Nivel {subclassUnlockLevel}.
+                                        {isSpanish ? `Los rasgos de esta senda se activarán al subir a Nivel ${subclassUnlockLevel}.` : `Features of this subclass unlock at Level ${subclassUnlockLevel}.`}
                                       </span>
                                     )}
                                   </div>
@@ -4457,31 +4916,35 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                   onClick={() => setIsSubclassPickerModalOpen(true)}
                                   className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-[#b88c32] to-[#8c672b] hover:from-[#cfa344] hover:to-[#a67a33] text-white text-xs font-fantasy font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs"
                                 >
-                                  <Sword className="w-3.5 h-3.5" /> Cambiar Subclase ({activeClass.subclasses.length} opciones)
+                                  <Sword className="w-3.5 h-3.5" /> {isSpanish ? `Cambiar Subclase (${activeClass.subclasses.length} opciones)` : `Change Subclass (${activeClass.subclasses.length} options)`}
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() =>
                                     setInspectingCompendium({
                                       id: activeSubclass.id,
-                                      title: activeSubclass.name,
-                                      subtitle: `Arquetipo de ${activeClass.name}`,
-                                      category: `Subclase de ${activeClass.name}`,
+                                      title: getSubclassDisplayName(activeSubclass),
+                                      subtitle: isSpanish ? `Arquetipo de ${activeClass.name}` : `${getClassDisplayName(activeClass)} Archetype`,
+                                      category: isSpanish ? `Subclase de ${activeClass.name}` : `${getClassDisplayName(activeClass)} Subclass`,
                                       iconType: 'subclass',
-                                      description: activeSubclass.description,
-                                      traits: activeSubclass.features,
+                                      description: isSpanish ? activeSubclass.description : translateDndText(activeSubclass.description),
+                                      traits: activeSubclass.features?.map((f) => ({
+                                        ...f,
+                                        name: isSpanish ? f.name : translateDndTitle(f.name),
+                                        desc: isSpanish ? f.desc : translateDndText(f.desc),
+                                      })),
                                     })
                                   }
                                   className="px-3 py-1.5 rounded-lg bg-[#ede1ce] hover:bg-[#dfd0ba] text-[#4a361c] text-xs font-bold border border-[#cfbe9f] transition flex items-center gap-1.5 cursor-pointer"
                                 >
-                                  <Eye className="w-3.5 h-3.5 text-[#8c672b]" /> Inspeccionar Rasgos (1-20)
+                                  <Eye className="w-3.5 h-3.5 text-[#8c672b]" /> {isSpanish ? 'Inspeccionar Rasgos (1-20)' : 'Inspect Features (1-20)'}
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => setSelectedSubclassId('')}
                                   className="px-2.5 py-1.5 rounded-lg bg-[#ede0cc] hover:bg-[#dfceb5] text-[#8c2e28] text-xs font-semibold border border-[#cfbe9f] transition cursor-pointer ml-auto"
                                 >
-                                  Quitar Selección
+                                  {isSpanish ? 'Quitar Selección' : 'Clear Selection'}
                                 </button>
                               </div>
                             </div>
@@ -4491,11 +4954,11 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                 <div className="flex items-center gap-2">
                                   <Sparkles className="w-4 h-4 text-[#b88c32]" />
                                   <h4 className="font-fantasy font-bold text-xs sm:text-sm text-[#4a361c]">
-                                    Especialización pendiente ({activeClass.subclassesName})
+                                    {isSpanish ? `Especialización pendiente (${activeClass.subclassesName})` : `Specialization Pending (${getSubclassesGroupName(activeClass)})`}
                                   </h4>
                                 </div>
                                 <p className="text-xs text-[#786450] max-w-lg leading-relaxed">
-                                  Tu personaje ha alcanzado el Nivel {characterLevel}. Hay <strong>{activeClass.subclasses.length} sendas oficiales</strong> disponibles para {activeClass.name} en el compendio.
+                                  {isSpanish ? <>Tu personaje ha alcanzado el Nivel {characterLevel}. Hay <strong>{activeClass.subclasses.length} sendas oficiales</strong> disponibles para {activeClass.name} en el compendio.</> : <>Your character has reached Level {characterLevel}. There are <strong>{activeClass.subclasses.length} official subclasses</strong> available for {getClassDisplayName(activeClass)}.</>}
                                 </p>
                               </div>
                               <button
@@ -4503,7 +4966,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                 onClick={() => setIsSubclassPickerModalOpen(true)}
                                 className="px-4 py-2 bg-gradient-to-r from-[#b88c32] to-[#8c672b] hover:from-[#cfa344] hover:to-[#a67a33] text-white font-fantasy font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer ring-2 ring-[#ffd56b]/40 shrink-0"
                               >
-                                <Sword className="w-4 h-4" /> Elegir Subclase ({activeClass.subclasses.length} opciones)
+                                <Sword className="w-4 h-4" /> {isSpanish ? `Elegir Subclase (${activeClass.subclasses.length} opciones)` : `Choose Subclass (${activeClass.subclasses.length} options)`}
                               </button>
                             </div>
                           ) : (
@@ -4512,10 +4975,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                 <Lock className="w-4 h-4 text-[#8c672b] shrink-0 mt-0.5" />
                                 <div className="space-y-0.5">
                                   <h4 className="font-fantasy font-bold text-xs text-[#4a361c]">
-                                    Las especializaciones ({activeClass.subclassesName}) se eligen a Nivel {subclassUnlockLevel}
+                                    {isSpanish ? `Las especializaciones (${activeClass.subclassesName}) se eligen a Nivel ${subclassUnlockLevel}` : `Specializations (${getSubclassesGroupName(activeClass)}) are chosen at Level ${subclassUnlockLevel}`}
                                   </h4>
                                   <p className="text-[11px] text-[#7a6448]">
-                                    Tu personaje actualmente es Nivel {characterLevel}. Puedes explorar previamente las {activeClass.subclasses.length} sendas disponibles para planificar su progresión.
+                                    {isSpanish ? `Tu personaje actualmente es Nivel ${characterLevel}. Puedes explorar previamente las ${activeClass.subclasses.length} sendas disponibles para planificar su progresión.` : `Your character is currently Level ${characterLevel}. You can preview all ${activeClass.subclasses.length} available subclasses to plan your progression.`}
                                   </p>
                                 </div>
                               </div>
@@ -4524,7 +4987,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                 onClick={() => setIsSubclassPickerModalOpen(true)}
                                 className="px-3.5 py-1.5 bg-[#dfceb5] hover:bg-[#d4c1a5] text-[#4a361c] font-fantasy font-bold text-xs rounded-xl border border-[#bfab8d] transition flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
                               >
-                                <Eye className="w-3.5 h-3.5 text-[#8c672b]" /> Explorar ({activeClass.subclasses.length} Subclases)
+                                <Eye className="w-3.5 h-3.5 text-[#8c672b]" /> {isSpanish ? `Explorar (${activeClass.subclasses.length} Subclases)` : `Browse (${activeClass.subclasses.length} Subclasses)`}
                               </button>
                             </div>
                           )}
@@ -4550,10 +5013,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                     </div>
                                     <div>
                                       <h5 className="font-fantasy font-bold text-xs sm:text-sm text-[#4a361c] uppercase flex items-center gap-1.5">
-                                        {dec.title} (Elige {dec.countNeeded})
+                                        {isSpanish ? dec.title : translateDndTitle(dec.title)} ({isSpanish ? 'Elige' : 'Choose'} {dec.countNeeded})
                                       </h5>
                                       <p className="text-[11px] text-[#5c4a35] mt-0.5 leading-relaxed">
-                                        {dec.description}
+                                        {isSpanish ? dec.description : translateDndText(dec.description)}
                                       </p>
                                     </div>
                                   </div>
@@ -4564,7 +5027,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                         : 'bg-[#fef7e0] text-[#b06000] border-[#fce293]'
                                     }`}
                                   >
-                                    {selectedList.length} / {dec.countNeeded} elegidas
+                                    {selectedList.length} / {dec.countNeeded} {isSpanish ? 'elegidas' : 'selected'}
                                   </span>
                                 </div>
 
@@ -4574,7 +5037,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                     <Search className="w-3.5 h-3.5 text-[#8c672b] absolute left-2.5 top-1/2 -translate-y-1/2" />
                                     <input
                                       type="text"
-                                      placeholder={`Buscar en ${dec.title}...`}
+                                      placeholder={isSpanish ? `Buscar en ${dec.title}...` : `Search in ${translateDndTitle(dec.title)}...`}
                                       value={creatorDecisionSearchTerms[dec.id] || ''}
                                       onChange={(e) => setCreatorDecisionSearchTerms((prev) => ({ ...prev, [dec.id]: e.target.value }))}
                                       className="w-full pl-8 pr-3 py-1.5 bg-white border border-[#d6c4aa] rounded-lg text-xs text-[#2c221a] focus:outline-none focus:border-[#8c672b]"
@@ -4611,7 +5074,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                               className="text-left flex-1 cursor-pointer font-fantasy font-bold text-xs text-[#2c221a] hover:text-[#8c672b] transition flex items-center gap-1.5"
                                             >
                                               {isSelected && <Check className="w-3.5 h-3.5 text-[#8c672b] shrink-0" />}
-                                              <span>{opt.name}</span>
+                                              <span>{isSpanish ? opt.name : translateDndTitle(opt.name)}</span>
                                             </button>
 
                                             <div className="flex items-center gap-1 shrink-0">
@@ -4622,37 +5085,37 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                               )}
                                               {optLevel !== undefined && (
                                                 <span className="text-[10px] font-mono text-[#5a4837] bg-white/70 px-1.5 py-0.5 rounded border border-[#d8c8af]">
-                                                  Nv {optLevel}
+                                                  {isSpanish ? 'Nv' : 'Lv'} {optLevel}
                                                 </span>
                                               )}
                                               {opt.badge && (
                                                 <span className="text-[10px] font-mono text-[#542d72] bg-white/70 px-1.5 py-0.5 rounded border border-[#d2b8ea]">
-                                                  {opt.badge}
+                                                  {isSpanish ? opt.badge : translateDndTitle(opt.badge)}
                                                 </span>
                                               )}
                                               {/* Ojito 👁️ para Inspeccionar 1:1 con Wikidot */}
                                               <button
                                                 type="button"
-                                                title="Ver detalles completos de la opción"
+                                                title={isSpanish ? 'Ver detalles completos de la opción' : 'View full option details'}
                                                 onClick={(e) => {
                                                   e.stopPropagation();
                                                   setInspectingCompendium({
                                                     id: opt.id,
-                                                    title: opt.name,
-                                                    subtitle: dec.title,
-                                                    category: 'Decisión de Clase',
-                                                    description: opt.desc,
-                                                    detailedDescription: (opt as any).details,
-                                                    prerequisite: opt.prerequisite,
+                                                    title: isSpanish ? opt.name : translateDndTitle(opt.name),
+                                                    subtitle: isSpanish ? dec.title : translateDndTitle(dec.title),
+                                                    category: isSpanish ? 'Decisión de Clase' : 'Class Decision',
+                                                    description: isSpanish ? opt.desc : translateDndText(opt.desc),
+                                                    detailedDescription: (opt as any).details ? (isSpanish ? (opt as any).details : translateDndText((opt as any).details)) : undefined,
+                                                    prerequisite: opt.prerequisite ? (isSpanish ? opt.prerequisite : translateDndText(opt.prerequisite)) : undefined,
                                                     badges: [
                                                       ...(optKi !== undefined
-                                                        ? [{ label: 'Coste Ki', value: optKi > 0 ? `${optKi} Ki` : '0 Ki (Básico)', variant: 'amber' as const }]
+                                                        ? [{ label: isSpanish ? 'Coste Ki' : 'Ki Cost', value: optKi > 0 ? `${optKi} Ki` : (isSpanish ? '0 Ki (Básico)' : '0 Ki (Basic)'), variant: 'amber' as const }]
                                                         : []),
                                                       ...(optLevel !== undefined
-                                                        ? [{ label: 'Nivel Mínimo', value: `Nivel ${optLevel}+`, variant: 'gold' as const }]
+                                                        ? [{ label: isSpanish ? 'Nivel Mínimo' : 'Min Level', value: `${isSpanish ? 'Nivel' : 'Level'} ${optLevel}+`, variant: 'gold' as const }]
                                                         : []),
-                                                      ...(opt.badge ? [{ label: 'Tipo', value: opt.badge, variant: 'neutral' as const }] : []),
-                                                      ...(opt.prerequisite ? [{ label: 'Requisito', value: opt.prerequisite, variant: 'neutral' as const }] : []),
+                                                      ...(opt.badge ? [{ label: isSpanish ? 'Tipo' : 'Type', value: isSpanish ? opt.badge : translateDndTitle(opt.badge), variant: 'neutral' as const }] : []),
+                                                      ...(opt.prerequisite ? [{ label: isSpanish ? 'Requisito' : 'Prerequisite', value: isSpanish ? opt.prerequisite : translateDndText(opt.prerequisite), variant: 'neutral' as const }] : []),
                                                     ],
                                                   });
                                                 }}
@@ -4664,7 +5127,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                           </div>
 
                                           <p className="text-[11px] text-[#6e5c4a] mt-1 leading-snug">
-                                            {opt.desc}
+                                            {isSpanish ? opt.desc : translateDndText(opt.desc)}
                                           </p>
                                         </div>
                                       </div>
@@ -4681,7 +5144,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       <div id="creator-class-progression" className="p-4 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] space-y-3 shadow-xs">
                         <div className="flex items-center justify-between">
                           <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
-                            <BookOpen className="w-4 h-4 text-[#8c672b]" /> Progresión Nivel a Nivel de {activeClass.name}
+                            <BookOpen className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? `Progresión Nivel a Nivel de ${activeClass.name}` : `Level-by-Level Progression (${getClassDisplayName(activeClass)})`}
                           </h5>
                           <div className="flex items-center gap-1.5 text-xs">
                             <button
@@ -4693,7 +5156,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                   : 'bg-white text-[#5c4a35] border border-[#d6c4aa]'
                               }`}
                             >
-                              Hasta Nivel {characterLevel}
+                              {isSpanish ? `Hasta Nivel ${characterLevel}` : `Up to Level ${characterLevel}`}
                             </button>
                             <button
                               type="button"
@@ -4704,7 +5167,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                   : 'bg-white text-[#5c4a35] border border-[#d6c4aa]'
                               }`}
                             >
-                              Ver Todos (1-20)
+                              {isSpanish ? 'Ver Todos (1-20)' : 'View All (1-20)'}
                             </button>
                           </div>
                         </div>
@@ -4730,7 +5193,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                           <div className="p-4 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] space-y-3 shadow-xs">
                             <div className="flex items-center justify-between">
                               <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase">
-                                Habilidades de Clase: Elige {classConfig.count} ({selectedClassSkills.length}/{classConfig.count} seleccionadas)
+                                {isSpanish ? `Habilidades de Clase: Elige ${classConfig.count} (${selectedClassSkills.length}/${classConfig.count} seleccionadas)` : `Class Skills: Choose ${classConfig.count} (${selectedClassSkills.length}/${classConfig.count} selected)`}
                               </h5>
                             </div>
 
@@ -4757,9 +5220,9 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                       }`}
                                     >
                                       <div>
-                                        <span className="font-fantasy font-bold text-xs block text-[#4a361c]">{sk}</span>
+                                        <span className="font-fantasy font-bold text-xs block text-[#4a361c]">{displaySkillName(sk)}</span>
                                         <span className="text-[9px] text-[#7a6448]">
-                                          {isFromBg ? 'Otorgado por Trasfondo' : isFromRace || isFromBonusRace ? 'Otorgado por Raza' : 'Disponible'}
+                                          {isFromBg ? (isSpanish ? 'Otorgado por Trasfondo' : 'Granted by Background') : isFromRace || isFromBonusRace ? (isSpanish ? 'Otorgado por Raza' : 'Granted by Race') : (isSpanish ? 'Disponible' : 'Available')}
                                         </span>
                                       </div>
 
@@ -4778,7 +5241,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                           </div>
                         ) : (
                           <div className="p-4 bg-[#f5ede0] rounded-xl border border-dashed border-[#d6c4aa] text-center text-xs text-[#7a6448]">
-                            Selecciona una clase para habilitar la selección de habilidades de clase.
+                            {isSpanish ? 'Selecciona una clase para habilitar la selección de habilidades de clase.' : 'Select a class to enable class skill selection.'}
                           </div>
                         )}
 
@@ -4791,11 +5254,11 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                   <Star className="w-4 h-4 text-[#8c672b]" /> {expertiseConfig.title}
                                 </h5>
                                 <p className="text-[11px] text-[#5c4a35] mt-0.5 leading-relaxed">
-                                  {expertiseConfig.desc} Tu bonificador de competencia se <strong>duplica (+{profBonus * 2} en lugar de +{profBonus})</strong> en las pruebas que hagas con estas habilidades.
+                                  {isSpanish ? <>{expertiseConfig.desc} Tu bonificador de competencia se <strong>duplica (+{profBonus * 2} en lugar de +{profBonus})</strong> en las pruebas que hagas con estas habilidades.</> : <>Choose your Expertise skills. Your proficiency bonus is <strong>doubled (+{profBonus * 2} instead of +{profBonus})</strong> for any ability check you make that uses any of the chosen proficiencies.</>}
                                 </p>
                               </div>
                               <span className="text-[11px] bg-[#8c672b] text-white px-2 py-0.5 rounded font-mono font-bold shrink-0">
-                                {validExpertiseSkills.length} / {expertiseConfig.allowedCount} con Pericia
+                                {validExpertiseSkills.length} / {expertiseConfig.allowedCount} {isSpanish ? 'con Pericia' : 'with Expertise'}
                               </span>
                             </div>
 
@@ -4813,7 +5276,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                         : 'bg-white border-[#d6c4aa] text-[#4a361c] hover:border-[#8c672b]'
                                     }`}
                                   >
-                                    <span className="truncate">{sk}</span>
+                                    <span className="truncate">{displaySkillName(sk)}</span>
                                     <span className="text-[10px] font-mono px-1 rounded bg-black/10">
                                       {isExpert ? `⭐ +${profBonus * 2}` : `+${profBonus}`}
                                     </span>
@@ -4830,16 +5293,16 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             <div className="flex items-center justify-between">
                               <div>
                                 <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
-                                  <Sword className="w-4 h-4 text-[#8c672b]" /> Estilo de Combate (Fighting Style)
+                                  <Sword className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? 'Estilo de Combate (Fighting Style)' : 'Fighting Style'}
                                 </h5>
                                 <p className="text-[11px] text-[#5c4a35] mt-0.5">
-                                  Especialización marcial y táctica de tu {activeClass.name} a nivel {characterLevel}.
+                                  {isSpanish ? `Especialización marcial y táctica de tu ${activeClass.name} a nivel ${characterLevel}.` : `Martial and tactical specialization for your Level ${characterLevel} ${getClassDisplayName(activeClass)}.`}
                                 </p>
                               </div>
                               <span className="text-[11px] text-[#8c672b] font-mono font-bold">
                                 {selectedFightingStyle
                                   ? FIGHTING_STYLE_OPTIONS.find((f) => f.id === selectedFightingStyle)?.name
-                                  : 'Sin seleccionar'}
+                                  : (isSpanish ? 'Sin seleccionar' : 'Unselected')}
                               </span>
                             </div>
 
@@ -4863,8 +5326,22 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                     </>
                   ) : (
                     <div className="p-4 bg-[#f5ede0] rounded-xl border border-dashed border-[#d6c4aa] text-center text-xs text-[#7a6448]">
-                      Selecciona una clase de la lista para ver sus subclases, progresión y habilidades.
+                      {isSpanish ? 'Selecciona una clase de la lista para ver sus subclases, progresión y habilidades.' : 'Select a class from the list above to configure its subclasses, progression, and skills.'}
                     </div>
+                  )}
+
+                  {/* 2024 WEAPON MASTERY PICKER (MARTIAL CLASSES) */}
+                  {selectedEdition === '5.5e' && (
+                    <Creator2024WeaponMasteryPicker
+                      classNameString={activeClass?.name || ''}
+                      characterLevel={characterLevel}
+                      selectedMasteries={selectedWeaponMasteries}
+                      onToggleMastery={(m) => {
+                        setSelectedWeaponMasteries((prev) =>
+                          prev.includes(m) ? prev.filter((x) => x !== m) : [...prev, m]
+                        );
+                      }}
+                    />
                   )}
                 </div>
               )}
@@ -4879,10 +5356,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                     <Sword className="w-5 h-5 text-[#8c672b] shrink-0 mt-0.5" />
                     <div>
                       <h4 className="font-fantasy font-bold text-sm text-[#4a361c] uppercase tracking-wide">
-                        Paso 6: Estilos de Combate & Rasgos Tácticos
+                        {isSpanish ? 'Paso 6: Estilos de Combate & Rasgos Tácticos' : 'Step 6: Fighting Styles & Tactical Features'}
                       </h4>
                       <p className="text-xs text-[#5c4a35] mt-1 leading-relaxed">
-                        Muchas clases te exigen definir tu especialidad marcial o mágica desde nivel 1. Aquí eliges tu <strong>Estilo de Combate</strong> (para Guerreros, Paladines y Exploradores) y revisas tus recursos iniciales.
+                        {isSpanish ? <>Muchas clases te exigen definir tu especialidad marcial o mágica desde nivel 1. Aquí eliges tu <strong>Estilo de Combate</strong> (para Guerreros, Paladines y Exploradores) y revisas tus recursos iniciales.</> : <>Many classes define their martial or magical specialty early on. Choose your <strong>Fighting Style</strong> (for Fighters, Paladins, and Rangers) and review your starting class resources.</>}
                       </p>
                     </div>
                   </div>
@@ -4894,12 +5371,12 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                         <div className="p-4 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] space-y-3 shadow-xs">
                           <div className="flex items-center justify-between">
                             <label className="block text-xs font-bold font-fantasy text-[#4a361c] uppercase">
-                              Elige tu Estilo de Combate (Fighting Style)
+                              {isSpanish ? 'Elige tu Estilo de Combate (Fighting Style)' : 'Choose Your Fighting Style'}
                             </label>
                             <span className="text-[11px] text-[#8c672b] font-mono font-bold">
                               {selectedFightingStyle
                                 ? FIGHTING_STYLE_OPTIONS.find((f) => f.id === selectedFightingStyle)?.name
-                                : 'Sin seleccionar'}
+                                : (isSpanish ? 'Sin seleccionar' : 'Unselected')}
                             </span>
                           </div>
 
@@ -4923,7 +5400,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       {/* Class Resources & Tactical Overview */}
                       <div className="p-4 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] space-y-3 shadow-xs">
                         <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
-                          <Zap className="w-4 h-4 text-[#8c672b]" /> Recursos de Clase Iniciales para {activeClass.name}
+                          <Zap className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? `Recursos de Clase Iniciales para ${activeClass.name}` : `Starting Class Resources for ${getClassDisplayName(activeClass)}`}
                         </h5>
 
                         <div className="space-y-2">
@@ -4931,21 +5408,21 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             <div key={res.id} className="p-3 bg-[#fcf9f2] rounded-lg border border-[#d6c4aa] flex items-start justify-between gap-3 text-xs shadow-xs">
                               <div>
                                 <span className="font-fantasy font-bold text-[#4a361c] text-xs block">
-                                  {res.name} (Máximo a Nivel {characterLevel}: {res.calculateMax(characterLevel)})
+                                  {isSpanish ? res.name : translateDndTitle(res.name)} ({isSpanish ? `Máximo a Nivel ${characterLevel}` : `Max at Level ${characterLevel}`}: {res.calculateMax(characterLevel)})
                                 </span>
                                 <p className="text-[#5c4a35] text-[11px] mt-0.5 leading-relaxed">
-                                  {res.description}
+                                  {isSpanish ? res.description : translateDndText(res.description)}
                                 </p>
                               </div>
                               <span className="text-[10px] bg-[#ede1ce] text-[#5e4b37] px-2 py-0.5 rounded font-mono font-bold shrink-0">
-                                Recarga: {res.resetOn === 'short' ? 'Descanso Corto' : 'Descanso Largo'}
+                                {isSpanish ? 'Recarga:' : 'Recharges:'} {res.resetOn === 'short' ? (isSpanish ? 'Descanso Corto' : 'Short Rest') : (isSpanish ? 'Descanso Largo' : 'Long Rest')}
                               </span>
                             </div>
                           ))}
 
                           {(!activeClass.defaultResources || activeClass.defaultResources.length === 0) && (
                             <p className="text-xs text-[#7a6448] italic">
-                              Esta clase no requiere contadores de recursos limitados a nivel 1 o se gestiona mediante ranuras de conjuro.
+                              {isSpanish ? 'Esta clase no requiere contadores de recursos limitados a nivel 1 o se gestiona mediante ranuras de conjuro.' : 'This class does not require limited resource counters at Level 1 or uses spell slots.'}
                             </p>
                           )}
                         </div>
@@ -4953,7 +5430,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                     </>
                   ) : (
                     <div className="p-6 bg-[#f5ede0] rounded-xl border border-dashed border-[#d6c4aa] text-center text-xs text-[#7a6448]">
-                      Debes seleccionar primero una clase en el paso anterior para configurar sus rasgos tácticos y recursos iniciales.
+                      {isSpanish ? 'Debes seleccionar primero una clase en el paso anterior para configurar sus rasgos tácticos y recursos iniciales.' : 'Please select a class in the previous step first to configure its tactical features and starting resources.'}
                     </div>
                   )}
                 </div>
@@ -4969,20 +5446,34 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                     <BookOpen className="w-5 h-5 text-[#8c672b] shrink-0 mt-0.5" />
                     <div>
                       <h4 className="font-fantasy font-bold text-sm text-[#4a361c] uppercase tracking-wide">
-                        Paso 3: Tu Trasfondo Oficial (99 Disponibles)
+                        {isSpanish ? 'Paso 3: Tu Trasfondo Oficial (99 Disponibles)' : 'Step 3: Official Background'}
                       </h4>
                       <p className="text-xs text-[#5c4a35] mt-1 leading-relaxed">
-                        Tu trasfondo representa de dónde vienes y qué hacías antes de convertirte en aventurero. Te otorga <strong>2 competencias fijas</strong>, idiomas o herramientas y un <strong>Rasgo Especial de Trasfondo</strong> para interactuar con el mundo.
+                        {isSpanish ? <>Tu trasfondo representa de dónde vienes y qué hacías antes de convertirte en aventurero. Te otorga <strong>2 competencias fijas</strong>, idiomas o herramientas y un <strong>Rasgo Especial de Trasfondo</strong> para interactuar con el mundo.</> : <>Your background reveals where you came from and your place in the world before becoming an adventurer, granting skill and tool proficiencies plus an origin feature.</>}
                       </p>
                     </div>
                   </div>
 
+                  {/* 2024 BACKGROUND PICKER vs 5e BACKGROUND CATALOG */}
+                  {selectedEdition === '5.5e' ? (
+                    <Creator2024BackgroundPicker
+                      selectedBackgroundId={selectedBackgroundId}
+                      onSelectBackground={(id) => setSelectedBackgroundId(id)}
+                      bgAsiMode={bgAsiMode2024}
+                      setBgAsiMode={setBgAsiMode2024}
+                      bgAsiStatPlusTwo={bgAsiStatPlusTwo}
+                      setBgAsiStatPlusTwo={setBgAsiStatPlusTwo}
+                      bgAsiStatPlusOne={bgAsiStatPlusOne}
+                      setBgAsiStatPlusOne={setBgAsiStatPlusOne}
+                    />
+                  ) : (
+                    <>
                   {/* Entire Background Selection: Filters + Search + Catalog Accordion */}
                   <div id="creator-background-catalog" className="space-y-3">
                     {/* Orientation Filter Buttons */}
                     <div className="flex items-center gap-1.5 flex-wrap bg-[#f5ede0] p-2.5 rounded-xl border border-[#d6c4aa]">
                       <span className="text-[10px] text-[#7a6448] font-fantasy font-bold uppercase mr-1">
-                        Filtrar por Enfoque / Rol:
+                        {isSpanish ? 'Filtrar por Enfoque / Rol:' : 'Filter by Role / Focus:'}
                       </span>
                       {(['Todos', 'Magia', 'Combate', 'Sigilo', 'Social', 'Exploración'] as const).map((ori) => {
                         const isAct = backgroundOrientationFilter === ori;
@@ -5007,7 +5498,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             }`}
                           >
                             <span>{icons[ori]}</span>
-                            <span>{ori}</span>
+                            <span>{isSpanish ? ori : ({ Todos: 'All', Magia: 'Magic', Combate: 'Combat', Sigilo: 'Stealth', Social: 'Social', Exploración: 'Exploration' }[ori] || ori)}</span>
                             <span className="text-[10px] opacity-80 font-mono font-bold">({count})</span>
                           </button>
                         );
@@ -5018,7 +5509,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                     <div className="flex flex-col sm:flex-row gap-2 items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-fantasy font-bold text-[#4a361c] uppercase flex items-center gap-1.5">
-                          Compendio Oficial ({WIKIDOT_BACKGROUNDS.length} Trasfondos)
+                          {isSpanish ? `Compendio Oficial (${WIKIDOT_BACKGROUNDS.length} Trasfondos)` : `Official Compendium (${WIKIDOT_BACKGROUNDS.length} Backgrounds)`}
                         </span>
                         <button
                           type="button"
@@ -5026,7 +5517,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                           className="text-[11px] text-[#8c672b] hover:text-[#5e4318] hover:underline font-bold cursor-pointer"
                           title="Expandir todas las categorías"
                         >
-                          Expandir Todo
+                          {isSpanish ? 'Expandir Todo' : 'Expand All'}
                         </button>
                         <span className="text-[#c0ad97] text-xs">•</span>
                         <button
@@ -5035,7 +5526,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                           className="text-[11px] text-[#8c672b] hover:text-[#5e4318] hover:underline font-bold cursor-pointer"
                           title="Colapsar todas las categorías"
                         >
-                          Colapsar Todo
+                          {isSpanish ? 'Colapsar Todo' : 'Collapse All'}
                         </button>
                       </div>
 
@@ -5046,7 +5537,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             type="text"
                             value={backgroundSearch}
                             onChange={(e) => setBackgroundSearch(e.target.value)}
-                            placeholder="Buscar trasfondo (ej: Soldado, Pirata, Noble)..."
+                            placeholder={isSpanish ? "Buscar trasfondo (ej: Soldado, Pirata, Noble)..." : "Search background (e.g., Soldier, Pirate, Noble)..."}
                             className="w-full bg-white border border-[#d6c4aa] rounded-lg pl-8 pr-3 py-1.5 text-xs text-[#2c241b] focus:outline-none focus:border-[#8c672b]"
                           />
                         </div>
@@ -5058,7 +5549,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                           title="Maximizar catálogo para ver todos los trasfondos disponibles en pantalla completa"
                         >
                           <Maximize2 className="w-3.5 h-3.5 text-[#8c672b]" />
-                          <span>Maximizar Catálogo</span>
+                          <span>{isSpanish ? 'Maximizar Catálogo' : 'Maximize Catalog'}</span>
                         </button>
                       </div>
                     </div>
@@ -5067,7 +5558,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                     <div className="space-y-3 max-h-[44vh] overflow-y-auto pr-1">
                       {groupedBackgrounds.length === 0 ? (
                         <div className="p-6 bg-[#f5ede0] rounded-xl border border-dashed border-[#d6c4aa] text-center text-xs text-[#7a6448]">
-                          No se encontraron trasfondos que coincidan con los filtros aplicados.
+                          {isSpanish ? 'No se encontraron trasfondos que coincidan con los filtros aplicados.' : 'No backgrounds found matching the current filters.'}
                         </div>
                       ) : (
                         groupedBackgrounds.map((group) => {
@@ -5111,7 +5602,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-1 text-[11px] text-[#7a6448] font-bold">
-                                  <span>{isCollapsed ? 'Desplegar' : 'Colapsar'}</span>
+                                  <span>{isCollapsed ? (isSpanish ? 'Desplegar' : 'Expand') : (isSpanish ? 'Colapsar' : 'Collapse')}</span>
                                   {isCollapsed ? (
                                     <ChevronRight className="w-3.5 h-3.5 text-[#8c672b]" />
                                   ) : (
@@ -5152,28 +5643,32 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                         <div>
                           <div className="flex items-center gap-2">
                             <h4 className="font-fantasy font-bold text-sm text-[#4a361c]">
-                              {activeBackground.name}
+                              {isSpanish ? activeBackground.name : getBgDisplayName(activeBackground)}
                             </h4>
                             <span className="text-[10px] bg-[#ede1ce] text-[#7a6448] px-2 py-0.5 rounded font-mono font-bold">
-                              {activeBackground.category}
+                              {isSpanish ? activeBackground.category : translateDndText(activeBackground.category)}
                             </span>
                           </div>
                           <p className="text-xs text-[#5c4a35] mt-1 leading-relaxed">
                             {(() => {
+                              if (!isSpanish) {
+                                const enDesc = translateBackgroundDescription(activeBackground.id, activeBackground.nameEn);
+                                if (enDesc) return enDesc;
+                              }
                               const desc = activeBackground.description || '';
                               const detailed = activeBackground.detailedDescription || '';
                               if (detailed && (desc.endsWith('...') || detailed.length > desc.length)) {
-                                return detailed;
+                                return isSpanish ? detailed : translateDndText(detailed);
                               }
-                              return desc;
+                              return isSpanish ? desc : translateDndText(desc);
                             })()}
                           </p>
                         </div>
                         <div className="flex items-center gap-2 shrink-0 bg-[#ebdcc4] border border-[#c4b094] px-3 py-1.5 rounded-lg shadow-xs">
                           <Coins className="w-4 h-4 text-[#8c672b]" />
                           <div className="text-right">
-                            <span className="text-[10px] text-[#7a6448] font-fantasy uppercase block leading-none">Oro Inicial</span>
-                            <span className="font-fantasy font-bold text-xs text-[#4a361c]">{formatBackgroundWealth(activeBackground)}</span>
+                            <span className="text-[10px] text-[#7a6448] font-fantasy uppercase block leading-none">{isSpanish ? 'Oro Inicial' : 'Starting Gold'}</span>
+                            <span className="font-fantasy font-bold text-xs text-[#4a361c]">{isSpanish ? formatBackgroundWealth(activeBackground) : formatBackgroundWealth(activeBackground).replace(/po/g, 'gp')}</span>
                           </div>
                         </div>
                       </div>
@@ -5183,14 +5678,14 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                         <div id="creator-background-skill-choices" className="p-4 bg-[#fcf9f2] rounded-xl border border-[#d6c4aa] shadow-xs space-y-2.5">
                           <div className="flex items-center justify-between">
                             <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
-                              <Award className="w-4 h-4 text-[#8c672b]" /> Elección de Habilidades (Elige {activeBackground.skillChoices.count})
+                              <Award className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? `Elección de Habilidades (Elige ${activeBackground.skillChoices.count})` : `Skill Choices (Choose ${activeBackground.skillChoices.count})`}
                             </h5>
                             <span className="text-[11px] font-bold text-[#8c672b] bg-[#f5ede0] px-2.5 py-0.5 rounded-full border border-[#d6c4aa]">
-                              {selectedBackgroundSkills.length} de {activeBackground.skillChoices.count} elegidas
+                              {selectedBackgroundSkills.length} {isSpanish ? 'de' : 'of'} {activeBackground.skillChoices.count} {isSpanish ? 'elegidas' : 'selected'}
                             </span>
                           </div>
                           <p className="text-[11px] text-[#7a6448] leading-relaxed">
-                            El manual oficial establece que con este trasfondo debes elegir <strong>{activeBackground.skillChoices.count}</strong> competencias entre las siguientes opciones:
+                            {isSpanish ? <>El manual oficial establece que con este trasfondo debes elegir <strong>{activeBackground.skillChoices.count}</strong> competencias entre las siguientes opciones:</> : <>Official rules state that with this background you choose <strong>{activeBackground.skillChoices.count}</strong> skill proficiencies from the following options:</>}
                           </p>
                           <div className="flex flex-wrap gap-2 pt-1">
                             {activeBackground.skillChoices.options.map((skillName) => {
@@ -5217,7 +5712,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                   }`}
                                 >
                                   {isChecked ? <Check className="w-3.5 h-3.5 text-white" /> : <Plus className="w-3.5 h-3.5 text-[#8c672b]" />}
-                                  <span>{skillName}</span>
+                                  <span>{isSpanish ? skillName : translateSkillName(skillName)}</span>
                                 </button>
                               );
                             })}
@@ -5225,10 +5720,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                         {activeBackground.skillProficiencies && activeBackground.skillProficiencies.length > 0 && (
                           <div className="p-3 bg-[#fcf9f2] rounded-xl border border-[#d6c4aa] shadow-xs flex items-center justify-between text-xs">
                             <span className="font-fantasy font-bold text-[#4a361c] flex items-center gap-1.5">
-                              <Award className="w-4 h-4 text-[#8c672b]" /> Habilidad Fija de Trasfondo:
+                              <Award className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? 'Habilidad Fija de Trasfondo:' : 'Fixed Background Skill:'}
                             </span>
                             <span className="text-[#5c4a35] font-semibold">
-                              {activeBackground.skillProficiencies.join(', ')}
+                              {activeBackground.skillProficiencies.map((s) => (isSpanish ? s : translateSkillName(s))).join(', ')}
                             </span>
                           </div>
                         )}
@@ -5236,10 +5731,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                     ) : (
                       <div className="p-3 bg-[#fcf9f2] rounded-xl border border-[#d6c4aa] shadow-xs flex items-center justify-between text-xs">
                         <span className="font-fantasy font-bold text-[#4a361c] flex items-center gap-1.5">
-                          <Award className="w-4 h-4 text-[#8c672b]" /> Habilidades de Trasfondo:
+                          <Award className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? 'Habilidades de Trasfondo:' : 'Background Skills:'}
                         </span>
                         <span className="text-[#5c4a35] font-semibold">
-                          {activeBackground.skillProficiencies?.join(', ') || 'Ninguna'}
+                          {activeBackground.skillProficiencies?.map((s) => (isSpanish ? s : translateSkillName(s))).join(', ') || (isSpanish ? 'Ninguna' : 'None')}
                         </span>
                       </div>
                     )}
@@ -5249,14 +5744,14 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       <div className="p-3 bg-[#fcf9f2] rounded-xl border border-[#d6c4aa] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
                         <div>
                           <span className="font-fantasy font-bold text-[#4a361c] flex items-center gap-1.5">
-                            <Award className="w-4 h-4 text-[#8c672b]" /> Competencias en Herramientas (Fijas):
+                            <Award className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? 'Competencias en Herramientas (Fijas):' : 'Tool Proficiencies (Fixed):'}
                           </span>
                           <span className="text-[10px] text-[#7a6448] font-mono italic block mt-0.5">
-                            (Otorga bonificador de competencia al usar estas herramientas en pruebas y tiradas)
+                            {isSpanish ? '(Otorga bonificador de competencia al usar estas herramientas en pruebas y tiradas)' : '(Grants proficiency bonus when making ability checks with these tools)'}
                           </span>
                         </div>
                         <span className="text-[#5c4a35] font-bold bg-[#ebdcc4] px-2.5 py-1 rounded-lg border border-[#c4b094] self-start sm:self-auto">
-                          {activeBackground.toolProficiencies.join(', ')}
+                          {activeBackground.toolProficiencies.map((t) => (isSpanish ? t : translateDndText(t))).join(', ')}
                         </span>
                       </div>
                     )}
@@ -5267,14 +5762,14 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 border-b border-[#e2d2bc] pb-2">
                             <div>
                               <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
-                                <Package className="w-4 h-4 text-[#8c672b]" /> Elección de Competencia en Herramientas / Instrumentos (Elige {activeBackground.toolChoices.count})
+                                <Package className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? `Elección de Competencia en Herramientas / Instrumentos (Elige ${activeBackground.toolChoices.count})` : `Tool / Instrument Proficiency Choice (Choose ${activeBackground.toolChoices.count})`}
                               </h5>
                               <p className="text-[11px] text-[#7a6448] mt-0.5">
-                                Selecciona entre las opciones canónicas disponibles o introduce un instrumento o herramienta personalizada.
+                                {isSpanish ? 'Selecciona entre las opciones canónicas disponibles o introduce un instrumento o herramienta personalizada.' : 'Select from the canonical options available or enter a custom musical instrument or tool.'}
                               </p>
                             </div>
                             <span className="text-[11px] font-bold text-[#8c672b] bg-[#f5ede0] px-2.5 py-0.5 rounded-full border border-[#d6c4aa] shrink-0 self-start sm:self-auto">
-                              {selectedBackgroundTools.length} de {activeBackground.toolChoices.count} elegidas
+                              {selectedBackgroundTools.length} {isSpanish ? 'de' : 'of'} {activeBackground.toolChoices.count} {isSpanish ? 'elegidas' : 'selected'}
                             </span>
                           </div>
 
@@ -5304,7 +5799,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                   }`}
                                 >
                                   {isChecked ? <Check className="w-3.5 h-3.5 text-white" /> : <Plus className="w-3.5 h-3.5 text-[#8c672b]" />}
-                                  <span>{toolName}</span>
+                                  <span>{isSpanish ? toolName : translateDndText(toolName)}</span>
                                 </button>
                               );
                             })}
@@ -5313,12 +5808,12 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                           {/* Custom Tool / Instrument Write-in Field */}
                           <div className="pt-2.5 border-t border-[#e2d2bc]/60 space-y-2">
                             <span className="text-[11px] text-[#7a6448] font-bold block">
-                              ¿Prefieres otro instrumento musical o herramienta personalizada? Escríbela aquí:
+                              {isSpanish ? '¿Prefieres otro instrumento musical o herramienta personalizada? Escríbela aquí:' : 'Prefer another musical instrument or custom tool? Enter it here:'}
                             </span>
                             <div className="flex items-center gap-2">
                               <input
                                 type="text"
-                                placeholder="Ej: Gaita enana, Viola de gamba, Chalumeau, Tamboril..."
+                                placeholder={isSpanish ? 'Ej: Gaita enana, Viola de gamba, Chalumeau, Tamboril...' : 'E.g. Dwarven bagpipes, Viol, Shawm, Tabor...'}
                                 value={customBackgroundToolInput}
                                 onChange={(e) => setCustomBackgroundToolInput(e.target.value)}
                                 onKeyDown={(e) => {
@@ -5335,14 +5830,14 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                 disabled={!customBackgroundToolInput.trim()}
                                 className="px-3 py-1.5 bg-gradient-to-r from-[#b88c32] to-[#8c672b] hover:from-[#cfa344] hover:to-[#a67a33] text-white rounded-lg text-xs font-fantasy font-bold transition flex items-center gap-1 shadow-xs disabled:opacity-50 cursor-pointer shrink-0"
                               >
-                                <Plus className="w-3.5 h-3.5" /> Añadir / Asignar
+                                <Plus className="w-3.5 h-3.5" /> {isSpanish ? 'Añadir / Asignar' : 'Add / Assign'}
                               </button>
                             </div>
 
                             {/* Display selected custom tools */}
                             {selectedBackgroundTools.filter((t) => !activeBackground.toolChoices?.options.includes(t)).length > 0 && (
                               <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                                <span className="text-[10px] text-[#7a6448] uppercase font-bold">Herramientas personalizadas asignadas:</span>
+                                <span className="text-[10px] text-[#7a6448] uppercase font-bold">{isSpanish ? 'Herramientas personalizadas asignadas:' : 'Custom assigned tools:'}</span>
                                 {selectedBackgroundTools
                                   .filter((t) => !activeBackground.toolChoices?.options.includes(t))
                                   .map((toolName) => (
@@ -5374,26 +5869,26 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             <div key={choice.id} className="p-4 bg-[#fcf9f2] rounded-xl border border-[#d6c4aa] shadow-xs space-y-3">
                               <div className="flex items-center justify-between">
                                 <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
-                                  <Sparkles className="w-4 h-4 text-[#8c672b]" /> {choice.label}
+                                  <Sparkles className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? choice.label : translateDndTitle(choice.label)}
                                 </h5>
                                 {choice.type === 'horror_trinket' && (
                                   <span className="text-[10px] bg-[#3b2818] text-[#e8c37d] px-2 py-0.5 rounded font-mono font-bold">
-                                    Tabla d100 de Horror
+                                    {isSpanish ? 'Tabla d100 de Horror' : 'Horror d100 Table'}
                                   </span>
                                 )}
                                 {choice.type === 'standard_trinket' && (
                                   <span className="text-[10px] bg-[#3b2818] text-[#e8c37d] px-2 py-0.5 rounded font-mono font-bold">
-                                    Tabla Común d100
+                                    {isSpanish ? 'Tabla Común d100' : 'Standard d100 Table'}
                                   </span>
                                 )}
                                 {choice.type === 'feywild_trinket' && (
                                   <span className="text-[10px] bg-[#3b2818] text-[#e8c37d] px-2 py-0.5 rounded font-mono font-bold">
-                                    Tabla Feérica
+                                    {isSpanish ? 'Tabla Feérica' : 'Feywild Table'}
                                   </span>
                                 )}
                               </div>
                               <p className="text-xs text-[#5c4a35] leading-relaxed">
-                                {choice.description}
+                                {isSpanish ? choice.description : translateDndText(choice.description)}
                               </p>
 
                               {/* Action Buttons: Roll d100 & Pick from List */}
@@ -5413,7 +5908,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                     className="px-3 py-1.5 rounded-lg border border-[#8c672b] bg-[#ebdcc4] hover:bg-[#dfcdb1] text-xs font-fantasy font-bold text-[#4a361c] flex items-center justify-center gap-1.5 transition cursor-pointer shadow-xs shrink-0"
                                   >
                                     <Dices className="w-4 h-4 text-[#8c672b]" />
-                                    <span>🎲 Tirar 1d100 en la Tabla del Horror</span>
+                                    <span>{isSpanish ? '🎲 Tirar 1d100 en la Tabla del Horror' : '🎲 Roll 1d100 on Horror Table'}</span>
                                   </button>
                                 )}
                                 {choice.type === 'standard_trinket' && (
@@ -5431,7 +5926,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                     className="px-3 py-1.5 rounded-lg border border-[#8c672b] bg-[#ebdcc4] hover:bg-[#dfcdb1] text-xs font-fantasy font-bold text-[#4a361c] flex items-center justify-center gap-1.5 transition cursor-pointer shadow-xs shrink-0"
                                   >
                                     <Dices className="w-4 h-4 text-[#8c672b]" />
-                                    <span>🎲 Tirar 1d100 en la Tabla Común</span>
+                                    <span>{isSpanish ? '🎲 Tirar 1d100 en la Tabla Común' : '🎲 Roll 1d100 on Standard Table'}</span>
                                   </button>
                                 )}
                                 {choice.type === 'feywild_trinket' && (
@@ -5449,7 +5944,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                     className="px-3 py-1.5 rounded-lg border border-[#8c672b] bg-[#ebdcc4] hover:bg-[#dfcdb1] text-xs font-fantasy font-bold text-[#4a361c] flex items-center justify-center gap-1.5 transition cursor-pointer shadow-xs shrink-0"
                                   >
                                     <Dices className="w-4 h-4 text-[#8c672b]" />
-                                    <span>🎲 Tirar 1d100 en la Tabla Feérica</span>
+                                    <span>{isSpanish ? '🎲 Tirar 1d100 en la Tabla Feérica' : '🎲 Roll 1d100 on Feywild Table'}</span>
                                   </button>
                                 )}
 
@@ -5469,7 +5964,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                       }}
                                       className="w-full bg-white border border-[#d6c4aa] rounded-lg px-2.5 py-1.5 text-xs text-[#2c241b] focus:outline-none focus:border-[#8c672b] cursor-pointer"
                                     >
-                                      <option value="">-- O elige directamente de la lista --</option>
+                                      <option value="">{isSpanish ? '-- O elige directamente de la lista --' : '-- Or choose directly from the list --'}</option>
                                       {(choice.type === 'horror_trinket'
                                         ? GOTHIC_HORROR_TRINKETS
                                         : choice.type === 'feywild_trinket'
@@ -5480,7 +5975,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                           key={trinket.roll}
                                           value={`(d100 #${trinket.roll}) ${trinket.name}: ${trinket.description}`}
                                         >
-                                          #{trinket.roll}: {trinket.name}
+                                          #{trinket.roll}: {isSpanish ? trinket.name : translateDndTitle(trinket.name)}
                                         </option>
                                       ))}
                                     </select>
@@ -5502,7 +5997,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                     >
                                       {choice.options.map((opt) => (
                                         <option key={opt} value={opt}>
-                                          {opt}
+                                          {isSpanish ? opt : translateDndText(opt)}
                                         </option>
                                       ))}
                                     </select>
@@ -5515,7 +6010,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                 <div className="p-2 bg-[#f4ecd8] border border-[#d0b47e] rounded-lg flex items-center gap-2 text-xs text-[#5e4315] animate-fade-in">
                                   <Dices className="w-4 h-4 text-[#8c672b] shrink-0" />
                                   <span>
-                                    ¡Tiraste un <strong>d100 = #{lastTrinketRollFeedback.roll}</strong>: <em>{lastTrinketRollFeedback.text}</em>!
+                                    {isSpanish ? '¡Tiraste un' : 'You rolled a'} <strong>d100 = #{lastTrinketRollFeedback.roll}</strong>: <em>{isSpanish ? lastTrinketRollFeedback.text : translateDndTitle(lastTrinketRollFeedback.text)}</em>!
                                   </span>
                                 </div>
                               )}
@@ -5523,7 +6018,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                               {/* Text Input to customize item */}
                               <div className="space-y-1">
                                 <span className="text-[10px] text-[#7a6448] font-bold block">
-                                  Elemento asignado al inventario (editable):
+                                  {isSpanish ? 'Elemento asignado al inventario (editable):' : 'Item assigned to inventory (editable):'}
                                 </span>
                                 <input
                                   type="text"
@@ -5534,7 +6029,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                       [choice.id]: e.target.value,
                                     }));
                                   }}
-                                  placeholder="Escribe o selecciona tu objeto / evidencia..."
+                                  placeholder={isSpanish ? 'Escribe o selecciona tu objeto / evidencia...' : 'Write or select your item / evidence...'}
                                   className="w-full bg-white border border-[#d6c4aa] rounded-lg px-3 py-1.5 text-xs text-[#2c241b] focus:outline-none focus:border-[#8c672b]"
                                 />
                               </div>
@@ -5546,18 +6041,18 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       {/* Special Feature Details */}
                       <div className="p-4 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] space-y-2 shadow-xs">
                         <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
-                          <Star className="w-4 h-4 text-[#8c672b]" /> Rasgo Especial: {activeBackground.featureName}
+                          <Star className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? 'Rasgo Especial:' : 'Background Feature:'} {isSpanish ? activeBackground.featureName : translateDndTitle(activeBackground.featureName)}
                         </h5>
                         <p className="text-xs text-[#5c4a35] leading-relaxed">
-                          {activeBackground.featureDescription}
+                          {isSpanish ? activeBackground.featureDescription : translateDndText(activeBackground.featureDescription)}
                         </p>
                         {activeBackground.suggestedEquipment && (
                           <div className="pt-2 border-t border-[#e2d2bc] text-[11px] text-[#7a6448] italic flex items-center justify-between">
                             <div>
-                              <strong>Equipo Oficial:</strong> {activeBackground.suggestedEquipment}
+                              <strong>{isSpanish ? 'Equipo Oficial:' : 'Official Equipment:'}</strong> {isSpanish ? activeBackground.suggestedEquipment : translateBackgroundEquipment(activeBackground.id, activeBackground.nameEn, activeBackground.suggestedEquipment)}
                             </div>
                             <span className="font-mono font-bold text-[#8c672b] not-italic shrink-0 ml-2">
-                              💰 {formatBackgroundWealth(activeBackground)}
+                              💰 {isSpanish ? formatBackgroundWealth(activeBackground) : formatBackgroundWealth(activeBackground).replace('po', 'gp')}
                             </span>
                           </div>
                         )}
@@ -5571,15 +6066,15 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 border-b border-[#e2d2bc] pb-2">
                             <div>
                               <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
-                                <Languages className="w-4 h-4 text-[#8c672b]" /> Idiomas de Trasfondo ({activeBackground.languagesCount || activeBackground.fixedLanguages?.length || 0} en total)
+                                <Languages className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? `Idiomas de Trasfondo (${activeBackground.languagesCount || activeBackground.fixedLanguages?.length || 0} en total)` : `Background Languages (${activeBackground.languagesCount || activeBackground.fixedLanguages?.length || 0} total)`}
                               </h5>
                               <p className="text-[11px] text-[#7a6448] mt-0.5">
-                                Tu historia y raíces te han enseñado a comunicarte en lenguas adicionales a las de tu linaje racial.
+                                {isSpanish ? 'Tu historia y raíces te han enseñado a comunicarte en lenguas adicionales a las de tu linaje racial.' : 'Your history and roots have taught you additional languages beyond those of your racial lineage.'}
                               </p>
                             </div>
                             <div className="flex items-center gap-2">
                               <span className="text-[11px] font-bold text-[#8c672b] bg-[#f5ede0] px-2.5 py-0.5 rounded-full border border-[#d6c4aa] shrink-0 self-start sm:self-auto">
-                                {selectedBackgroundLanguages.length} de {activeBackground.languagesCount || activeBackground.fixedLanguages?.length || 1} seleccionados
+                                {selectedBackgroundLanguages.length} {isSpanish ? 'de' : 'of'} {activeBackground.languagesCount || activeBackground.fixedLanguages?.length || 1} {isSpanish ? 'seleccionados' : 'selected'}
                               </span>
                             </div>
                           </div>
@@ -5589,13 +6084,13 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             <Shield className="w-4 h-4 text-[#8c672b] shrink-0 mt-0.5" />
                             <div className="flex-1">
                               <span className="font-bold font-fantasy text-[#4a361c]">
-                                Idiomas conocidos por tu linaje racial ({activeRace?.name || 'Sin Raza'}):{' '}
+                                {isSpanish ? `Idiomas conocidos por tu linaje racial (${activeRace?.name || 'Sin Raza'}): ` : `Languages known from your racial lineage (${getRaceDisplayName(activeRace) || 'No Race'}): `}
                               </span>
                               <span className="font-semibold text-[#8c672b]">
-                                {knownRacialLanguages.join(', ')}
+                                {isSpanish ? knownRacialLanguages.join(', ') : translateLanguageList(knownRacialLanguages)}
                               </span>
                               <span className="text-[10px] text-[#7a6448] block mt-0.5 italic">
-                                ✨ Ya dominados de nacimiento por tu raza. No consumen ninguna de las ranuras de tu trasfondo.
+                                {isSpanish ? '✨ Ya dominados de nacimiento por tu raza. No consumen ninguna de las ranuras de tu trasfondo.' : '✨ Already known from your racial lineage. They do not consume background language slots.'}
                               </span>
                             </div>
                           </div>
@@ -5605,7 +6100,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             <div className="flex items-start gap-2 p-2.5 bg-[#fffaf0] rounded-lg border border-[#e8c882] text-[11px] text-[#7c5315]">
                               <Info className="w-4 h-4 text-[#b88c32] shrink-0 mt-0.5" />
                               <div>
-                                <span className="font-bold block">Regla Especial de este Trasfondo:</span>
+                                <span className="font-bold block">{isSpanish ? 'Regla Especial de este Trasfondo:' : 'Special Background Rule:'}</span>
                                 <span>{activeBackground.languageNote}</span>
                               </div>
                             </div>
@@ -5615,7 +6110,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                           {activeBackground.fixedLanguages && activeBackground.fixedLanguages.length > 0 && (
                             <div className="space-y-1.5">
                               <span className="text-[10px] text-[#7a6448] uppercase font-bold tracking-wider flex items-center gap-1">
-                                <Lock className="w-3 h-3 text-[#8c672b]" /> Idioma obligatorio de este trasfondo:
+                                <Lock className="w-3 h-3 text-[#8c672b]" /> {isSpanish ? 'Idioma obligatorio de este trasfondo:' : 'Mandatory language from this background:'}
                               </span>
                               <div className="flex flex-wrap gap-2">
                                 {activeBackground.fixedLanguages.map((fl) => (
@@ -5638,14 +6133,14 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                               <div className="flex items-center justify-between border-b border-[#e8ddcb] pb-1.5">
                                 <div>
                                   <span className="text-xs font-fantasy font-bold text-[#4a361c] flex items-center gap-1.5">
-                                    <Languages className="w-4 h-4 text-[#8c672b]" /> Idiomas Específicos Permitidos (Elige {activeBackground.languagesCount || 1})
+                                    <Languages className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? `Idiomas Específicos Permitidos (Elige ${activeBackground.languagesCount || 1})` : `Allowed Specific Languages (Choose ${activeBackground.languagesCount || 1})`}
                                   </span>
                                   <span className="text-[10px] text-[#7a6448] block mt-0.5">
-                                    Este trasfondo solo permite elegir entre las siguientes lenguas tradicionales:
+                                    {isSpanish ? 'Este trasfondo solo permite elegir entre las siguientes lenguas tradicionales:' : 'This background allows choosing from the following traditional languages:'}
                                   </span>
                                 </div>
                                 <span className="text-[11px] font-bold text-[#8c672b] bg-[#f5ede0] px-2.5 py-0.5 rounded-full border border-[#d6c4aa]">
-                                  {selectedBackgroundLanguages.filter((l) => activeBackground.languageOptions?.includes(l)).length} de {activeBackground.languagesCount || 1} seleccionados
+                                  {selectedBackgroundLanguages.filter((l) => activeBackground.languageOptions?.includes(l)).length} {isSpanish ? 'de' : 'of'} {activeBackground.languagesCount || 1} {isSpanish ? 'seleccionados' : 'selected'}
                                 </span>
                               </div>
 
@@ -5701,10 +6196,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                       }
                                     >
                                       <div className="flex items-center justify-between">
-                                        <span className="font-bold">{optName}</span>
+                                        <span className="font-bold">{isSpanish ? optName : (translateLanguageName(optName) || optName)}</span>
                                         {isRacial ? (
                                           <span className="text-[9px] text-[#8c672b] bg-[#e4d7c3] px-1 py-0.2 rounded font-mono font-normal">
-                                            Raza
+                                            {isSpanish ? 'Raza' : 'Race'}
                                           </span>
                                         ) : isSelected ? (
                                           <Check className="w-3.5 h-3.5 text-white" />
@@ -5715,7 +6210,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                           isSelected ? 'text-amber-100' : isRacial ? 'text-[#9c8974]' : 'text-[#7a6448]'
                                         }`}
                                       >
-                                        {isRacial ? '(Innato por raza)' : langObj ? `${langObj.type} • ${langObj.script}` : 'Especial'}
+                                        {isRacial ? (isSpanish ? '(Innato por raza)' : '(Innate racial)') : langObj ? `${isSpanish ? langObj.type : (langObj.type === 'Exótico' ? 'Exotic' : 'Standard')} • ${isSpanish ? langObj.script : translateLanguageScript(langObj.script)}` : (isSpanish ? 'Especial' : 'Special')}
                                       </span>
                                     </button>
                                   );
@@ -5727,11 +6222,11 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                               {activeBackground.languageSlots.map((slotType, slotIdx) => {
                                 const isExoticSlot = slotType === 'exotic';
                                 const slotTitle = isExoticSlot
-                                  ? `Ranura ${slotIdx + 1}: Idioma Exótico Obligatorio (Elige 1)`
-                                  : `Ranura ${slotIdx + 1}: Idioma Estándar / Común (Elige 1)`;
+                                  ? (isSpanish ? `Ranura ${slotIdx + 1}: Idioma Exótico Obligatorio (Elige 1)` : `Slot ${slotIdx + 1}: Mandatory Exotic Language (Choose 1)`)
+                                  : (isSpanish ? `Ranura ${slotIdx + 1}: Idioma Estándar / Común (Elige 1)` : `Slot ${slotIdx + 1}: Standard / Common Language (Choose 1)`);
                                 const slotSubtitle = isExoticSlot
-                                  ? 'Debe pertenecer a lenguas arcanas, planares u oscuras (Abisal, Celestial, Habla Profunda, Dracónico, etc.)'
-                                  : 'Lenguas comunes de los pueblos civilizados del multiverso';
+                                  ? (isSpanish ? 'Debe pertenecer a lenguas arcanas, planares u oscuras (Abisal, Celestial, Habla Profunda, Dracónico, etc.)' : 'Must belong to arcane, planar, or obscure tongues (Abyssal, Celestial, Deep Speech, Draconic, etc.)')
+                                  : (isSpanish ? 'Lenguas comunes de los pueblos civilizados del multiverso' : 'Common tongues of the civilized peoples of the multiverse');
 
                                 const slotOptions = OFFICIAL_5E_LANGUAGES.filter((l) =>
                                   isExoticSlot ? l.type === 'Exótico' : l.type === 'Estándar'
@@ -5792,17 +6287,17 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                             }
                                           >
                                             <div className="flex items-center justify-between">
-                                              <span className="font-bold">{lang.name}</span>
+                                              <span className="font-bold">{isSpanish ? lang.name : (lang.nameEn || lang.name)}</span>
                                               {isRacial ? (
                                                 <span className="text-[9px] text-[#8c672b] bg-[#e4d7c3] px-1 py-0.2 rounded font-mono font-normal">
-                                                  Raza
+                                                  {isSpanish ? 'Raza' : 'Race'}
                                                 </span>
                                               ) : isSelected ? (
                                                 <Check className="w-3.5 h-3.5 text-white" />
                                               ) : null}
                                             </div>
                                             <span className={`text-[9px] mt-0.5 ${isSelected ? 'text-amber-100' : isRacial ? 'text-[#9c8974]' : 'text-[#7a6448]'}`}>
-                                              {isRacial ? '(Innato por raza)' : `${lang.type} • ${lang.script}`}
+                                              {isRacial ? (isSpanish ? '(Innato por raza)' : '(Innate racial)') : `${isSpanish ? lang.type : (lang.type === 'Exótico' ? 'Exotic' : 'Standard')} • ${isSpanish ? lang.script : translateLanguageScript(lang.script)}`}
                                             </span>
                                           </button>
                                         );
@@ -5817,7 +6312,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             Math.max(0, (activeBackground.languagesCount || 0) - (activeBackground.fixedLanguages?.length || 0)) > 0 && (
                               <div className="space-y-2 pt-1">
                                 <span className="text-[10px] text-[#7a6448] uppercase font-bold tracking-wider block">
-                                  Elige {Math.max(0, (activeBackground.languagesCount || 0) - (activeBackground.fixedLanguages?.length || 0))} idioma(s) adicional(es) a tu elección:
+                                  {isSpanish ? `Elige ${Math.max(0, (activeBackground.languagesCount || 0) - (activeBackground.fixedLanguages?.length || 0))} idioma(s) adicional(es) a tu elección:` : `Choose ${Math.max(0, (activeBackground.languagesCount || 0) - (activeBackground.fixedLanguages?.length || 0))} additional language(s) of your choice:`}
                                 </span>
 
                                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1.5">
@@ -5867,22 +6362,22 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                         }`}
                                         title={
                                           isRacial
-                                            ? `Ya conocido por tu linaje racial (${activeRace?.name || 'Raza'}).`
-                                            : `${lang.name} (${lang.nameEn}) - Alfabeto: ${lang.script}`
+                                            ? (isSpanish ? `Ya conocido por tu linaje racial (${activeRace?.name || 'Raza'}).` : `Already known from your racial lineage (${getRaceDisplayName(activeRace) || 'Race'}).`)
+                                            : `${isSpanish ? lang.name : (lang.nameEn || lang.name)} - ${isSpanish ? 'Alfabeto' : 'Script'}: ${isSpanish ? lang.script : translateLanguageScript(lang.script)}`
                                         }
                                       >
                                         <div className="flex items-center justify-between">
-                                          <span className="font-bold">{lang.name}</span>
+                                          <span className="font-bold">{isSpanish ? lang.name : (lang.nameEn || lang.name)}</span>
                                           {isRacial ? (
                                             <span className="text-[9px] text-[#8c672b] bg-[#e4d7c3] px-1 py-0.2 rounded font-mono font-normal">
-                                              Raza
+                                              {isSpanish ? 'Raza' : 'Race'}
                                             </span>
                                           ) : isSelected ? (
                                             <Check className="w-3.5 h-3.5 text-white" />
                                           ) : null}
                                         </div>
                                         <span className={`text-[9px] mt-0.5 ${isSelected ? 'text-amber-100' : isRacial ? 'text-[#9c8974]' : 'text-[#7a6448]'}`}>
-                                          {isRacial ? '(Innato por raza)' : `${lang.type} • ${lang.script}`}
+                                          {isRacial ? (isSpanish ? '(Innato por raza)' : '(Innate racial)') : `${isSpanish ? lang.type : (lang.type === 'Exótico' ? 'Exotic' : 'Standard')} • ${isSpanish ? lang.script : translateLanguageScript(lang.script)}`}
                                         </span>
                                       </button>
                                     );
@@ -5895,12 +6390,12 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                           {/* Custom language input */}
                           <div className="pt-2 border-t border-[#e2d2bc]/60 space-y-1.5">
                             <span className="text-[10px] text-[#7a6448] font-bold block">
-                              ¿Tu ambientación o DM utiliza otro dialecto o idioma exótico? Escríbelo aquí:
+                              {isSpanish ? '¿Tu ambientación o DM utiliza otro dialecto o idioma exótico? Escríbelo aquí:' : 'Does your setting or DM use another dialect or exotic language? Enter it here:'}
                             </span>
                             <div className="flex items-center gap-2">
                               <input
                                 type="text"
-                                placeholder="Ej: Silvano, Habla Profunda, Infracomún, Druídico..."
+                                placeholder={isSpanish ? "Ej: Silvano, Habla Profunda, Infracomún, Druídico..." : "E.g., Sylvan, Deep Speech, Undercommon, Druidic..."}
                                 value={customBackgroundLanguageInput}
                                 onChange={(e) => setCustomBackgroundLanguageInput(e.target.value)}
                                 onKeyDown={(e) => {
@@ -5917,7 +6412,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                 disabled={!customBackgroundLanguageInput.trim()}
                                 className="px-3 py-1.5 bg-gradient-to-r from-[#b88c32] to-[#8c672b] hover:from-[#cfa344] hover:to-[#a67a33] text-white rounded-lg text-xs font-fantasy font-bold transition flex items-center gap-1 shadow-xs disabled:opacity-50 cursor-pointer shrink-0"
                               >
-                                <Plus className="w-3.5 h-3.5" /> Añadir
+                                <Plus className="w-3.5 h-3.5" /> {isSpanish ? 'Añadir' : 'Add'}
                               </button>
                             </div>
                           </div>
@@ -5932,11 +6427,13 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#d8be8a] pb-2.5">
                               <div>
                                 <span className="text-[10px] font-mono uppercase tracking-wider text-[#9c6a1e] font-bold block">
-                                  ★ Dote Oficial Otorgada por Trasfondo (Reglas Oficiales 5e)
+                                  ★ {isSpanish ? 'Dote Oficial Otorgada por Trasfondo (Reglas Oficiales 5e)' : 'Official Bonus Feat Granted by Background (Official 5e Rules)'}
                                 </span>
                                 <h4 className="font-fantasy font-bold text-sm text-[#4a361c] flex items-center gap-1.5">
                                   <Star className="w-4 h-4 text-[#b88c32] fill-[#b88c32]" />
-                                  {bonusFeat?.name || activeBackground.bonusFeatName || 'Dote Especial'}
+                                  {isSpanish
+                                    ? (bonusFeat?.name || activeBackground.bonusFeatName || 'Dote Especial')
+                                    : (bonusFeat?.nameEn || translateDndTitle(bonusFeat?.name || activeBackground.bonusFeatName || 'Special Feat'))}
                                 </h4>
                               </div>
                               {bonusFeat && (
@@ -5945,14 +6442,14 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                   onClick={() => setInspectingFeat(bonusFeat)}
                                   className="px-3 py-1.5 bg-white/80 hover:bg-white text-[#7a5a2b] hover:text-[#4a361c] border border-[#cbb99f] rounded-lg text-xs font-fantasy font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs self-start sm:self-auto shrink-0"
                                 >
-                                  <Eye className="w-3.5 h-3.5 text-[#8c672b]" /> Ver Detalles & Reglas
+                                  <Eye className="w-3.5 h-3.5 text-[#8c672b]" /> {isSpanish ? 'Ver Detalles & Reglas' : 'View Details & Rules'}
                                 </button>
                               )}
                             </div>
 
                             {bonusFeat && (
                               <p className="text-xs text-[#5c4a35] leading-relaxed">
-                                {bonusFeat.description}
+                                {isSpanish ? bonusFeat.description : translateDndText(bonusFeat.description)}
                               </p>
                             )}
 
@@ -5962,10 +6459,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                 <div>
                                   <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
                                     <Sparkles className="w-3.5 h-3.5 text-[#b88c32]" />
-                                    {bonusFeat.subChoice.title}
+                                    {isSpanish ? bonusFeat.subChoice.title : translateDndTitle(bonusFeat.subChoice.title)}
                                   </h5>
                                   <p className="text-[11px] text-[#7a6448]">
-                                    {bonusFeat.subChoice.description}
+                                    {isSpanish ? bonusFeat.subChoice.description : translateDndText(bonusFeat.subChoice.description || '')}
                                   </p>
                                 </div>
 
@@ -5987,17 +6484,17 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                             <span className={`w-3 h-3 rounded-full border flex items-center justify-center shrink-0 ${isChosen ? 'border-white bg-white' : 'border-[#8c672b]'}`}>
                                               {isChosen && <span className="w-1.5 h-1.5 rounded-full bg-[#8c672b]" />}
                                             </span>
-                                            {opt.name}
+                                            {isSpanish ? opt.name : translateDndTitle(opt.name)}
                                           </span>
                                           {isChosen && (
                                             <span className="text-[10px] bg-white/20 text-white px-2 py-0.5 rounded font-mono font-bold shrink-0">
-                                              Seleccionado
+                                              {isSpanish ? 'Seleccionado' : 'Selected'}
                                             </span>
                                           )}
                                         </div>
                                         {opt.desc && (
                                           <p className={`text-[11px] mt-1.5 leading-relaxed ${isChosen ? 'text-amber-100' : 'text-[#6b553e]'}`}>
-                                            {opt.desc}
+                                            {isSpanish ? opt.desc : translateDndText(opt.desc)}
                                           </p>
                                         )}
                                       </div>
@@ -6016,10 +6513,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                           <div>
                             <h4 className="font-fantasy font-bold text-sm text-[#4a361c] uppercase tracking-wide flex items-center gap-2">
                               <Sparkles className="w-4 h-4 text-[#8c672b]" />
-                              Personalidad, Convicciones & Rasgos de Rol
+                              {isSpanish ? 'Personalidad, Convicciones & Rasgos de Rol' : 'Personality, Convictions & Roleplay Traits'}
                             </h4>
                             <p className="text-[11px] text-[#7a6448]">
-                              Tablas de rol canónicas basadas en tu trasfondo ({activeBackground.name}). Tira dados para inspirarte o selecciona directamente en las listas.
+                              {isSpanish ? `Tablas de rol canónicas basadas en tu trasfondo (${activeBackground.name}). Tira dados para inspirarte o selecciona directamente en las listas.` : `Canonical roleplay tables based on your background (${getBgDisplayName(activeBackground)}). Roll dice for inspiration or select directly from the lists.`}
                             </p>
                           </div>
 
@@ -6030,7 +6527,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             title="Tira dados para generar automáticamente Virtudes, Ideales, Vínculos y Defectos"
                           >
                             <Dices className="w-4 h-4" />
-                            🎲🎲 Tirar Todo con Dados
+                            🎲🎲 {isSpanish ? 'Tirar Todo con Dados' : 'Roll All with Dice'}
                           </button>
                         </div>
 
@@ -6040,7 +6537,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             <div>
                               <div className="flex items-center justify-between">
                                 <label className="block text-xs font-bold font-fantasy text-[#4a361c] uppercase flex items-center gap-1.5">
-                                  <span>🎭</span> Rasgos de Personalidad & Virtudes
+                                  <span>🎭</span> {isSpanish ? 'Rasgos de Personalidad & Virtudes' : 'Personality Traits & Virtues'}
                                 </label>
                                 <div className="flex items-center gap-1.5">
                                   <span className="text-[10px] bg-[#ebdcc4] text-[#7a5a2b] px-2 py-0.5 rounded font-mono font-bold">
@@ -6052,12 +6549,12 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                     className="px-2 py-1 bg-[#ede1ce] hover:bg-[#dfcfb9] text-[#7a5a2b] hover:text-[#4a361c] border border-[#cbb99f] rounded text-[11px] font-fantasy font-bold transition flex items-center gap-1 cursor-pointer"
                                     title={`Tirar dado d${currentRoleplayOptions.personalityTraits.length || 8} en la tabla de rasgos (genera 2 rasgos)`}
                                   >
-                                    <Dices className="w-3.5 h-3.5" /> Tirar d{currentRoleplayOptions.personalityTraits.length || 8}
+                                    <Dices className="w-3.5 h-3.5" /> {isSpanish ? 'Tirar' : 'Roll'} d{currentRoleplayOptions.personalityTraits.length || 8}
                                   </button>
                                 </div>
                               </div>
                               <p className="text-[10px] text-[#7a6448] mt-0.5">
-                                Elige 1 o 2 rasgos oficiales de la tabla o escribe abajo tus propias costumbres:
+                                {isSpanish ? 'Elige 1 o 2 rasgos oficiales de la tabla o escribe abajo tus propias costumbres:' : 'Choose 1 or 2 official traits from the table or write your own below:'}
                               </p>
 
                               {/* Dropdown Selector */}
@@ -6071,12 +6568,12 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                   }}
                                   className="w-full bg-white border border-[#d6c4aa] rounded-lg p-2 text-xs text-[#2c241b] focus:outline-none focus:border-[#8c672b] cursor-pointer"
                                 >
-                                  <option value="">-- Selecciona para alternar un rasgo ({currentRoleplayOptions.personalityTraits.length} disponibles) --</option>
+                                  <option value="">{isSpanish ? `-- Selecciona para alternar un rasgo (${currentRoleplayOptions.personalityTraits.length} disponibles) --` : `-- Select to toggle a trait (${currentRoleplayOptions.personalityTraits.length} available) --`}</option>
                                   {currentRoleplayOptions.personalityTraits.map((opt, idx) => {
-                                    const isChosen = personalityTraits.includes(opt.text);
+                                    const isChosen = personalityTraits.includes(opt.text) || personalityTraits.includes(translateRoleplayOptionText(opt.text));
                                     return (
                                       <option key={opt.id} value={opt.text}>
-                                        {isChosen ? '✓ ' : ''}{idx + 1}. {opt.text}
+                                        {isChosen ? '✓ ' : ''}{idx + 1}. {isSpanish ? opt.text : translateRoleplayOptionText(opt.text)}
                                       </option>
                                     );
                                   })}
@@ -6089,7 +6586,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                 rows={3}
                                 value={personalityTraits}
                                 onChange={(e) => setPersonalityTraits(e.target.value)}
-                                placeholder="Escribe o edita aquí los rasgos de personalidad..."
+                                placeholder={isSpanish ? "Escribe o edita aquí los rasgos de personalidad..." : "Write or edit personality traits here..."}
                                 className="w-full bg-white border border-[#d6c4aa] rounded-lg p-2 text-xs text-[#2c241b] focus:outline-none focus:border-[#8c672b] shadow-inner"
                               />
                             </div>
@@ -6100,7 +6597,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             <div>
                               <div className="flex items-center justify-between">
                                 <label className="block text-xs font-bold font-fantasy text-[#4a361c] uppercase flex items-center gap-1.5">
-                                  <span>⚖️</span> Ideales & Convicciones Morales
+                                  <span>⚖️</span> {isSpanish ? 'Ideales & Convicciones Morales' : 'Ideals & Moral Convictions'}
                                 </label>
                                 <button
                                   type="button"
@@ -6108,17 +6605,17 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                   className="px-2.5 py-1 bg-[#ede1ce] hover:bg-[#dfcfb9] text-[#7a5a2b] hover:text-[#4a361c] border border-[#cbb99f] rounded text-[11px] font-fantasy font-bold transition flex items-center gap-1 cursor-pointer"
                                   title={`Tirar dado d${currentRoleplayOptions.ideals.length || 6} en la tabla de ideales`}
                                 >
-                                  <Dices className="w-3.5 h-3.5" /> Tirar d{currentRoleplayOptions.ideals.length || 6}
+                                  <Dices className="w-3.5 h-3.5" /> {isSpanish ? 'Tirar' : 'Roll'} d{currentRoleplayOptions.ideals.length || 6}
                                 </button>
                               </div>
                               <p className="text-[10px] text-[#7a6448] mt-0.5">
-                                ¿Qué principio o deber moral guía tus decisiones más difíciles?
+                                {isSpanish ? '¿Qué principio o deber moral guía tus decisiones más difíciles?' : 'What moral principle or duty guides your toughest decisions?'}
                               </p>
 
                               {/* Dropdown Selector */}
                               <div className="mt-2">
                                 <select
-                                  value={currentRoleplayOptions.ideals.find((opt) => ideals.includes(opt.text))?.text || ''}
+                                  value={currentRoleplayOptions.ideals.find((opt) => ideals.includes(opt.text) || ideals.includes(translateRoleplayOptionText(opt.text)))?.text || ''}
                                   onChange={(e) => {
                                     const chosen = currentRoleplayOptions.ideals.find((opt) => opt.text === e.target.value);
                                     if (chosen) {
@@ -6129,10 +6626,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                   }}
                                   className="w-full bg-white border border-[#d6c4aa] rounded-lg p-2 text-xs text-[#2c241b] focus:outline-none focus:border-[#8c672b] cursor-pointer"
                                 >
-                                  <option value="">-- Elige un ideal de la tabla ({currentRoleplayOptions.ideals.length} opciones) --</option>
+                                  <option value="">{isSpanish ? `-- Elige un ideal de la tabla (${currentRoleplayOptions.ideals.length} opciones) --` : `-- Choose an ideal from the table (${currentRoleplayOptions.ideals.length} options) --`}</option>
                                   {currentRoleplayOptions.ideals.map((opt, idx) => (
                                     <option key={opt.id} value={opt.text}>
-                                      {idx + 1}. {opt.tag ? `[${opt.tag}] ` : ''}{opt.text}
+                                      {idx + 1}. {opt.tag ? `[${isSpanish ? opt.tag : translateDndTitle(opt.tag)}] ` : ''}{isSpanish ? opt.text : translateRoleplayOptionText(opt.text)}
                                     </option>
                                   ))}
                                 </select>
@@ -6144,7 +6641,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                 rows={3}
                                 value={ideals}
                                 onChange={(e) => setIdeals(e.target.value)}
-                                placeholder="Escribe o edita aquí el ideal..."
+                                placeholder={isSpanish ? "Escribe o edita aquí el ideal..." : "Write or edit your ideal here..."}
                                 className="w-full bg-white border border-[#d6c4aa] rounded-lg p-2 text-xs text-[#2c241b] focus:outline-none focus:border-[#8c672b] shadow-inner"
                               />
                             </div>
@@ -6155,7 +6652,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             <div>
                               <div className="flex items-center justify-between">
                                 <label className="block text-xs font-bold font-fantasy text-[#4a361c] uppercase flex items-center gap-1.5">
-                                  <span>🔗</span> Vínculos & Lazos de Vida
+                                  <span>🔗</span> {isSpanish ? 'Vínculos & Lazos de Vida' : 'Bonds & Life Ties'}
                                 </label>
                                 <button
                                   type="button"
@@ -6163,17 +6660,17 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                   className="px-2.5 py-1 bg-[#ede1ce] hover:bg-[#dfcfb9] text-[#7a5a2b] hover:text-[#4a361c] border border-[#cbb99f] rounded text-[11px] font-fantasy font-bold transition flex items-center gap-1 cursor-pointer"
                                   title={`Tirar dado d${currentRoleplayOptions.bonds.length || 6} en la tabla de vínculos`}
                                 >
-                                  <Dices className="w-3.5 h-3.5" /> Tirar d{currentRoleplayOptions.bonds.length || 6}
+                                  <Dices className="w-3.5 h-3.5" /> {isSpanish ? 'Tirar' : 'Roll'} d{currentRoleplayOptions.bonds.length || 6}
                                 </button>
                               </div>
                               <p className="text-[10px] text-[#7a6448] mt-0.5">
-                                ¿Por quién o qué darías la vida? ¿A quién le debes tu lealtad?
+                                {isSpanish ? '¿Por quién o qué darías la vida? ¿A quién le debes tu lealtad?' : 'Who or what would you give your life for? To whom do you owe your loyalty?'}
                               </p>
 
                               {/* Dropdown Selector */}
                               <div className="mt-2">
                                 <select
-                                  value={currentRoleplayOptions.bonds.find((opt) => bonds.includes(opt.text))?.text || ''}
+                                  value={currentRoleplayOptions.bonds.find((opt) => bonds.includes(opt.text) || bonds.includes(translateRoleplayOptionText(opt.text)))?.text || ''}
                                   onChange={(e) => {
                                     const chosen = currentRoleplayOptions.bonds.find((opt) => opt.text === e.target.value);
                                     if (chosen) {
@@ -6184,10 +6681,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                   }}
                                   className="w-full bg-white border border-[#d6c4aa] rounded-lg p-2 text-xs text-[#2c241b] focus:outline-none focus:border-[#8c672b] cursor-pointer"
                                 >
-                                  <option value="">-- Elige un vínculo de la tabla ({currentRoleplayOptions.bonds.length} opciones) --</option>
+                                  <option value="">{isSpanish ? `-- Elige un vínculo de la tabla (${currentRoleplayOptions.bonds.length} opciones) --` : `-- Choose a bond from the table (${currentRoleplayOptions.bonds.length} options) --`}</option>
                                   {currentRoleplayOptions.bonds.map((opt, idx) => (
                                     <option key={opt.id} value={opt.text}>
-                                      {idx + 1}. {opt.text}
+                                      {idx + 1}. {isSpanish ? opt.text : translateRoleplayOptionText(opt.text)}
                                     </option>
                                   ))}
                                 </select>
@@ -6199,7 +6696,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                 rows={3}
                                 value={bonds}
                                 onChange={(e) => setBonds(e.target.value)}
-                                placeholder="Escribe o edita aquí el vínculo afectivo..."
+                                placeholder={isSpanish ? "Escribe o edita aquí el vínculo afectivo..." : "Write or edit your bond here..."}
                                 className="w-full bg-white border border-[#d6c4aa] rounded-lg p-2 text-xs text-[#2c241b] focus:outline-none focus:border-[#8c672b] shadow-inner"
                               />
                             </div>
@@ -6210,7 +6707,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             <div>
                               <div className="flex items-center justify-between">
                                 <label className="block text-xs font-bold font-fantasy text-[#4a361c] uppercase flex items-center gap-1.5">
-                                  <span>⚠️</span> Defectos, Debilidades & Tentaciones
+                                  <span>⚠️</span> {isSpanish ? 'Defectos, Debilidades & Tentaciones' : 'Flaws, Weaknesses & Temptations'}
                                 </label>
                                 <button
                                   type="button"
@@ -6218,17 +6715,17 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                   className="px-2.5 py-1 bg-[#ede1ce] hover:bg-[#dfcfb9] text-[#7a5a2b] hover:text-[#4a361c] border border-[#cbb99f] rounded text-[11px] font-fantasy font-bold transition flex items-center gap-1 cursor-pointer"
                                   title={`Tirar dado d${currentRoleplayOptions.flaws.length || 6} en la tabla de defectos`}
                                 >
-                                  <Dices className="w-3.5 h-3.5" /> Tirar d{currentRoleplayOptions.flaws.length || 6}
+                                  <Dices className="w-3.5 h-3.5" /> {isSpanish ? 'Tirar' : 'Roll'} d{currentRoleplayOptions.flaws.length || 6}
                                 </button>
                               </div>
                               <p className="text-[10px] text-[#7a6448] mt-0.5">
-                                ¿Qué vicio, miedo o tentación te hace cometer errores imprudentes?
+                                {isSpanish ? '¿Qué vicio, miedo o tentación te hace cometer errores imprudentes?' : 'What vice, fear, or temptation makes you commit reckless mistakes?'}
                               </p>
 
                               {/* Dropdown Selector */}
                               <div className="mt-2">
                                 <select
-                                  value={currentRoleplayOptions.flaws.find((opt) => flaws.includes(opt.text))?.text || ''}
+                                  value={currentRoleplayOptions.flaws.find((opt) => flaws.includes(opt.text) || flaws.includes(translateRoleplayOptionText(opt.text)))?.text || ''}
                                   onChange={(e) => {
                                     const chosen = currentRoleplayOptions.flaws.find((opt) => opt.text === e.target.value);
                                     if (chosen) {
@@ -6239,10 +6736,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                   }}
                                   className="w-full bg-white border border-[#d6c4aa] rounded-lg p-2 text-xs text-[#2c241b] focus:outline-none focus:border-[#8c672b] cursor-pointer"
                                 >
-                                  <option value="">-- Elige un defecto de la tabla ({currentRoleplayOptions.flaws.length} opciones) --</option>
+                                  <option value="">{isSpanish ? `-- Elige un defecto de la tabla (${currentRoleplayOptions.flaws.length} opciones) --` : `-- Choose a flaw from the table (${currentRoleplayOptions.flaws.length} options) --`}</option>
                                   {currentRoleplayOptions.flaws.map((opt, idx) => (
                                     <option key={opt.id} value={opt.text}>
-                                      {idx + 1}. {opt.text}
+                                      {idx + 1}. {isSpanish ? opt.text : translateRoleplayOptionText(opt.text)}
                                     </option>
                                   ))}
                                 </select>
@@ -6254,7 +6751,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                 rows={3}
                                 value={flaws}
                                 onChange={(e) => setFlaws(e.target.value)}
-                                placeholder="Escribe o edita aquí el defecto o debilidad..."
+                                placeholder={isSpanish ? "Escribe o edita aquí el defecto o debilidad..." : "Write or edit your flaw or weakness here..."}
                                 className="w-full bg-white border border-[#d6c4aa] rounded-lg p-2 text-xs text-[#2c241b] focus:outline-none focus:border-[#8c672b] shadow-inner"
                               />
                             </div>
@@ -6264,16 +6761,16 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                         {/* CARD 5: BACKSTORY & MOTIVATIONS */}
                         <div id="creator-identity-backstory" className="p-4 bg-[#fcf9f2] rounded-xl border border-[#d6c4aa] space-y-2 shadow-xs">
                           <label className="block text-xs font-bold font-fantasy text-[#4a361c] uppercase flex items-center gap-1.5">
-                            <span>📜</span> Historia, Pasado & Motivaciones del Héroe (Backstory)
+                            <span>📜</span> {isSpanish ? 'Historia, Pasado & Motivaciones del Héroe (Backstory)' : 'Hero Backstory, Past & Motivations'}
                           </label>
                           <p className="text-[10px] text-[#7a6448]">
-                            ¿De dónde vienes? ¿Quién fue tu familia o mentor? ¿Por qué decidiste salir de tu hogar y recorrer los Reinos Olvidados?
+                            {isSpanish ? '¿De dónde vienes? ¿Quién fue tu familia o mentor? ¿Por qué decidiste salir de tu hogar y recorrer los Reinos Olvidados?' : 'Where do you come from? Who was your family or mentor? Why did you leave home to adventure across the realms?'}
                           </p>
                           <textarea
                             rows={4}
                             value={backstoryBrief}
                             onChange={(e) => setBackstoryBrief(e.target.value)}
-                            placeholder="Escribe libremente el origen de tu personaje o notas clave para tu Dungeon Master..."
+                            placeholder={isSpanish ? "Escribe libremente el origen de tu personaje o notas clave para tu Dungeon Master..." : "Freely write your character's origin or key notes for your Dungeon Master..."}
                             className="w-full bg-white border border-[#d6c4aa] rounded-lg p-2.5 text-xs text-[#2c241b] focus:outline-none focus:border-[#8c672b] shadow-inner"
                           />
                         </div>
@@ -6281,8 +6778,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                     </div>
                   ) : (
                     <div id="creator-background-subdecisions" className="p-4 bg-[#f5ede0] rounded-xl border border-dashed border-[#d6c4aa] text-center text-xs text-[#7a6448]">
-                      Selecciona un trasfondo arriba para ver su rasgo especial y equipo sugerido.
+                      {isSpanish ? 'Selecciona un trasfondo arriba para ver su rasgo especial y equipo sugerido.' : 'Select a background above to view its special feature and starting equipment.'}
                     </div>
+                  )}
+                    </>
                   )}
 
                 </div>
@@ -6298,10 +6797,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                     <Package className="w-5 h-5 text-[#8c672b] shrink-0 mt-0.5" />
                     <div>
                       <h4 className="font-fantasy font-bold text-sm text-[#4a361c] uppercase tracking-wide">
-                        Paso 8: Inventario, Equipo Inicial & Riqueza
+                        {isSpanish ? 'Paso 8: Inventario, Equipo Inicial & Riqueza' : 'Step 8: Inventory, Starting Equipment & Wealth'}
                       </h4>
                       <p className="text-xs text-[#5c4a35] mt-1 leading-relaxed">
-                        Basado en las opciones oficiales del Manual del Jugador y Reglas 5e para {activeClass?.name || 'tu clase'}, puedes elegir tus armas primarias, armadura y paquetes de aventurero. Además, se incluye el equipo de tu trasfondo y tus monedas iniciales.
+                        {isSpanish ? `Basado en las opciones oficiales del Manual del Jugador y Reglas 5e para ${activeClass?.name || 'tu clase'}, puedes elegir tus armas primarias, armadura y paquetes de aventurero. Además, se incluye el equipo de tu trasfondo y tus monedas iniciales.` : `Based on official Player's Handbook options for ${getClassDisplayName(activeClass) || 'your class'}, choose your primary weapons, armor, and adventurer's pack, plus your background equipment and starting gold.`}
                       </p>
                     </div>
                   </div>
@@ -6316,10 +6815,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                           <div key={group.id} className="p-4 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] space-y-3 shadow-xs">
                             <div className="flex items-center justify-between">
                               <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
-                                <Sword className="w-4 h-4 text-[#8c672b]" /> {group.title}
+                                <Sword className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? group.title : translateDndTitle(group.title)}
                               </h5>
                               <span className="text-[11px] text-[#8c672b] font-mono font-bold">
-                                Elige una opción
+                                {isSpanish ? 'Elige una opción' : 'Choose one option'}
                               </span>
                             </div>
 
@@ -6339,7 +6838,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                     <div>
                                       <div className="flex items-center justify-between gap-2">
                                         <span className="font-fantasy font-bold text-xs text-[#4a361c]">
-                                          {option.name}
+                                          {isSpanish ? option.name : translateDndTitle(option.name)}
                                         </span>
                                         <div
                                           className={`w-4 h-4 rounded-full flex items-center justify-center border shrink-0 ${
@@ -6350,7 +6849,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                         </div>
                                       </div>
                                       <p className="text-[11px] text-[#5c4a35] mt-1.5 leading-relaxed">
-                                        {option.description}
+                                        {isSpanish ? option.description : translateDndText(option.description)}
                                       </p>
                                     </div>
 
@@ -6364,18 +6863,18 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                             key={idx}
                                             className="text-[10px] bg-[#ede1ce] text-[#5e4b37] px-2 py-0.5 rounded font-mono font-bold"
                                           >
-                                            {displayItemName}
+                                            {isSpanish ? displayItemName : translateDndText(displayItemName)}
                                           </span>
                                         );
                                       })}
                                       {option.armorAcBase && (
                                         <span className="text-[10px] bg-[#dbe8d3] text-[#2e5924] px-2 py-0.5 rounded font-mono font-bold">
-                                          🛡️ CA Base: {option.armorAcBase}
+                                          🛡️ {isSpanish ? 'CA Base:' : 'Base AC:'} {option.armorAcBase}
                                         </span>
                                       )}
                                       {option.shieldBonus && (
                                         <span className="text-[10px] bg-[#dbe8d3] text-[#2e5924] px-2 py-0.5 rounded font-mono font-bold">
-                                          🛡️ Escudo: +{option.shieldBonus} CA
+                                          🛡️ {isSpanish ? `Escudo: +${option.shieldBonus} CA` : `Shield: +${option.shieldBonus} AC`}
                                         </span>
                                       )}
                                     </div>
@@ -6386,7 +6885,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                           <div className="p-2 bg-[#fcf9f2] rounded-lg border border-[#b88c32] flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
                                             <div className="flex items-center gap-1.5 text-xs text-[#4a361c]">
                                               <Sword className="w-3.5 h-3.5 text-[#8c672b] shrink-0" />
-                                              <span>Arma elegida: <strong className="text-[#8c672b]">{customWeaponChoices[group.id].name}</strong></span>
+                                              <span>{isSpanish ? 'Arma elegida:' : 'Chosen weapon:'} <strong className="text-[#8c672b]">{customWeaponChoices[group.id].name}</strong></span>
                                               <span className="text-[10px] bg-[#dbe8d3] text-[#2e5924] px-1.5 py-0.2 rounded font-mono font-bold">
                                                 {customWeaponChoices[group.id].damageDice} {customWeaponChoices[group.id].damageType}
                                               </span>
@@ -6405,7 +6904,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                               }}
                                               className="px-2 py-1 bg-gradient-to-r from-[#b88c32] to-[#8c672b] hover:from-[#cfa344] hover:to-[#a67a33] text-white rounded text-[11px] font-fantasy font-bold transition flex items-center justify-center gap-1 shadow-xs cursor-pointer shrink-0"
                                             >
-                                              <Sword className="w-3 h-3" /> Cambiar Arma...
+                                              <Sword className="w-3 h-3" /> {isSpanish ? 'Cambiar Arma...' : 'Change Weapon...'}
                                             </button>
                                           </div>
                                         ) : (
@@ -6424,7 +6923,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                             className="w-full py-1.5 px-2.5 bg-[#e8dac1] hover:bg-[#decab0] text-[#4a361c] border border-[#b88c32] rounded-lg text-xs font-fantasy font-bold transition flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
                                           >
                                             <Sword className="w-3.5 h-3.5 text-[#8c672b]" />
-                                            ⚔️ Elegir Arma de Menú Compendio Oficial...
+                                            {isSpanish ? '⚔️ Elegir Arma de Menú Compendio Oficial...' : '⚔️ Choose Weapon from Official Compendium...'}
                                           </button>
                                         )}
                                       </div>
@@ -6441,10 +6940,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       <div id="creator-equipment-wealth" className="p-4 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] space-y-2 shadow-xs">
                         <div className="flex items-center justify-between">
                           <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
-                            <Coins className="w-4 h-4 text-[#8c672b]" /> Riqueza y Equipo Fijo de {startingEquipmentConfig.className}
+                            <Coins className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? `Riqueza y Equipo Fijo de ${startingEquipmentConfig.className}` : `Fixed Equipment & Wealth (${getClassDisplayName(activeClass) || startingEquipmentConfig.className})`}
                           </h5>
                           <span className="bg-[#fcecc2] border border-[#d8aa35] text-[#7a5813] font-fantasy font-bold text-xs px-2.5 py-0.5 rounded-lg flex items-center gap-1 shadow-xs">
-                            💰 Oro Inicial: {startingGoldTotal} po
+                            💰 {isSpanish ? `Oro Inicial: ${startingGoldTotal} po` : `Starting Gold: ${startingGoldTotal} gp`}
                           </span>
                         </div>
                         <div className="flex flex-wrap items-center gap-2 text-xs">
@@ -6464,19 +6963,21 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                         <div className="p-4 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] space-y-2.5 shadow-xs">
                           <div className="flex items-center justify-between">
                             <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
-                              <Backpack className="w-4 h-4 text-[#8c672b]" /> Equipo Otorgado por el Trasfondo ({activeBackground.name})
+                              <Backpack className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? `Equipo Otorgado por el Trasfondo (${activeBackground.name})` : `Equipment Granted by Background (${getBgDisplayName(activeBackground)})`}
                             </h5>
                             <span className="text-xs font-fantasy font-bold text-[#8c672b] flex items-center gap-1 bg-[#ebdcc4] px-2.5 py-0.5 rounded-full border border-[#d6c4aa]">
                               <Coins className="w-3.5 h-3.5 text-[#8c672b]" /> {formatBackgroundWealth(activeBackground)}
                             </span>
                           </div>
                           <p className="text-xs text-[#5c4a35] leading-relaxed">
-                            {activeBackground.suggestedEquipment}
+                            {isSpanish
+                              ? activeBackground.suggestedEquipment
+                              : translateBackgroundEquipment(activeBackground.id, activeBackground.nameEn, activeBackground.suggestedEquipment)}
                           </p>
                           {activeBackground.equipmentChoices && activeBackground.equipmentChoices.length > 0 && (
                             <div className="pt-2 border-t border-[#e2d2bc] space-y-1.5">
                               <span className="text-[10px] font-fantasy font-bold text-[#4a361c] uppercase block">
-                                Evidencias, Baratijas y Objetos Especiales Asignados:
+                                {isSpanish ? 'Evidencias, Baratijas y Objetos Especiales Asignados:' : 'Assigned Evidence, Trinkets & Special Items:'}
                               </span>
                               {activeBackground.equipmentChoices.map((ch) => {
                                 const val = selectedBackgroundEquipmentChoices[ch.id];
@@ -6484,7 +6985,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                   <div key={ch.id} className="text-xs text-[#4a361c] bg-white p-2.5 rounded-lg border border-[#e2d2bc] flex items-start gap-2 shadow-xs">
                                     <Sparkles className="w-4 h-4 text-[#8c672b] shrink-0 mt-0.5" />
                                     <div>
-                                      <strong className="text-[#8c672b]">{ch.label}:</strong> {val}
+                                      <strong className="text-[#8c672b]">{isSpanish ? ch.label : translateDndTitle(ch.label)}:</strong> {isSpanish ? val : translateDndText(val)}
                                     </div>
                                   </div>
                                 ) : null;
@@ -6499,10 +7000,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#e2d2bc] pb-2.5">
                           <div>
                             <h5 className="font-fantasy font-bold text-xs sm:text-sm text-[#4a361c] uppercase flex items-center gap-2">
-                              <Shield className="w-4 h-4 text-[#8c672b]" /> Armas, Armaduras y Equipo Activo (Equipar / Desequipar en Vivo)
+                              <Shield className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? 'Armas, Armaduras y Equipo Activo (Equipar / Desequipar en Vivo)' : 'Weapons, Armor & Active Gear (Live Equip / Unequip)'}
                             </h5>
                             <p className="text-[11px] text-[#7a6448] mt-0.5">
-                              Haz clic en cada objeto para equiparlo o desequiparlo. La CA y los ataques de la ficha se actualizan automáticamente en tiempo real.
+                              {isSpanish ? 'Haz clic en cada objeto para equiparlo o desequiparlo. La CA y los ataques de la ficha se actualizan automáticamente en tiempo real.' : 'Click each item to equip or unequip it. Your AC and weapon attacks on the sheet update automatically in real time.'}
                             </p>
                           </div>
                           <div className="flex flex-wrap items-center gap-2">
@@ -6518,18 +7019,18 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                               }}
                               className="px-2.5 py-1.5 bg-[#8c672b] hover:bg-[#725322] text-white rounded-lg text-xs font-fantasy font-bold transition flex items-center gap-1 shadow-xs cursor-pointer"
                             >
-                              <span>⚔️</span> Añadir Arma...
+                              <span>⚔️</span> {isSpanish ? 'Añadir Arma...' : 'Add Weapon...'}
                             </button>
                             <button
                               type="button"
                               onClick={() => setIsArmorPickerOpen(true)}
                               className="px-2.5 py-1.5 bg-[#2e7d32] hover:bg-[#1b5e20] text-white rounded-lg text-xs font-fantasy font-bold transition flex items-center gap-1 shadow-xs cursor-pointer"
                             >
-                              <span>🛡️</span> Añadir Armadura...
+                              <span>🛡️</span> {isSpanish ? 'Añadir Armadura...' : 'Add Armor...'}
                             </button>
                             <div className="px-3 py-1 bg-[#f5ede0] rounded-lg border border-[#d6c4aa] flex items-center gap-1.5 shadow-2xs">
-                              <span className="text-[10px] text-[#7a6448] uppercase font-bold">Defensa Táctica:</span>
-                              <span className="font-fantasy font-bold text-sm sm:text-base text-[#8c672b]">{calculatedAc} CA</span>
+                              <span className="text-[10px] text-[#7a6448] uppercase font-bold">{isSpanish ? 'Defensa Táctica:' : 'Tactical Defense:'}</span>
+                              <span className="font-fantasy font-bold text-sm sm:text-base text-[#8c672b]">{calculatedAc} {isSpanish ? 'CA' : 'AC'}</span>
                             </div>
                           </div>
                         </div>
@@ -6591,17 +7092,17 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                     >
                                       {isEquipped ? (
                                         <>
-                                          <Check className="w-3.5 h-3.5" /> Equipado
+                                          <Check className="w-3.5 h-3.5" /> {isSpanish ? 'Equipado' : 'Equipped'}
                                         </>
                                       ) : (
                                         <>
-                                          <Shield className="w-3.5 h-3.5 text-[#8c672b]" /> Equipar
+                                          <Shield className="w-3.5 h-3.5 text-[#8c672b]" /> {isSpanish ? 'Equipar' : 'Equip'}
                                         </>
                                       )}
                                     </button>
                                   ) : (
                                     <span className="text-[10px] bg-[#ede1ce] text-[#7a6448] px-2 py-1 rounded font-mono border border-[#d6c4aa]/60">
-                                      En inventario
+                                      {isSpanish ? 'En inventario' : 'In inventory'}
                                     </span>
                                   )}
                                   {isExtraCustom && (
@@ -6626,7 +7127,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                     </div>
                   ) : (
                       <div className="p-6 bg-[#f5ede0] rounded-xl border border-dashed border-[#d6c4aa] text-center text-xs text-[#7a6448]">
-                        Selecciona una clase en el paso anterior para cargar su equipo inicial y opciones tácticas de armas y armaduras.
+                        {isSpanish ? 'Selecciona una clase en el paso anterior para cargar su equipo inicial y opciones tácticas de armas y armaduras.' : 'Select a class in the previous step to load its starting equipment and tactical weapon/armor options.'}
                       </div>
                     )}
                   </div>
@@ -6644,13 +7145,13 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                     <div>
                       <h4 className="font-fantasy font-bold text-sm text-[#4a361c] uppercase tracking-wide">
                         {isCaster
-                          ? `Paso 7: Conjuración & Grimorio (${activeClass?.name || 'Lanzador'})`
-                          : `Paso 7: Conjuración & Magia Innata / Racial (${activeClass?.name || 'No lanzador'})`}
+                          ? (isSpanish ? `Paso 7: Conjuración & Grimorio (${activeClass?.name || 'Lanzador'})` : `Step 7: Spellcasting & Grimoire (${getClassDisplayName(activeClass) || 'Caster'})`)
+                          : (isSpanish ? `Paso 7: Conjuración & Magia Innata / Racial (${activeClass?.name || 'No lanzador'})` : `Step 7: Spellcasting & Innate / Racial Magic (${getClassDisplayName(activeClass) || 'Non-caster'})`)}
                       </h4>
                       <p className="text-xs text-[#5c4a35] mt-1 leading-relaxed">
                         {isCaster
-                          ? `${spellLimits.explanation} Selecciona los trucos y conjuros conocidos que componen tu Grimorio o repertorio arcano. Puedes organizarlos por nivel, escuela de magia o alfabéticamente.`
-                          : `Tu clase (${activeClass?.name || 'guerrera'}) no posee ranuras de conjuro de clase, pero tu personaje puede conocer trucos o conjuros concedidos por tu Linaje Racial (como Tiefling, Alto Elfo, Drow, Gnomo de los Bosques), dotes (Iniciado en la Magia, Tocado por las Sombras) o trasfondo. Selecciona aquí los conjuros que posea tu personaje para que figuren en su ficha con su CD de salvación y modificador de ataque mágico, o continúa con "Siguiente" si no tiene magia.`}
+                          ? (isSpanish ? `${spellLimits.explanation} Selecciona los trucos y conjuros conocidos que componen tu Grimorio o repertorio arcano. Puedes organizarlos por nivel, escuela de magia o alfabéticamente.` : `${spellLimits.explanation} Select the cantrips and spells that make up your Spellbook or arcane repertoire. Sort them by level, school of magic, or alphabetically.`)
+                          : (isSpanish ? `Tu clase (${activeClass?.name || 'guerrera'}) no posee ranuras de conjuro de clase, pero tu personaje puede conocer trucos o conjuros concedidos por tu Linaje Racial (como Tiefling, Alto Elfo, Drow, Gnomo de los Bosques), dotes (Iniciado en la Magia, Tocado por las Sombras) o trasfondo. Selecciona aquí los conjuros que posea tu personaje para que figuren en su ficha con su CD de salvación y modificador de ataque mágico, o continúa con "Siguiente" si no tiene magia.` : `Your class (${getClassDisplayName(activeClass) || 'martial'}) does not use class spell slots, but your character may know cantrips or spells granted by your Racial Lineage (such as Tiefling, High Elf, Drow, Forest Gnome), feats (Magic Initiate, Shadow Touched), or background. Configure any innate spells here or click "Next Step" if your hero is purely martial.`)}
                       </p>
                     </div>
                   </div>
@@ -6659,7 +7160,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   {isCaster && (
                     <div id="creator-spells-limits-banner" className="p-3 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs font-mono shadow-xs">
                       <span className="text-[#5c4a35]">
-                        Capacidad 5e: <strong>{spellLimits.explanation}</strong>
+                        {isSpanish ? 'Capacidad 5e:' : 'Spell Capacity:'} <strong>{spellLimits.explanation}</strong>
                       </span>
                       <div className="flex items-center gap-2">
                         <span className={`px-2.5 py-1 rounded border font-bold ${
@@ -6667,14 +7168,14 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             ? 'bg-amber-100 text-amber-900 border-amber-400'
                             : 'bg-white text-[#4a361c] border-[#d6c4aa]'
                         }`}>
-                          Trucos: {selectedCantripsCount} / {spellLimits.maxCantrips}
+                          {isSpanish ? 'Trucos:' : 'Cantrips:'} {selectedCantripsCount} / {spellLimits.maxCantrips}
                         </span>
                         <span className={`px-2.5 py-1 rounded border font-bold ${
                           selectedLeveledCount > spellLimits.maxPreparedOrKnown
                             ? 'bg-amber-100 text-amber-900 border-amber-400'
                             : 'bg-white text-[#4a361c] border-[#d6c4aa]'
                         }`}>
-                          Grimorio / Repertorio: {selectedLeveledCount} / {spellLimits.maxPreparedOrKnown}
+                          {isSpanish ? 'Grimorio / Repertorio:' : 'Spellbook / Repertoire:'} {selectedLeveledCount} / {spellLimits.maxPreparedOrKnown}
                         </span>
                       </div>
                     </div>
@@ -6689,14 +7190,14 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       {/* Non-Caster Status & Ability Summary */}
                       <div id="creator-spells-noncaster-summary" className="p-3 bg-[#f5ede0] rounded-xl border border-[#d6c4aa] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs font-mono shadow-xs">
                         <span className="text-[#5c4a35]">
-                          Magia Innata / Racial: <strong>{selectedSpells.length > 0 ? `${selectedSpells.length} conjuro${selectedSpells.length > 1 ? 's' : ''} registrado${selectedSpells.length > 1 ? 's' : ''}` : 'Sin conjuros de clase'}</strong>
+                          {isSpanish ? 'Magia Innata / Racial:' : 'Innate / Racial Magic:'} <strong>{selectedSpells.length > 0 ? (isSpanish ? `${selectedSpells.length} conjuro${selectedSpells.length > 1 ? 's' : ''} registrado${selectedSpells.length > 1 ? 's' : ''}` : `${selectedSpells.length} spell${selectedSpells.length > 1 ? 's' : ''} recorded`) : (isSpanish ? 'Sin conjuros de clase' : 'No class spells')}</strong>
                         </span>
                         <div className="flex items-center gap-2">
                           <span className="px-2.5 py-1 rounded border bg-white text-[#4a361c] border-[#d6c4aa] font-bold">
-                            Trucos: {selectedCantripsCount}
+                            {isSpanish ? 'Trucos:' : 'Cantrips:'} {selectedCantripsCount}
                           </span>
                           <span className="px-2.5 py-1 rounded border bg-white text-[#4a361c] border-[#d6c4aa] font-bold">
-                            Nivel 1+: {selectedLeveledCount}
+                            {isSpanish ? 'Nivel 1+:' : 'Level 1+:'} {selectedLeveledCount}
                           </span>
                         </div>
                       </div>
@@ -6711,10 +7212,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                               </div>
                               <div>
                                 <h5 className="font-fantasy font-bold text-sm text-purple-950 uppercase tracking-wide">
-                                  Magia Innata de Linaje Racial ({activeSubrace?.name || activeRace?.name})
+                                  {isSpanish ? `Magia Innata de Linaje Racial (${activeSubrace?.name || activeRace?.name})` : `Innate Racial Lineage Magic (${activeSubrace?.name || getRaceDisplayName(activeRace)})`}
                                 </h5>
                                 <p className="text-[11px] text-[#6b5840]">
-                                  Concedida por tu linaje de D&D 5e. No consume ranuras de conjuro de clase.
+                                  {isSpanish ? 'Concedida por tu linaje de D&D 5e. No consume ranuras de conjuro de clase.' : 'Granted by your racial lineage. Does not consume class spell slots.'}
                                 </p>
                               </div>
                             </div>
@@ -6730,7 +7231,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             <div className="p-3 bg-white/80 rounded-lg border border-purple-200 space-y-2">
                               <div className="flex items-center justify-between text-xs">
                                 <span className="font-fantasy font-bold text-[#4a361c] flex items-center gap-1.5">
-                                  <span>🧠</span> Característica de Conjuración Racial:
+                                  <span>🧠</span> {isSpanish ? 'Característica de Conjuración Racial:' : 'Racial Spellcasting Ability:'}
                                 </span>
                                 <span className="text-[10px] text-purple-700 font-mono font-bold">
                                   Actual: {effectiveRacialSpellAbility.toUpperCase()} (Mod {getMod(finalStats[effectiveRacialSpellAbility]) >= 0 ? `+${getMod(finalStats[effectiveRacialSpellAbility])}` : getMod(finalStats[effectiveRacialSpellAbility])})
@@ -6743,7 +7244,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                     const isChosen = effectiveRacialSpellAbility === ab;
                                     const modVal = getMod(finalStats[ab]);
                                     const cdVal = 8 + profBonus + modVal;
-                                    const label = ab === 'int' ? 'Inteligencia' : ab === 'wis' ? 'Sabiduría' : 'Carisma';
+                                    const label = ab === 'int' ? (isSpanish ? 'Inteligencia' : 'Intelligence') : ab === 'wis' ? (isSpanish ? 'Sabiduría' : 'Wisdom') : (isSpanish ? 'Carisma' : 'Charisma');
                                     return (
                                       <button
                                         key={ab}
@@ -6756,7 +7257,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                         }`}
                                       >
                                         <span>{label}</span>
-                                        <span className="text-[10px] font-mono opacity-80">CD {cdVal} (Mod {modVal >= 0 ? `+${modVal}` : modVal})</span>
+                                        <span className="text-[10px] font-mono opacity-80">{isSpanish ? 'CD' : 'DC'} {cdVal} (Mod {modVal >= 0 ? `+${modVal}` : modVal})</span>
                                       </button>
                                     );
                                   })}
@@ -6768,18 +7269,18 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                           {racialSpellcastingInfo.config?.hasCantripChoice && (
                             <div className="p-3 bg-white/80 rounded-lg border border-purple-200 space-y-2">
                               <label className="text-xs font-fantasy font-bold text-[#4a361c] uppercase flex items-center justify-between">
-                                <span>📖 Truco Racial a Elegir (Lista de {racialSpellcastingInfo.config.cantripChoiceClass || 'Mago'}):</span>
-                                <span className="text-[10px] text-purple-700 font-mono font-bold">1 Truco adicional</span>
+                                <span>📖 {isSpanish ? `Truco Racial a Elegir (Lista de ${racialSpellcastingInfo.config.cantripChoiceClass || 'Mago'}):` : `Racial Cantrip Choice (${racialSpellcastingInfo.config.cantripChoiceClass || 'Wizard'} List):`}</span>
+                                <span className="text-[10px] text-purple-700 font-mono font-bold">{isSpanish ? '1 Truco adicional' : '1 Bonus Cantrip'}</span>
                               </label>
                               <select
                                 value={selectedRacialCantrip}
                                 onChange={(e) => setSelectedRacialCantrip(e.target.value)}
                                 className="w-full bg-white border border-[#d6c4aa] rounded-lg p-2 text-xs text-[#2c241b] focus:outline-none focus:border-purple-600 cursor-pointer"
                               >
-                                <option value="">-- Selecciona un Truco de Linaje --</option>
+                                <option value="">{isSpanish ? '-- Selecciona un Truco de Linaje --' : '-- Select a Lineage Cantrip --'}</option>
                                 {wizardCantripsList.map((spl) => (
                                   <option key={spl.id} value={spl.name}>
-                                    {spl.name} ({spl.school})
+                                    {isSpanish ? spl.name : (spl.nameEn || translateDndTitle(spl.name))} ({isSpanish ? spl.school : translateSpellSchool(spl.school)})
                                   </option>
                                 ))}
                               </select>
@@ -6789,7 +7290,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                           {/* Tarjetas de Conjuros Concedidos Activos */}
                           <div className="space-y-2">
                             <span className="text-xs font-fantasy font-bold text-[#4a361c] uppercase tracking-wide block">
-                              Hechizos Otorgados Activos a tu Nivel ({characterLevel}):
+                              {isSpanish ? `Hechizos Otorgados Activos a tu Nivel (${characterLevel}):` : `Granted Spells Active at Your Level (${characterLevel}):`}
                             </span>
                             {grantedRacialSpells.length > 0 ? (
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -6806,8 +7307,8 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             ) : (
                               <div className="p-3 bg-white/70 rounded-lg border border-dashed border-purple-300 text-xs text-[#7a6448] text-center">
                                 {racialSpellcastingInfo.config?.hasCantripChoice && !selectedRacialCantrip
-                                  ? 'Por favor selecciona tu truco racial en el desplegable superior.'
-                                  : 'Tus hechizos innatos se activarán al alcanzar los niveles correspondientes.'}
+                                  ? (isSpanish ? 'Por favor selecciona tu truco racial en el desplegable superior.' : 'Please select your racial cantrip in the dropdown above.')
+                                  : (isSpanish ? 'Tus hechizos innatos se activarán al alcanzar los niveles correspondientes.' : 'Your innate spells will unlock upon reaching the required levels.')}
                               </div>
                             )}
                           </div>
@@ -6816,16 +7317,16 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                           {racialSpellcastingInfo.innateSpells.some((entry) => characterLevel < entry.requiredLevel) && (
                             <div className="p-3 bg-purple-50/60 rounded-lg border border-purple-200 text-xs space-y-1.5">
                               <span className="font-fantasy font-bold text-purple-950 flex items-center gap-1.5 text-[11px] uppercase">
-                                <span>🔮</span> Progresión de Linaje (Hechizos que desbloquearás al subir de nivel):
+                                <span>🔮</span> {isSpanish ? 'Progresión de Linaje (Hechizos que desbloquearás al subir de nivel):' : 'Lineage Progression (Spells unlocked at higher levels):'}
                               </span>
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
                                 {racialSpellcastingInfo.innateSpells
                                   .filter((entry) => characterLevel < entry.requiredLevel)
                                   .map((entry, idx) => (
                                     <div key={idx} className="p-2 bg-white rounded border border-purple-200 flex items-center justify-between">
-                                      <span className="font-semibold text-purple-900">{entry.spellName}</span>
+                                      <span className="font-semibold text-purple-900">{isSpanish ? entry.spellName : translateDndTitle(entry.spellName)}</span>
                                       <span className="font-mono text-[10px] text-[#7a6448] bg-purple-100 px-1.5 py-0.5 rounded">
-                                        Nivel {entry.requiredLevel}
+                                        {isSpanish ? 'Nivel' : 'Level'} {entry.requiredLevel}
                                       </span>
                                     </div>
                                   ))}
@@ -6840,7 +7341,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                         <div className="p-4 rounded-xl bg-[#f5ede0] border border-[#d6c4aa] space-y-3">
                           <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase tracking-wide flex items-center gap-2">
                             <Star className="w-4 h-4 text-[#8c672b]" />
-                            Conjuros Adicionales Registrados (Dotes / Trasfondo / Excepción)
+                            {isSpanish ? 'Conjuros Adicionales Registrados (Dotes / Trasfondo / Excepción)' : 'Additional Recorded Spells (Feats / Background / DM Exception)'}
                           </h5>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             {selectedSpells
@@ -6866,13 +7367,13 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                           </div>
                           <div className="max-w-xl mx-auto space-y-2">
                             <h3 className="font-fantasy font-bold text-xl text-[#4a361c] tracking-wide uppercase">
-                              Vía Marcial: El Acero y la Táctica son tu Poder
+                              {isSpanish ? 'Vía Marcial: El Acero y la Táctica son tu Poder' : 'Martial Path: Steel and Tactics Are Your Power'}
                             </h3>
                             <p className="text-xs text-[#5c4a35] leading-relaxed">
-                              Tu personaje (<strong className="text-[#3b2a14]">{activeRace?.name || 'Aventurero'} {activeClass?.name || 'Guerrero'}</strong>) no canaliza la urdimbre mágica ni posee ranuras de conjuros. Tu verdadera fuerza reside en tus armas, tu armadura, tus reflejos atléticos y tu disciplina táctica.
+                              {isSpanish ? <>Tu personaje (<strong className="text-[#3b2a14]">{activeRace?.name || 'Aventurero'} {activeClass?.name || 'Guerrero'}</strong>) no canaliza la urdimbre mágica ni posee ranuras de conjuros. Tu verdadera fuerza reside en tus armas, tu armadura, tus reflejos atléticos y tu disciplina táctica.</> : <>Your character (<strong className="text-[#3b2a14]">{getRaceDisplayName(activeRace) || 'Adventurer'} {getClassDisplayName(activeClass) || 'Warrior'}</strong>) does not channel the magical Weave or use spell slots. Your true strength lies in your weapons, armor, athletic reflexes, and tactical discipline.</>}
                             </p>
                             <p className="text-[11px] text-[#7a6448]">
-                              No necesitas seleccionar conjuros de clase para avanzar. Tu ficha está lista para equiparse.
+                              {isSpanish ? 'No necesitas seleccionar conjuros de clase para avanzar. Tu ficha está lista para equiparse.' : 'You do not need to select class spells to proceed. Your character sheet is ready to be equipped.'}
                             </p>
                           </div>
                           <div className="pt-2">
@@ -6881,7 +7382,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                               onClick={() => setCurrentStep('equipment')}
                               className="px-6 py-2.5 rounded-xl border-2 border-[#8c672b] bg-[#8c672b] hover:bg-[#6e5020] text-white font-fantasy font-bold text-xs shadow-md transition cursor-pointer inline-flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98]"
                             >
-                              <span>Continuar a Inventario y Equipo (Paso 8)</span>
+                              <span>{isSpanish ? 'Continuar a Inventario y Equipo (Paso 8)' : 'Continue to Inventory & Equipment (Step 8)'}</span>
                               <ChevronRight className="w-4 h-4" />
                             </button>
                           </div>
@@ -6891,12 +7392,12 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       {/* 4. ACORDEÓN PARA EXCEPCIÓN DEL DM (HOMEBREW) */}
                       <details className="group p-3 bg-[#ede1ce]/60 rounded-xl border border-[#d6c4aa] text-xs text-[#5c4a35]">
                         <summary className="font-fantasy font-bold text-xs text-[#4a361c] cursor-pointer select-none hover:text-[#8c672b] flex items-center justify-between">
-                          <span>¿Tu Dungeon Master te otorgó un conjuro especial o regla casera (Homebrew)? (Opcional)</span>
+                          <span>{isSpanish ? '¿Tu Dungeon Master te otorgó un conjuro especial o regla casera (Homebrew)? (Opcional)' : 'Did your Dungeon Master grant you a special or Homebrew spell? (Optional)'}</span>
                           <span className="text-[10px] text-[#8c672b] group-open:rotate-180 transition-transform">▼</span>
                         </summary>
                         <div className="mt-3 pt-3 border-t border-[#d6c4aa] space-y-3">
                           <p className="text-[11px] text-[#7a6448]">
-                            Si tu director de juego te concedió un conjuro por trasfondo casero, un pacto o una bendición divina, puedes buscarlo en el compendio oficial y agregarlo a tu ficha:
+                            {isSpanish ? 'Si tu director de juego te concedió un conjuro por trasfondo casero, un pacto o una bendición divina, puedes buscarlo en el compendio oficial y agregarlo a tu ficha:' : 'If your Dungeon Master granted you a spell via a homebrew background, pact, or divine blessing, you can search the official compendium and add it to your sheet:'}
                           </p>
                           <div className="flex gap-2">
                             <div className="relative flex-1">
@@ -6908,7 +7409,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                   setSpellSearchQuery(e.target.value);
                                   if (spellScopeMode !== 'all_compendium') setSpellScopeMode('all_compendium');
                                 }}
-                                placeholder="Buscar en el compendio general de 515 conjuros..."
+                                placeholder={isSpanish ? "Buscar en el compendio general de 515 conjuros..." : "Search the full compendium of 515 spells..."}
                                 className="w-full bg-white border border-[#d6c4aa] rounded-lg pl-8 pr-3 py-1.5 text-xs text-[#2c241b] focus:outline-none focus:border-[#8c672b]"
                               />
                             </div>
@@ -6921,7 +7422,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                               className="px-3 py-1.5 rounded-lg border border-[#8c672b] bg-[#ebdcc4] hover:bg-[#dfcdb1] text-xs font-fantasy font-bold text-[#4a361c] flex items-center gap-1.5 shrink-0 cursor-pointer"
                             >
                               <Maximize2 className="w-3.5 h-3.5 text-[#8c672b]" />
-                              <span>Compendio ({OFFICIAL_SPELLS_COMPENDIUM.length})</span>
+                              <span>{isSpanish ? 'Compendio' : 'Compendium'} ({OFFICIAL_SPELLS_COMPENDIUM.length})</span>
                             </button>
                           </div>
                           {spellSearchQuery.trim() && displayedSpellsData.totalCount > 0 && (
@@ -6959,15 +7460,15 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             <Sparkles className="w-4 h-4 text-purple-700 shrink-0" />
                             <div>
                               <span className="font-fantasy font-bold text-purple-950 block">
-                                Magia Innata Racial Concedida ({activeSubrace?.name || activeRace?.name})
+                                {isSpanish ? `Magia Innata Racial Concedida (${activeSubrace?.name || activeRace?.name})` : `Granted Innate Racial Magic (${activeSubrace?.name || getRaceDisplayName(activeRace)})`}
                               </span>
                               <span className="text-[11px] text-[#5c4a35]">
-                                {grantedRacialSpells.map((s) => s.name).join(', ')} • Aptitud de Linaje: {effectiveRacialSpellAbility.toUpperCase()} (CD {8 + profBonus + getMod(finalStats[effectiveRacialSpellAbility])})
+                                {grantedRacialSpells.map((s) => isSpanish ? s.name : (s.nameEn || translateDndTitle(s.name))).join(', ')} • {isSpanish ? 'Aptitud de Linaje:' : 'Lineage Spellcasting Ability:'} {effectiveRacialSpellAbility.toUpperCase()} ({isSpanish ? 'CD' : 'DC'} {8 + profBonus + getMod(finalStats[effectiveRacialSpellAbility])})
                               </span>
                             </div>
                           </div>
                           <span className="text-[10px] bg-purple-100 text-purple-900 border border-purple-300 px-2 py-0.5 rounded font-mono font-bold shrink-0">
-                            {grantedRacialSpells.length} conjuro{grantedRacialSpells.length > 1 ? 's' : ''} (Sin gasto de ranuras de clase)
+                            {isSpanish ? `${grantedRacialSpells.length} conjuro${grantedRacialSpells.length > 1 ? 's' : ''} (Sin gasto de ranuras de clase)` : `${grantedRacialSpells.length} spell${grantedRacialSpells.length > 1 ? 's' : ''} (No class slots used)`}
                           </span>
                         </div>
                       )}
@@ -6978,7 +7479,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                           <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
                           <div>
                             <span className="font-fantasy font-bold uppercase tracking-wide block text-amber-900">
-                              Has superado el límite recomendado por las reglas de D&D 5e
+                              {isSpanish ? 'Has superado el límite recomendado por las reglas de D&D 5e' : 'You have exceeded the recommended D&D spell limit'}
                             </span>
                             <p className="mt-0.5 leading-relaxed text-amber-800">
                               Tienes seleccionados más {selectedCantripsCount > spellLimits.maxCantrips ? 'trucos' : ''}
@@ -6999,7 +7500,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                               type="text"
                               value={spellSearchQuery}
                               onChange={(e) => setSpellSearchQuery(e.target.value)}
-                              placeholder="Buscar conjuro por nombre, escuela o efecto..."
+                              placeholder={isSpanish ? "Buscar conjuro por nombre, escuela o efecto..." : "Search spell by name, school, or effect..."}
                               className="w-full bg-white border border-[#d6c4aa] rounded-lg pl-8 pr-3 py-1.5 text-xs text-[#2c241b] focus:outline-none focus:border-[#8c672b]"
                             />
                           </div>
@@ -7013,7 +7514,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             title="Maximizar catálogo para ver todos los conjuros disponibles en pantalla completa"
                           >
                             <Maximize2 className="w-3.5 h-3.5 text-[#8c672b]" />
-                            <span>Maximizar ({displayedSpellsData.totalCount} Conjuros)</span>
+                            <span>{isSpanish ? `Maximizar (${displayedSpellsData.totalCount} Conjuros)` : `Maximize (${displayedSpellsData.totalCount} Spells)`}</span>
                           </button>
                         </div>
 
@@ -7021,7 +7522,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                         <div className="space-y-2.5 pt-1 border-t border-[#e2d2bc] text-xs">
                           {/* Scope selector: Disponibles vs Toda la clase vs Compendio */}
                           <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="text-[10px] text-[#7a6448] font-fantasy font-bold uppercase mr-1">Repertorio:</span>
+                            <span className="text-[10px] text-[#7a6448] font-fantasy font-bold uppercase mr-1">{isSpanish ? 'Repertorio:' : 'Scope:'}</span>
                             <button
                               type="button"
                               onClick={() => setSpellScopeMode('available')}
@@ -7032,7 +7533,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                               }`}
                               title="Muestra únicamente los conjuros que puedes lanzar con tus ranuras de nivel actual"
                             >
-                              ⚡ Disponibles para Elegir ({filteredSpells.availableToChoose.length})
+                              ⚡ {isSpanish ? `Disponibles para Elegir (${filteredSpells.availableToChoose.length})` : `Available to Choose (${filteredSpells.availableToChoose.length})`}
                             </button>
                             <button
                               type="button"
@@ -7044,7 +7545,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                               }`}
                               title="Explorar niveles superiores de tu clase (Solo consulta/lectura)"
                             >
-                              👁️ Consultar Niveles Superiores ({filteredSpells.higherLevelToBrowse.length})
+                              👁️ {isSpanish ? `Consultar Niveles Superiores (${filteredSpells.higherLevelToBrowse.length})` : `Browse Higher Levels (${filteredSpells.higherLevelToBrowse.length})`}
                             </button>
                             <button
                               type="button"
@@ -7056,7 +7557,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                               }`}
                               title="Compendio Completo Oficial con conjuros de todas las clases"
                             >
-                              📖 Compendio Completo ({OFFICIAL_SPELLS_COMPENDIUM.length})
+                              📖 {isSpanish ? `Compendio Completo (${OFFICIAL_SPELLS_COMPENDIUM.length})` : `Full Compendium (${OFFICIAL_SPELLS_COMPENDIUM.length})`}
                             </button>
                           </div>
 
@@ -7071,7 +7572,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                   spellActiveTab === 'all' ? 'bg-[#8c672b] text-white shadow-xs' : 'text-[#4a361c] hover:bg-white/50'
                                 }`}
                               >
-                                Todos ({displayedSpellsData.totalCount})
+                                {isSpanish ? 'Todos' : 'All'} ({displayedSpellsData.totalCount})
                               </button>
                               <button
                                 type="button"
@@ -7080,7 +7581,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                   spellActiveTab === 'cantrips' ? 'bg-[#8c672b] text-white shadow-xs' : 'text-[#4a361c] hover:bg-white/50'
                                 }`}
                               >
-                                Trucos ({displayedSpellsData.cantrips.length})
+                                {isSpanish ? 'Trucos' : 'Cantrips'} ({displayedSpellsData.cantrips.length})
                               </button>
                               <button
                                 type="button"
@@ -7089,7 +7590,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                   spellActiveTab === 'leveled' ? 'bg-[#8c672b] text-white shadow-xs' : 'text-[#4a361c] hover:bg-white/50'
                                 }`}
                               >
-                                Nivel 1+ ({displayedSpellsData.leveled.length})
+                                {isSpanish ? 'Nivel 1+' : 'Level 1+'} ({displayedSpellsData.leveled.length})
                               </button>
                             </div>
 
@@ -7098,36 +7599,36 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                               {/* Sort dropdown */}
                               <div className="flex items-center gap-1 bg-white border border-[#d6c4aa] rounded-lg px-2 py-1">
                                 <ArrowUpDown className="w-3 h-3 text-[#8c672b]" />
-                                <span className="text-[10px] text-[#7a6448] font-fantasy font-bold">Orden:</span>
+                                <span className="text-[10px] text-[#7a6448] font-fantasy font-bold">{isSpanish ? 'Orden:' : 'Sort:'}</span>
                                 <select
                                   value={spellSortMode}
                                   onChange={(e) => setSpellSortMode(e.target.value as any)}
                                   className="bg-transparent text-[11px] text-[#2c241b] focus:outline-none cursor-pointer"
                                 >
-                                  <option value="level">Por Nivel (1 → 9)</option>
-                                  <option value="name">Alfabético (A → Z)</option>
-                                  <option value="school">Por Escuela de Magia</option>
+                                  <option value="level">{isSpanish ? 'Por Nivel (1 → 9)' : 'By Level (1 → 9)'}</option>
+                                  <option value="name">{isSpanish ? 'Alfabético (A → Z)' : 'Alphabetical (A → Z)'}</option>
+                                  <option value="school">{isSpanish ? 'Por Escuela de Magia' : 'By School of Magic'}</option>
                                 </select>
                               </div>
 
                               {/* School filter dropdown */}
                               <div className="flex items-center gap-1 bg-white border border-[#d6c4aa] rounded-lg px-2 py-1">
                                 <SlidersHorizontal className="w-3 h-3 text-[#8c672b]" />
-                                <span className="text-[10px] text-[#7a6448] font-fantasy font-bold">Escuela:</span>
+                                <span className="text-[10px] text-[#7a6448] font-fantasy font-bold">{isSpanish ? 'Escuela:' : 'School:'}</span>
                                 <select
                                   value={spellSchoolFilter}
                                   onChange={(e) => setSpellSchoolFilter(e.target.value)}
                                   className="bg-transparent text-[11px] text-[#2c241b] focus:outline-none cursor-pointer"
                                 >
-                                  <option value="all">Todas las Escuelas</option>
-                                  <option value="Abjuración">Abjuración</option>
-                                  <option value="Adivinación">Adivinación</option>
-                                  <option value="Conjuración">Conjuración</option>
-                                  <option value="Encantamiento">Encantamiento</option>
-                                  <option value="Evocación">Evocación</option>
-                                  <option value="Ilusión">Ilusión</option>
-                                  <option value="Nigromancia">Nigromancia</option>
-                                  <option value="Transmutación">Transmutación</option>
+                                  <option value="all">{isSpanish ? 'Todas las Escuelas' : 'All Schools'}</option>
+                                  <option value="Abjuración">{isSpanish ? 'Abjuración' : 'Abjuration'}</option>
+                                  <option value="Adivinación">{isSpanish ? 'Adivinación' : 'Divination'}</option>
+                                  <option value="Conjuración">{isSpanish ? 'Conjuración' : 'Conjuration'}</option>
+                                  <option value="Encantamiento">{isSpanish ? 'Encantamiento' : 'Enchantment'}</option>
+                                  <option value="Evocación">{isSpanish ? 'Evocación' : 'Evocation'}</option>
+                                  <option value="Ilusión">{isSpanish ? 'Ilusión' : 'Illusion'}</option>
+                                  <option value="Nigromancia">{isSpanish ? 'Nigromancia' : 'Necromancy'}</option>
+                                  <option value="Transmutación">{isSpanish ? 'Transmutación' : 'Transmutation'}</option>
                                 </select>
                               </div>
                             </div>
@@ -7143,10 +7644,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             <div className="flex items-center justify-between border-b-2 border-[#8c672b] pb-1.5">
                               <h5 className="font-fantasy font-bold text-sm text-[#4a361c] flex items-center gap-2">
                                 <Sparkles className="w-4 h-4 text-[#8c672b]" />
-                                Trucos de Magia (Nivel 0 / Cantrips)
+                                {isSpanish ? 'Trucos de Magia (Nivel 0 / Cantrips)' : 'Cantrips (Level 0 Spells)'}
                               </h5>
                               <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-[#ebdcc4] text-[#8c672b] border border-[#d6c4aa]">
-                                {selectedCantripsCount} / {spellLimits.maxCantrips} Trucos Elegidos • {displayedSpellsData.cantrips.length} disponibles
+                                {selectedCantripsCount} / {spellLimits.maxCantrips} {isSpanish ? 'Trucos Elegidos' : 'Cantrips Chosen'} • {displayedSpellsData.cantrips.length} {isSpanish ? 'disponibles' : 'available'}
                               </span>
                             </div>
 
@@ -7169,7 +7670,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                               </div>
                             ) : (
                               <div className="p-4 bg-[#f5ede0] rounded-lg border border-dashed border-[#d6c4aa] text-center text-xs text-[#7a6448]">
-                                No se encontraron trucos con los filtros actuales.
+                                {isSpanish ? 'No se encontraron trucos con los filtros actuales.' : 'No cantrips found with the current filters.'}
                               </div>
                             )}
                           </div>
@@ -7181,10 +7682,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             <div className="flex items-center justify-between border-b-2 border-[#8c672b] pb-1.5">
                               <h5 className="font-fantasy font-bold text-sm text-[#4a361c] flex items-center gap-2">
                                 <BookOpen className="w-4 h-4 text-[#8c672b]" />
-                                Hechizos con Espacio de Conjuro (Nivel 1 o Superior)
+                                {isSpanish ? 'Hechizos con Espacio de Conjuro (Nivel 1 o Superior)' : 'Leveled Spells (Level 1 & Higher)'}
                               </h5>
                               <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-[#ebdcc4] text-[#8c672b] border border-[#d6c4aa]">
-                                {selectedLeveledCount} / {spellLimits.maxPreparedOrKnown} en Grimorio / Repertorio
+                                {selectedLeveledCount} / {spellLimits.maxPreparedOrKnown} {isSpanish ? 'en Grimorio / Repertorio' : 'in Spellbook / Repertoire'}
                               </span>
                             </div>
 
@@ -7200,15 +7701,15 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                     }`}>
                                       <span className="font-fantasy font-bold text-xs text-[#4a361c] uppercase tracking-wide flex items-center gap-1.5">
                                         <Star className="w-3.5 h-3.5 text-[#8c672b]" />
-                                        Hechizos de Nivel {level} ({spells.length} disponibles)
+                                        {isSpanish ? `Hechizos de Nivel ${level} (${spells.length} disponibles)` : `Level ${level} Spells (${spells.length} available)`}
                                         {isHigherThanAllowed && (
                                           <span className="text-[9px] bg-amber-200 text-amber-900 border border-amber-400 px-1.5 py-0.2 rounded font-mono font-bold">
-                                            Solo Consulta (Nivel Superior)
+                                            {isSpanish ? 'Solo Consulta (Nivel Superior)' : 'Browse Only (Higher Level)'}
                                           </span>
                                         )}
                                       </span>
                                       <span className="text-[10px] font-mono text-[#7a6448]">
-                                        {spells.filter((sp) => selectedSpells.some((s) => s.name.toLowerCase() === sp.name.toLowerCase())).length} elegidos de nivel {level}
+                                        {spells.filter((sp) => selectedSpells.some((s) => s.name.toLowerCase() === sp.name.toLowerCase())).length} {isSpanish ? `elegidos de nivel ${level}` : `chosen at Level ${level}`}
                                       </span>
                                     </div>
 
@@ -7235,7 +7736,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                               })
                             ) : (
                               <div className="p-4 bg-[#f5ede0] rounded-lg border border-dashed border-[#d6c4aa] text-center text-xs text-[#7a6448]">
-                                No se encontraron hechizos de nivel con los filtros actuales.
+                                {isSpanish ? 'No se encontraron hechizos de nivel con los filtros actuales.' : 'No leveled spells found with the current filters.'}
                               </div>
                             )}
                           </div>
@@ -7257,10 +7758,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       <Star className="w-5 h-5 text-[#8c672b] shrink-0 mt-0.5" />
                       <div>
                         <h4 className="font-fantasy font-bold text-sm text-[#4a361c] uppercase tracking-wide">
-                          ¡Todo listo para comenzar la aventura!
+                          {isSpanish ? '¡Todo listo para comenzar la aventura!' : 'Ready to Begin the Adventure!'}
                         </h4>
                         <p className="text-xs text-[#5c4a35] mt-1 leading-relaxed">
-                          Revisa la ficha definitiva de tu aventurero antes de forjarla. Al presionar <strong>"¡Forjar Personaje!"</strong>, tu héroe se integrará de inmediato a la campaña activa con todas sus estadísticas, rasgos, conjuros y equipo.
+                          {isSpanish ? <>Revisa la ficha definitiva de tu aventurero antes de forjarla. Al presionar <strong>"¡Forjar Personaje!"</strong>, tu héroe se integrará de inmediato a la campaña activa con todas sus estadísticas, rasgos, conjuros y equipo.</> : <>Review your adventurer's final character sheet before forging. Press <strong>"Forge Character!"</strong> to save your hero with all stats, traits, spells, and equipment.</>}
                         </p>
                       </div>
                     </div>
@@ -7273,7 +7774,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       title="Descargar la Hoja de Personaje Oficial 5e (PDF editable de 3 páginas)"
                     >
                       <FileDown className="w-4 h-4 text-[#ffd56b]" />
-                      <span>{isExportingPdf ? 'Generando PDF...' : 'Exportar Hoja Oficial (PDF)'}</span>
+                      <span>{isExportingPdf ? (isSpanish ? 'Generando PDF...' : 'Generating PDF...') : (isSpanish ? 'Exportar Hoja Oficial (PDF)' : 'Export Official Sheet (PDF)')}</span>
                     </button>
                   </div>
 
@@ -7294,24 +7795,24 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       <div className="text-center sm:text-left flex-1 min-w-0">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                           <h3 className="text-xl font-fantasy font-bold text-[#4a361c] truncate">
-                            {characterName || 'Héroe sin Nombre'}
+                            {characterName || (isSpanish ? 'Héroe sin Nombre' : 'Unnamed Hero')}
                           </h3>
                           <span className="text-xs bg-[#2c221a] text-[#d4ab59] font-mono font-bold px-2 py-0.5 rounded shrink-0 self-center sm:self-auto">
-                            Nivel {characterLevel}
+                            {isSpanish ? 'Nivel' : 'Level'} {characterLevel}
                           </span>
                         </div>
                         <p className="text-xs text-[#8c672b] font-mono font-bold truncate">
-                          {activeRace ? `${activeRace.name} ${activeSubrace ? `(${activeSubrace.name})` : ''}` : 'Raza sin elegir'} •{' '}
+                          {activeRace ? `${getRaceDisplayName(activeRace)} ${activeSubrace ? `(${isSpanish ? activeSubrace.name : (activeSubrace.nameEn || activeSubrace.name)})` : ''}` : (isSpanish ? 'Raza sin elegir' : 'No race selected')} •{' '}
                           {activeClass
                             ? isSubclassUnlocked && activeSubclass
-                              ? `${activeClass.name} (${activeSubclass.name})`
+                              ? `${getClassDisplayName(activeClass)} (${getSubclassDisplayName(activeSubclass)})`
                               : !isSubclassUnlocked
-                              ? `${activeClass.name} (Subclase a Nv ${subclassUnlockLevel})`
-                              : activeClass.name
-                            : 'Clase sin elegir'}
+                              ? `${getClassDisplayName(activeClass)} (${isSpanish ? `Subclase a Nv ${subclassUnlockLevel}` : `Subclass at Lv ${subclassUnlockLevel}`})`
+                              : getClassDisplayName(activeClass)
+                            : (isSpanish ? 'Clase sin elegir' : 'No class selected')}
                         </p>
                         <p className="text-[11px] text-[#7a6448] truncate">
-                          Trasfondo: <strong>{activeBackground ? activeBackground.name : 'Sin elegir'}</strong> • Alineamiento: {alignment ? (ALIGNMENT_OPTIONS.find((a) => a.id === alignment)?.name || alignment) : 'Neutral'} • Jugador: {playerName || 'Tú'}
+                          {isSpanish ? 'Trasfondo:' : 'Background:'} <strong>{activeBackground ? getBgDisplayName(activeBackground) : (isSpanish ? 'Sin elegir' : 'None')}</strong> • {isSpanish ? 'Alineamiento:' : 'Alignment:'} {alignment ? (isSpanish ? (ALIGNMENT_OPTIONS.find((a) => a.id === alignment)?.name || alignment) : (ALIGNMENT_LABELS_EN[alignment]?.name || alignment)) : 'Neutral'} • {isSpanish ? 'Jugador:' : 'Player:'} {playerName || (isSpanish ? 'Tú' : 'You')}
                         </p>
                       </div>
                     </div>
@@ -7319,37 +7820,37 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                     {/* Vital Metrics Grid */}
                     <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 text-center pt-1">
                       <div className="p-2 bg-[#fcf9f2] rounded-lg border border-[#d6c4aa] shadow-2xs">
-                        <span className="text-[9px] text-[#7a6448] uppercase block">Salud (PG)</span>
+                        <span className="text-[9px] text-[#7a6448] uppercase block">{isSpanish ? 'Salud (PG)' : 'Health (HP)'}</span>
                         <span className="font-fantasy font-bold text-base text-[#2e7d32]">
-                          {activeClass ? `${calculatedMaxHp} PG` : '-'}
+                          {activeClass ? `${calculatedMaxHp} ${isSpanish ? 'PG' : 'HP'}` : '-'}
                         </span>
                       </div>
                       <div className="p-2 bg-[#fcf9f2] rounded-lg border border-[#d6c4aa] shadow-2xs">
-                        <span className="text-[9px] text-[#7a6448] uppercase block">Armadura (CA)</span>
+                        <span className="text-[9px] text-[#7a6448] uppercase block">{isSpanish ? 'Armadura (CA)' : 'Armor (AC)'}</span>
                         <span className="font-fantasy font-bold text-base text-[#8c672b]">
-                          {calculatedAc} CA
+                          {calculatedAc} {isSpanish ? 'CA' : 'AC'}
                         </span>
                       </div>
                       <div className="p-2 bg-[#fcf9f2] rounded-lg border border-[#d6c4aa] shadow-2xs">
-                        <span className="text-[9px] text-[#7a6448] uppercase block">Iniciativa</span>
+                        <span className="text-[9px] text-[#7a6448] uppercase block">{isSpanish ? 'Iniciativa' : 'Initiative'}</span>
                         <span className="font-fantasy font-bold text-base text-[#1d4ed8]">
                           {calculatedInitiative >= 0 ? `+${calculatedInitiative}` : calculatedInitiative}
                         </span>
                       </div>
                       <div className="p-2 bg-[#fcf9f2] rounded-lg border border-[#d6c4aa] shadow-2xs" title={calculatedSpeedResult.breakdown.join(' | ')}>
-                        <span className="text-[9px] text-[#7a6448] uppercase block">Velocidad</span>
+                        <span className="text-[9px] text-[#7a6448] uppercase block">{isSpanish ? 'Velocidad' : 'Speed'}</span>
                         <span className="font-fantasy font-bold text-base text-[#4a361c]">
-                          {calculatedSpeedResult.speedStr}
+                          {isSpanish ? calculatedSpeedResult.speedStr : calculatedSpeedResult.speedStr.replace('pies', 'ft')}
                         </span>
                       </div>
                       <div className="p-2 bg-[#fcf9f2] rounded-lg border border-[#d6c4aa] shadow-2xs" title="Bono de Competencia">
-                        <span className="text-[9px] text-[#7a6448] uppercase block">Bono Comp.</span>
+                        <span className="text-[9px] text-[#7a6448] uppercase block">{isSpanish ? 'Bono Comp.' : 'Prof. Bonus'}</span>
                         <span className="font-fantasy font-bold text-base text-[#92400e]">
                           +{profBonus}
                         </span>
                       </div>
                       <div className="p-2 bg-[#fcf9f2] rounded-lg border border-[#d6c4aa] shadow-2xs" title="Percepción Pasiva">
-                        <span className="text-[9px] text-[#7a6448] uppercase block">Percep. Pasiva</span>
+                        <span className="text-[9px] text-[#7a6448] uppercase block">{isSpanish ? 'Percep. Pasiva' : 'Passive Percep.'}</span>
                         <span className="font-fantasy font-bold text-base text-[#b45309]">
                           {calculatedPassivePerception}
                         </span>
@@ -7368,7 +7869,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                           : 'text-[#4a361c] hover:bg-white/60'
                       }`}
                     >
-                      <span>⚔️</span> Combate & Salvaciones
+                      <span>⚔️</span> {isSpanish ? 'Combate & Salvaciones' : 'Combat & Saves'}
                     </button>
                     <button
                       type="button"
@@ -7379,7 +7880,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                           : 'text-[#4a361c] hover:bg-white/60'
                       }`}
                     >
-                      <span>🎯</span> Habilidades 5e ({totalSkills.length})
+                      <span>🎯</span> {isSpanish ? 'Habilidades 5e' : 'Skills'} ({totalSkills.length})
                     </button>
                     <button
                       type="button"
@@ -7390,7 +7891,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                           : 'text-[#4a361c] hover:bg-white/60'
                       }`}
                     >
-                      <span>📜</span> Rasgos & Dotes
+                      <span>📜</span> {isSpanish ? 'Rasgos & Dotes' : 'Traits & Feats'}
                     </button>
                     {(isCaster || selectedSpells.length > 0) && (
                       <button
@@ -7402,7 +7903,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             : 'text-[#4a361c] hover:bg-white/60'
                         }`}
                       >
-                        <span>🔮</span> Magia & Grimorio ({selectedSpells.length})
+                        <span>🔮</span> {isSpanish ? 'Magia & Grimorio' : 'Spells & Grimoire'} ({selectedSpells.length})
                       </button>
                     )}
                     <button
@@ -7414,7 +7915,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                           : 'text-[#4a361c] hover:bg-white/60'
                       }`}
                     >
-                      <span>🎒</span> Inventario & Oro ({startingGoldTotal} po)
+                      <span>🎒</span> {isSpanish ? `Inventario & Oro (${startingGoldTotal} po)` : `Inventory & Gold (${startingGoldTotal} gp)`}
                     </button>
                   </div>
 
@@ -7424,7 +7925,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       {/* Ability Scores Grid */}
                       <div className="p-4 bg-[#fcf9f2] rounded-xl border border-[#d6c4aa] space-y-2 shadow-xs">
                         <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
-                          <Dices className="w-4 h-4 text-[#8c672b]" /> Puntuaciones de Característica & Modificadores
+                          <Dices className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? 'Puntuaciones de Característica & Modificadores' : 'Ability Scores & Modifiers'}
                         </h5>
                         <div className="grid grid-cols-2 sm:grid-cols-6 gap-2">
                           {(['str', 'dex', 'con', 'int', 'wis', 'cha'] as (keyof AbilityScores)[]).map((st) => {
@@ -7438,7 +7939,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             return (
                               <div key={st} className="p-2.5 bg-[#f5ede0] rounded-lg border border-[#d6c4aa] text-center shadow-2xs">
                                 <span className="font-fantasy font-bold text-xs text-[#4a361c] block">
-                                  {ABILITY_SCORE_EXPLANATIONS[st].abbreviation}
+                                  {getAbilityAbbr(st)}
                                 </span>
                                 <span className="text-[10px] text-[#7a6448] font-mono block">
                                   {base}
@@ -7460,7 +7961,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       {/* Saving Throws Grid with Numeric Bonuses */}
                       <div className="p-4 bg-[#fcf9f2] rounded-xl border border-[#d6c4aa] space-y-2 shadow-xs">
                         <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
-                          <Shield className="w-4 h-4 text-[#8c672b]" /> Tiradas de Salvación Calculadas (D20 + Mod)
+                          <Shield className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? 'Tiradas de Salvación Calculadas (D20 + Mod)' : 'Calculated Saving Throws (d20 + Mod)'}
                         </h5>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                           {savingThrowDetails.map((save) => (
@@ -7477,9 +7978,9 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                   {save.isProficient ? '★' : '○'}
                                 </span>
                                 <div>
-                                  <span className="text-[#4a361c] font-bold block">{save.statName}</span>
+                                  <span className="text-[#4a361c] font-bold block">{getAbilityName(save.stat)}</span>
                                   <span className="text-[9px] text-[#7a6448]">
-                                    {save.isProficient ? `Competente (+${profBonus})` : 'Modificador base'}
+                                    {save.isProficient ? (isSpanish ? `Competente (+${profBonus})` : `Proficient (+${profBonus})`) : (isSpanish ? 'Modificador base' : 'Base modifier')}
                                   </span>
                                 </div>
                               </div>
@@ -7500,7 +8001,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       {/* Attacks & Weapons Ready */}
                       <div className="p-4 bg-[#fcf9f2] rounded-xl border border-[#d6c4aa] space-y-2 shadow-xs">
                         <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
-                          <Sword className="w-4 h-4 text-[#8c672b]" /> Armas & Acciones de Ataque Iniciales
+                          <Sword className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? 'Armas & Acciones de Ataque Iniciales' : 'Starting Weapons & Attack Actions'}
                         </h5>
                         <div className="space-y-2">
                           {equippedAttacks.map((att, i) => (
@@ -7510,18 +8011,18 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             >
                               <div>
                                 <span className="font-fantasy font-bold text-[#4a361c] text-sm block">
-                                  ⚔️ {att.name}
+                                  ⚔️ {displayAttackName(att.name)}
                                 </span>
                                 <span className="text-[11px] text-[#7a6448]">
-                                  Ataque con arma vinculada a tu clase y equipo inicial
+                                  {isSpanish ? 'Ataque con arma vinculada a tu clase y equipo inicial' : 'Weapon attack linked to your class and starting equipment'}
                                 </span>
                               </div>
                               <div className="text-right">
                                 <span className="font-mono text-[#8c672b] font-bold text-sm block">
-                                  Impacto: {att.bonus}
+                                  {isSpanish ? 'Impacto:' : 'Hit:'} {att.bonus}
                                 </span>
                                 <span className="font-mono text-[#2e7d32] text-xs font-bold block">
-                                  Daño: {att.damage} ({att.type})
+                                  {isSpanish ? 'Daño:' : 'Damage:'} {att.damage} ({displayAttackType(att.type)})
                                 </span>
                               </div>
                             </div>
@@ -7536,10 +8037,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                     <div className="p-4 bg-[#fcf9f2] rounded-xl border border-[#d6c4aa] space-y-3 shadow-xs">
                       <div className="flex items-center justify-between">
                         <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
-                          <Award className="w-4 h-4 text-[#8c672b]" /> Las 18 Habilidades Oficiales 5e (Bonificador Calculado)
+                          <Award className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? 'Las 18 Habilidades Oficiales 5e (Bonificador Calculado)' : 'All 18 Official Skills (Calculated Bonus)'}
                         </h5>
                         <span className="text-xs text-[#7a6448] font-mono font-bold">
-                          {totalSkills.length} con competencia activa
+                          {totalSkills.length} {isSpanish ? 'con competencia activa' : 'proficient'}
                         </span>
                       </div>
 
@@ -7561,17 +8062,17 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                 </span>
                                 <div className="min-w-0">
                                   <span className="font-bold text-[#4a361c] truncate block">
-                                    {sk.name}{' '}
+                                    {displaySkillName(sk.name)}{' '}
                                     <span className="text-[10px] text-[#7a6448] font-mono font-normal">
-                                      ({ABILITY_SCORE_EXPLANATIONS[sk.ability].abbreviation})
+                                      ({getAbilityAbbr(sk.ability)})
                                     </span>
                                   </span>
                                   <span className="text-[9px] text-[#7a6448] truncate block">
                                     {sk.isExpertise
-                                      ? `Pericia x2 (+${2 * profBonus})`
+                                      ? (isSpanish ? `Pericia x2 (+${2 * profBonus})` : `Expertise x2 (+${2 * profBonus})`)
                                       : sk.isProficient
-                                      ? `Competente [${sk.origin}] (+${profBonus})`
-                                      : 'Sin competencia'}
+                                      ? (isSpanish ? `Competente [${sk.origin}] (+${profBonus})` : `Proficient [${sk.origin}] (+${profBonus})`)
+                                      : (isSpanish ? 'Sin competencia' : 'Not proficient')}
                                   </span>
                                 </div>
                               </div>
@@ -7601,7 +8102,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       <div className="p-4 bg-[#fcf9f2] rounded-xl border-2 border-[#8c672b] space-y-3 shadow-xs">
                         <div className="flex items-center justify-between border-b border-[#e2d5c2] pb-2">
                           <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
-                            <User className="w-4 h-4 text-[#8c672b]" /> Identidad, Filosofía & Rol del Héroe
+                            <User className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? 'Identidad, Filosofía & Rol del Héroe' : 'Hero Identity, Philosophy & Roleplay'}
                           </h5>
                           <span className="text-[10px] bg-[#2c221a] text-[#d4ab59] px-2 py-0.5 rounded font-mono font-bold">
                             {alignment ? (ALIGNMENT_OPTIONS.find((a) => a.id === alignment)?.name || alignment) : 'Neutral'}
@@ -7611,37 +8112,37 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                           <div className="p-2.5 bg-[#f5ede0] rounded-lg border border-[#d6c4aa]">
                             <strong className="text-[#8c672b] block font-fantasy text-xs uppercase mb-1">
-                              🎭 Rasgos de Personalidad & Virtudes:
+                              🎭 {isSpanish ? 'Rasgos de Personalidad & Virtudes:' : 'Personality Traits & Virtues:'}
                             </strong>
                             <p className="text-[#4a361c] whitespace-pre-line italic">
-                              {personalityTraits.trim() || 'Sin definir todavía.'}
+                              {personalityTraits.trim() || (isSpanish ? 'Sin definir todavía.' : 'Not defined yet.')}
                             </p>
                           </div>
 
                           <div className="p-2.5 bg-[#f5ede0] rounded-lg border border-[#d6c4aa]">
                             <strong className="text-[#8c672b] block font-fantasy text-xs uppercase mb-1">
-                              ⚖️ Ideales & Convicciones Morales:
+                              ⚖️ {isSpanish ? 'Ideales & Convicciones Morales:' : 'Ideals & Moral Convictions:'}
                             </strong>
                             <p className="text-[#4a361c] whitespace-pre-line italic">
-                              {ideals.trim() || 'Sin definir todavía.'}
+                              {ideals.trim() || (isSpanish ? 'Sin definir todavía.' : 'Not defined yet.')}
                             </p>
                           </div>
 
                           <div className="p-2.5 bg-[#f5ede0] rounded-lg border border-[#d6c4aa]">
                             <strong className="text-[#8c672b] block font-fantasy text-xs uppercase mb-1">
-                              🔗 Vínculos & Lealtades:
+                              🔗 {isSpanish ? 'Vínculos & Lealtades:' : 'Bonds & Loyalties:'}
                             </strong>
                             <p className="text-[#4a361c] whitespace-pre-line italic">
-                              {bonds.trim() || 'Sin definir todavía.'}
+                              {bonds.trim() || (isSpanish ? 'Sin definir todavía.' : 'Not defined yet.')}
                             </p>
                           </div>
 
                           <div className="p-2.5 bg-[#f5ede0] rounded-lg border border-[#d6c4aa]">
                             <strong className="text-[#8c672b] block font-fantasy text-xs uppercase mb-1">
-                              ⚠️ Defectos, Debilidades & Tentaciones:
+                              ⚠️ {isSpanish ? 'Defectos, Debilidades & Tentaciones:' : 'Flaws, Weaknesses & Temptations:'}
                             </strong>
                             <p className="text-[#4a361c] whitespace-pre-line italic">
-                              {flaws.trim() || 'Sin definir todavía.'}
+                              {flaws.trim() || (isSpanish ? 'Sin definir todavía.' : 'Not defined yet.')}
                             </p>
                           </div>
                         </div>
@@ -7649,7 +8150,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                         {backstoryBrief.trim() && (
                           <div className="p-3 bg-[#fdfbf6] rounded-lg border border-[#d6c4aa] text-xs">
                             <strong className="text-[#4a361c] block font-fantasy text-xs uppercase mb-1">
-                              📜 Historia y Pasado del Héroe:
+                              📜 {isSpanish ? 'Historia y Pasado del Héroe:' : 'Hero Backstory & Past:'}
                             </strong>
                             <p className="text-[#5c4a35] whitespace-pre-line leading-relaxed">
                               {backstoryBrief}
@@ -7663,18 +8164,21 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                         <div className="p-4 bg-[#fcf9f2] rounded-xl border border-[#d6c4aa] space-y-1.5 shadow-xs">
                           <div className="flex items-center justify-between">
                             <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
-                              <BookOpen className="w-4 h-4 text-[#8c672b]" /> Rasgo de Trasfondo: {activeBackground.featureName}
+                              <BookOpen className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? 'Rasgo de Trasfondo:' : 'Background Feature:'} {isSpanish ? activeBackground.featureName : translateDndTitle(activeBackground.featureName || '')}
                             </h5>
                             <span className="text-[10px] bg-[#ede1ce] text-[#5e4b37] px-2 py-0.5 rounded font-mono font-bold">
-                              {activeBackground.name}
+                              {isSpanish ? activeBackground.name : (activeBackground.nameEn || activeBackground.name)}
                             </span>
                           </div>
                           <p className="text-xs text-[#5c4a35] leading-relaxed">
-                            {activeBackground.featureDescription}
+                            {isSpanish ? activeBackground.featureDescription : translateDndText(activeBackground.featureDescription || '')}
                           </p>
                           {activeBackground.suggestedEquipment && (
                             <p className="text-[11px] text-[#7a6448] italic pt-1">
-                              <strong>Equipo Sugerido:</strong> {activeBackground.suggestedEquipment}
+                              <strong>{isSpanish ? 'Equipo Sugerido:' : 'Suggested Equipment:'}</strong>{' '}
+                              {isSpanish
+                                ? activeBackground.suggestedEquipment
+                                : translateBackgroundEquipment(activeBackground.id, activeBackground.nameEn, activeBackground.suggestedEquipment)}
                             </p>
                           )}
                         </div>
@@ -7684,7 +8188,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       {chosenFeatsList.length > 0 && (
                         <div className="p-4 bg-[#fcf9f2] rounded-xl border border-[#d6c4aa] space-y-2 shadow-xs">
                           <h5 className="font-fantasy font-bold text-xs text-[#b45309] uppercase flex items-center gap-1.5">
-                            <Star className="w-4 h-4 text-[#8c672b]" /> Dotes Oficiales Seleccionadas ({chosenFeatsList.length})
+                            <Star className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? `Dotes Oficiales Seleccionadas (${chosenFeatsList.length})` : `Selected Official Feats (${chosenFeatsList.length})`}
                           </h5>
                           <div className="space-y-2">
                             {chosenFeatsList.map(({ feat, choice }, fIdx) => {
@@ -7705,7 +8209,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                   </div>
                                   {subChoiceNames && (
                                     <div className="text-xs font-bold text-[#b45309]">
-                                      Elección ({feat.subChoice?.title}): <span className="underline">{subChoiceNames}</span>
+                                      {isSpanish ? 'Elección' : 'Choice'} ({feat.subChoice?.title}): <span className="underline">{subChoiceNames}</span>
                                     </div>
                                   )}
                                   <div className="text-xs text-[#78350f] leading-relaxed">
@@ -7724,12 +8228,12 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       {activeRace && (
                         <div className="p-4 bg-[#fcf9f2] rounded-xl border border-[#d6c4aa] space-y-2 shadow-xs">
                           <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
-                            <Award className="w-4 h-4 text-[#8c672b]" /> Rasgos Raciales ({activeRace.name})
+                            <Award className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? `Rasgos Raciales (${activeRace.name})` : `Racial Traits (${getRaceDisplayName(activeRace)})`}
                           </h5>
                           <div className="space-y-1.5">
                             {activeRace.darkvision > 0 && (
                               <div className="p-2 bg-[#f5ede0] rounded border border-[#d6c4aa] text-xs">
-                                <strong>Visión en la Oscuridad:</strong> Puedes ver en la oscuridad hasta {activeRace.darkvision} pies en tonos de gris.
+                                {isSpanish ? <><strong>Visión en la Oscuridad:</strong> Puedes ver en la oscuridad hasta {activeRace.darkvision} pies en tonos de gris.</> : <><strong>Darkvision:</strong> You can see in dim light and darkness up to {activeRace.darkvision} feet in shades of gray.</>}
                               </div>
                             )}
                             {activeRace.traits?.map((t, idx) => (
@@ -7750,14 +8254,14 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       {activeClass && (
                         <div className="p-4 bg-[#fcf9f2] rounded-xl border border-[#d6c4aa] space-y-2 shadow-xs">
                           <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
-                            <Shield className="w-4 h-4 text-[#8c672b]" /> Rasgos de Clase ({activeClass.name} Nv{characterLevel})
+                            <Shield className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? `Rasgos de Clase (${activeClass.name} Nv${characterLevel})` : `Class Features (${getClassDisplayName(activeClass)} Lv${characterLevel})`}
                           </h5>
                           <div className="space-y-1.5">
                             {combinedProgression
                               .filter((f) => f.level <= characterLevel)
                               .map((f, idx) => (
                                 <div key={idx} className="p-2 bg-[#f5ede0] rounded border border-[#d6c4aa] text-xs">
-                                  <strong>{f.name} (Nv {f.level}):</strong> {f.desc}
+                                  <strong>{f.name} ({isSpanish ? 'Nv' : 'Lv'} {f.level}):</strong> {f.desc}
                                 </div>
                               ))}
                           </div>
@@ -7773,25 +8277,25 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       <div className="p-4 bg-[#fcf9f2] rounded-xl border border-[#d6c4aa] space-y-3 shadow-xs">
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
                           <div className="p-2.5 bg-[#f5ede0] rounded-lg border border-[#d6c4aa]">
-                            <span className="text-[10px] text-[#7a6448] uppercase block">Característica</span>
+                            <span className="text-[10px] text-[#7a6448] uppercase block">{isSpanish ? 'Característica' : 'Ability'}</span>
                             <span className="font-fantasy font-bold text-sm text-[#4a361c]">
                               {spellcastingDetails?.abilityName} ({(spellcastingDetails?.abilityMod ?? 0) >= 0 ? `+${spellcastingDetails?.abilityMod ?? 0}` : (spellcastingDetails?.abilityMod ?? 0)})
                             </span>
                           </div>
                           <div className="p-2.5 bg-[#f5ede0] rounded-lg border border-[#d6c4aa]">
-                            <span className="text-[10px] text-[#7a6448] uppercase block">CD Salvación</span>
+                            <span className="text-[10px] text-[#7a6448] uppercase block">{isSpanish ? 'CD Salvación' : 'Save DC'}</span>
                             <span className="font-fantasy font-bold text-base text-[#8c672b]">
                               CD {spellcastingDetails?.saveDc}
                             </span>
                           </div>
                           <div className="p-2.5 bg-[#f5ede0] rounded-lg border border-[#d6c4aa]">
-                            <span className="text-[10px] text-[#7a6448] uppercase block">Ataque de Conjuro</span>
+                            <span className="text-[10px] text-[#7a6448] uppercase block">{isSpanish ? 'Ataque de Conjuro' : 'Spell Attack'}</span>
                             <span className="font-fantasy font-bold text-base text-[#1d4ed8]">
                               {spellcastingDetails?.attackStr}
                             </span>
                           </div>
                           <div className="p-2.5 bg-[#f5ede0] rounded-lg border border-[#d6c4aa]">
-                            <span className="text-[10px] text-[#7a6448] uppercase block">Preparados/Conocidos</span>
+                            <span className="text-[10px] text-[#7a6448] uppercase block">{isSpanish ? 'Preparados/Conocidos' : 'Prepared/Known'}</span>
                             <span className="font-fantasy font-bold text-sm text-[#2e7d32]">
                               {isCaster ? `${selectedLeveledCount} / ${spellLimits.maxPreparedOrKnown}` : `${selectedLeveledCount}`}
                             </span>
@@ -7802,7 +8306,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                         {spellcastingDetails?.slots && Object.keys(spellcastingDetails.slots).length > 0 && (
                           <div className="p-3 bg-[#ede1ce] rounded-lg border border-[#d6c4aa] flex items-center justify-between flex-wrap gap-2 text-xs">
                             <span className="font-fantasy font-bold text-[#4a361c] uppercase text-xs">
-                              Ranuras de Conjuro Disponibles:
+                              {isSpanish ? 'Ranuras de Conjuro Disponibles:' : 'Available Spell Slots:'}
                             </span>
                             <div className="flex items-center gap-2 flex-wrap">
                               {Object.entries(spellcastingDetails.slots).map(([lvlKey, count]) => (
@@ -7810,7 +8314,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                   key={lvlKey}
                                   className="px-2.5 py-1 rounded-md bg-[#2c221a] text-[#d4ab59] font-mono text-xs font-bold border border-[#c59b27]"
                                 >
-                                  {lvlKey.toUpperCase().replace('LVL', 'Nivel ')}: {count} {count === 1 ? 'ranura' : 'ranuras'}
+                                  {lvlKey.toUpperCase().replace('LVL', isSpanish ? 'Nivel ' : 'Level ')}: {count} {count === 1 ? (isSpanish ? 'ranura' : 'slot') : (isSpanish ? 'ranuras' : 'slots')}
                                 </span>
                               ))}
                             </div>
@@ -7822,10 +8326,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       <div className="p-4 bg-[#fcf9f2] rounded-xl border border-[#d6c4aa] space-y-2 shadow-xs">
                         <div className="flex items-center justify-between">
                           <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
-                            <Sparkles className="w-4 h-4 text-[#8c672b]" /> Trucos Conocidos (Nivel 0)
+                            <Sparkles className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? 'Trucos Conocidos (Nivel 0)' : 'Known Cantrips (Level 0)'}
                           </h5>
                           <span className="text-xs text-[#7a6448] font-mono font-bold">
-                            {selectedCantripsCount} de {spellLimits.maxCantrips}
+                            {selectedCantripsCount} {isSpanish ? 'de' : 'of'} {spellLimits.maxCantrips}
                           </span>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -7838,14 +8342,14 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                               >
                                 <div className="flex items-center justify-between">
                                   <span className="font-fantasy font-bold text-[#4a361c] text-xs">
-                                    {spl.name}
+                                    {isSpanish ? spl.name : (spl.nameEn || translateDndTitle(spl.name))}
                                   </span>
                                   <span className="text-[10px] text-[#8c672b] font-mono font-bold">
-                                    {spl.school}
+                                    {isSpanish ? spl.school : translateSpellSchool(spl.school)}
                                   </span>
                                 </div>
-                                <p className="text-[11px] text-[#5c4a35] line-clamp-2">
-                                  {spl.description}
+                                <p className="text-[11px] text-[#5c4a35] leading-relaxed">
+                                  {isSpanish ? spl.description : (spl.descriptionEn || translateDndText(spl.description))}
                                 </p>
                               </div>
                             ))}
@@ -7856,10 +8360,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       <div className="p-4 bg-[#fcf9f2] rounded-xl border border-[#d6c4aa] space-y-2 shadow-xs">
                         <div className="flex items-center justify-between">
                           <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
-                            <BookOpen className="w-4 h-4 text-[#8c672b]" /> Conjuros Nivelados Conocidos / Preparados
+                            <BookOpen className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? 'Conjuros Nivelados Conocidos / Preparados' : 'Known / Prepared Leveled Spells'}
                           </h5>
                           <span className="text-xs text-[#7a6448] font-mono font-bold">
-                            {selectedLeveledCount} de {spellLimits.maxPreparedOrKnown}
+                            {selectedLeveledCount} {isSpanish ? 'de' : 'of'} {spellLimits.maxPreparedOrKnown}
                           </span>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -7872,17 +8376,17 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                               >
                                 <div className="flex items-center justify-between">
                                   <span className="font-fantasy font-bold text-[#4a361c] text-xs">
-                                    {spl.name}
+                                    {isSpanish ? spl.name : (spl.nameEn || translateDndTitle(spl.name))}
                                   </span>
                                   <span className="text-[10px] bg-[#8c672b] text-white px-1.5 py-0.2 rounded font-mono font-bold">
-                                    Nv {spl.level} • {spl.school}
+                                    {isSpanish ? 'Nv' : 'Lv'} {spl.level} • {isSpanish ? spl.school : translateSpellSchool(spl.school)}
                                   </span>
                                 </div>
                                 <div className="text-[10px] text-[#7a6448] font-mono">
-                                  Casteo: {spl.castingTime || '1 acción'} • Alcance: {spl.range || 'Cerca'}
+                                  {isSpanish ? 'Casteo:' : 'Cast:'} {isSpanish ? (spl.castingTime || '1 acción') : (spl.castingTimeEn || translateSpellMeta(spl.castingTime || '1 acción'))} • {isSpanish ? 'Alcance:' : 'Range:'} {isSpanish ? (spl.range || 'Cerca') : (spl.rangeEn || translateSpellMeta(spl.range || 'Self/Close'))}
                                 </div>
-                                <p className="text-[11px] text-[#5c4a35] line-clamp-2">
-                                  {spl.description}
+                                <p className="text-[11px] text-[#5c4a35] leading-relaxed">
+                                  {isSpanish ? spl.description : (spl.descriptionEn || translateDndText(spl.description))}
                                 </p>
                               </div>
                             ))}
@@ -7902,10 +8406,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                           </div>
                           <div>
                             <span className="font-fantasy font-bold text-sm text-[#4a361c] uppercase block">
-                              Bolsa de Monedas Inicial
+                              {isSpanish ? 'Bolsa de Monedas Inicial' : 'Starting Coin Pouch'}
                             </span>
                             <span className="text-xs text-[#7a6448]">
-                              Fondos acumulados de clase y trasfondo
+                              {isSpanish ? 'Fondos acumulados de clase y trasfondo' : 'Combined funds from class and background'}
                             </span>
                           </div>
                         </div>
@@ -7917,7 +8421,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       {/* Equipment List */}
                       <div className="p-4 bg-[#fcf9f2] rounded-xl border border-[#d6c4aa] space-y-2 shadow-xs">
                         <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
-                          <Backpack className="w-4 h-4 text-[#8c672b]" /> Equipamiento de Aventurero & Posesiones
+                          <Backpack className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? 'Equipamiento de Aventurero & Posesiones' : 'Adventurer Equipment & Possessions'}
                         </h5>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           {chosenEquipmentList.map((item, idx) => {
@@ -7967,7 +8471,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                       : 'bg-[#e2d2bc] hover:bg-[#d6c4aa] text-[#4a361c]'
                                   }`}
                                 >
-                                  {isEquipped ? '🛡️ Equipado' : 'Equipar'}
+                                  {isEquipped ? (isSpanish ? '🛡️ Equipado' : '🛡️ Equipped') : (isSpanish ? 'Equipar' : 'Equip')}
                                 </button>
                               </div>
                             );
@@ -7978,24 +8482,24 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       {/* Tools & Languages */}
                       <div className="p-4 bg-[#fcf9f2] rounded-xl border border-[#d6c4aa] space-y-2 shadow-xs">
                         <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase flex items-center gap-1.5">
-                          <Award className="w-4 h-4 text-[#8c672b]" /> Herramientas & Idiomas de Trasfondo
+                          <Award className="w-4 h-4 text-[#8c672b]" /> {isSpanish ? 'Herramientas & Idiomas de Trasfondo' : 'Background Tools & Languages'}
                         </h5>
                         <div className="text-xs text-[#5c4a35] space-y-1">
                           <p>
-                            <strong>Herramientas:</strong>{' '}
+                            <strong>{isSpanish ? 'Herramientas:' : 'Tools:'}</strong>{' '}
                             {backgroundTools && backgroundTools.length > 0
                               ? backgroundTools.join(', ')
-                              : 'Ninguna herramienta otorgada por este trasfondo'}
+                              : (isSpanish ? 'Ninguna herramienta otorgada por este trasfondo' : 'No tools granted by this background')}
                           </p>
                           <p>
-                            <strong>Idiomas adicionales:</strong>{' '}
+                            <strong>{isSpanish ? 'Idiomas adicionales:' : 'Additional Languages:'}</strong>{' '}
                             {activeBackground?.languageOptions && activeBackground.languageOptions.length > 0
-                              ? `${activeBackground.languagesCount || 1} a elegir entre: ${activeBackground.languageOptions.join(', ')}`
+                              ? (isSpanish ? `${activeBackground.languagesCount || 1} a elegir entre: ${activeBackground.languageOptions.join(', ')}` : `${activeBackground.languagesCount || 1} to choose from: ${activeBackground.languageOptions.join(', ')}`)
                               : activeBackground?.languageNote
                               ? activeBackground.languageNote
                               : activeBackground?.languagesCount
-                              ? `${activeBackground.languagesCount} idiomas adicionales a elección`
-                              : 'Idiomas estándar según raza'}
+                              ? (isSpanish ? `${activeBackground.languagesCount} idiomas adicionales a elección` : `${activeBackground.languagesCount} additional languages of choice`)
+                              : (isSpanish ? 'Idiomas estándar según raza' : 'Standard racial languages')}
                           </p>
                         </div>
                       </div>
@@ -8019,12 +8523,12 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                 disabled={currentStepIndex === 0}
                 className="px-3.5 py-1 bg-[#24170d] hover:bg-[#382313] text-[#dfbe7e] hover:text-[#ffd56b] rounded-lg text-xs font-fantasy font-bold transition flex items-center gap-1.5 cursor-pointer disabled:opacity-25 disabled:cursor-not-allowed border border-[#8c672b]/70 shadow-xs active:scale-95 shrink-0"
               >
-                <ChevronLeft className="w-4 h-4" /> Paso Anterior
+                <ChevronLeft className="w-4 h-4" /> {isSpanish ? 'Paso Anterior' : 'Previous Step'}
               </button>
 
               <div className="flex items-center gap-3 shrink-0">
                 <span className="text-xs font-mono font-bold text-[#dfbe7e] hidden sm:inline px-3 py-1 rounded-full bg-[#180e07] border border-[#8c672b]/60 shadow-xs">
-                  Paso {currentStepIndex + 1} de {STEPS.length}
+                  {isSpanish ? 'Paso' : 'Step'} {currentStepIndex + 1} {isSpanish ? 'de' : 'of'} {STEPS.length}
                 </span>
 
                 <button
@@ -8034,7 +8538,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   title="Guardar borrador y salir para continuar luego"
                 >
                   <Save className="w-3.5 h-3.5 text-[#dfbe7e]" />
-                  <span className="hidden md:inline">Guardar Borrador</span>
+                  <span className="hidden md:inline">{isSpanish ? 'Guardar Borrador' : 'Save Draft'}</span>
                 </button>
               </div>
 
@@ -8048,7 +8552,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                     boxShadow: '0 2px 10px rgba(212, 167, 59, 0.45)',
                   }}
                 >
-                  <span>Siguiente Paso</span> <ChevronRight className="w-4 h-4" />
+                  <span>{isSpanish ? 'Siguiente Paso' : 'Next Step'}</span> <ChevronRight className="w-4 h-4" />
                 </button>
               ) : (
                 <button
@@ -8065,8 +8569,8 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   <Sparkles className="w-3.5 h-3.5 text-[#1c130b]" />
                   <span>
                     {initialCharacter && !initialCharacter.isDraft
-                      ? 'Guardar Cambios'
-                      : '¡Forjar Personaje!'}
+                      ? (isSpanish ? 'Guardar Cambios' : 'Save Changes')
+                      : (isSpanish ? '¡Forjar Personaje!' : 'Forge Character!')}
                   </span>
                   <ChevronRight className="w-4 h-4" />
                 </button>
@@ -8098,10 +8602,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                 <div className="flex items-center gap-2 min-w-0">
                   <Scroll className="w-3.5 h-3.5 text-[#ffd56b] shrink-0" />
                   <span className="text-[11px] font-fantasy font-bold uppercase tracking-wider text-[#ffd56b] truncate">
-                    Hoja en Vivo
+                    {isSpanish ? 'Hoja en Vivo' : 'Live Sheet'}
                   </span>
                   <span className="text-[9.5px] bg-[#24170d] text-[#dfbe7e] font-mono font-bold px-1.5 py-0.2 rounded border border-[#8c672b]/60 shadow-xs">
-                    Nv{characterLevel} • +{profBonus}
+                    {isSpanish ? 'Nv' : 'Lv'}{characterLevel} • +{profBonus}
                   </span>
                 </div>
 
@@ -8109,9 +8613,9 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   type="button"
                   onClick={() => setIsSidebarOpen(false)}
                   className="p-1 text-[#dfbe7e] hover:text-[#ffd56b] hover:bg-[#3d2714] rounded-md transition cursor-pointer flex items-center gap-0.5 text-[10px] font-fantasy active:scale-95"
-                  title="Colapsar previsualización para tener más espacio"
+                  title={isSpanish ? "Colapsar previsualización para tener más espacio" : "Collapse preview for more space"}
                 >
-                  <span className="hidden sm:inline">Colapsar</span>
+                  <span className="hidden sm:inline">{isSpanish ? 'Colapsar' : 'Collapse'}</span>
                   <ChevronRight className="w-4 h-4 text-[#ffd56b]" />
                 </button>
               </div>
@@ -8140,29 +8644,29 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                 <div className="overflow-hidden min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-1">
                     <h4 className="font-fantasy font-bold text-sm text-[#241308] truncate tracking-wide">
-                      {characterName || 'Sin Nombre'}
+                      {characterName || (isSpanish ? 'Sin Nombre' : 'Unnamed')}
                     </h4>
                     <button
                       type="button"
                       onClick={() => setAvatarModalOpen(true)}
                       className="text-[9px] font-fantasy font-bold text-[#8c672b] hover:text-[#5c3e1e] underline cursor-pointer shrink-0"
                     >
-                      Marco 🎨
+                      {isSpanish ? 'Marco 🎨' : 'Frame 🎨'}
                     </button>
                   </div>
                   <p className="text-[11px] text-[#8c521f] font-mono font-bold truncate mt-0.5">
-                    {activeRace ? activeRace.name : 'Raza sin elegir'} •{' '}
+                    {activeRace ? getRaceDisplayName(activeRace) : (isSpanish ? 'Raza sin elegir' : 'No race selected')} •{' '}
                     {activeClass
                       ? isSubclassUnlocked && activeSubclass
-                        ? `${activeClass.name} (${activeSubclass.name.split('(')[0].trim()})`
-                        : activeClass.name
-                      : 'Clase sin elegir'}
+                        ? `${getClassDisplayName(activeClass)} (${getSubclassDisplayName(activeSubclass)})`
+                        : getClassDisplayName(activeClass)
+                      : (isSpanish ? 'Clase sin elegir' : 'No class selected')}
                   </p>
                   <p className="text-[10px] text-[#6b472e] truncate">
-                    {activeBackground ? activeBackground.name : 'Trasfondo sin elegir'} •{' '}
+                    {activeBackground ? getBgDisplayName(activeBackground) : (isSpanish ? 'Trasfondo sin elegir' : 'No background selected')} •{' '}
                     {alignment
-                      ? ALIGNMENT_OPTIONS.find((a) => a.id === alignment)?.name.split(' ')[0] || alignment
-                      : 'Alineamiento'}
+                      ? (isSpanish ? (ALIGNMENT_OPTIONS.find((a) => a.id === alignment)?.name.split('(')[0].trim() || alignment) : (ALIGNMENT_LABELS_EN[alignment]?.name || alignment))
+                      : (isSpanish ? 'Alineamiento' : 'Alignment')}
                   </p>
                 </div>
               </div>
@@ -8179,7 +8683,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   }`}
                   title="Combate, Atributos, Salvaciones y Ataques"
                 >
-                  ⚔️ Combate
+                  ⚔️ {isSpanish ? 'Combate' : 'Combat'}
                 </button>
                 <button
                   type="button"
@@ -8191,7 +8695,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   }`}
                   title="Habilidades y Bonificadores Calculados"
                 >
-                  🎯 Hab ({totalSkills.length})
+                  🎯 {isSpanish ? 'Hab' : 'Skills'} ({totalSkills.length})
                 </button>
                 <button
                   type="button"
@@ -8203,7 +8707,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   }`}
                   title="Rasgos de Trasfondo, Raza, Clase y Dotes"
                 >
-                  📜 Rasgos
+                  📜 {isSpanish ? 'Rasgos' : 'Traits'}
                 </button>
                 {(isCaster || selectedSpells.length > 0) && (
                   <button
@@ -8216,7 +8720,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                     }`}
                     title="Grimorio, CD y Ranuras"
                   >
-                    🔮 Magia ({selectedSpells.length})
+                    🔮 {isSpanish ? 'Magia' : 'Spells'} ({selectedSpells.length})
                   </button>
                 )}
                 <button
@@ -8229,7 +8733,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   }`}
                   title="Inventario, Armas y Oro"
                 >
-                  🎒 Equipo
+                  🎒 {isSpanish ? 'Equipo' : 'Equipment'}
                 </button>
               </div>
 
@@ -8240,7 +8744,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   <div className="grid grid-cols-4 gap-1.5 text-center">
                     {/* CA Forged Shield */}
                     <div className="flex flex-col items-center justify-center p-1.5 bg-[#fbf6ed]/90 rounded-xl border border-[#c4a982] shadow-xs">
-                      <span className="text-[8.5px] uppercase font-bold text-[#6b472e] tracking-wider mb-0.5">Armadura</span>
+                      <span className="text-[8.5px] uppercase font-bold text-[#6b472e] tracking-wider mb-0.5">{isSpanish ? 'Armadura' : 'Armor'}</span>
                       <div className="relative w-9 h-10 shrink-0 flex items-center justify-center filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.45)]">
                         <img
                           src="./assets/ui/badge_shield_ac.png"
@@ -8252,12 +8756,12 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                           {calculatedAc}
                         </span>
                       </div>
-                      <span className="text-[9px] font-fantasy font-bold text-[#3d2714] mt-0.5">CA {calculatedAc}</span>
+                      <span className="text-[9px] font-fantasy font-bold text-[#3d2714] mt-0.5">{isSpanish ? 'CA' : 'AC'} {calculatedAc}</span>
                     </div>
 
                     {/* Init Crest */}
                     <div className="flex flex-col items-center justify-center p-1.5 bg-[#fbf6ed]/90 rounded-xl border border-[#c4a982] shadow-xs">
-                      <span className="text-[8.5px] uppercase font-bold text-[#6b472e] tracking-wider mb-0.5">Iniciativa</span>
+                      <span className="text-[8.5px] uppercase font-bold text-[#6b472e] tracking-wider mb-0.5">{isSpanish ? 'Iniciativa' : 'Initiative'}</span>
                       <div className="relative w-9 h-9 shrink-0 flex items-center justify-center filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.45)]">
                         <img
                           src="./assets/ui/coin_stat_medallion.png"
@@ -8293,7 +8797,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
 
                     {/* Proficiency Bonus Crest */}
                     <div className="flex flex-col items-center justify-center p-1.5 bg-[#fbf6ed]/90 rounded-xl border border-[#c4a982] shadow-xs">
-                      <span className="text-[8.5px] uppercase font-bold text-[#6b472e] tracking-wider mb-0.5">Comp.</span>
+                      <span className="text-[8.5px] uppercase font-bold text-[#6b472e] tracking-wider mb-0.5">{isSpanish ? 'Comp.' : 'Prof.'}</span>
                       <div className="relative w-9 h-9 shrink-0 flex items-center justify-center filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.45)]">
                         <img
                           src="./assets/ui/coin_stat_medallion.png"
@@ -8305,7 +8809,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                           +{profBonus}
                         </span>
                       </div>
-                      <span className="text-[9px] font-fantasy font-bold text-[#3d2714] mt-0.5">+{profBonus} Bono</span>
+                      <span className="text-[9px] font-fantasy font-bold text-[#3d2714] mt-0.5">+{profBonus} {isSpanish ? 'Bono' : 'Bonus'}</span>
                     </div>
                   </div>
 
@@ -8314,10 +8818,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                     <div className="flex items-center justify-between text-xs font-fantasy font-bold text-[#4a361c]">
                       <span className="flex items-center gap-1.5">
                         <Heart className="w-3.5 h-3.5 text-red-600 fill-red-500" />
-                        <span>PUNTOS DE GOLPE (PG MÁX)</span>
+                        <span>{isSpanish ? 'PUNTOS DE GOLPE (PG MÁX)' : 'HIT POINTS (MAX HP)'}</span>
                       </span>
                       <span className="font-mono text-sm text-[#2e7d32] font-bold">
-                        {activeClass ? `${calculatedMaxHp} / ${calculatedMaxHp} PG` : '0 PG'}
+                        {activeClass ? `${calculatedMaxHp} / ${calculatedMaxHp} ${isSpanish ? 'PG' : 'HP'}` : (isSpanish ? '0 PG' : '0 HP')}
                       </span>
                     </div>
 
@@ -8353,16 +8857,16 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                     </div>
 
                     <div className="flex items-center justify-between text-[10px] text-[#7a5538] font-mono">
-                      <span>Dado de Golpe: 1d{activeClass ? activeClass.hitDie : 8}</span>
-                      <span>Mod CON: {getModStr(finalStats.con)}</span>
+                      <span>{isSpanish ? 'Dado de Golpe:' : 'Hit Die:'} 1d{activeClass ? activeClass.hitDie : 8}</span>
+                      <span>{isSpanish ? 'Mod CON:' : 'CON Mod:'} {getModStr(finalStats.con)}</span>
                     </div>
                   </div>
 
                   {/* 6 Ability Scores with Medallions in 3x2 Grid */}
                   <div className="bg-[#fbf6ed]/95 rounded-xl p-2.5 border border-[#c4a982] space-y-1.5 shadow-xs">
                     <div className="flex items-center justify-between text-[10px] text-[#7a6448] uppercase font-mono border-b border-[#e2d5c2] pb-1 font-bold">
-                      <span className="font-fantasy tracking-wider">Atributos & Modificadores</span>
-                      <span className="text-[9px]">Base + Bonos</span>
+                      <span className="font-fantasy tracking-wider">{isSpanish ? 'Atributos & Modificadores' : 'Ability Scores & Modifiers'}</span>
+                      <span className="text-[9px]">{isSpanish ? 'Base + Bonos' : 'Base + Bonuses'}</span>
                     </div>
 
                     <div className="grid grid-cols-3 gap-1.5">
@@ -8381,7 +8885,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             title={`${ABILITY_SCORE_EXPLANATIONS[st].name}: Base ${base}${race > 0 ? ` +${race} Raza` : ''}${asi > 0 ? ` +${asi} Dote` : ''} = Total ${total} (${mod})`}
                           >
                             <span className="text-[10px] font-fantasy font-bold text-[#4a361c] uppercase tracking-wider">
-                              {ABILITY_SCORE_EXPLANATIONS[st].abbreviation}
+                              {getAbilityAbbr(st)}
                             </span>
                             <div className="relative w-11 h-11 my-0.5 flex items-center justify-center">
                               <img
@@ -8407,9 +8911,9 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   <div className="bg-[#fbf6ed]/95 rounded-xl p-2.5 border border-[#c4a982] space-y-1.5 shadow-xs">
                     <div className="flex items-center justify-between text-[10px] font-fantasy font-bold text-[#4a361c] uppercase">
                       <span className="flex items-center gap-1">
-                        <Shield className="w-3.5 h-3.5 text-[#8c672b]" /> Tiradas de Salvación
+                        <Shield className="w-3.5 h-3.5 text-[#8c672b]" /> {isSpanish ? 'Tiradas de Salvación' : 'Saving Throws'}
                       </span>
-                      <span className="text-[9px] text-[#7a6448] font-mono">★ = Competente</span>
+                      <span className="text-[9px] text-[#7a6448] font-mono">{isSpanish ? '★ = Competente' : '★ = Proficient'}</span>
                     </div>
                     <div className="grid grid-cols-3 gap-1">
                       {savingThrowDetails.map((save) => (
@@ -8436,13 +8940,13 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   <div className="bg-[#fbf6ed]/95 rounded-xl p-2.5 border border-[#c4a982] space-y-1.5 shadow-xs">
                     <div className="flex items-center justify-between text-[10px] font-fantasy font-bold text-[#4a361c] uppercase">
                       <span className="flex items-center gap-1">
-                        <Sword className="w-3.5 h-3.5 text-[#8c672b]" /> Armas & Ataques
+                        <Sword className="w-3.5 h-3.5 text-[#8c672b]" /> {isSpanish ? 'Armas & Ataques' : 'Weapons & Attacks'}
                       </span>
                       <span className="text-[9px] text-[#7a6448] font-mono">{equippedAttacks.length}</span>
                     </div>
                     <div className="space-y-1">
                       {equippedAttacks.length === 0 ? (
-                        <p className="text-[10px] text-[#7a6448] italic py-1 text-center">Sin armas equipadas</p>
+                        <p className="text-[10px] text-[#7a6448] italic py-1 text-center">{isSpanish ? 'Sin armas equipadas' : 'No weapons equipped'}</p>
                       ) : (
                         equippedAttacks.map((att, i) => {
                           const lower = att.name.toLowerCase();
@@ -8470,10 +8974,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                   draggable={false}
                                   className="w-5 h-5 object-contain shrink-0 drop-shadow-xs"
                                 />
-                                <span className="font-bold text-[#4a361c] truncate">{att.name}</span>
+                                <span className="font-bold text-[#4a361c] truncate">{displayAttackName(att.name)}</span>
                               </div>
                               <span className="font-mono text-[#8c672b] font-bold text-[11px] shrink-0">
-                                {att.bonus} • {att.damage} ({att.type})
+                                {att.bonus} • {att.damage} ({displayAttackType(att.type)})
                               </span>
                             </div>
                           );
@@ -8489,7 +8993,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                 <div className="space-y-2 flex-1 overflow-y-auto pr-0.5">
                   <div className="flex items-center justify-between bg-[#fbf6ed] p-2 rounded-lg border border-[#c4a982]">
                     <span className="text-[10px] font-fantasy font-bold text-[#4a361c] uppercase">
-                      Habilidades 5e
+                      {isSpanish ? 'Habilidades' : 'Skills'}
                     </span>
                     <div className="flex items-center gap-1 text-[10px]">
                       <button
@@ -8501,7 +9005,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             : 'bg-white text-[#4a361c] border border-[#d6c4aa]'
                         }`}
                       >
-                        Todas (18)
+                        {isSpanish ? 'Todas (18)' : 'All (18)'}
                       </button>
                       <button
                         type="button"
@@ -8512,7 +9016,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             : 'bg-white text-[#4a361c] border border-[#d6c4aa]'
                         }`}
                       >
-                        Competentes ({totalSkills.length})
+                        {isSpanish ? `Competentes (${totalSkills.length})` : `Proficient (${totalSkills.length})`}
                       </button>
                     </div>
                   </div>
@@ -8537,14 +9041,14 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                               </span>
                               <div className="min-w-0">
                                 <span className="text-[#4a361c] font-bold truncate block">
-                                  {sk.name}{' '}
+                                  {displaySkillName(sk.name)}{' '}
                                   <span className="text-[9px] text-[#7a6448] font-mono font-normal">
-                                    ({ABILITY_SCORE_EXPLANATIONS[sk.ability].abbreviation})
+                                    ({getAbilityAbbr(sk.ability)})
                                   </span>
                                 </span>
                                 <span className="text-[8px] text-[#7a6448] block">
                                   {sk.isExpertise
-                                    ? '[Pericia x2]'
+                                    ? (isSpanish ? '[Pericia x2]' : '[Expertise x2]')
                                     : sk.isProficient
                                     ? `[${sk.origin}]`
                                     : 'Base'}
@@ -8577,26 +9081,26 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   {(personalityTraits.trim() || ideals.trim() || bonds.trim() || flaws.trim()) && (
                     <div className="bg-[#fbf6ed] rounded-xl p-2.5 border border-[#c4a982] space-y-1.5 shadow-2xs">
                       <span className="text-[10px] font-fantasy font-bold text-[#4a361c] uppercase flex items-center gap-1">
-                        <User className="w-3.5 h-3.5 text-[#8c672b]" /> Rol & Personalidad
+                        <User className="w-3.5 h-3.5 text-[#8c672b]" /> {isSpanish ? 'Rol & Personalidad' : 'Roleplay & Personality'}
                       </span>
                       {personalityTraits.trim() && (
                         <div className="text-[10px] text-[#5c4a35]">
-                          <strong className="text-[#8c672b]">Virtudes/Rasgos:</strong> {personalityTraits}
+                          <strong className="text-[#8c672b]">{isSpanish ? 'Virtudes/Rasgos:' : 'Personality Traits:'}</strong> {personalityTraits}
                         </div>
                       )}
                       {ideals.trim() && (
                         <div className="text-[10px] text-[#5c4a35]">
-                          <strong className="text-[#8c672b]">Ideales:</strong> {ideals}
+                          <strong className="text-[#8c672b]">{isSpanish ? 'Ideales:' : 'Ideals:'}</strong> {ideals}
                         </div>
                       )}
                       {bonds.trim() && (
                         <div className="text-[10px] text-[#5c4a35]">
-                          <strong className="text-[#8c672b]">Vínculos:</strong> {bonds}
+                          <strong className="text-[#8c672b]">{isSpanish ? 'Vínculos:' : 'Bonds:'}</strong> {bonds}
                         </div>
                       )}
                       {flaws.trim() && (
                         <div className="text-[10px] text-[#5c4a35]">
-                          <strong className="text-[#8c672b]">Defectos:</strong> {flaws}
+                          <strong className="text-[#8c672b]">{isSpanish ? 'Defectos:' : 'Flaws:'}</strong> {flaws}
                         </div>
                       )}
                     </div>
@@ -8606,7 +9110,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   {activeBackground && (
                     <div className="bg-[#fbf6ed] rounded-xl p-2.5 border border-[#c4a982] space-y-1 shadow-2xs">
                       <span className="text-[10px] font-fantasy font-bold text-[#4a361c] uppercase flex items-center gap-1">
-                        <BookOpen className="w-3.5 h-3.5 text-[#8c672b]" /> Rasgo de Trasfondo: {activeBackground.featureName}
+                        <BookOpen className="w-3.5 h-3.5 text-[#8c672b]" /> {isSpanish ? 'Rasgo de Trasfondo:' : 'Background Feature:'} {activeBackground.featureName}
                       </span>
                       <p className="text-[11px] text-[#5c4a35] leading-relaxed">
                         {activeBackground.featureDescription}
@@ -8618,7 +9122,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   {chosenFeatsList.length > 0 && (
                     <div className="bg-[#fbf6ed] rounded-xl p-2.5 border border-[#c4a982] space-y-1.5 shadow-2xs">
                       <span className="text-[10px] font-fantasy font-bold text-[#b45309] uppercase flex items-center gap-1">
-                        <Star className="w-3.5 h-3.5 text-[#8c672b]" /> Dotes Oficiales ({chosenFeatsList.length})
+                        <Star className="w-3.5 h-3.5 text-[#8c672b]" /> {isSpanish ? `Dotes Oficiales (${chosenFeatsList.length})` : `Official Feats (${chosenFeatsList.length})`}
                       </span>
                       <div className="space-y-1">
                         {chosenFeatsList.map(({ feat, choice }, fIdx) => {
@@ -8635,7 +9139,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                   Elección: {subChoiceNames}
                                 </span>
                               )}
-                              <p className="text-[10px] text-[#78350f] line-clamp-2">
+                              <p className="text-[10px] text-[#78350f] leading-relaxed">
                                 {feat.benefits.join(' ')}
                               </p>
                             </div>
@@ -8649,12 +9153,12 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   {activeRace && (
                     <div className="bg-[#fbf6ed] rounded-xl p-2.5 border border-[#c4a982] space-y-1 shadow-2xs">
                       <span className="text-[10px] font-fantasy font-bold text-[#4a361c] uppercase flex items-center gap-1">
-                        <Award className="w-3.5 h-3.5 text-[#8c672b]" /> Rasgos Raciales ({activeRace.name})
+                        <Award className="w-3.5 h-3.5 text-[#8c672b]" /> {isSpanish ? `Rasgos Raciales (${activeRace.name})` : `Racial Traits (${activeRace.name})`}
                       </span>
                       <div className="space-y-1">
                         {activeRace.darkvision > 0 && (
                           <div className="text-[10px] text-[#5c4a35]">
-                            <strong>Visión en la Oscuridad:</strong> {activeRace.darkvision} pies
+                            <strong>{isSpanish ? 'Visión en la Oscuridad:' : 'Darkvision:'}</strong> {activeRace.darkvision} {isSpanish ? 'pies' : 'feet'}
                           </div>
                         )}
                         {activeRace.traits?.slice(0, 3).map((t, idx) => (
@@ -8670,14 +9174,14 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   {activeClass && (
                     <div className="bg-[#fbf6ed] rounded-xl p-2.5 border border-[#c4a982] space-y-1 shadow-2xs">
                       <span className="text-[10px] font-fantasy font-bold text-[#4a361c] uppercase flex items-center gap-1">
-                        <Shield className="w-3.5 h-3.5 text-[#8c672b]" /> Rasgos de {activeClass.name}
+                        <Shield className="w-3.5 h-3.5 text-[#8c672b]" /> {isSpanish ? `Rasgos de ${activeClass.name}` : `${activeClass.name} Features`}
                       </span>
                       <div className="space-y-1">
                         {combinedProgression
                           .filter((f) => f.level <= characterLevel)
                           .map((f, idx) => (
                             <div key={idx} className="text-[10px] text-[#5c4a35]">
-                              <strong>{f.name} (Nv{f.level}):</strong> {f.desc}
+                              <strong>{f.name} ({isSpanish ? 'Nv' : 'Lv'}{f.level}):</strong> {f.desc}
                             </div>
                           ))}
                       </div>
@@ -8692,19 +9196,19 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   {/* Spell Stats Ribbon */}
                   <div className="grid grid-cols-3 gap-1 text-center bg-[#fbf6ed] p-2 rounded-xl border border-[#c4a982]">
                     <div className="p-1 bg-[#ede1ce] rounded">
-                      <span className="text-[8px] text-[#7a6448] uppercase block">Caract.</span>
+                      <span className="text-[8px] text-[#7a6448] uppercase block">{isSpanish ? 'Caract.' : 'Ability'}</span>
                       <span className="font-fantasy font-bold text-xs text-[#4a361c]">
                         {spellcastingDetails?.abilityName ? spellcastingDetails.abilityName.slice(0, 3).toUpperCase() : 'INT'} ({(spellcastingDetails?.abilityMod ?? 0) >= 0 ? `+${spellcastingDetails?.abilityMod ?? 0}` : (spellcastingDetails?.abilityMod ?? 0)})
                       </span>
                     </div>
                     <div className="p-1 bg-[#ede1ce] rounded">
-                      <span className="text-[8px] text-[#7a6448] uppercase block">CD Salvación</span>
+                      <span className="text-[8px] text-[#7a6448] uppercase block">{isSpanish ? 'CD Salvación' : 'Save DC'}</span>
                       <span className="font-fantasy font-bold text-xs text-[#8c672b]">
-                        CD {spellcastingDetails?.saveDc}
+                        {isSpanish ? 'CD' : 'DC'} {spellcastingDetails?.saveDc}
                       </span>
                     </div>
                     <div className="p-1 bg-[#ede1ce] rounded">
-                      <span className="text-[8px] text-[#7a6448] uppercase block">Ataque Conj.</span>
+                      <span className="text-[8px] text-[#7a6448] uppercase block">{isSpanish ? 'Ataque Conj.' : 'Spell Attack'}</span>
                       <span className="font-fantasy font-bold text-xs text-[#1d4ed8]">
                         {spellcastingDetails?.attackStr}
                       </span>
@@ -8715,7 +9219,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   {spellcastingDetails?.slots && Object.keys(spellcastingDetails.slots).length > 0 && (
                     <div className="bg-[#fbf6ed] rounded-xl p-2 border border-[#c4a982] space-y-1">
                       <span className="text-[9px] font-fantasy font-bold text-[#4a361c] uppercase block">
-                        Ranuras Disponibles
+                        {isSpanish ? 'Ranuras Disponibles' : 'Available Spell Slots'}
                       </span>
                       <div className="flex items-center gap-1 flex-wrap">
                         {Object.entries(spellcastingDetails.slots).map(([lvlKey, count]) => (
@@ -8733,12 +9237,12 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   {/* Chosen Spells List */}
                   <div className="bg-[#fbf6ed] rounded-xl p-2.5 border border-[#c4a982] space-y-1.5">
                     <div className="flex items-center justify-between text-[10px] font-fantasy font-bold text-[#4a361c] uppercase">
-                      <span>Grimorio Seleccionado</span>
+                      <span>{isSpanish ? 'Grimorio Seleccionado' : 'Selected Spellbook'}</span>
                       <span className="font-mono text-[#8c672b] font-bold">{selectedSpells.length}</span>
                     </div>
                     <div className="space-y-1">
                       {selectedSpells.length === 0 ? (
-                        <p className="text-[10px] text-[#7a6448] italic">Ningún conjuro seleccionado aún.</p>
+                        <p className="text-[10px] text-[#7a6448] italic">{isSpanish ? 'Ningún conjuro seleccionado aún.' : 'No spells selected yet.'}</p>
                       ) : (
                         selectedSpells.map((spl) => (
                           <div
@@ -8747,7 +9251,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                           >
                             <span className="font-bold text-[#4a361c] truncate">{spl.name}</span>
                             <span className="font-mono text-[9px] text-[#8c672b] shrink-0 font-bold">
-                              {spl.level === 0 ? 'Truco' : `Nv ${spl.level}`}
+                              {spl.level === 0 ? (isSpanish ? 'Truco' : 'Cantrip') : `${isSpanish ? 'Nv' : 'Lv'} ${spl.level}`}
                             </span>
                           </div>
                         ))
@@ -8764,21 +9268,21 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   <div className="bg-[#fbf6ed] rounded-xl p-2.5 border border-[#c4a982] flex items-center justify-between shadow-2xs">
                     <div className="flex items-center gap-2">
                       <Coins className="w-4 h-4 text-[#8c672b]" />
-                      <span className="text-xs font-fantasy font-bold text-[#4a361c] uppercase">Oro Inicial</span>
+                      <span className="text-xs font-fantasy font-bold text-[#4a361c] uppercase">{isSpanish ? 'Oro Inicial' : 'Starting Gold'}</span>
                     </div>
                     <span className="font-mono text-base font-bold text-[#b45309]">
-                      {startingGoldTotal} po
+                      {startingGoldTotal} {isSpanish ? 'po' : 'gp'}
                     </span>
                   </div>
 
                   {/* Items List */}
                   <div className="bg-[#fbf6ed] rounded-xl p-2.5 border border-[#c4a982] space-y-1.5 shadow-2xs">
                     <span className="text-[10px] font-fantasy font-bold text-[#4a361c] uppercase flex items-center gap-1">
-                      <Backpack className="w-3.5 h-3.5 text-[#8c672b]" /> Equipo Inicial & Posesiones
+                      <Backpack className="w-3.5 h-3.5 text-[#8c672b]" /> {isSpanish ? 'Equipo Inicial & Posesiones' : 'Starting Equipment & Possessions'}
                     </span>
                     <div className="space-y-1">
                       {chosenEquipmentList.length === 0 ? (
-                        <p className="text-[10px] text-[#7a6448] italic">Sin equipo seleccionado aún.</p>
+                        <p className="text-[10px] text-[#7a6448] italic">{isSpanish ? 'Sin equipo seleccionado aún.' : 'No equipment selected yet.'}</p>
                       ) : (
                         chosenEquipmentList.map((item, idx) => {
                           const isEquipped = isItemEquipped(item);
@@ -8802,7 +9306,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                     : 'bg-[#e2d2bc] text-[#5e4b37]'
                                 }`}
                               >
-                                {isEquipped ? 'Equipado' : 'Mochila'}
+                                {isEquipped ? (isSpanish ? 'Equipado' : 'Equipped') : (isSpanish ? 'Mochila' : 'Backpack')}
                               </span>
                             </div>
                           );
@@ -8815,14 +9319,14 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   {activeBackground && (
                     <div className="bg-[#fbf6ed] rounded-xl p-2.5 border border-[#c4a982] space-y-1 text-xs">
                       <span className="text-[10px] font-fantasy font-bold text-[#4a361c] uppercase block">
-                        Herramientas & Idiomas
+                        {isSpanish ? 'Herramientas & Idiomas' : 'Tools & Languages'}
                       </span>
                       <p className="text-[11px] text-[#5c4a35]">
-                        <strong>Herramientas:</strong>{' '}
-                        {backgroundTools && backgroundTools.length > 0 ? backgroundTools.join(', ') : 'Ninguna'}
+                        <strong>{isSpanish ? 'Herramientas:' : 'Tools:'}</strong>{' '}
+                        {backgroundTools && backgroundTools.length > 0 ? backgroundTools.join(', ') : (isSpanish ? 'Ninguna' : 'None')}
                       </p>
                       <p className="text-[11px] text-[#5c4a35]">
-                        <strong>Idiomas extras:</strong> {activeBackground.languageNote ? `${activeBackground.languagesCount || 0} (${activeBackground.languageNote})` : (activeBackground.languagesCount || 0)}
+                        <strong>{isSpanish ? 'Idiomas extras:' : 'Extra Languages:'}</strong> {activeBackground.languageNote ? `${activeBackground.languagesCount || 0} (${activeBackground.languageNote})` : (activeBackground.languagesCount || 0)}
                       </p>
                     </div>
                   )}
@@ -8834,9 +9338,9 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
             <div className="h-6 w-full shrink-0 flex items-center justify-between px-3 bg-[#f5ede0]/95 border-t border-[#d6c4aa] text-[9px] text-[#7a6448] font-mono">
               <span className="flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span>Sincronizado en Vivo</span>
+                <span>{isSpanish ? 'Sincronizado en Vivo' : 'Live Synced'}</span>
               </span>
-              <span className="truncate max-w-[150px]">{characterName || 'Héroe'} (Nv {characterLevel})</span>
+              <span className="truncate max-w-[150px]">{characterName || (isSpanish ? 'Héroe' : 'Hero')} ({isSpanish ? 'Nv' : 'Lv'} {characterLevel})</span>
             </div>
           </div>
         </div>
@@ -8859,10 +9363,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                 </div>
                 <div>
                   <h3 className="font-fantasy font-bold text-base text-[#f5ebd7] tracking-wider uppercase">
-                    Compendio de Conjuración Ampliado • {activeClass?.name || 'Lanzador'}
+                    {isSpanish ? `Compendio de Conjuración Ampliado • ${activeClass?.name || 'Lanzador'}` : `Expanded Spellcasting Compendium • ${getClassDisplayName(activeClass) || 'Caster'}`}
                   </h3>
                   <p className="text-[11px] text-[#c5af95]">
-                    {spellLimits.explanation} • Organiza y selecciona tus conjuros en pantalla completa
+                    {spellLimits.explanation} • {isSpanish ? 'Organiza y selecciona tus conjuros en pantalla completa' : 'Organize and select your spells in fullscreen'}
                   </p>
                 </div>
               </div>
@@ -8874,14 +9378,14 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       ? 'bg-amber-500 text-black border-amber-300'
                       : 'bg-[#1c150e] text-[#f5ebd7] border-[#8c672b]'
                   }`}>
-                    Trucos: {selectedCantripsCount} / {spellLimits.maxCantrips}
+                    {isSpanish ? 'Trucos:' : 'Cantrips:'} {selectedCantripsCount} / {spellLimits.maxCantrips}
                   </span>
                   <span className={`px-2.5 py-1 rounded border font-bold ${
                     selectedLeveledCount > spellLimits.maxPreparedOrKnown
                       ? 'bg-amber-500 text-black border-amber-300'
                       : 'bg-[#1c150e] text-[#f5ebd7] border-[#8c672b]'
                   }`}>
-                    Grimorio: {selectedLeveledCount} / {spellLimits.maxPreparedOrKnown}
+                    {isSpanish ? 'Grimorio:' : 'Spellbook:'} {selectedLeveledCount} / {spellLimits.maxPreparedOrKnown}
                   </span>
                 </div>
                 <button
@@ -8890,7 +9394,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   className="px-4 py-2 rounded-xl border border-[#c59b27] bg-[#8c672b] hover:bg-[#6e5020] text-xs font-fantasy font-bold text-white flex items-center gap-1.5 transition cursor-pointer shadow-md"
                 >
                   <Check className="w-4 h-4" />
-                  Listo / Minimizar
+                  {isSpanish ? 'Listo / Minimizar' : 'Done / Minimize'}
                 </button>
               </div>
             </div>
@@ -8915,14 +9419,14 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                     type="text"
                     value={spellSearchQuery}
                     onChange={(e) => setSpellSearchQuery(e.target.value)}
-                    placeholder="Buscar conjuro por nombre, escuela o efecto..."
+                    placeholder={isSpanish ? "Buscar conjuro por nombre, escuela o efecto..." : "Search spell by name, school, or effect..."}
                     className="w-full bg-white border border-[#d6c4aa] rounded-lg pl-9 pr-3 py-1.5 text-xs text-[#2c241b] focus:outline-none focus:border-[#8c672b]"
                   />
                 </div>
 
                   {/* Scope selector pills */}
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-[10px] text-[#7a6448] font-fantasy font-bold uppercase mr-1">Repertorio:</span>
+                    <span className="text-[10px] text-[#7a6448] font-fantasy font-bold uppercase mr-1">{isSpanish ? 'Repertorio:' : 'Scope:'}</span>
                     <button
                       type="button"
                       onClick={() => setSpellScopeMode('available')}
@@ -8933,7 +9437,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       }`}
                       title="Muestra únicamente los conjuros que puedes lanzar con tus ranuras de nivel actual"
                     >
-                      ⚡ Disponibles para Elegir ({filteredSpells.availableToChoose.length})
+                      ⚡ {isSpanish ? `Disponibles para Elegir (${filteredSpells.availableToChoose.length})` : `Available to Choose (${filteredSpells.availableToChoose.length})`}
                     </button>
                     <button
                       type="button"
@@ -8945,7 +9449,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       }`}
                       title="Explorar niveles superiores de tu clase (Solo consulta/lectura)"
                     >
-                      👁️ Consultar Niveles Superiores ({filteredSpells.higherLevelToBrowse.length})
+                      👁️ {isSpanish ? `Consultar Niveles Superiores (${filteredSpells.higherLevelToBrowse.length})` : `Browse Higher Levels (${filteredSpells.higherLevelToBrowse.length})`}
                     </button>
                     <button
                       type="button"
@@ -8957,7 +9461,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       }`}
                       title="Compendio Completo Oficial con conjuros de todas las clases"
                     >
-                      📖 Compendio Completo ({OFFICIAL_SPELLS_COMPENDIUM.length})
+                      📖 {isSpanish ? `Compendio Completo (${OFFICIAL_SPELLS_COMPENDIUM.length})` : `Full Compendium (${OFFICIAL_SPELLS_COMPENDIUM.length})`}
                     </button>
                   </div>
               </div>
@@ -8973,7 +9477,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       spellActiveTab === 'all' ? 'bg-[#8c672b] text-white shadow-xs' : 'text-[#4a361c] hover:bg-white/50'
                     }`}
                   >
-                    Todos ({displayedSpellsData.totalCount})
+                    {isSpanish ? 'Todos' : 'All'} ({displayedSpellsData.totalCount})
                   </button>
                   <button
                     type="button"
@@ -8982,7 +9486,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       spellActiveTab === 'cantrips' ? 'bg-[#8c672b] text-white shadow-xs' : 'text-[#4a361c] hover:bg-white/50'
                     }`}
                   >
-                    Trucos ({displayedSpellsData.cantrips.length})
+                    {isSpanish ? 'Trucos' : 'Cantrips'} ({displayedSpellsData.cantrips.length})
                   </button>
                   <button
                     type="button"
@@ -8991,7 +9495,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       spellActiveTab === 'leveled' ? 'bg-[#8c672b] text-white shadow-xs' : 'text-[#4a361c] hover:bg-white/50'
                     }`}
                   >
-                    Nivel 1+ ({displayedSpellsData.leveled.length})
+                    {isSpanish ? 'Nivel 1+' : 'Level 1+'} ({displayedSpellsData.leveled.length})
                   </button>
                 </div>
 
@@ -8999,35 +9503,35 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                 <div className="flex items-center gap-2 flex-wrap">
                   <div className="flex items-center gap-1 bg-white border border-[#d6c4aa] rounded-lg px-2 py-1">
                     <ArrowUpDown className="w-3.5 h-3.5 text-[#8c672b]" />
-                    <span className="text-[10px] text-[#7a6448] font-fantasy font-bold">Orden:</span>
+                    <span className="text-[10px] text-[#7a6448] font-fantasy font-bold">{isSpanish ? 'Orden:' : 'Sort:'}</span>
                     <select
                       value={spellSortMode}
                       onChange={(e) => setSpellSortMode(e.target.value as any)}
                       className="bg-transparent text-xs text-[#2c241b] focus:outline-none cursor-pointer"
                     >
-                      <option value="level">Por Nivel (1 → 9)</option>
-                      <option value="name">Alfabético (A → Z)</option>
-                      <option value="school">Por Escuela de Magia</option>
+                      <option value="level">{isSpanish ? 'Por Nivel (1 → 9)' : 'By Level (1 → 9)'}</option>
+                      <option value="name">{isSpanish ? 'Alfabético (A → Z)' : 'Alphabetical (A → Z)'}</option>
+                      <option value="school">{isSpanish ? 'Por Escuela de Magia' : 'By School of Magic'}</option>
                     </select>
                   </div>
 
                   <div className="flex items-center gap-1 bg-white border border-[#d6c4aa] rounded-lg px-2 py-1">
                     <SlidersHorizontal className="w-3.5 h-3.5 text-[#8c672b]" />
-                    <span className="text-[10px] text-[#7a6448] font-fantasy font-bold">Escuela:</span>
+                    <span className="text-[10px] text-[#7a6448] font-fantasy font-bold">{isSpanish ? 'Escuela:' : 'School:'}</span>
                     <select
                       value={spellSchoolFilter}
                       onChange={(e) => setSpellSchoolFilter(e.target.value)}
                       className="bg-transparent text-xs text-[#2c241b] focus:outline-none cursor-pointer"
                     >
-                      <option value="all">Todas las Escuelas</option>
-                      <option value="Abjuración">Abjuración</option>
-                      <option value="Adivinación">Adivinación</option>
-                      <option value="Conjuración">Conjuración</option>
-                      <option value="Encantamiento">Encantamiento</option>
-                      <option value="Evocación">Evocación</option>
-                      <option value="Ilusión">Ilusión</option>
-                      <option value="Nigromancia">Nigromancia</option>
-                      <option value="Transmutación">Transmutación</option>
+                      <option value="all">{isSpanish ? 'Todas las Escuelas' : 'All Schools'}</option>
+                      <option value="Abjuración">{isSpanish ? 'Abjuración' : 'Abjuration'}</option>
+                      <option value="Adivinación">{isSpanish ? 'Adivinación' : 'Divination'}</option>
+                      <option value="Conjuración">{isSpanish ? 'Conjuración' : 'Conjuration'}</option>
+                      <option value="Encantamiento">{isSpanish ? 'Encantamiento' : 'Enchantment'}</option>
+                      <option value="Evocación">{isSpanish ? 'Evocación' : 'Evocation'}</option>
+                      <option value="Ilusión">{isSpanish ? 'Ilusión' : 'Illusion'}</option>
+                      <option value="Nigromancia">{isSpanish ? 'Nigromancia' : 'Necromancy'}</option>
+                      <option value="Transmutación">{isSpanish ? 'Transmutación' : 'Transmutation'}</option>
                     </select>
                   </div>
                 </div>
@@ -9042,10 +9546,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   <div className="flex items-center justify-between border-b-2 border-[#8c672b] pb-2">
                     <h4 className="font-fantasy font-bold text-base text-[#4a361c] flex items-center gap-2">
                       <Sparkles className="w-5 h-5 text-[#8c672b]" />
-                      TRUCOS DE MAGIA (Nivel 0 / Cantrips) — {displayedSpellsData.cantrips.length} disponibles
+                      {isSpanish ? `TRUCOS DE MAGIA (Nivel 0 / Cantrips) — ${displayedSpellsData.cantrips.length} disponibles` : `CANTRIPS (Level 0 Spells) — ${displayedSpellsData.cantrips.length} available`}
                     </h4>
                     <span className="text-xs font-mono font-bold px-2.5 py-1 rounded bg-[#ebdcc4] text-[#8c672b] border border-[#d6c4aa]">
-                      {selectedCantripsCount} / {spellLimits.maxCantrips} Trucos Elegidos
+                      {selectedCantripsCount} / {spellLimits.maxCantrips} {isSpanish ? 'Trucos Elegidos' : 'Cantrips Chosen'}
                     </span>
                   </div>
 
@@ -9068,7 +9572,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                     </div>
                   ) : (
                     <div className="p-4 bg-[#f5ede0] rounded-lg border border-dashed border-[#d6c4aa] text-center text-xs text-[#7a6448]">
-                      No se encontraron trucos con los filtros actuales.
+                      {isSpanish ? 'No se encontraron trucos con los filtros actuales.' : 'No cantrips found with the current filters.'}
                     </div>
                   )}
                 </div>
@@ -9080,10 +9584,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   <div className="flex items-center justify-between border-b-2 border-[#8c672b] pb-2">
                     <h4 className="font-fantasy font-bold text-base text-[#4a361c] flex items-center gap-2">
                       <BookOpen className="w-5 h-5 text-[#8c672b]" />
-                      HECHIZOS CON ESPACIO DE CONJURO (Nivel 1 o Superior) — {displayedSpellsData.leveled.length} disponibles
+                      {isSpanish ? `HECHIZOS CON ESPACIO DE CONJURO (Nivel 1 o Superior) — ${displayedSpellsData.leveled.length} disponibles` : `LEVELED SPELLS (Level 1 & Higher) — ${displayedSpellsData.leveled.length} available`}
                     </h4>
                     <span className="text-xs font-mono font-bold px-2.5 py-1 rounded bg-[#ebdcc4] text-[#8c672b] border border-[#d6c4aa]">
-                      {selectedLeveledCount} / {spellLimits.maxPreparedOrKnown} en Grimorio / Repertorio
+                      {selectedLeveledCount} / {spellLimits.maxPreparedOrKnown} {isSpanish ? 'en Grimorio / Repertorio' : 'in Spellbook / Repertoire'}
                     </span>
                   </div>
 
@@ -9092,10 +9596,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       <div className="bg-[#ede1ce] px-4 py-2 rounded-xl border border-[#d6c4aa] flex items-center justify-between shadow-xs">
                         <span className="font-fantasy font-bold text-sm text-[#4a361c] uppercase tracking-wide flex items-center gap-2">
                           <Star className="w-4 h-4 text-[#8c672b]" />
-                          Hechizos de Nivel {level} ({spells.length} disponibles)
+                          {isSpanish ? `Hechizos de Nivel ${level} (${spells.length} disponibles)` : `Level ${level} Spells (${spells.length} available)`}
                         </span>
                         <span className="text-xs font-mono text-[#7a6448]">
-                          {spells.filter((sp) => selectedSpells.some((s) => s.name.toLowerCase() === sp.name.toLowerCase())).length} elegidos de este nivel
+                          {spells.filter((sp) => selectedSpells.some((s) => s.name.toLowerCase() === sp.name.toLowerCase())).length} {isSpanish ? 'elegidos de este nivel' : 'chosen from this level'}
                         </span>
                       </div>
 
@@ -9139,10 +9643,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                 </div>
                 <div>
                   <h3 className="font-fantasy font-bold text-base text-[#f5ebd7] tracking-wider uppercase">
-                    Compendio de Razas y Linajes Ancestrales (30+ Razas Oficiales)
+                    {isSpanish ? 'Compendio de Razas y Linajes Ancestrales (30+ Razas Oficiales)' : 'Ancestral Races & Lineages Compendium (30+ Official Races)'}
                   </h3>
                   <p className="text-[11px] text-[#c5af95]">
-                    {activeRace ? `Raza seleccionada: ${activeRace.name}` : 'Selecciona la raza para tu héroe'}
+                    {activeRace ? (isSpanish ? `Raza seleccionada: ${activeRace.name}` : `Selected race: ${getRaceDisplayName(activeRace)}`) : (isSpanish ? 'Selecciona la raza para tu héroe' : 'Select the race for your hero')}
                   </p>
                 </div>
               </div>
@@ -9154,7 +9658,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   className="px-4 py-2 rounded-xl border border-[#c59b27] bg-[#8c672b] hover:bg-[#6e5020] text-xs font-fantasy font-bold text-white flex items-center gap-1.5 transition cursor-pointer shadow-md shrink-0"
                 >
                   <Check className="w-4 h-4" />
-                  Listo / Minimizar
+                  {isSpanish ? 'Listo / Minimizar' : 'Done / Minimize'}
                 </button>
               </div>
             </div>
@@ -9197,7 +9701,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   type="text"
                   value={raceSearchQuery}
                   onChange={(e) => setRaceSearchQuery(e.target.value)}
-                  placeholder="Buscar raza o linaje..."
+                  placeholder={isSpanish ? "Buscar raza o linaje..." : "Search race or lineage..."}
                   className="w-full bg-white border border-[#d6c4aa] rounded-lg pl-8.5 pr-3 py-1.5 text-xs text-[#2c241b] focus:outline-none focus:border-[#8c672b]"
                 />
               </div>
@@ -9244,8 +9748,8 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                 </div>
                 <div className="min-w-0">
                   <div className="text-xs font-fantasy font-bold text-[#4a361c] uppercase tracking-wide flex items-center gap-2">
-                    <span>Raza Seleccionada:</span>
-                    <span className="text-[#8c672b] font-black">{activeRace?.name || 'Ninguna (haz clic en una tarjeta)'}</span>
+                    <span>{isSpanish ? 'Raza Seleccionada:' : 'Selected Race:'}</span>
+                    <span className="text-[#8c672b] font-black">{activeRace ? getRaceDisplayName(activeRace) : (isSpanish ? 'Ninguna (haz clic en una tarjeta)' : 'None (click a card)')}</span>
                   </div>
                   <div className="text-[11px] text-[#7a6448] truncate">
                     {activeRace ? (
@@ -9275,7 +9779,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   }`}
                 >
                   <Check className="w-4 h-4 text-[#ffd56b]" />
-                  <span>Confirmar y Configurar Linaje y Rasgos →</span>
+                  <span>{isSpanish ? 'Confirmar y Configurar Linaje y Rasgos →' : 'Confirm & Configure Lineage and Traits →'}</span>
                 </button>
               </div>
             </div>
@@ -9296,10 +9800,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                 </div>
                 <div>
                   <h3 className="font-fantasy font-bold text-base text-[#f5ebd7] tracking-wider uppercase">
-                    Compendio de Dotes Oficiales (Feats Oficiales de 5e)
+                    {isSpanish ? 'Compendio de Dotes Oficiales (Feats Oficiales de 5e)' : 'Official Feats Compendium (5e Feats)'}
                   </h3>
                   <p className="text-[11px] text-[#c5af95]">
-                    Asignando a Slot #{maximizedFeatSlotIdx + 1} • Elige tu dote táctica
+                    {isSpanish ? `Asignando a Slot #${maximizedFeatSlotIdx + 1} • Elige tu dote táctica` : `Assigning to Slot #${maximizedFeatSlotIdx + 1} • Choose your tactical feat`}
                   </p>
                 </div>
               </div>
@@ -9311,7 +9815,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   className="px-4 py-2 rounded-xl border border-[#c59b27] bg-[#8c672b] hover:bg-[#6e5020] text-xs font-fantasy font-bold text-white flex items-center gap-1.5 transition cursor-pointer shadow-md"
                 >
                   <Check className="w-4 h-4" />
-                  Listo / Minimizar
+                  {isSpanish ? 'Listo / Minimizar' : 'Done / Minimize'}
                 </button>
               </div>
             </div>
@@ -9330,7 +9834,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                         : 'bg-white text-[#5c4a35] border border-[#d6c4aa]'
                     }`}
                   >
-                    {cat}
+                    {isSpanish ? cat : ({ Todos: 'All', Combate: 'Combat', Magia: 'Magic', Utilidad: 'Utility', General: 'General' }[cat] || cat)}
                   </button>
                 ))}
               </div>
@@ -9341,7 +9845,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   type="text"
                   value={featSearch}
                   onChange={(e) => setFeatSearch(e.target.value)}
-                  placeholder="Buscar dote por nombre, beneficio o requisito..."
+                  placeholder={isSpanish ? "Buscar dote por nombre, beneficio o requisito..." : "Search feat by name, benefit, or prerequisite..."}
                   className="w-full bg-white border border-[#d6c4aa] rounded-lg pl-9 pr-3 py-1.5 text-xs text-[#2c241b] focus:outline-none focus:border-[#8c672b]"
                 />
               </div>
@@ -9437,10 +9941,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                 </div>
                 <div>
                   <h3 className="font-fantasy font-bold text-base text-[#f5ebd7] tracking-wider uppercase">
-                    Compendio Oficial de Trasfondos ({WIKIDOT_BACKGROUNDS.length} Trasfondos Canónicos)
+                    {isSpanish ? `Compendio Oficial de Trasfondos (${WIKIDOT_BACKGROUNDS.length} Trasfondos Canónicos)` : `Official Backgrounds Compendium (${WIKIDOT_BACKGROUNDS.length} Canonical Backgrounds)`}
                   </h3>
                   <p className="text-[11px] text-[#c5af95]">
-                    {activeBackground ? `Trasfondo seleccionado: ${activeBackground.name}` : 'Selecciona el trasfondo de tu personaje'}
+                    {activeBackground ? (isSpanish ? `Trasfondo seleccionado: ${activeBackground.name}` : `Selected background: ${getBgDisplayName(activeBackground)}`) : (isSpanish ? 'Selecciona el trasfondo de tu personaje' : 'Select your character background')}
                   </p>
                 </div>
               </div>
@@ -9452,7 +9956,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                     type="text"
                     value={backgroundSearch}
                     onChange={(e) => setBackgroundSearch(e.target.value)}
-                    placeholder="Buscar trasfondo..."
+                    placeholder={isSpanish ? "Buscar trasfondo..." : "Search background..."}
                     className="w-full bg-white border border-[#d6c4aa] rounded-lg pl-8 pr-3 py-1.5 text-xs text-[#2c241b] focus:outline-none focus:border-[#8c672b]"
                   />
                 </div>
@@ -9462,7 +9966,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   className="px-4 py-2 rounded-xl border border-[#c59b27] bg-[#8c672b] hover:bg-[#6e5020] text-xs font-fantasy font-bold text-white flex items-center gap-1.5 transition cursor-pointer shadow-md"
                 >
                   <Check className="w-4 h-4" />
-                  Listo / Minimizar
+                  {isSpanish ? 'Listo / Minimizar' : 'Done / Minimize'}
                 </button>
               </div>
             </div>
@@ -9472,7 +9976,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
               {/* Orientation Buttons */}
               <div className="flex items-center gap-1.5 flex-wrap">
                 <span className="text-[10px] text-[#7a6448] font-fantasy font-bold uppercase mr-1">
-                  Enfoque / Rol:
+                  {isSpanish ? 'Enfoque / Rol:' : 'Focus / Role:'}
                 </span>
                 {(['Todos', 'Magia', 'Combate', 'Sigilo', 'Social', 'Exploración'] as const).map((ori) => {
                   const isAct = backgroundOrientationFilter === ori;
@@ -9497,7 +10001,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       }`}
                     >
                       <span>{icons[ori]}</span>
-                      <span>{ori}</span>
+                      <span>{isSpanish ? ori : ({ Todos: 'All', Magia: 'Magic', Combate: 'Combat', Sigilo: 'Stealth', Social: 'Social', Exploración: 'Exploration' }[ori] || ori)}</span>
                       <span className="text-[10px] opacity-80 font-mono font-bold">({count})</span>
                     </button>
                   );
@@ -9511,14 +10015,14 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   onClick={expandAllBackgroundCategories}
                   className="px-2.5 py-1 rounded bg-white hover:bg-[#fbf7ee] text-[#8c672b] border border-[#d6c4aa] font-bold cursor-pointer transition shadow-2xs"
                 >
-                  Expandir Todo
+                  {isSpanish ? 'Expandir Todo' : 'Expand All'}
                 </button>
                 <button
                   type="button"
                   onClick={collapseAllBackgroundCategories}
                   className="px-2.5 py-1 rounded bg-white hover:bg-[#fbf7ee] text-[#8c672b] border border-[#d6c4aa] font-bold cursor-pointer transition shadow-2xs"
                 >
-                  Colapsar Todo
+                  {isSpanish ? 'Colapsar Todo' : 'Collapse All'}
                 </button>
               </div>
             </div>
@@ -9527,7 +10031,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
             <div className="flex-1 overflow-y-auto p-6 bg-[#fbf7ee] space-y-4">
               {groupedBackgrounds.length === 0 ? (
                 <div className="p-12 text-center text-sm text-[#7a6448] italic bg-[#f5ede0] rounded-xl border border-[#d6c4aa]">
-                  No se encontraron trasfondos con los filtros actuales.
+                  {isSpanish ? 'No se encontraron trasfondos con los filtros actuales.' : 'No backgrounds found matching current filters.'}
                 </div>
               ) : (
                 groupedBackgrounds.map((group) => {
@@ -9567,11 +10071,11 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             {group.category}
                           </span>
                           <span className="px-2 py-0.5 rounded-full bg-[#d6c4aa] text-[#4a361c] text-xs font-mono font-bold">
-                            {group.backgrounds.length} disponibles
+                            {group.backgrounds.length} {isSpanish ? 'disponibles' : 'available'}
                           </span>
                         </div>
                         <div className="flex items-center gap-1.5 text-xs text-[#7a6448] font-bold">
-                          <span>{isCollapsed ? 'Desplegar Sección' : 'Colapsar Sección'}</span>
+                          <span>{isCollapsed ? (isSpanish ? 'Desplegar Sección' : 'Expand Section') : (isSpanish ? 'Colapsar Sección' : 'Collapse Section')}</span>
                           {isCollapsed ? (
                             <ChevronRight className="w-4 h-4 text-[#8c672b]" />
                           ) : (
@@ -9611,20 +10115,22 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                 </div>
                 <div className="min-w-0">
                   <div className="text-xs font-fantasy font-bold text-[#4a361c] uppercase tracking-wide flex items-center gap-2">
-                    <span>Trasfondo Seleccionado:</span>
-                    <span className="text-[#8c672b] font-black">{activeBackground?.name || 'Ninguno (haz clic en una tarjeta)'}</span>
+                    <span>{isSpanish ? 'Trasfondo Seleccionado:' : 'Selected Background:'}</span>
+                    <span className="text-[#8c672b] font-black">{activeBackground ? getBgDisplayName(activeBackground) : (isSpanish ? 'Ninguno (haz clic en una tarjeta)' : 'None (click a card)')}</span>
                   </div>
                   <div className="text-[11px] text-[#7a6448] truncate">
                     {activeBackground ? (
                       <span>
-                        <strong>Habilidades:</strong> {activeBackground.skillProficiencies && activeBackground.skillProficiencies.length > 0 ? activeBackground.skillProficiencies.join(', ') : (activeBackground.skillChoices ? `${activeBackground.skillChoices.count} a elegir` : 'Ninguna')}
+                        <strong>{isSpanish ? 'Habilidades:' : 'Skills:'}</strong> {activeBackground.skillProficiencies && activeBackground.skillProficiencies.length > 0 ? (isSpanish ? activeBackground.skillProficiencies.join(', ') : activeBackground.skillProficiencies.map(translateSkillName).join(', ')) : (activeBackground.skillChoices ? (isSpanish ? `${activeBackground.skillChoices.count} a elegir` : `${activeBackground.skillChoices.count} to choose`) : (isSpanish ? 'Ninguna' : 'None'))}
                         {' • '}
-                        <strong>Herramientas:</strong> {activeBackground.toolProficiencies && activeBackground.toolProficiencies.length > 0 ? activeBackground.toolProficiencies.join(', ') : (activeBackground.toolChoices ? `${activeBackground.toolChoices.count} a elegir` : 'Ninguna')}
+                        <strong>{isSpanish ? 'Herramientas:' : 'Tools:'}</strong> {activeBackground.toolProficiencies && activeBackground.toolProficiencies.length > 0 ? (isSpanish ? activeBackground.toolProficiencies.join(', ') : activeBackground.toolProficiencies.map(translateDndText).join(', ')) : (activeBackground.toolChoices ? (isSpanish ? `${activeBackground.toolChoices.count} a elegir` : `${activeBackground.toolChoices.count} to choose`) : (isSpanish ? 'Ninguna' : 'None'))}
                         {' • '}
-                        <strong>Idiomas:</strong> {activeBackground.languagesCount ? `+${activeBackground.languagesCount}` : (activeBackground.fixedLanguages ? activeBackground.fixedLanguages.join(', ') : 'Racial')}
+                        <strong>{isSpanish ? 'Idiomas:' : 'Languages:'}</strong> {activeBackground.languagesCount ? `+${activeBackground.languagesCount}` : (activeBackground.fixedLanguages ? (isSpanish ? activeBackground.fixedLanguages.join(', ') : translateLanguageList(activeBackground.fixedLanguages)) : (isSpanish ? 'Racial' : 'Racial'))}
                       </span>
                     ) : (
-                      'Haz clic en cualquier carta de trasfondo para seleccionarlo y configurar sus herramientas e idiomas.'
+                      isSpanish
+                        ? 'Haz clic en cualquier carta de trasfondo para seleccionarlo y configurar sus herramientas e idiomas.'
+                        : 'Click any background card to select it and configure its tools and languages.'
                     )}
                   </div>
                 </div>
@@ -9642,7 +10148,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                   }`}
                 >
                   <Check className="w-4 h-4 text-[#ffd56b]" />
-                  <span>Confirmar y Configurar Herramientas, Idiomas y Rasgos →</span>
+                  <span>{isSpanish ? 'Confirmar y Configurar Herramientas, Idiomas y Rasgos →' : 'Confirm & Configure Tools, Languages, and Traits →'}</span>
                 </button>
               </div>
             </div>
@@ -9756,16 +10262,16 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
               </div>
               <div>
                 <h3 className="font-fantasy font-bold text-lg text-[#382b20]">
-                  ¿Deseas guardar antes de salir?
+                  {isSpanish ? '¿Deseas guardar antes de salir?' : 'Save before leaving?'}
                 </h3>
                 <p className="text-xs text-[#786450]">
-                  Tienes selecciones y cambios en este personaje.
+                  {isSpanish ? 'Tienes selecciones y cambios en este personaje.' : 'You have unsaved selections and changes on this character.'}
                 </p>
               </div>
             </div>
 
             <p className="text-xs text-[#5c4a35] leading-relaxed bg-[#f5ede0] p-3 rounded-xl border border-[#ebdcc7]">
-              Puedes <strong>guardar tu progreso como borrador</strong> para reanudarlo más tarde exactamente desde este paso (<em>{STEPS.find((s) => s.id === currentStep)?.title}</em>), o salir sin guardar los cambios.
+              {isSpanish ? <>Puedes <strong>guardar tu progreso como borrador</strong> para reanudarlo más tarde exactamente desde este paso (<em>{STEPS.find((s) => s.id === currentStep)?.title}</em>), o salir sin guardar los cambios.</> : <>You can <strong>save your progress as a draft</strong> to resume later from this exact step (<em>{STEPS.find((s) => s.id === currentStep)?.title}</em>), or exit without saving.</>}
             </p>
 
             <div className="flex flex-col gap-2 pt-2">
@@ -9777,7 +10283,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                 }}
                 className="w-full py-2.5 px-4 bg-gradient-to-r from-[#b88c32] to-[#8c672b] hover:from-[#cfa344] hover:to-[#a67a33] text-white font-fantasy font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer ring-2 ring-[#ffd56b]/40"
               >
-                <Save className="w-4 h-4" /> 💾 Guardar Borrador y Salir
+                <Save className="w-4 h-4" /> 💾 {isSpanish ? 'Guardar Borrador y Salir' : 'Save Draft & Exit'}
               </button>
 
               <button
@@ -9788,7 +10294,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                 }}
                 className="w-full py-2 px-4 bg-[#ede1ce] hover:bg-[#dfd0ba] text-[#8c2e28] font-bold text-xs rounded-xl transition cursor-pointer border border-[#cfbe9f]"
               >
-                ❌ Salir sin Guardar Cambios
+                ❌ {isSpanish ? 'Salir sin Guardar Cambios' : 'Exit Without Saving'}
               </button>
 
               <button
@@ -9796,7 +10302,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                 onClick={() => setShowExitConfirmModal(false)}
                 className="w-full py-1.5 px-4 text-[#6e5c4a] hover:text-[#2c221a] text-xs font-semibold transition cursor-pointer text-center"
               >
-                Continuar Editando
+                {isSpanish ? 'Continuar Editando' : 'Continue Editing'}
               </button>
             </div>
           </div>
@@ -9830,6 +10336,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
           setAvatarOffsetY(offsetY);
         }}
       />
-    </div>
-  );
+    </div>,
+    isSpanish
+  ) as React.ReactElement;
 };

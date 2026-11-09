@@ -3,6 +3,8 @@ import { X, Check, Palette, Sparkles, Upload, Trash2, Link2, Camera, Image as Im
 import { AvatarFrameStyle, Character } from '../types';
 import { AVATAR_FRAME_DEFINITIONS, getAvatarFrame } from '../data/avatarFramesData';
 import { FantasyAvatarFrame } from './FantasyAvatarFrame';
+import { useLanguageStore } from '../hooks/useLanguageStore';
+import { localizeReactNode } from '../utils/dndEnglishTranslator';
 
 export interface AvatarLightboxModalProps {
   isOpen: boolean;
@@ -31,6 +33,7 @@ export const AvatarLightboxModal: React.FC<AvatarLightboxModalProps> = ({
   onUpdateAvatarAdjustments,
   onSaveFrameSettings,
 }) => {
+  const { isSpanish } = useLanguageStore();
   const [selectedFrame, setSelectedFrame] = useState<AvatarFrameStyle>(() => {
     const raw = (initialFrame || character?.avatarFrame) as AvatarFrameStyle | undefined;
     if (raw === 'celtic-bronze' || !raw) {
@@ -195,7 +198,7 @@ export const AvatarLightboxModal: React.FC<AvatarLightboxModalProps> = ({
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  return (
+  return localizeReactNode(
     <div
       onClick={onClose}
       className="fixed inset-0 z-70 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md animate-fadeIn cursor-pointer"
@@ -630,6 +633,7 @@ export const AvatarLightboxModal: React.FC<AvatarLightboxModalProps> = ({
           </button>
         </div>
       </div>
-    </div>
-  );
+    </div>,
+    isSpanish
+  ) as React.ReactElement;
 };

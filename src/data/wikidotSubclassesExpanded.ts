@@ -2400,6 +2400,8 @@ export const EXPANDED_SUBCLASSES_BY_CLASS: Record<string, SubclassDefinition[]> 
 export const ARTIFICER_CLASS = {
   id: 'artifice',
   name: 'Artífice (Artificer)',
+  nameEn: 'Artificer',
+  descriptionEn: 'Masters of invention and applied magic, artificers use ingenuity to unlock extraordinary capabilities in everyday objects and tools.',
   description: 'Maestros del ingenio y la magia aplicada, los artífices transforman objetos cotidianos y herramientas en maravillas arcanas.',
   hitDie: 8 as const,
   primaryAbility: 'int',
