@@ -30,6 +30,7 @@ import { SpellDetailModal } from './SpellDetailModal';
 import { LevelUpModal } from './LevelUpModal';
 import { WeaponPickerModal } from './WeaponPickerModal';
 import { ArmorPickerModal } from './ArmorPickerModal';
+import { GearPickerModal } from './GearPickerModal';
 import { ItemDetailModal } from './ItemDetailModal';
 import { SpellPickerModal } from './SpellPickerModal';
 import { RestModal, RestResult } from './RestModal';
@@ -953,6 +954,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
 
   const [isWeaponPickerOpen, setIsWeaponPickerOpen] = useState(false);
   const [isArmorPickerOpen, setIsArmorPickerOpen] = useState(false);
+  const [isGearPickerOpen, setIsGearPickerOpen] = useState(false);
   const [isSpellPickerOpen, setIsSpellPickerOpen] = useState(false);
   const [selectedDetailItem, setSelectedDetailItem] = useState<string | null>(null);
 
@@ -1077,6 +1079,10 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
         setIsSpellPickerOpen(false);
         return;
       }
+      if (isGearPickerOpen) {
+        setIsGearPickerOpen(false);
+        return;
+      }
       if (isArmorPickerOpen) {
         setIsArmorPickerOpen(false);
         return;
@@ -1120,6 +1126,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
     selectedSpellDetail,
     isCantripFormulasOpen,
     isSpellPickerOpen,
+    isGearPickerOpen,
     isArmorPickerOpen,
     isWeaponPickerOpen,
     isWildMagicModalOpen,
@@ -1312,12 +1319,46 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
   };
 
   const handleToggleEquipItem = (itemName: string) => {
+    const removeMatchingWeaponAttacks = (
+      attacksList: CharacterAttack[],
+      weaponName: string,
+      poolToKeep: string[]
+    ): CharacterAttack[] => {
+      const removedWeapon = findWeaponByName(weaponName);
+      const stillHasWeapon = poolToKeep.some((it) => {
+        const w = findWeaponByName(it);
+        if (w && removedWeapon) return w.id === removedWeapon.id;
+        return it.toLowerCase().trim() === weaponName.toLowerCase().trim();
+      });
+      if (stillHasWeapon) return attacksList;
+
+      const rName = weaponName.toLowerCase().trim();
+      return attacksList.filter((a) => {
+        const aName = a.name.toLowerCase().trim();
+        const aWeapon = findWeaponByName(a.name);
+        if (removedWeapon && aWeapon && aWeapon.id === removedWeapon.id) return false;
+        if (aName === rName || rName.includes(aName) || aName.includes(rName)) return false;
+        if (
+          removedWeapon &&
+          (aName === removedWeapon.name.toLowerCase() ||
+            (removedWeapon.nameEn && aName === removedWeapon.nameEn.toLowerCase()))
+        ) {
+          return false;
+        }
+        return true;
+      });
+    };
+
     const isEquipped = equippedItems.includes(itemName);
     if (!isEquipped && !isItemEquipable(itemName)) return;
     let nextEquipped: string[];
+    let nextAttacks: CharacterAttack[] = [...(charData.attacks || [])];
 
     if (isEquipped) {
       nextEquipped = equippedItems.filter((i) => i !== itemName);
+      if (findWeaponByName(itemName)) {
+        nextAttacks = removeMatchingWeaponAttacks(nextAttacks, itemName, nextEquipped);
+      }
     } else {
       const armor = findArmorByName(itemName);
       if (armor && armor.category !== 'shield') {
@@ -1330,16 +1371,12 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
         nextEquipped = [...equippedItems, itemName];
       }
 
-      // If it's a weapon, add attack if missing
       const weapon = findWeaponByName(itemName);
       if (weapon) {
         const profBonus = Math.floor((charData.level - 1) / 4) + 2;
         const newAttack = generateAttackFromWeapon(weapon, charData.stats, profBonus, true);
-        const currentAttacks = charData.attacks || [];
-        if (!currentAttacks.some((a) => a.name.toLowerCase() === newAttack.name.toLowerCase())) {
-          const updatedAttacks = [...currentAttacks, newAttack];
-          setCharData((prev) => ({ ...prev, attacks: updatedAttacks }));
-          onUpdateCharacter({ ...charData, attacks: updatedAttacks });
+        if (!nextAttacks.some((a) => a.name.toLowerCase() === newAttack.name.toLowerCase())) {
+          nextAttacks = [...nextAttacks, newAttack];
         }
       }
     }
@@ -1371,18 +1408,77 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
       speed: nextSpeed.speedStr,
       equippedItems: nextEquipped,
       inventory: customItems,
+      attacks: nextAttacks,
     };
     setCharData(updatedChar);
     onUpdateCharacter(updatedChar);
   };
 
-  const handleAddCustomItem = (nameToAdd?: string) => {
-    const name = (nameToAdd || newItemName).trim();
-    if (!name) return;
-    const updated = [...customItems, name];
-    setCustomItems(updated);
-    setNewItemName('');
-    const updatedChar = { ...charData, inventory: updated };
+  const handleAddCustomItem = (nameToAdd?: string, autoEquip: boolean = false) => {
+    const name = (nameToAdd !== undefined ? nameToAdd : newItemName).trim();
+    if (!name) {
+      setIsGearPickerOpen(true);
+      return;
+    }
+
+    const updatedInventory = [...customItems, name];
+    setCustomItems(updatedInventory);
+    if (nameToAdd === undefined) setNewItemName('');
+
+    let nextEquipped = [...equippedItems];
+    let nextAttacks = [...(charData.attacks || [])];
+    let nextAc = charData.ac;
+    let nextSpeed = charData.speed;
+
+    if (autoEquip && isItemEquipable(name)) {
+      const armor = findArmorByName(name);
+      if (armor && armor.category !== 'shield') {
+        const nonArmors = nextEquipped.filter((i) => {
+          const a = findArmorByName(i);
+          return !a || a.category === 'shield';
+        });
+        nextEquipped = [...nonArmors, name];
+      } else if (!nextEquipped.includes(name)) {
+        nextEquipped = [...nextEquipped, name];
+      }
+
+      const weapon = findWeaponByName(name);
+      if (weapon) {
+        const profBonus = Math.floor((charData.level - 1) / 4) + 2;
+        const newAttack = generateAttackFromWeapon(weapon, charData.stats, profBonus, true);
+        if (!nextAttacks.some((a) => a.name.toLowerCase() === newAttack.name.toLowerCase())) {
+          nextAttacks = [...nextAttacks, newAttack];
+        }
+      }
+
+      setEquippedItems(nextEquipped);
+      nextAc = calculateEquippedAc({
+        equippedItems: nextEquipped,
+        stats: charData.stats,
+        characterClass: charData.class,
+        raceId: charData.race,
+        fightingStyle: charData.notes?.match(/Estilo de Combate:\s*([^\n]+)/i)?.[1] || '',
+        hasDualWielderFeat: charData.notes?.toLowerCase().includes('combatiente con dos armas') || false,
+      });
+      nextSpeed = calculateCharacterSpeed({
+        baseSpeed: charData.speed,
+        characterClass: charData.class,
+        level: charData.level,
+        equippedItems: nextEquipped,
+        notes: charData.notes,
+        raceName: charData.race,
+        strength: charData.stats.str,
+      }).speedStr;
+    }
+
+    const updatedChar: Character = {
+      ...charData,
+      inventory: updatedInventory,
+      equippedItems: nextEquipped,
+      attacks: nextAttacks,
+      ac: nextAc,
+      speed: nextSpeed,
+    };
     setCharData(updatedChar);
     onUpdateCharacter(updatedChar);
   };
@@ -1393,6 +1489,32 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
     const updatedEquipped = equippedItems.filter((it) => it !== itemToRemove);
     setCustomItems(updated);
     setEquippedItems(updatedEquipped);
+
+    // También remover ataques asociados si el arma eliminada ya no está en el inventario
+    let nextAttacks = [...(charData.attacks || [])];
+    const removedWeapon = findWeaponByName(itemToRemove);
+    const stillHasWeapon = updated.some((it) => {
+      const w = findWeaponByName(it);
+      if (w && removedWeapon) return w.id === removedWeapon.id;
+      return it.toLowerCase().trim() === itemToRemove.toLowerCase().trim();
+    });
+    if (!stillHasWeapon) {
+      const rName = itemToRemove.toLowerCase().trim();
+      nextAttacks = nextAttacks.filter((a) => {
+        const aName = a.name.toLowerCase().trim();
+        const aWeapon = findWeaponByName(a.name);
+        if (removedWeapon && aWeapon && aWeapon.id === removedWeapon.id) return false;
+        if (aName === rName || rName.includes(aName) || aName.includes(rName)) return false;
+        if (
+          removedWeapon &&
+          (aName === removedWeapon.name.toLowerCase() ||
+            (removedWeapon.nameEn && aName === removedWeapon.nameEn.toLowerCase()))
+        ) {
+          return false;
+        }
+        return true;
+      });
+    }
 
     const nextAc = calculateEquippedAc({
       equippedItems: updatedEquipped,
@@ -1419,7 +1541,15 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
       speed: nextSpeed.speedStr,
       inventory: updated,
       equippedItems: updatedEquipped,
+      attacks: nextAttacks,
     };
+    setCharData(updatedChar);
+    onUpdateCharacter(updatedChar);
+  };
+
+  const handleRemoveAttack = (attackId: string) => {
+    const nextAttacks = (charData.attacks || []).filter((a) => a.id !== attackId);
+    const updatedChar: Character = { ...charData, attacks: nextAttacks };
     setCharData(updatedChar);
     onUpdateCharacter(updatedChar);
   };
@@ -2837,7 +2967,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 shrink-0 ml-auto">
+                      <div className="flex items-center gap-1.5 shrink-0 ml-auto">
                         <button
                           type="button"
                           onClick={() =>
@@ -2862,6 +2992,14 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                           }
                         >
                           <Dices className="w-3.5 h-3.5" /> {isSpanish ? 'Tirar Ataque' : 'Roll Attack'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveAttack(att.id)}
+                          className="p-1.5 rounded-lg text-[#9c8264] hover:text-[#be123c] hover:bg-[#ffe4e6] transition cursor-pointer"
+                          title="Quitar ataque de la lista"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </div>
@@ -7656,33 +7794,35 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
             {/* Compendium Weapon/Armor Picker & Add Custom Item Row */}
             <div className="space-y-2">
               {/* Row 1: Quick Compendium Catalog Pickers */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 <button
                   type="button"
                   onClick={() => setIsWeaponPickerOpen(true)}
-                  className="w-full px-3 py-2 bg-[#3a2816] hover:bg-[#2a1c0e] text-[#f3dfb1] border border-[#b88c32] rounded-lg text-xs font-fantasy font-bold shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
-                  title={
-                    isSpanish
-                      ? 'Abrir el catálogo oficial y suplementario de armas'
-                      : 'Open official and supplementary weapons catalog'
-                  }
+                  className="w-full px-2.5 py-2 bg-[#3a2816] hover:bg-[#2a1c0e] text-[#f3dfb1] border border-[#b88c32] rounded-lg text-xs font-fantasy font-bold shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
+                  title="Abrir el catálogo oficial y suplementario de armas"
                 >
                   <Sword className="w-3.5 h-3.5 text-[#ffd56b] shrink-0" />
-                  <span>{isSpanish ? '⚔️ Añadir Arma...' : '⚔️ Add Weapon...'}</span>
+                  <span>⚔️ Añadir Arma...</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setIsArmorPickerOpen(true)}
-                  className="w-full px-3 py-2 bg-[#2b2015] hover:bg-[#1e150d] text-[#e8d096] border border-[#8c672b] rounded-lg text-xs font-fantasy font-bold shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
-                  title={
-                    isSpanish
-                      ? 'Abrir el catálogo oficial y suplementario de armaduras y escudos'
-                      : 'Open official and supplementary armor and shields catalog'
-                  }
+                  className="w-full px-2.5 py-2 bg-[#2b2015] hover:bg-[#1e150d] text-[#e8d096] border border-[#8c672b] rounded-lg text-xs font-fantasy font-bold shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
+                  title="Abrir el catálogo oficial y suplementario de armaduras y escudos"
                 >
                   <Shield className="w-3.5 h-3.5 text-[#d4ab59] shrink-0" />
-                  <span>{isSpanish ? '🛡️ Añadir Armadura...' : '🛡️ Add Armor...'}</span>
+                  <span>🛡️ Añadir Armadura...</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setIsGearPickerOpen(true)}
+                  className="w-full px-2.5 py-2 bg-[#4a3420] hover:bg-[#382515] text-[#f3dfb1] border border-[#a37d39] rounded-lg text-xs font-fantasy font-bold shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
+                  title="Abrir catálogo de equipo de aventurero, pociones, herramientas y objetos mágicos"
+                >
+                  <Plus className="w-3.5 h-3.5 text-[#ffd56b] shrink-0" />
+                  <span>🎒 Añadir Equipo...</span>
                 </button>
               </div>
 
@@ -7693,11 +7833,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                   value={newItemName}
                   onChange={(e) => setNewItemName(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAddCustomItem()}
-                  placeholder={
-                    isSpanish
-                      ? 'Escribir nombre de objeto o equipo personalizado...'
-                      : 'Type custom item or gear name...'
-                  }
+                  placeholder='Escribir objeto personalizado (o clic en + Añadir para ver catálogo)...'
                   className="w-full min-w-0 flex-1 bg-[#fcf6ea] border border-[#b89b6a] rounded-lg px-3 py-2 text-xs text-[#2c221a] focus:outline-none focus:border-[#8c672b] shadow-2xs"
                 />
                 <button
@@ -7707,7 +7843,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                   title={isSpanish ? 'Añadir a inventario' : 'Add to inventory'}
                 >
                   <Plus className="w-4 h-4" />
-                  <span className="hidden sm:inline">{isSpanish ? 'Añadir' : 'Add'}</span>
+                  <span>Añadir</span>
                 </button>
               </div>
 
@@ -9017,17 +9153,12 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
           isOpen={isWeaponPickerOpen}
           onClose={() => setIsWeaponPickerOpen(false)}
           onSelectWeapon={(w) => {
-            handleAddCustomItem(w.name);
-            handleToggleEquipItem(w.name);
+            handleAddCustomItem(w.name, true);
             setIsWeaponPickerOpen(false);
           }}
           filterCategory="all"
-          title={isSpanish ? 'Armería: Compendio de Armas' : 'Armory: Weapons Compendium'}
-          subtitle={
-            isSpanish
-              ? 'Selecciona un arma oficial para añadirla directamente a tu inventario y equiparla.'
-              : 'Select an official weapon to add directly to your inventory and equip it.'
-          }
+          title="Armería: Compendio de Armas"
+          subtitle="Selecciona un arma oficial para añadirla directamente a tu inventario y equiparla."
         />
 
         {/* ARMOR PICKER COMPENDIUM MODAL */}
@@ -9035,17 +9166,22 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
           isOpen={isArmorPickerOpen}
           onClose={() => setIsArmorPickerOpen(false)}
           onSelectArmor={(armor) => {
-            handleAddCustomItem(armor.name);
-            handleToggleEquipItem(armor.name);
+            handleAddCustomItem(armor.name, true);
             setIsArmorPickerOpen(false);
           }}
           filterCategory="all"
-          title={isSpanish ? 'Armería: Catálogo de Armaduras y Escudos' : 'Armory: Armor & Shields Catalog'}
-          subtitle={
-            isSpanish
-              ? 'Selecciona una armadura o escudo oficial para añadirlo a tu inventario y equiparlo.'
-              : 'Select an official armor or shield to add to your inventory and equip it.'
-          }
+          title="Armería: Catálogo de Armaduras y Escudos"
+          subtitle="Selecciona una armadura o escudo oficial para añadirlo a tu inventario y equiparlo."
+        />
+
+        {/* GEAR PICKER COMPENDIUM MODAL */}
+        <GearPickerModal
+          isOpen={isGearPickerOpen}
+          onClose={() => setIsGearPickerOpen(false)}
+          onSelectGear={(itemName) => {
+            handleAddCustomItem(itemName, isItemEquipable(itemName));
+            setIsGearPickerOpen(false);
+          }}
         />
 
         {/* ITEM DETAIL INSPECTOR MODAL */}

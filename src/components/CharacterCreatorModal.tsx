@@ -58,6 +58,7 @@ import { CompendiumInspectModal, CompendiumInspectData } from './CompendiumInspe
 import { SubclassPickerModal } from './SubclassPickerModal';
 import { WeaponPickerModal } from './WeaponPickerModal';
 import { ArmorPickerModal } from './ArmorPickerModal';
+import { GearPickerModal } from './GearPickerModal';
 import { FantasyAvatarFrame } from './FantasyAvatarFrame';
 import { AvatarLightboxModal } from './AvatarLightboxModal';
 import { EquipmentBadge } from './EquipmentBadge';
@@ -709,6 +710,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
   const [customWeaponChoices, setCustomWeaponChoices] = useState<Record<string, WeaponDef>>(initState?.customWeaponChoices || {});
   const [isWeaponPickerOpen, setIsWeaponPickerOpen] = useState(false);
   const [isArmorPickerOpen, setIsArmorPickerOpen] = useState(false);
+  const [isGearPickerOpen, setIsGearPickerOpen] = useState(false);
   const [extraCustomEquipment, setExtraCustomEquipment] = useState<string[]>([]);
   const [activeWeaponPickerGroup, setActiveWeaponPickerGroup] = useState<{
     groupId: string;
@@ -1201,8 +1203,8 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
 
   // Class Starting Equipment Configuration
   const startingEquipmentConfig = useMemo(() => {
-    return getClassStartingEquipment(activeClass?.id);
-  }, [activeClass]);
+    return getClassStartingEquipment(activeClass?.id, selectedEdition);
+  }, [activeClass, selectedEdition]);
 
   // Update starting equipment defaults when class changes
   useEffect(() => {
@@ -2032,17 +2034,26 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
     return baseAttacks;
   }, [startingEquipmentConfig, selectedEquipmentChoices, customWeaponChoices, chosenEquipmentList, activeEquippedList, classConfig, finalStats, profBonus]);
 
-  // Starting gold calculation - Strictly adheres to the background's official gold
+  // Starting gold calculation - In 5.5e adds Class Package gold + Background gold
   const startingGoldTotal = useMemo(() => {
+    let bgGold = 0;
     if (activeBackground && typeof activeBackground.gold === 'number') {
-      return activeBackground.gold;
-    }
-    if (activeBackground?.suggestedEquipment) {
+      bgGold = activeBackground.gold;
+    } else if (activeBackground?.suggestedEquipment) {
       const m = activeBackground.suggestedEquipment.match(/(\d+)\s*po/);
-      if (m) return parseInt(m[1], 10);
+      if (m) bgGold = parseInt(m[1], 10);
     }
-    return startingEquipmentConfig?.startingGold || 10;
-  }, [startingEquipmentConfig, activeBackground]);
+    if (selectedEdition === '5.5e' && startingEquipmentConfig) {
+      let pkgGold = 0;
+      Object.entries(selectedEquipmentChoices).forEach(([grpId, optId]) => {
+        const grp = startingEquipmentConfig.choiceGroups.find((g) => g.id === grpId);
+        const opt = grp?.options.find((o) => o.id === optId);
+        if (opt?.goldCoins) pkgGold += opt.goldCoins;
+      });
+      return pkgGold + bgGold;
+    }
+    return bgGold || startingEquipmentConfig?.startingGold || 10;
+  }, [startingEquipmentConfig, selectedEquipmentChoices, activeBackground, selectedEdition]);
 
   // Saving Throw details with numeric bonus
   const savingThrowDetails = useMemo(() => {
@@ -7041,6 +7052,13 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             >
                               <span>🛡️</span> {isSpanish ? 'Añadir Armadura...' : 'Add Armor...'}
                             </button>
+                            <button
+                              type="button"
+                              onClick={() => setIsGearPickerOpen(true)}
+                              className="px-2.5 py-1.5 bg-[#5b3d1e] hover:bg-[#422b13] text-[#f5ebd7] border border-[#b88c32] rounded-lg text-xs font-fantasy font-bold transition flex items-center gap-1 shadow-xs cursor-pointer"
+                            >
+                              <span>🎒</span> Añadir Equipo...
+                            </button>
                             <div className="px-3 py-1 bg-[#f5ede0] rounded-lg border border-[#d6c4aa] flex items-center gap-1.5 shadow-2xs">
                               <span className="text-[10px] text-[#7a6448] uppercase font-bold">{isSpanish ? 'Defensa Táctica:' : 'Tactical Defense:'}</span>
                               <span className="font-fantasy font-bold text-sm sm:text-base text-[#8c672b]">{calculatedAc} {isSpanish ? 'CA' : 'AC'}</span>
@@ -10261,6 +10279,18 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
             setExtraCustomEquipment((prev) => [...prev, armor.name]);
             toggleEquipItem(armor.name);
             setIsArmorPickerOpen(false);
+          }}
+        />
+      )}
+
+      {/* Gear / Objects Picker Modal Popup */}
+      {isGearPickerOpen && (
+        <GearPickerModal
+          isOpen={isGearPickerOpen}
+          onClose={() => setIsGearPickerOpen(false)}
+          onSelectGear={(itemName) => {
+            setExtraCustomEquipment((prev) => [...prev, itemName]);
+            setIsGearPickerOpen(false);
           }}
         />
       )}

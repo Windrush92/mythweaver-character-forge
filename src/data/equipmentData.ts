@@ -11,6 +11,7 @@ export interface EquipmentOption {
   shieldBonus?: number;
   isCustomizableWeapon?: boolean;
   weaponCategory?: 'martial' | 'simple' | 'all';
+  goldCoins?: number;
 }
 
 export interface EquipmentChoiceGroup {
@@ -1425,8 +1426,501 @@ export const CLASS_STARTING_EQUIPMENT: Record<string, ClassStartingEquipment> = 
   },
 };
 
-export function getClassStartingEquipment(classId?: string): ClassStartingEquipment | null {
+
+export const CLASS_STARTING_EQUIPMENT_2024: Record<string, ClassStartingEquipment> = {
+  barbaro: {
+    classId: 'barbaro',
+    className: 'Bárbaro (2024 / 5.5e)',
+    startingGold: 15,
+    fixedEquipment: [],
+    choiceGroups: [
+      {
+        id: 'pack-2024',
+        title: 'Paquete Inicial Oficial 5.5e (Elige A o B)',
+        defaultOptionId: 'opt-a',
+        options: [
+          {
+            id: 'opt-a',
+            name: 'Opción A: Equipo Completo de Bárbaro + 15 po',
+            description: 'Gran Hacha, 4 Hachas de Mano, Paquete de Explorador y 15 piezas de oro.',
+            items: ['Gran Hacha', 'Hacha de Mano (x4)', 'Paquete de Explorador'],
+            goldCoins: 15,
+            attacks: [
+              { id: 'hacha-2024', name: 'Gran Hacha', bonus: '+5', damage: '1d12 + 3', type: 'Cortante' },
+              { id: 'hacha-mano-2024', name: 'Hacha de Mano', bonus: '+5', damage: '1d6 + 3', type: 'Cortante (Arrojadiza)' },
+            ],
+          },
+          {
+            id: 'opt-b',
+            name: 'Opción B: 75 Piezas de Oro (Para comprar equipo libre)',
+            description: 'Comienza sin equipo predeterminado pero con 75 po adicionales para equiparte a tu gusto.',
+            items: [],
+            goldCoins: 75,
+          },
+        ],
+      },
+    ],
+  },
+  bardo: {
+    classId: 'bardo',
+    className: 'Bardo (2024 / 5.5e)',
+    startingGold: 19,
+    fixedEquipment: [],
+    choiceGroups: [
+      {
+        id: 'pack-2024',
+        title: 'Paquete Inicial Oficial 5.5e (Elige A o B)',
+        defaultOptionId: 'opt-a',
+        options: [
+          {
+            id: 'opt-a',
+            name: 'Opción A: Equipo Completo de Bardo + 19 po',
+            description: 'Armadura de Cuero, 2 Dagas, Instrumento Musical a elección, Paquete de Artista y 19 piezas de oro.',
+            items: ['Armadura de Cuero', 'Daga (x2)', 'Instrumento Musical', 'Paquete de Artista'],
+            armorAcBase: 11,
+            armorType: 'light',
+            goldCoins: 19,
+            attacks: [
+              { id: 'daga-bardo-2024', name: 'Daga', bonus: '+4', damage: '1d4 + 2', type: 'Perforante (Sutil, Ligera)' },
+            ],
+          },
+          {
+            id: 'opt-b',
+            name: 'Opción B: 90 Piezas de Oro (Para comprar equipo libre)',
+            description: 'Comienza con 90 po adicionales para comprar el equipo que prefieras.',
+            items: [],
+            goldCoins: 90,
+          },
+        ],
+      },
+    ],
+  },
+  clerigo: {
+    classId: 'clerigo',
+    className: 'Clérigo (2024 / 5.5e)',
+    startingGold: 7,
+    fixedEquipment: [],
+    choiceGroups: [
+      {
+        id: 'pack-2024',
+        title: 'Paquete Inicial Oficial 5.5e (Elige A o B)',
+        defaultOptionId: 'opt-a',
+        options: [
+          {
+            id: 'opt-a',
+            name: 'Opción A: Camisote de Mallas, Escudo, Maza, Símbolo Sagrado + 7 po',
+            description: 'Camisote de Mallas (13 + Des máx 2), Escudo (+2 CA), Maza, Símbolo Sagrado, Paquete de Sacerdote y 7 piezas de oro.',
+            items: ['Camisote de Mallas', 'Escudo', 'Maza', 'Símbolo Sagrado', 'Paquete de Sacerdote'],
+            armorAcBase: 13,
+            armorType: 'medium',
+            shieldBonus: 2,
+            goldCoins: 7,
+            attacks: [
+              { id: 'maza-clerigo-2024', name: 'Maza', bonus: '+4', damage: '1d6 + 2', type: 'Contundente' },
+            ],
+          },
+          {
+            id: 'opt-b',
+            name: 'Opción B: 110 Piezas de Oro (Para comprar equipo libre)',
+            description: 'Comienza con 110 po adicionales en lugar del paquete estándar de clase.',
+            items: [],
+            goldCoins: 110,
+          },
+        ],
+      },
+    ],
+  },
+  druida: {
+    classId: 'druida',
+    className: 'Druida (2024 / 5.5e)',
+    startingGold: 9,
+    fixedEquipment: [],
+    choiceGroups: [
+      {
+        id: 'pack-2024',
+        title: 'Paquete Inicial Oficial 5.5e (Elige A o B)',
+        defaultOptionId: 'opt-a',
+        options: [
+          {
+            id: 'opt-a',
+            name: 'Opción A: Armadura de Cuero, Escudo, Hoz, Foco Druídico + 9 po',
+            description: 'Armadura de Cuero, Escudo, Hoz, Foco Druídico (Bastón), Paquete de Explorador, Kit de Herboristería y 9 piezas de oro.',
+            items: ['Armadura de Cuero', 'Escudo', 'Hoz', 'Foco Druídico (Bastón)', 'Paquete de Explorador', 'Kit de Herboristería'],
+            armorAcBase: 11,
+            armorType: 'light',
+            shieldBonus: 2,
+            goldCoins: 9,
+            attacks: [
+              { id: 'hoz-druida-2024', name: 'Hoz', bonus: '+3', damage: '1d4 + 1', type: 'Cortante (Ligera)' },
+              { id: 'baston-druida-2024', name: 'Bastón', bonus: '+3', damage: '1d6 + 1 / 1d8 + 1', type: 'Contundente (Versátil)' },
+            ],
+          },
+          {
+            id: 'opt-b',
+            name: 'Opción B: 50 Piezas de Oro (Para comprar equipo libre)',
+            description: 'Comienza con 50 po adicionales en lugar del paquete estándar de clase.',
+            items: [],
+            goldCoins: 50,
+          },
+        ],
+      },
+    ],
+  },
+  guerrero: {
+    classId: 'guerrero',
+    className: 'Guerrero (2024 / 5.5e)',
+    startingGold: 4,
+    fixedEquipment: [],
+    choiceGroups: [
+      {
+        id: 'pack-2024',
+        title: 'Paquete Inicial Oficial 5.5e (Elige A, B o C)',
+        defaultOptionId: 'opt-a',
+        options: [
+          {
+            id: 'opt-a',
+            name: 'Opción A: Cota de Malla, Espadón, Mangual, 8 Jabalinas + 4 po',
+            description: 'Equipamiento pesado de primera línea: Cota de Malla, Espadón, Mangual, 8 Jabalinas, Paquete de Explorador de Mazmorras y 4 po.',
+            items: ['Cota de Malla', 'Espadón', 'Mangual', 'Jabalina (x8)', 'Paquete de Explorador de Mazmorras'],
+            armorAcBase: 16,
+            armorType: 'heavy',
+            goldCoins: 4,
+            attacks: [
+              { id: 'espadon-2024', name: 'Espadón', bonus: '+5', damage: '2d6 + 3', type: 'Cortante (Pesada, A dos manos)' },
+              { id: 'mangual-2024', name: 'Mangual', bonus: '+5', damage: '1d8 + 3', type: 'Contundente' },
+              { id: 'jabalina-2024', name: 'Jabalina', bonus: '+5', damage: '1d6 + 3', type: 'Perforante (Arrojadiza)' },
+            ],
+          },
+          {
+            id: 'opt-b',
+            name: 'Opción B: Cuero Tachonado, Cimitarra, Espada Corta, Arco Largo + 11 po',
+            description: 'Equipamiento ágil/versátil: Cuero Tachonado, Cimitarra, Espada Corta, Arco Largo, Carcaj con 20 Flechas, Paquete de Mazmorras y 11 po.',
+            items: ['Armadura de Cuero Tachonado', 'Cimitarra', 'Espada Corta', 'Arco Largo', 'Carcaj con 20 Flechas', 'Paquete de Explorador de Mazmorras'],
+            armorAcBase: 12,
+            armorType: 'light',
+            goldCoins: 11,
+            attacks: [
+              { id: 'cimitarra-2024', name: 'Cimitarra', bonus: '+5', damage: '1d6 + 3', type: 'Cortante (Sutil, Ligera)' },
+              { id: 'espada-corta-2024', name: 'Espada Corta', bonus: '+5', damage: '1d6 + 3', type: 'Perforante (Sutil, Ligera)' },
+              { id: 'arco-largo-2024', name: 'Arco Largo', bonus: '+5', damage: '1d8 + 3', type: 'Perforante (Alcance 150/600)' },
+            ],
+          },
+          {
+            id: 'opt-c',
+            name: 'Opción C: 155 Piezas de Oro (Para comprar equipo libre)',
+            description: 'Comienza con 155 po adicionales para equipar a tu guerrero desde cero.',
+            items: [],
+            goldCoins: 155,
+          },
+        ],
+      },
+    ],
+  },
+  monje: {
+    classId: 'monje',
+    className: 'Monje (2024 / 5.5e)',
+    startingGold: 11,
+    fixedEquipment: [],
+    choiceGroups: [
+      {
+        id: 'pack-2024',
+        title: 'Paquete Inicial Oficial 5.5e (Elige A o B)',
+        defaultOptionId: 'opt-a',
+        options: [
+          {
+            id: 'opt-a',
+            name: 'Opción A: Lanza, 5 Dagas, Herramienta/Instrumento + 11 po',
+            description: 'Lanza, 5 Dagas, Herramientas de Artesano o Instrumento Musical, Paquete de Explorador y 11 piezas de oro.',
+            items: ['Lanza', 'Daga (x5)', 'Herramientas de Artesano', 'Paquete de Explorador'],
+            goldCoins: 11,
+            attacks: [
+              { id: 'lanza-monje-2024', name: 'Lanza', bonus: '+5', damage: '1d6 + 3 / 1d8 + 3', type: 'Perforante (Versátil)' },
+              { id: 'daga-monje-2024', name: 'Daga', bonus: '+5', damage: '1d4 + 3', type: 'Perforante (Sutil, Ligera)' },
+            ],
+          },
+          {
+            id: 'opt-b',
+            name: 'Opción B: 50 Piezas de Oro (Para comprar equipo libre)',
+            description: 'Comienza con 50 po adicionales.',
+            items: [],
+            goldCoins: 50,
+          },
+        ],
+      },
+    ],
+  },
+  paladin: {
+    classId: 'paladin',
+    className: 'Paladín (2024 / 5.5e)',
+    startingGold: 9,
+    fixedEquipment: [],
+    choiceGroups: [
+      {
+        id: 'pack-2024',
+        title: 'Paquete Inicial Oficial 5.5e (Elige A o B)',
+        defaultOptionId: 'opt-a',
+        options: [
+          {
+            id: 'opt-a',
+            name: 'Opción A: Cota de Malla, Escudo, Espada Larga, 6 Jabalinas + 9 po',
+            description: 'Cota de Malla, Escudo, Espada Larga, 6 Jabalinas, Símbolo Sagrado, Paquete de Sacerdote y 9 piezas de oro.',
+            items: ['Cota de Malla', 'Escudo', 'Espada Larga', 'Jabalina (x6)', 'Símbolo Sagrado', 'Paquete de Sacerdote'],
+            armorAcBase: 16,
+            armorType: 'heavy',
+            shieldBonus: 2,
+            goldCoins: 9,
+            attacks: [
+              { id: 'espada-larga-pal-2024', name: 'Espada Larga', bonus: '+5', damage: '1d8 + 3', type: 'Cortante (Versátil)' },
+              { id: 'jabalina-pal-2024', name: 'Jabalina', bonus: '+5', damage: '1d6 + 3', type: 'Perforante (Arrojadiza)' },
+            ],
+          },
+          {
+            id: 'opt-b',
+            name: 'Opción B: 150 Piezas de Oro (Para comprar equipo libre)',
+            description: 'Comienza con 150 po adicionales.',
+            items: [],
+            goldCoins: 150,
+          },
+        ],
+      },
+    ],
+  },
+  explorador: {
+    classId: 'explorador',
+    className: 'Explorador (2024 / 5.5e)',
+    startingGold: 7,
+    fixedEquipment: [],
+    choiceGroups: [
+      {
+        id: 'pack-2024',
+        title: 'Paquete Inicial Oficial 5.5e (Elige A o B)',
+        defaultOptionId: 'opt-a',
+        options: [
+          {
+            id: 'opt-a',
+            name: 'Opción A: Cuero Tachonado, Cimitarra, Espada Corta, Arco Largo + 7 po',
+            description: 'Armadura de Cuero Tachonado, Cimitarra, Espada Corta, Arco Largo, Carcaj con 20 Flechas, Foco Druídico (Muérdago), Paquete de Explorador y 7 po.',
+            items: ['Armadura de Cuero Tachonado', 'Cimitarra', 'Espada Corta', 'Arco Largo', 'Carcaj con 20 Flechas', 'Foco Druídico (Muérdago)', 'Paquete de Explorador'],
+            armorAcBase: 12,
+            armorType: 'light',
+            goldCoins: 7,
+            attacks: [
+              { id: 'cimitarra-exp-2024', name: 'Cimitarra', bonus: '+5', damage: '1d6 + 3', type: 'Cortante (Sutil, Ligera)' },
+              { id: 'espada-corta-exp-2024', name: 'Espada Corta', bonus: '+5', damage: '1d6 + 3', type: 'Perforante (Sutil, Ligera)' },
+              { id: 'arco-largo-exp-2024', name: 'Arco Largo', bonus: '+5', damage: '1d8 + 3', type: 'Perforante (Alcance 150/600)' },
+            ],
+          },
+          {
+            id: 'opt-b',
+            name: 'Opción B: 150 Piezas de Oro (Para comprar equipo libre)',
+            description: 'Comienza con 150 po adicionales.',
+            items: [],
+            goldCoins: 150,
+          },
+        ],
+      },
+    ],
+  },
+  picaro: {
+    classId: 'picaro',
+    className: 'Pícaro (2024 / 5.5e)',
+    startingGold: 8,
+    fixedEquipment: [],
+    choiceGroups: [
+      {
+        id: 'pack-2024',
+        title: 'Paquete Inicial Oficial 5.5e (Elige A o B)',
+        defaultOptionId: 'opt-a',
+        options: [
+          {
+            id: 'opt-a',
+            name: 'Opción A: Cuero, 2 Dagas, Espada Corta, Arco Corto, Herramientas + 8 po',
+            description: 'Armadura de Cuero, 2 Dagas, Espada Corta, Arco Corto, Carcaj con 20 Flechas, Herramientas de Ladrón, Paquete de Ladronzuelo y 8 po.',
+            items: ['Armadura de Cuero', 'Daga (x2)', 'Espada Corta', 'Arco Corto', 'Carcaj con 20 Flechas', 'Herramientas de Ladrón', 'Paquete de Ladronzuelo'],
+            armorAcBase: 11,
+            armorType: 'light',
+            goldCoins: 8,
+            attacks: [
+              { id: 'espada-corta-pic-2024', name: 'Espada Corta', bonus: '+5', damage: '1d6 + 3', type: 'Perforante (Sutil, Ligera)' },
+              { id: 'daga-pic-2024', name: 'Daga', bonus: '+5', damage: '1d4 + 3', type: 'Perforante (Sutil, Ligera)' },
+              { id: 'arco-corto-pic-2024', name: 'Arco Corto', bonus: '+5', damage: '1d6 + 3', type: 'Perforante (Alcance 80/320)' },
+            ],
+          },
+          {
+            id: 'opt-b',
+            name: 'Opción B: 100 Piezas de Oro (Para comprar equipo libre)',
+            description: 'Comienza con 100 po adicionales.',
+            items: [],
+            goldCoins: 100,
+          },
+        ],
+      },
+    ],
+  },
+  hechicero: {
+    classId: 'hechicero',
+    className: 'Hechicero (2024 / 5.5e)',
+    startingGold: 28,
+    fixedEquipment: [],
+    choiceGroups: [
+      {
+        id: 'pack-2024',
+        title: 'Paquete Inicial Oficial 5.5e (Elige A o B)',
+        defaultOptionId: 'opt-a',
+        options: [
+          {
+            id: 'opt-a',
+            name: 'Opción A: Lanza, 2 Dagas, Foco Arcano (Cristal), Paquete + 28 po',
+            description: 'Lanza, 2 Dagas, Foco Arcano (Cristal), Paquete de Explorador de Mazmorras y 28 piezas de oro.',
+            items: ['Lanza', 'Daga (x2)', 'Foco Arcano (Cristal)', 'Paquete de Explorador de Mazmorras'],
+            goldCoins: 28,
+            attacks: [
+              { id: 'lanza-hech-2024', name: 'Lanza', bonus: '+2', damage: '1d6', type: 'Perforante (Versátil)' },
+              { id: 'daga-hech-2024', name: 'Daga', bonus: '+4', damage: '1d4 + 2', type: 'Perforante (Sutil, Ligera)' },
+            ],
+          },
+          {
+            id: 'opt-b',
+            name: 'Opción B: 50 Piezas de Oro (Para comprar equipo libre)',
+            description: 'Comienza con 50 po adicionales.',
+            items: [],
+            goldCoins: 50,
+          },
+        ],
+      },
+    ],
+  },
+  brujo: {
+    classId: 'brujo',
+    className: 'Brujo (2024 / 5.5e)',
+    startingGold: 15,
+    fixedEquipment: [],
+    choiceGroups: [
+      {
+        id: 'pack-2024',
+        title: 'Paquete Inicial Oficial 5.5e (Elige A o B)',
+        defaultOptionId: 'opt-a',
+        options: [
+          {
+            id: 'opt-a',
+            name: 'Opción A: Cuero, Hoz, 2 Dagas, Foco Arcano (Orbe), Libro + 15 po',
+            description: 'Armadura de Cuero, Hoz, 2 Dagas, Foco Arcano (Orbe), Libro de Saber Oculto, Paquete de Erudito y 15 piezas de oro.',
+            items: ['Armadura de Cuero', 'Hoz', 'Daga (x2)', 'Foco Arcano (Orbe)', 'Libro de Saber Oculto', 'Paquete de Erudito'],
+            armorAcBase: 11,
+            armorType: 'light',
+            goldCoins: 15,
+            attacks: [
+              { id: 'hoz-brujo-2024', name: 'Hoz', bonus: '+2', damage: '1d4', type: 'Cortante (Ligera)' },
+              { id: 'daga-brujo-2024', name: 'Daga', bonus: '+4', damage: '1d4 + 2', type: 'Perforante (Sutil, Ligera)' },
+            ],
+          },
+          {
+            id: 'opt-b',
+            name: 'Opción B: 100 Piezas de Oro (Para comprar equipo libre)',
+            description: 'Comienza con 100 po adicionales.',
+            items: [],
+            goldCoins: 100,
+          },
+        ],
+      },
+    ],
+  },
+  mago: {
+    classId: 'mago',
+    className: 'Mago (2024 / 5.5e)',
+    startingGold: 5,
+    fixedEquipment: [],
+    choiceGroups: [
+      {
+        id: 'pack-2024',
+        title: 'Paquete Inicial Oficial 5.5e (Elige A o B)',
+        defaultOptionId: 'opt-a',
+        options: [
+          {
+            id: 'opt-a',
+            name: 'Opción A: 2 Dagas, Foco Arcano (Bastón), Túnica, Grimorio + 5 po',
+            description: '2 Dagas, Foco Arcano (Bastón), Túnica, Libro de Conjuros (Grimorio), Paquete de Erudito y 5 piezas de oro.',
+            items: ['Daga (x2)', 'Foco Arcano (Bastón)', 'Túnica de erudito', 'Libro de Conjuros (Grimorio)', 'Paquete de Erudito'],
+            goldCoins: 5,
+            attacks: [
+              { id: 'daga-mago-2024', name: 'Daga', bonus: '+4', damage: '1d4 + 2', type: 'Perforante (Sutil, Ligera)' },
+              { id: 'baston-mago-2024', name: 'Bastón', bonus: '+2', damage: '1d6', type: 'Contundente (Versátil)' },
+            ],
+          },
+          {
+            id: 'opt-b',
+            name: 'Opción B: 55 Piezas de Oro (Para comprar equipo libre)',
+            description: 'Comienza con 55 po adicionales.',
+            items: [],
+            goldCoins: 55,
+          },
+        ],
+      },
+    ],
+  },
+  artifice: {
+    classId: 'artifice',
+    className: 'Artífice (2024 / 5.5e)',
+    startingGold: 16,
+    fixedEquipment: [],
+    choiceGroups: [
+      {
+        id: 'pack-2024',
+        title: 'Paquete Inicial Oficial 5.5e (Elige A o B)',
+        defaultOptionId: 'opt-a',
+        options: [
+          {
+            id: 'opt-a',
+            name: 'Opción A: Cuero Tachonado, Daga, Herramientas de Ladrón y Manitas + 16 po',
+            description: 'Armadura de Cuero Tachonado, Daga, Herramientas de Ladrón, Herramientas de Manitas, Paquete de Explorador de Mazmorras y 16 po.',
+            items: ['Armadura de Cuero Tachonado', 'Daga', 'Herramientas de Ladrón', 'Herramientas de Manitas', 'Paquete de Explorador de Mazmorras'],
+            armorAcBase: 12,
+            armorType: 'light',
+            goldCoins: 16,
+            attacks: [
+              { id: 'daga-art-2024', name: 'Daga', bonus: '+4', damage: '1d4 + 2', type: 'Perforante (Sutil, Ligera)' },
+            ],
+          },
+          {
+            id: 'opt-b',
+            name: 'Opción B: 150 Piezas de Oro (Para comprar equipo libre)',
+            description: 'Comienza con 150 po adicionales.',
+            items: [],
+            goldCoins: 150,
+          },
+        ],
+      },
+    ],
+  },
+};
+
+
+const CLASS_ID_ALIAS_MAP: Record<string, string> = {
+  barbarian: 'barbaro',
+  bard: 'bardo',
+  cleric: 'clerigo',
+  druid: 'druida',
+  fighter: 'guerrero',
+  monk: 'monje',
+  paladin: 'paladin',
+  ranger: 'explorador',
+  rogue: 'picaro',
+  sorcerer: 'hechicero',
+  warlock: 'brujo',
+  wizard: 'mago',
+  artificer: 'artifice',
+};
+
+export function getClassStartingEquipment(
+  classId?: string,
+  edition: '5e' | '5.5e' = '5e'
+): ClassStartingEquipment | null {
   if (!classId) return null;
-  const key = classId.toLowerCase().trim();
+  let key = classId.toLowerCase().trim().replace(/^class-2024-/, '');
+  if (CLASS_ID_ALIAS_MAP[key]) key = CLASS_ID_ALIAS_MAP[key];
+
+  if (edition === '5.5e') {
+    return CLASS_STARTING_EQUIPMENT_2024[key] || CLASS_STARTING_EQUIPMENT_2024['guerrero'];
+  }
   return CLASS_STARTING_EQUIPMENT[key] || CLASS_STARTING_EQUIPMENT['guerrero'];
 }
