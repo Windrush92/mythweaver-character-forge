@@ -1417,6 +1417,15 @@ export const HALF_CASTER_SLOTS_TABLE: Record<number, Record<string, number>> = {
   20: { lvl1: 4, lvl2: 3, lvl3: 3, lvl4: 3, lvl5: 2 },
 };
 
+export const HALF_CASTER_2024_SLOTS_TABLE: Record<number, Record<string, number>> = {
+  ...HALF_CASTER_SLOTS_TABLE,
+  1: { lvl1: 2 },
+};
+
+export function getHalfCasterSlotsTable(edition: '5e' | '5.5e' = '5e'): Record<number, Record<string, number>> {
+  return edition === '5.5e' ? HALF_CASTER_2024_SLOTS_TABLE : HALF_CASTER_SLOTS_TABLE;
+}
+
 export const WARLOCK_PACT_SLOTS_TABLE: Record<number, { count: number; slotLevel: number }> = {
   1: { count: 1, slotLevel: 1 },
   2: { count: 2, slotLevel: 1 },
@@ -1443,7 +1452,7 @@ export const WARLOCK_PACT_SLOTS_TABLE: Record<number, { count: number; slotLevel
 /**
  * Calcula el nivel máximo de conjuro disponible para una clase y nivel dado
  */
-export function getMaxSpellLevelForClass(className: string, level: number): number {
+export function getMaxSpellLevelForClass(className: string, level: number, edition: '5e' | '5.5e' = '5e'): number {
   const norm = className.toLowerCase();
   if (norm.includes('mago') || norm.includes('wizard') ||
       norm.includes('hechicero') || norm.includes('sorcerer') ||
@@ -1454,7 +1463,7 @@ export function getMaxSpellLevelForClass(className: string, level: number): numb
     return Math.min(5, Math.max(1, Math.ceil(level / 4)));
   }
   if (norm.includes('palad') || norm.includes('explorador') || norm.includes('ranger')) {
-    if (level < 2) return 0;
+    if (edition !== '5.5e' && level < 2) return 0;
     return Math.min(5, Math.ceil(level / 4));
   }
   if (norm.includes('brujo') || norm.includes('warlock')) {

@@ -7,6 +7,7 @@ import {
   getMaxSpellLevel,
   getSpellcastingLimits,
   SpellcastingLimits,
+  getSpellForEdition,
 } from '../data/spellsData';
 import { SpellDetailModal } from './SpellDetailModal';
 import { RestModal, RestResult } from './RestModal';
@@ -130,7 +131,9 @@ export const ClassSheetModal: React.FC<ClassSheetModalProps> = ({
     ...(character.spellSlots || {}),
   };
 
-  const characterSpells: Spell[] = character.spells || [];
+  const characterSpells: Spell[] = (character.spells || []).map((s) =>
+    getSpellForEdition(s, charEdition)
+  );
 
   // Tabs
   const [activeTab, setActiveTab] = useState<'prepared' | 'known' | 'compendium' | 'browse_higher'>('prepared');
@@ -503,14 +506,16 @@ export const ClassSheetModal: React.FC<ClassSheetModalProps> = ({
   const spellSaveDc = character.spellSaveDc || (8 + profBonus + abilityMod);
   const spellAttackBonus = character.spellAttackBonus !== undefined ? character.spellAttackBonus : (profBonus + abilityMod);
 
+  const charEdition: '5e' | '5.5e' = character.edition === '5.5e' ? '5.5e' : '5e';
+
   // Filter compendium strictly by race and class
   const filteredCompendium = React.useMemo(() => {
-    return filterSpellsForCharacter(character.class, character.level, character.race);
-  }, [character.class, character.level, character.race]);
+    return filterSpellsForCharacter(character.class, character.level, character.race, charEdition);
+  }, [character.class, character.level, character.race, charEdition]);
 
   const spellcastingLimits = React.useMemo(() => {
-    return getSpellcastingLimits(character.class, character.level, character.stats, character.race);
-  }, [character.class, character.level, character.stats, character.race]);
+    return getSpellcastingLimits(character.class, character.level, character.stats, character.race, charEdition);
+  }, [character.class, character.level, character.stats, character.race, charEdition]);
 
   const cantripsList = characterSpells.filter((s) => s.level === 0 && !s.isRacial);
   const leveledPreparedList = characterSpells.filter((s) => s.level > 0 && s.prepared && !s.isRacial);
@@ -1720,6 +1725,7 @@ export const ClassSheetModal: React.FC<ClassSheetModalProps> = ({
       {/* Full Spell Detail Reading Modal / Overlay */}
       <SpellDetailModal
         spell={selectedSpell}
+        edition={charEdition}
         onClose={() => setSelectedSpell(null)}
         isKnown={
           selectedSpell

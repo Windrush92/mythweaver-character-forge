@@ -59,7 +59,7 @@ export const Compendium2024View: React.FC<Compendium2024ViewProps> = ({
   const [selectedClassId, setSelectedClassId] = useState<string>(DND_2024_CLASSES[0]?.id || '');
   const [selectedFeatId, setSelectedFeatId] = useState<string>(DND_2024_FEATS[0]?.id || '');
   const [selectedMasteryName, setSelectedMasteryName] = useState<string>(DND_2024_WEAPON_MASTERIES[0]?.name || '');
-  const [featCategoryFilter, setFeatCategoryFilter] = useState<'all' | 'origin' | 'general'>('all');
+  const [featCategoryFilter, setFeatCategoryFilter] = useState<'all' | 'origin' | 'fighting' | 'general' | 'epic'>('all');
 
   // Filtered Species
   const filteredSpecies = useMemo(() => {
@@ -134,9 +134,14 @@ export const Compendium2024View: React.FC<Compendium2024ViewProps> = ({
   // Filtered Feats
   const filteredFeats = useMemo(() => {
     return DND_2024_FEATS.filter(f => {
-      const isOrigin = f.category.includes('Origen') || (f.categoryEn && f.categoryEn.includes('Origin'));
+      const catLow = f.category.toLowerCase();
+      const isOrigin = catLow.includes('origen') || Boolean(f.categoryEn && f.categoryEn.toLowerCase().includes('origin'));
+      const isFighting = catLow.includes('combate') || Boolean(f.categoryEn && f.categoryEn.toLowerCase().includes('fighting'));
+      const isEpic = catLow.includes('épica') || catLow.includes('epica') || Boolean(f.categoryEn && f.categoryEn.toLowerCase().includes('epic'));
       if (featCategoryFilter === 'origin' && !isOrigin) return false;
-      if (featCategoryFilter === 'general' && isOrigin) return false;
+      if (featCategoryFilter === 'fighting' && !isFighting) return false;
+      if (featCategoryFilter === 'epic' && !isEpic) return false;
+      if (featCategoryFilter === 'general' && (isOrigin || isFighting || isEpic)) return false;
       if (!searchTerm.trim()) return true;
       const term = searchTerm.toLowerCase();
       const desc = isSpanish ? f.description : (f.descriptionEn || f.description);
@@ -539,11 +544,11 @@ export const Compendium2024View: React.FC<Compendium2024ViewProps> = ({
               </h3>
             </div>
             {/* Filter Pill */}
-            <div className="flex items-center gap-1 bg-[#ede1ce] p-1 rounded-lg text-[10px] font-fantasy font-bold">
+            <div className="flex flex-wrap items-center gap-1 bg-[#ede1ce] p-1 rounded-lg text-[10px] font-fantasy font-bold">
               <button
                 type="button"
                 onClick={() => setFeatCategoryFilter('all')}
-                className={`flex-1 py-1 rounded transition text-center cursor-pointer ${
+                className={`flex-1 py-1 px-1.5 rounded transition text-center cursor-pointer ${
                   featCategoryFilter === 'all' ? 'bg-[#8c672b] text-white shadow-xs' : 'text-[#6e5c4a]'
                 }`}
               >
@@ -552,7 +557,7 @@ export const Compendium2024View: React.FC<Compendium2024ViewProps> = ({
               <button
                 type="button"
                 onClick={() => setFeatCategoryFilter('origin')}
-                className={`flex-1 py-1 rounded transition text-center cursor-pointer ${
+                className={`flex-1 py-1 px-1.5 rounded transition text-center cursor-pointer ${
                   featCategoryFilter === 'origin' ? 'bg-[#8c672b] text-white shadow-xs' : 'text-[#6e5c4a]'
                 }`}
               >
@@ -560,12 +565,30 @@ export const Compendium2024View: React.FC<Compendium2024ViewProps> = ({
               </button>
               <button
                 type="button"
+                onClick={() => setFeatCategoryFilter('fighting')}
+                className={`flex-1 py-1 px-1.5 rounded transition text-center cursor-pointer ${
+                  featCategoryFilter === 'fighting' ? 'bg-[#8c672b] text-white shadow-xs' : 'text-[#6e5c4a]'
+                }`}
+              >
+                {t('Combate', 'Fighting')}
+              </button>
+              <button
+                type="button"
                 onClick={() => setFeatCategoryFilter('general')}
-                className={`flex-1 py-1 rounded transition text-center cursor-pointer ${
+                className={`flex-1 py-1 px-1.5 rounded transition text-center cursor-pointer ${
                   featCategoryFilter === 'general' ? 'bg-[#8c672b] text-white shadow-xs' : 'text-[#6e5c4a]'
                 }`}
               >
                 {t('Generales', 'General')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setFeatCategoryFilter('epic')}
+                className={`flex-1 py-1 px-1.5 rounded transition text-center cursor-pointer ${
+                  featCategoryFilter === 'epic' ? 'bg-[#8c672b] text-white shadow-xs' : 'text-[#6e5c4a]'
+                }`}
+              >
+                {t('Épicas', 'Epic')}
               </button>
             </div>
 
@@ -573,20 +596,27 @@ export const Compendium2024View: React.FC<Compendium2024ViewProps> = ({
               {filteredFeats.map((f) => {
                 const isSelected = f.id === selectedFeatId;
                 const displayName = isSpanish ? f.name : f.nameEn;
-                const isOrigin = f.category.includes('Origen') || (f.categoryEn && f.categoryEn.includes('Origin'));
+                const catLow = f.category.toLowerCase();
+                const badgeText = catLow.includes('origen')
+                  ? t('Nv 1', 'Lv 1')
+                  : catLow.includes('combate')
+                  ? t('Combate', 'Fighting')
+                  : catLow.includes('épica') || catLow.includes('epica')
+                  ? t('Épica 19+', 'Epic 19+')
+                  : t('Nv 4+', 'Lv 4+');
                 return (
                   <button
                     key={f.id}
                     onClick={() => setSelectedFeatId(f.id)}
-                    className={`w-full p-2.5 rounded-xl border-2 text-left transition cursor-pointer flex items-center justify-between ${
+                    className={`w-full p-2.5 rounded-xl border-2 text-left transition cursor-pointer flex items-center justify-between gap-2 ${
                       isSelected
                         ? 'border-[#b88c32] bg-[#f5ede0] shadow-sm font-bold'
                         : 'border-[#d8c8af] bg-[#fcf9f2] hover:border-[#b88c32]'
                     }`}
                   >
                     <span className="text-xs font-fantasy text-[#2c221a]">{displayName}</span>
-                    <span className="text-[10px] text-[#8c672b] font-mono font-bold bg-[#faf3e8] px-1.5 py-0.5 rounded border border-[#d8c8af]">
-                      {isOrigin ? t('Nv 1', 'Lv 1') : t('Nv 4+', 'Lv 4+')}
+                    <span className="text-[10px] text-[#8c672b] font-mono font-bold bg-[#faf3e8] px-1.5 py-0.5 rounded border border-[#d8c8af] shrink-0">
+                      {badgeText}
                     </span>
                   </button>
                 );

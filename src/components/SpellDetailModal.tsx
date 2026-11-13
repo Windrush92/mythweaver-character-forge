@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Spell } from '../types';
-import { findSpellByNameOrAlias } from '../data/spellsData';
+import { findSpellByNameOrAlias, getSpellForEdition } from '../data/spellsData';
 import { useLanguageStore } from '../hooks/useLanguageStore';
 import {
   translateDndTitle,
@@ -13,6 +13,7 @@ import { Sparkles, X, Plus, Trash2, Check } from 'lucide-react';
 
 interface SpellDetailModalProps {
   spell: Spell | null;
+  edition?: '5e' | '5.5e';
   onClose: () => void;
   isKnown?: boolean;
   isPrepared?: boolean;
@@ -25,6 +26,7 @@ interface SpellDetailModalProps {
 
 export const SpellDetailModal: React.FC<SpellDetailModalProps> = ({
   spell,
+  edition,
   onClose,
   isKnown,
   isPrepared,
@@ -47,15 +49,16 @@ export const SpellDetailModal: React.FC<SpellDetailModalProps> = ({
 
   if (!spell) return null;
 
-  const canonical = (!spell.descriptionEn || !spell.castingTimeEn)
-    ? findSpellByNameOrAlias(spell.id || spell.nameEn || spell.name)
+  const activeSpell = edition ? getSpellForEdition(spell, edition) : spell;
+  const canonical = (!activeSpell.descriptionEn || !activeSpell.castingTimeEn)
+    ? findSpellByNameOrAlias(activeSpell.id || activeSpell.nameEn || activeSpell.name, edition || '5e')
     : undefined;
-  const castingTimeEn = spell.castingTimeEn || canonical?.castingTimeEn;
-  const rangeEn = spell.rangeEn || canonical?.rangeEn;
-  const componentsEn = spell.componentsEn || canonical?.componentsEn;
-  const durationEn = spell.durationEn || canonical?.durationEn;
-  const descriptionEn = spell.descriptionEn || canonical?.descriptionEn;
-  const higherLevelsEn = spell.higherLevelsEn || canonical?.higherLevelsEn;
+  const castingTimeEn = activeSpell.castingTimeEn || canonical?.castingTimeEn;
+  const rangeEn = activeSpell.rangeEn || canonical?.rangeEn;
+  const componentsEn = activeSpell.componentsEn || canonical?.componentsEn;
+  const durationEn = activeSpell.durationEn || canonical?.durationEn;
+  const descriptionEn = activeSpell.descriptionEn || canonical?.descriptionEn;
+  const higherLevelsEn = activeSpell.higherLevelsEn || canonical?.higherLevelsEn;
 
   return (
     <div
@@ -74,25 +77,30 @@ export const SpellDetailModal: React.FC<SpellDetailModalProps> = ({
             </div>
             <div>
               <h3 className="text-lg font-bold font-fantasy text-[#f7f2ea] tracking-wide flex items-baseline gap-2 flex-wrap">
-                <span>{isSpanish ? spell.name : (spell.nameEn || translateDndTitle(spell.name))}</span>
-                {isSpanish && spell.nameEn && spell.nameEn.toLowerCase() !== spell.name.toLowerCase() && (
+                <span>{isSpanish ? activeSpell.name : (activeSpell.nameEn || translateDndTitle(activeSpell.name))}</span>
+                {isSpanish && activeSpell.nameEn && activeSpell.nameEn.toLowerCase() !== activeSpell.name.toLowerCase() && (
                   <span className="text-xs font-serif font-normal italic text-[#d4ab59]">
-                    ({spell.nameEn})
+                    ({activeSpell.nameEn})
                   </span>
                 )}
               </h3>
               <div className="flex flex-wrap items-center gap-2 text-xs text-[#c7b9a5] mt-0.5">
                 <span className="font-mono uppercase font-bold text-[#d4ab59]">
-                  {spell.level === 0 ? t('Truco (Cantrip)', 'Cantrip') : `${t('Nivel', 'Level')} ${spell.level}`}
+                  {activeSpell.level === 0 ? t('Truco (Cantrip)', 'Cantrip') : `${t('Nivel', 'Level')} ${activeSpell.level}`}
                 </span>
                 <span>•</span>
-                <span className="font-fantasy font-medium">{isSpanish ? spell.school : translateSpellSchool(spell.school)}</span>
-                {spell.ritual && (
+                <span className="font-fantasy font-medium">{isSpanish ? activeSpell.school : translateSpellSchool(activeSpell.school)}</span>
+                {edition === '5.5e' && (
+                  <span className="bg-[#3d2e14] text-[#ffd56b] px-1.5 py-0.2 rounded text-[10px] border border-[#c59b27]/60 font-mono font-bold">
+                    5.5e (2024)
+                  </span>
+                )}
+                {activeSpell.ritual && (
                   <span className="bg-[#41311b] text-[#ecd89f] px-1.5 py-0.2 rounded text-[10px] border border-[#75592e] font-mono">
                     Ritual
                   </span>
                 )}
-                {spell.concentration && (
+                {activeSpell.concentration && (
                   <span className="bg-[#59231f] text-[#f7d6d4] px-1.5 py-0.2 rounded text-[10px] border border-[#8a3934] font-mono">
                     {t('Concentración', 'Concentration')}
                   </span>
@@ -119,7 +127,7 @@ export const SpellDetailModal: React.FC<SpellDetailModalProps> = ({
                 {t('Tiempo de Lanzamiento', 'Casting Time')}
               </span>
               <span className="font-semibold text-[#3b2b1b] mt-0.5 block">
-                {isSpanish ? spell.castingTime : (castingTimeEn || translateSpellMeta(spell.castingTime))}
+                {isSpanish ? activeSpell.castingTime : (castingTimeEn || translateSpellMeta(activeSpell.castingTime))}
               </span>
             </div>
             <div>
@@ -127,7 +135,7 @@ export const SpellDetailModal: React.FC<SpellDetailModalProps> = ({
                 {t('Alcance / Área', 'Range / Area')}
               </span>
               <span className="font-semibold text-[#3b2b1b] mt-0.5 block">
-                {isSpanish ? spell.range : (rangeEn || translateSpellMeta(spell.range))}
+                {isSpanish ? activeSpell.range : (rangeEn || translateSpellMeta(activeSpell.range))}
               </span>
             </div>
             <div>
@@ -135,7 +143,7 @@ export const SpellDetailModal: React.FC<SpellDetailModalProps> = ({
                 {t('Componentes', 'Components')}
               </span>
               <span className="font-semibold text-[#3b2b1b] mt-0.5 block">
-                {isSpanish ? spell.components : (componentsEn || translateDndText(spell.components))}
+                {isSpanish ? activeSpell.components : (componentsEn || translateDndText(activeSpell.components))}
               </span>
             </div>
             <div>
@@ -143,16 +151,16 @@ export const SpellDetailModal: React.FC<SpellDetailModalProps> = ({
                 {t('Duración', 'Duration')}
               </span>
               <span className="font-semibold text-[#3b2b1b] mt-0.5 block">
-                {isSpanish ? spell.duration : (durationEn || translateSpellMeta(spell.duration))}
+                {isSpanish ? activeSpell.duration : (durationEn || translateSpellMeta(activeSpell.duration))}
               </span>
             </div>
           </div>
 
           {/* Classes allowed */}
-          {spell.classes && spell.classes.length > 0 && (
+          {activeSpell.classes && activeSpell.classes.length > 0 && (
             <div className="flex flex-wrap items-center gap-1.5 text-xs">
               <span className="font-bold text-[#6e5842] font-fantasy">{t('Clases autorizadas:', 'Available to Classes:')}</span>
-              {spell.classes.map((cls) => (
+              {activeSpell.classes.map((cls: string) => (
                 <span
                   key={cls}
                   className="bg-[#ede1ce] text-[#543b18] px-2 py-0.5 rounded-full border border-[#cfbe9f] text-[11px] font-semibold font-mono"
@@ -169,18 +177,18 @@ export const SpellDetailModal: React.FC<SpellDetailModalProps> = ({
               {t('Efecto Completo del Conjuro', 'Full Spell Effect')}
             </h4>
             <p className="text-sm text-[#3a2c1f] leading-relaxed whitespace-pre-line">
-              {isSpanish ? spell.description : (descriptionEn || translateDndText(spell.description))}
+              {isSpanish ? activeSpell.description : (descriptionEn || translateDndText(activeSpell.description))}
             </p>
           </div>
 
           {/* Higher Levels Scaling */}
-          {spell.higherLevels && (
+          {activeSpell.higherLevels && (
             <div className="p-3.5 bg-[#faecd6] rounded-xl border border-[#deb87a]">
               <h4 className="text-xs font-bold font-fantasy text-[#7d561a] uppercase mb-1 flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-[#b88c32]" /> {t('A Niveles Superiores', 'At Higher Levels')}
               </h4>
               <p className="text-xs text-[#5e3f10] leading-relaxed">
-                {isSpanish ? spell.higherLevels : (higherLevelsEn || translateDndText(spell.higherLevels))}
+                {isSpanish ? activeSpell.higherLevels : (higherLevelsEn || translateDndText(activeSpell.higherLevels))}
               </p>
             </div>
           )}
@@ -188,11 +196,13 @@ export const SpellDetailModal: React.FC<SpellDetailModalProps> = ({
           {/* Quick Actions Footer inside Modal */}
           <div className="pt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[#d8c8af]">
             <span className="text-xs text-[#8c7457] italic">
-              {t('Compendio Oficial', 'Official Spell Compendium')}
+              {edition === '5.5e'
+                ? t('Compendio Oficial D&D 5.5e (2024)', 'Official D&D 5.5e (2024) Compendium')
+                : t('Compendio Oficial', 'Official Spell Compendium')}
             </span>
 
             <div className="flex items-center gap-2">
-              {onTogglePrepared && isKnown && spell.level > 0 && (
+              {onTogglePrepared && isKnown && activeSpell.level > 0 && (
                 <button
                   type="button"
                   onClick={onTogglePrepared}

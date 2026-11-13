@@ -1,23 +1,35 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Character, AbilityScores, Spell, CharacterSpellSlots, MulticlassEntry, ClassResource } from '../types';
+import { Character, AbilityScores, Spell, CharacterSpellSlots, MulticlassEntry, ClassResource, CharacterFeatEntry } from '../types';
+import {
+  OriginFeatSubChoicePicker,
+  OriginFeatChoiceData,
+  isOriginFeatWithSubChoice,
+} from './OriginFeatSubChoicePicker';
 import {
   WIKIDOT_CLASSES,
   FULL_CASTER_SLOTS_TABLE,
   HALF_CASTER_SLOTS_TABLE,
+  getHalfCasterSlotsTable,
   WARLOCK_PACT_SLOTS_TABLE,
   getMaxSpellLevelForClass,
 } from '../data/wikidotData';
 import { WIKIDOT_RACES } from '../data/wikidotRacesData';
-import { OFFICIAL_SPELLS_COMPENDIUM, isSpellcasterClass, findSpellByNameOrAlias } from '../data/spellsData';
+import { OFFICIAL_SPELLS_COMPENDIUM, isSpellcasterClass, findSpellByNameOrAlias, getCompendiumForEdition, filterSpellsForCharacter } from '../data/spellsData';
 import {
   OFFICIAL_5E_FEATS,
+  DND_2024_AS_OFFICIAL_FEATS,
+  getFeatsForEdition,
+  getExpertiseConfig,
   OfficialFeat,
   FIGHTING_STYLE_OPTIONS,
   ALL_5E_SKILLS,
 } from '../data/characterCreatorData';
 import {
   METAMAGIC_OPTIONS,
+  getMetamagicOptionsForEdition,
   ELDRITCH_INVOCATIONS,
+  getWarlockInvocationCount2024,
+  getEldritchInvocationsForEdition,
   PACT_BOON_OPTIONS,
   BATTLE_MASTER_MANEUVERS,
   ELEMENTAL_DISCIPLINES,
@@ -156,7 +168,12 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
   const currentClassLevel = existingEntry ? existingEntry.level : 0;
   const newClassLevel = currentClassLevel + 1;
 
+  const charEdition: '5e' | '5.5e' = character.edition === '5.5e' ? '5.5e' : '5e';
+  const is55e = charEdition === '5.5e';
+
   const classNorm = classObj.name.toLowerCase();
+  const isWarlockClass = classNorm.includes('brujo') || classNorm.includes('warlock');
+  const isSorcererClass = classNorm.includes('hechicero') || classNorm.includes('sorcerer');
   const hitDieSides = classObj.hitDie || 8;
   const conModifier = Math.floor(((character.stats.con || 10) - 10) / 2);
   const fixedHpGain = Math.max(1, Math.floor(hitDieSides / 2) + 1 + conModifier);
@@ -167,28 +184,16 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
   const [isRollingDie, setIsRollingDie] = useState(false);
   const [customHpBonus, setCustomHpBonus] = useState<number>(0);
 
-  const hpGained = useMemo(() => {
-    const base =
-      hpMethod === 'fixed'
-        ? fixedHpGain
-        : rolledDieValue !== null
-        ? Math.max(1, rolledDieValue + conModifier)
-        : fixedHpGain;
-    return Math.max(1, base + customHpBonus);
-  }, [hpMethod, fixedHpGain, rolledDieValue, conModifier, customHpBonus]);
-
-  const newMaxHp = (character.maxHp || 10) + hpGained;
-  const newCurrentHp = (character.currentHp || 10) + hpGained;
-
   // New features for this level
   const newClassFeatures = useMemo(() => {
     return (classObj.featuresByLevel || []).filter((f) => f.level === newClassLevel);
   }, [classObj, newClassLevel]);
 
-  // Subclass selection check
+  // Subclass selection check (5.5e: todas las clases desbloquean subclase a nivel 3)
+  const effectiveSubclassUnlockLevel = is55e ? 3 : (classObj.subclassUnlockLevel || 3);
   const needsSubclass =
     !existingEntry?.subclass &&
-    newClassLevel >= (classObj.subclassUnlockLevel || 3) &&
+    newClassLevel >= effectiveSubclassUnlockLevel &&
     classObj.subclasses.length > 0;
   const [selectedSubclass, setSelectedSubclass] = useState<string>(existingEntry?.subclass || '');
   const subNorm = (selectedSubclass || existingEntry?.subclass || '').toLowerCase();
@@ -225,10 +230,83 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
   const [featCategoryFilter, setFeatCategoryFilter] = useState<string>('all');
   const [featHalfStatChoice, setFeatHalfStatChoice] = useState<keyof AbilityScores>('str');
   const [selectedFeatSubChoices, setSelectedFeatSubChoices] = useState<string[]>([]);
+  const [featOriginSubChoice, setFeatOriginSubChoice] = useState<OriginFeatChoiceData>({
+    featId: '',
+    skillsOrTools: [],
+    tools: [],
+    cantrips: [],
+    level1Spell: '',
+    spellList: 'Mago',
+    spellAbility: 'cha',
+  });
+  const [lessonsOriginSubChoice, setLessonsOriginSubChoice] = useState<OriginFeatChoiceData>({
+    featId: '',
+    skillsOrTools: [],
+    tools: [],
+    cantrips: [],
+    level1Spell: '',
+    spellList: 'Mago',
+    spellAbility: 'cha',
+  });
+
+  // Dwarf / Tough passive & newly selected HP bonuses (5.5e & 5e)
+  const raceLowerForHp = (character.race || '').toLowerCase();
+  const subraceLowerForHp = (character.subrace || '').toLowerCase();
+  const notesLowerForHp = (character.notes || '').toLowerCase();
+  const existingFeatTokens = useMemo(() => {
+    const tokens = new Set<string>();
+    (character.feats || []).forEach((f) => {
+      if (f.id) tokens.add(f.id.toLowerCase());
+      if (f.name) tokens.add(f.name.toLowerCase());
+    });
+    return tokens;
+  }, [character.feats]);
+
+  const hasDwarfHpPerLevel =
+    (is55e && (raceLowerForHp.includes('enano') || raceLowerForHp.includes('dwarf'))) ||
+    subraceLowerForHp.includes('colinas') ||
+    notesLowerForHp.includes('aguante enano');
+  const alreadyHasToughFeat =
+    existingFeatTokens.has('duro') ||
+    existingFeatTokens.has('tough') ||
+    notesLowerForHp.includes('dote adquirida: duro');
+  const pickingToughAsAsiFeat =
+    isAsiLevel &&
+    asiType === 'feat' &&
+    Boolean(selectedFeat && (selectedFeat.id === 'duro' || selectedFeat.name.toLowerCase().startsWith('duro')));
+
+  const autoAncestryFeatHpBonus = useMemo(() => {
+    let bonus = 0;
+    if (hasDwarfHpPerLevel) bonus += 1;
+    if (alreadyHasToughFeat) bonus += 2;
+    else if (pickingToughAsAsiFeat) bonus += 2 * newLevel;
+    return bonus;
+  }, [hasDwarfHpPerLevel, alreadyHasToughFeat, pickingToughAsAsiFeat, newLevel]);
+
+  const hpGained = useMemo(() => {
+    const base =
+      hpMethod === 'fixed'
+        ? fixedHpGain
+        : rolledDieValue !== null
+        ? Math.max(1, rolledDieValue + conModifier)
+        : fixedHpGain;
+    return Math.max(1, base + autoAncestryFeatHpBonus + customHpBonus);
+  }, [hpMethod, fixedHpGain, rolledDieValue, conModifier, autoAncestryFeatHpBonus, customHpBonus]);
+
+  const newMaxHp = (character.maxHp || 10) + hpGained;
+  const newCurrentHp = (character.currentHp || 10) + hpGained;
+
+  const availableEditionFeats = useMemo(() => {
+    return getFeatsForEdition(charEdition, newLevel);
+  }, [charEdition, newLevel]);
+
+  const availableFeatCategories = useMemo(() => {
+    return Array.from(new Set(availableEditionFeats.map((f) => f.category)));
+  }, [availableEditionFeats]);
 
   // Filtered feats for level up selection
   const filteredLevelUpFeats = useMemo(() => {
-    return OFFICIAL_5E_FEATS.filter((f) => {
+    return availableEditionFeats.filter((f) => {
       if (featCategoryFilter !== 'all' && f.category !== featCategoryFilter) return false;
       if (!featSearchTerm.trim()) return true;
       const term = featSearchTerm.toLowerCase();
@@ -241,7 +319,7 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
         f.benefits.some((b) => b.toLowerCase().includes(term))
       );
     });
-  }, [featCategoryFilter, featSearchTerm]);
+  }, [availableEditionFeats, featCategoryFilter, featSearchTerm]);
 
   // Inspecting spell state
   const [inspectingSpell, setInspectingSpell] = useState<Spell | null>(null);
@@ -257,9 +335,10 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
       classObj.name,
       currentClassLevel,
       newClassLevel,
-      selectedSubclass || existingEntry?.subclass
+      selectedSubclass || existingEntry?.subclass,
+      charEdition
     );
-  }, [classObj.name, currentClassLevel, newClassLevel, selectedSubclass, existingEntry?.subclass]);
+  }, [classObj.name, currentClassLevel, newClassLevel, selectedSubclass, existingEntry?.subclass, charEdition]);
 
   const [selectedNewSpells, setSelectedNewSpells] = useState<Spell[]>([]);
   const [selectedNewCantrips, setSelectedNewCantrips] = useState<Spell[]>([]);
@@ -281,37 +360,58 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
   // CLASS-SPECIFIC LEVEL-UP DECISIONS
   // --------------------------------------------------------------------------
   // 1. Metamagic (Hechicero lv 3, 10, 17)
+  // 1. Metamagia (Hechicero: 5e nv 3,10,17 [2,1,1] | 5.5e nv 2,10,17 [2,2,2])
   const needsMetamagic =
-    (classNorm.includes('hechicero') || classNorm.includes('sorcerer')) &&
-    (newClassLevel === 3 || newClassLevel === 10 || newClassLevel === 17);
-  const metamagicCountNeeded = newClassLevel === 3 ? 2 : 1;
+    isSorcererClass &&
+    (is55e
+      ? (newClassLevel === 2 || newClassLevel === 10 || newClassLevel === 17)
+      : (newClassLevel === 3 || newClassLevel === 10 || newClassLevel === 17));
+  const metamagicCountNeeded = is55e ? 2 : (newClassLevel === 3 ? 2 : 1);
   const [selectedMetamagic, setSelectedMetamagic] = useState<string[]>([]);
+  const activeMetamagicOptions = useMemo(
+    () => getMetamagicOptionsForEdition(charEdition),
+    [charEdition]
+  );
 
   // 2. Eldritch Invocations (Brujo lv 2, 5, 7, 9, 12, 15, 18)
-  const needsInvocations =
-    (classNorm.includes('brujo') || classNorm.includes('warlock')) &&
-    (newClassLevel === 2 ||
-      newClassLevel === 5 ||
-      newClassLevel === 7 ||
-      newClassLevel === 9 ||
-      newClassLevel === 12 ||
-      newClassLevel === 15 ||
-      newClassLevel === 18);
-  const invocationsCountNeeded = newClassLevel === 2 ? 2 : 1;
+  const warlockInvocationsDelta2024 = isWarlockClass && is55e
+    ? Math.max(0, getWarlockInvocationCount2024(newClassLevel) - (currentClassLevel > 0 ? getWarlockInvocationCount2024(currentClassLevel) : 0))
+    : 0;
+  const needsInvocations = isWarlockClass && (
+    is55e
+      ? warlockInvocationsDelta2024 > 0
+      : (
+        newClassLevel === 2 ||
+        newClassLevel === 5 ||
+        newClassLevel === 7 ||
+        newClassLevel === 9 ||
+        newClassLevel === 12 ||
+        newClassLevel === 15 ||
+        newClassLevel === 18
+      )
+  );
+  const invocationsCountNeeded = is55e ? warlockInvocationsDelta2024 : (newClassLevel === 2 ? 2 : 1);
   const [selectedInvocations, setSelectedInvocations] = useState<string[]>([]);
+  const [swappedInvocation, setSwappedInvocation] = useState<{ out: string; in: string }>({ out: '', in: '' });
+  const [swappedMetamagic, setSwappedMetamagic] = useState<{ out: string; in: string }>({ out: '', in: '' });
 
-  // 3. Pact Boon (Brujo lv 3)
+  const activeEldritchInvocations = useMemo(
+    () => getEldritchInvocationsForEdition(charEdition, newClassLevel),
+    [charEdition, newClassLevel]
+  );
+
+  // 3. Pact Boon (solo Brujo 5e lv 3; en 5.5e los Pactos se eligen como Invocaciones desde Nv 1)
   const needsPactBoon =
-    (classNorm.includes('brujo') || classNorm.includes('warlock')) && newClassLevel === 3;
+    !is55e && isWarlockClass && newClassLevel === 3;
   const [selectedPactBoon, setSelectedPactBoon] = useState<string>('');
 
-
-  // 5. Expertise (Bardo lv 3 & 10, Pícaro lv 6)
-  const needsExpertise =
-    ((classNorm.includes('bardo') || classNorm.includes('bard')) &&
-      (newClassLevel === 3 || newClassLevel === 10)) ||
-    ((classNorm.includes('picaro') || classNorm.includes('pícaro') || classNorm.includes('rogue')) &&
-      newClassLevel === 6);
+  // 5. Expertise (5e: Bardo 3/10, Pícaro 6 | 5.5e: Bardo 2/9, Explorador 2/9, Pícaro 6)
+  const expertisePrevConfig = currentClassLevel > 0
+    ? getExpertiseConfig(classObj.id, currentClassLevel, charEdition)
+    : { allowedCount: 0 };
+  const expertiseNewConfig = getExpertiseConfig(classObj.id, newClassLevel, charEdition);
+  const expertiseCountNeeded = Math.max(0, expertiseNewConfig.allowedCount - expertisePrevConfig.allowedCount);
+  const needsExpertise = expertiseCountNeeded > 0;
   const [selectedExpertise, setSelectedExpertise] = useState<string[]>([]);
 
   // 6. Battle Master Maneuvers (Guerrero Maestro de la Batalla lv 3, 7, 10, 15)
@@ -344,13 +444,25 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
     setSelectedExpertise([]);
     setSelectedManeuvers([]);
     setActiveClassDecisions({});
+    setSwappedInvocation({ out: '', in: '' });
+    setSwappedMetamagic({ out: '', in: '' });
+    setFeatOriginSubChoice({ featId: '', skillsOrTools: [], tools: [], cantrips: [], level1Spell: '', spellList: 'Mago', spellAbility: 'cha' });
+    setLessonsOriginSubChoice({ featId: '', skillsOrTools: [], tools: [], cantrips: [], level1Spell: '', spellList: 'Mago', spellAbility: 'cha' });
   }, [activeClassName]);
 
-  // 7. Systematic Pending Class & Subclass Decisions (Four Elements, Totems, Runes, Kensei, Infusions, Magical Secrets, etc.)
+  // 7. Systematic Pending Class & Subclass Decisions (Four Elements, Totems, Runes, Kensei, Infusions, Magical Secrets, Warlock 2024 Invocations sub-decisions, etc.)
   const pendingClassDecisions = useMemo(() => {
+    const existingInvs = ((character.classDecisions?.invocations as string[]) || [])
+      .filter((x) => x !== swappedInvocation.out);
+    const liveInvocations = Array.from(new Set([
+      ...existingInvs,
+      ...selectedInvocations,
+      ...(swappedInvocation.in ? [swappedInvocation.in] : []),
+    ]));
     const effectiveDecisions = {
       ...(character.classDecisions || {}),
       ...(selectedPactBoon ? { pactBoon: selectedPactBoon } : {}),
+      ...(liveInvocations.length > 0 ? { invocations: liveInvocations } : {}),
       ...activeClassDecisions,
     };
     return getClassDecisionsForLevel(
@@ -358,7 +470,8 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
       selectedSubclass || existingEntry?.subclass,
       currentClassLevel,
       newClassLevel,
-      effectiveDecisions
+      effectiveDecisions,
+      charEdition
     );
   }, [
     classObj.name,
@@ -368,7 +481,10 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
     newClassLevel,
     character.classDecisions,
     selectedPactBoon,
+    selectedInvocations,
+    swappedInvocation,
     activeClassDecisions,
+    charEdition,
   ]);
 
   const toggleClassDecision = (decisionId: string, optionName: string, maxCount: number) => {
@@ -437,7 +553,7 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
   // Compute new spell slots for casters
   const calculatedNewSpellSlots = useMemo<Partial<CharacterSpellSlots>>(() => {
     if (projectedMulticlass.length > 1) {
-      return calculateMulticlassSpellSlots(projectedMulticlass).slots;
+      return calculateMulticlassSpellSlots(projectedMulticlass, charEdition).slots;
     }
     if (!isCaster) return character.spellSlots || {};
     const className = activeClassName.toLowerCase();
@@ -479,7 +595,8 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
     } else if (
       ['paladin', 'paladín', 'explorador', 'ranger'].some((c) => className.includes(c))
     ) {
-      slotDict = HALF_CASTER_SLOTS_TABLE[newClassLevel] || HALF_CASTER_SLOTS_TABLE[1] || {};
+      const halfTable = getHalfCasterSlotsTable(charEdition);
+      slotDict = halfTable[newClassLevel] || halfTable[1] || {};
     }
 
     keys.forEach((k) => {
@@ -492,12 +609,12 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
     });
 
     return result;
-  }, [projectedMulticlass, isCaster, activeClassName, newClassLevel, character.spellSlots]);
+  }, [projectedMulticlass, isCaster, activeClassName, newClassLevel, character.spellSlots, charEdition]);
 
   // Max spell level accessible at new level
   const maxSpellLvl = useMemo(() => {
-    return getMaxSpellLevelForClass(activeClassName, newClassLevel);
-  }, [activeClassName, newClassLevel]);
+    return getMaxSpellLevelForClass(activeClassName, newClassLevel, charEdition);
+  }, [activeClassName, newClassLevel, charEdition]);
 
   // Current cantrips and leveled spells of character
   const currentCharacterCantrips = useMemo(() => {
@@ -505,19 +622,19 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
   }, [character.spells]);
 
   const currentCharacterLeveledSpells = useMemo(() => {
-    return (character.spells || []).filter((s) => s.level > 0 && !s.isRacial);
+    return (character.spells || []).filter((s) => s.level > 0 && !s.isRacial && !s.isFeatSpell);
   }, [character.spells]);
 
   // Wizard Cantrips for Cantrip Formulas
   const wizardCantrips = useMemo(() => {
-    return OFFICIAL_SPELLS_COMPENDIUM.filter((sp) => {
+    return getCompendiumForEdition(charEdition).filter((sp) => {
       if (sp.level !== 0) return false;
       return (sp.classes || []).some((c) => {
         const cLower = c.toLowerCase();
         return cLower.includes('mago') || cLower.includes('wizard');
       });
     });
-  }, []);
+  }, [charEdition]);
 
   // Available new spells to learn
   const availableCompendiumSpells = useMemo(() => {
@@ -526,7 +643,7 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
       (character.spells || []).map((s) => s.name.toLowerCase())
     );
 
-    return OFFICIAL_SPELLS_COMPENDIUM.filter((sp) => {
+    return getCompendiumForEdition(charEdition).filter((sp) => {
       if (existingSpellNames.has(sp.name.toLowerCase())) return false;
       if (sp.level === 0) return false;
       if (sp.level > maxSpellLvl) return false;
@@ -536,7 +653,7 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
         return classNorm.includes(cLower) || cLower.includes(classNorm);
       });
     });
-  }, [isCaster, character.spells, maxSpellLvl, classNorm]);
+  }, [isCaster, character.spells, maxSpellLvl, classNorm, charEdition]);
 
   // Available new cantrips to learn (e.g. at lv 4 or 10)
   const availableCompendiumCantrips = useMemo(() => {
@@ -545,7 +662,7 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
       (character.spells || []).map((s) => s.name.toLowerCase())
     );
 
-    return OFFICIAL_SPELLS_COMPENDIUM.filter((sp) => {
+    return getCompendiumForEdition(charEdition).filter((sp) => {
       if (existingSpellNames.has(sp.name.toLowerCase())) return false;
       if (sp.level !== 0) return false;
       if (!sp.classes || sp.classes.length === 0) return true;
@@ -554,7 +671,7 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
         return classNorm.includes(cLower) || cLower.includes(classNorm);
       });
     });
-  }, [isCaster, character.spells, classNorm]);
+  }, [isCaster, character.spells, classNorm, charEdition]);
 
   // Filtered available spells
   const filteredAvailableSpells = useMemo(() => {
@@ -765,13 +882,13 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
       if (prev.includes(skillName)) {
         return prev.filter((s) => s !== skillName);
       }
-      if (prev.length >= 2) {
+      if (prev.length >= expertiseCountNeeded) {
         setThemedAlert({
           isOpen: true,
           title: 'Límite de Pericia Alcanzado',
           subtitle: 'Pericia (Expertise)',
           type: 'warning',
-          message: 'Solo puedes seleccionar 2 habilidades para Pericia en este nivel.',
+          message: `Solo puedes seleccionar ${expertiseCountNeeded} habilidad(es) para Pericia en este nivel.`,
         });
         return prev;
       }
@@ -801,11 +918,98 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
 
   // Confirm Level Up
   const handleConfirmLevelUp = () => {
-    // 1. Updated stats & decisions base
+    // 1. Updated stats, feats & decisions base
     const updatedStats: AbilityScores = { ...character.stats };
     let addedNotes = character.notes || '';
     const updatedClassDecisions: Record<string, any> = {
       ...(character.classDecisions || {}),
+    };
+    const updatedFeats: CharacterFeatEntry[] = [...(character.feats || [])];
+    const featGrantedSkills: string[] = [];
+    const featGrantedSpells: Spell[] = [];
+    let lessonsToughBonusHp = 0;
+
+    if (autoAncestryFeatHpBonus > 0) {
+      const hpReasons: string[] = [];
+      if (hasDwarfHpPerLevel) hpReasons.push('+1 Aguante Enano');
+      if (alreadyHasToughFeat) hpReasons.push('+2 Dote Duro');
+      else if (pickingToughAsAsiFeat) hpReasons.push(`+${2 * newLevel} Dote Duro (retroactivo Nv ${newLevel})`);
+      addedNotes += `\n[Nivel ${newLevel}] PG Adicionales: ${hpReasons.join(', ')}.`;
+    }
+
+    const applyOriginFeatGrants = (
+      featObj: OfficialFeat,
+      originData: OriginFeatChoiceData,
+      sourceLabel: string
+    ) => {
+      const subParts: string[] = [];
+      (originData.skillsOrTools || []).forEach((sk: string) => {
+        featGrantedSkills.push(sk);
+        subParts.push(`Competencia: ${sk}`);
+      });
+      (originData.tools || []).forEach((tl: string) => {
+        subParts.push(`Herramienta: ${tl}`);
+      });
+      (originData.instruments || []).forEach((inst: string) => {
+        subParts.push(`Instrumento: ${inst}`);
+      });
+      const chosenSpellNames = [
+        ...(originData.cantrips || []),
+        ...(originData.level1Spell ? [originData.level1Spell] : []),
+      ];
+      if (chosenSpellNames.length > 0) {
+        const spellNames: string[] = [];
+        const abl = originData.spellAbility || 'cha';
+        const listLabel = originData.spellList || 'Mago';
+        chosenSpellNames.forEach((spName: string) => {
+          const resolved = findSpellByNameOrAlias(spName, charEdition);
+          const spellTitle = resolved?.name || spName;
+          spellNames.push(spellTitle);
+          if (!featGrantedSpells.some((x) => x.name.toLowerCase() === spellTitle.toLowerCase())) {
+            if (resolved) {
+              featGrantedSpells.push({
+                ...resolved,
+                id: `char-spl-feat-${featObj.id}-${resolved.id || spellTitle.toLowerCase().replace(/\s+/g, '-')}`,
+                prepared: true,
+                isFeatSpell: true,
+                featOrigin: `Dote: ${featObj.name}`,
+                notes: `Concedido por ${featObj.name} (Lista de ${listLabel}, Aptitud: ${abl.toUpperCase()}).`,
+              });
+            } else {
+              featGrantedSpells.push({
+                id: `char-spl-feat-${featObj.id}-${spellTitle.toLowerCase().replace(/\s+/g, '-')}`,
+                name: spellTitle,
+                level: (originData.cantrips || []).includes(spName) ? 0 : 1,
+                school: 'Abjuración',
+                castingTime: '1 acción',
+                range: 'Personal',
+                components: 'V, S',
+                duration: 'Instantáneo',
+                description: `Conjuro concedido por ${featObj.name}.`,
+                classes: [],
+                prepared: true,
+                isFeatSpell: true,
+                featOrigin: `Dote: ${featObj.name}`,
+                notes: `Concedido por ${featObj.name} (Lista de ${listLabel}, Aptitud: ${abl.toUpperCase()}).`,
+              });
+            }
+          }
+        });
+        subParts.push(`Lista ${listLabel} (${abl.toUpperCase()}): ${spellNames.join(', ')}`);
+      }
+      if (!updatedFeats.some((f) => f.id === featObj.id || f.name.toLowerCase() === featObj.name.toLowerCase())) {
+        updatedFeats.push({
+          id: featObj.id,
+          name: featObj.name,
+          nameEn: featObj.nameEn,
+          source: sourceLabel,
+          category: featObj.category,
+          description: featObj.description,
+          benefits: featObj.benefits,
+          subChoices: subParts.length > 0 ? subParts : undefined,
+        });
+      }
+      return subParts;
     };
 
     if (isAsiLevel) {
@@ -828,10 +1032,22 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
           addedNotes += `\n[Nivel ${newLevel}] Mejora de Características: +1 a ${dualStatChoice1.toUpperCase()} y +1 a ${dualStatChoice2.toUpperCase()}.`;
         }
       } else if (selectedFeat) {
-        let subChoiceStr = '';
-        if (selectedFeatSubChoices.length > 0) {
-          subChoiceStr = ` [Elección: ${selectedFeatSubChoices.join(', ')}]`;
+        let subChoiceArr: string[] = [...selectedFeatSubChoices];
+        if (isOriginFeatWithSubChoice(selectedFeat.id)) {
+          subChoiceArr = applyOriginFeatGrants(selectedFeat, featOriginSubChoice, `Nivel ${newLevel} (${activeClassName})`);
+        } else if (!updatedFeats.some((f) => f.id === selectedFeat.id || f.name.toLowerCase() === selectedFeat.name.toLowerCase())) {
+          updatedFeats.push({
+            id: selectedFeat.id,
+            name: selectedFeat.name,
+            nameEn: selectedFeat.nameEn,
+            source: `Nivel ${newLevel} (${activeClassName})`,
+            category: selectedFeat.category,
+            description: selectedFeat.description,
+            benefits: selectedFeat.benefits,
+            subChoices: subChoiceArr.length > 0 ? subChoiceArr : undefined,
+          });
         }
+        const subChoiceStr = subChoiceArr.length > 0 ? ` [Elección: ${subChoiceArr.join(', ')}]` : '';
         if (selectedFeat.abilityBonus) {
           const chosenStat = (selectedFeat.abilityBonus.flexible && selectedFeat.abilityBonus.stats?.includes(featHalfStatChoice as any))
             ? featHalfStatChoice
@@ -841,8 +1057,8 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
         } else {
           addedNotes += `\n[Nivel ${newLevel}] Dote Adquirida: ${selectedFeat.name}${subChoiceStr} - ${selectedFeat.description}`;
         }
-        if (selectedFeatSubChoices.length > 0) {
-          updatedClassDecisions[`featChoice_${selectedFeat.id}`] = selectedFeatSubChoices;
+        if (subChoiceArr.length > 0) {
+          updatedClassDecisions[`featChoice_${selectedFeat.id}`] = subChoiceArr;
         }
       }
     }
@@ -866,10 +1082,59 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
       }
     });
 
+    // Lecciones de los Primeros (Brujo 5.5e Invocación -> Dote de Origen)
+    const lessonsPickedName = activeClassDecisions['warlockLessonsFeat']?.[0];
+    if (lessonsPickedName) {
+      const cleanLessonName = lessonsPickedName.split('(')[0].trim().toLowerCase();
+      const matchedOriginFeat = DND_2024_AS_OFFICIAL_FEATS.find(
+        (f) => f.id === lessonsPickedName || f.name.toLowerCase() === cleanLessonName || f.name.toLowerCase().includes(cleanLessonName)
+      );
+      if (matchedOriginFeat) {
+        if (isOriginFeatWithSubChoice(matchedOriginFeat.id)) {
+          const subParts = applyOriginFeatGrants(matchedOriginFeat, lessonsOriginSubChoice, 'Invocación: Lecciones de los Primeros');
+          if (subParts.length > 0) {
+            updatedClassDecisions[`featChoice_${matchedOriginFeat.id}`] = subParts;
+            addedNotes += `\n[Nivel ${newLevel}] Lecciones de los Primeros (${matchedOriginFeat.name}): ${subParts.join(', ')}.`;
+          }
+        } else {
+          if (!updatedFeats.some((f) => f.id === matchedOriginFeat.id)) {
+            updatedFeats.push({
+              id: matchedOriginFeat.id,
+              name: matchedOriginFeat.name,
+              nameEn: matchedOriginFeat.nameEn,
+              source: 'Invocación: Lecciones de los Primeros',
+              category: matchedOriginFeat.category,
+              description: matchedOriginFeat.description,
+              benefits: matchedOriginFeat.benefits,
+            });
+          }
+          if (matchedOriginFeat.id === 'duro' && !alreadyHasToughFeat && !pickingToughAsAsiFeat) {
+            lessonsToughBonusHp = 2 * newLevel;
+            addedNotes += `\n[Nivel ${newLevel}] Dote Duro por Lecciones de los Primeros: +${lessonsToughBonusHp} PG máximos.`;
+          }
+        }
+      }
+    }
+
+    if (swappedMetamagic.out && swappedMetamagic.in) {
+      const mList = ((updatedClassDecisions['metamagic'] as string[]) || []).filter((m) => m !== swappedMetamagic.out);
+      if (!mList.includes(swappedMetamagic.in)) mList.push(swappedMetamagic.in);
+      updatedClassDecisions['metamagic'] = mList;
+      addedNotes += `\n[Nivel ${newLevel}] Metamagia (Reemplazo): Cambiado "${swappedMetamagic.out}" por "${swappedMetamagic.in}".`;
+    }
+
     if (needsMetamagic && selectedMetamagic.length > 0 && !activeClassDecisions['metamagic']) {
       addedNotes += `\n[Nivel ${newLevel}] Metamagia: ${selectedMetamagic.join(', ')}.`;
       updatedClassDecisions['metamagic'] = Array.from(new Set([...(updatedClassDecisions['metamagic'] || []), ...selectedMetamagic]));
     }
+
+    if (swappedInvocation.out && swappedInvocation.in) {
+      const invList = ((updatedClassDecisions['invocations'] as string[]) || []).filter((i) => i !== swappedInvocation.out);
+      if (!invList.includes(swappedInvocation.in)) invList.push(swappedInvocation.in);
+      updatedClassDecisions['invocations'] = invList;
+      addedNotes += `\n[Nivel ${newLevel}] Invocación Sobrenatural (Reemplazo): Cambiado "${swappedInvocation.out}" por "${swappedInvocation.in}".`;
+    }
+
     if (needsInvocations && selectedInvocations.length > 0 && !activeClassDecisions['invocations']) {
       addedNotes += `\n[Nivel ${newLevel}] Invocaciones Sobrenaturales: ${selectedInvocations.join(', ')}.`;
       updatedClassDecisions['invocations'] = Array.from(new Set([...(updatedClassDecisions['invocations'] || []), ...selectedInvocations]));
@@ -920,6 +1185,7 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
     // 4. Append new learned spells & cantrips (including decisions like Tome, Cleric, Magical Secrets)
     const decisionSpellKeys = [
       'pactTomeCantrips',
+      'pactTomeRituals',
       'clericNatureCantrip',
       'clericArcanaCantrips',
       'clericDeathCantrip',
@@ -933,16 +1199,21 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
     ];
     decisionSpellKeys.forEach((key) => {
       const chosen = (updatedClassDecisions[key] as string[]) || (activeClassDecisions[key] as string[]) || [];
+      const isTomeGrant = key === 'pactTomeCantrips' || key === 'pactTomeRituals';
       chosen.forEach((spellName) => {
         const cleanName = spellName.split('(')[0].trim();
         if (!currentSpells.some((s) => s.name.toLowerCase() === cleanName.toLowerCase())) {
-          const found = findSpellByNameOrAlias(cleanName) || findSpellByNameOrAlias(spellName);
+          const found = findSpellByNameOrAlias(cleanName, charEdition) || findSpellByNameOrAlias(spellName, charEdition);
           if (found && !selectedNewSpells.some((s) => s.id === found.id) && !selectedNewCantrips.some((s) => s.id === found.id)) {
             currentSpells.push({
               ...found,
               id: `char-spl-decision-${found.id || found.name.toLowerCase().replace(/\s+/g, '-')}`,
               prepared: true,
-              notes: `Concedido por decisión táctica: ${key}`,
+              isFeatSpell: isTomeGrant ? true : undefined,
+              featOrigin: isTomeGrant ? 'Pacto del Tomo' : undefined,
+              notes: isTomeGrant
+                ? `Concedido por Pacto del Tomo (no ocupa tu límite de conjuros de Brujo).`
+                : `Concedido por decisión táctica: ${key}`,
             });
             addedNotes += `\n[Nivel ${newLevel}] Conjuro Aprendido por Especialización: "${found.name}".`;
           }
@@ -950,8 +1221,13 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
       });
     });
 
+    const uniqueFeatGrantedSpells = featGrantedSpells.filter(
+      (fs) => !currentSpells.some((cs) => cs.name.toLowerCase() === fs.name.toLowerCase())
+    );
+
     let updatedSpells = [
       ...currentSpells,
+      ...uniqueFeatGrantedSpells,
       ...selectedNewSpells,
       ...selectedNewCantrips,
     ];
@@ -975,7 +1251,7 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
       if (newLevel >= innate.requiredLevel) {
         const alreadyHas = updatedSpells.some((s) => s.name.toLowerCase() === innate.spellName.toLowerCase());
         if (!alreadyHas) {
-          const found = findSpellByNameOrAlias(innate.spellName);
+          const found = findSpellByNameOrAlias(innate.spellName, charEdition);
           if (found) {
             updatedSpells.push({
               ...found,
@@ -1026,7 +1302,7 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
 
     let finalSpellSlots = character.spellSlots;
     if (updatedMulticlass.length > 1) {
-      finalSpellSlots = calculateMulticlassSpellSlots(updatedMulticlass).slots;
+      finalSpellSlots = calculateMulticlassSpellSlots(updatedMulticlass, charEdition).slots;
     } else if (isCaster) {
       finalSpellSlots = calculatedNewSpellSlots;
     }
@@ -1039,7 +1315,7 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
         const cleanName = splName.split('(')[0].trim();
         const alreadyHas = updatedSpells.some((s) => s.name.toLowerCase() === cleanName.toLowerCase());
         if (!alreadyHas) {
-          const found = findSpellByNameOrAlias(cleanName) || findSpellByNameOrAlias(splName);
+          const found = findSpellByNameOrAlias(cleanName, charEdition) || findSpellByNameOrAlias(splName, charEdition);
           if (found) {
             updatedSpells.push({
               ...found,
@@ -1055,8 +1331,8 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
 
     // 5.2. Capstone de Bárbaro Nivel 20: Campeón Primitivo (Primal Champion)
     const isBarbarianChar = activeClassName.toLowerCase().includes('barbaro') || activeClassName.toLowerCase().includes('bárbaro') || activeClassName.toLowerCase().includes('barbarian');
-    let effectiveMaxHp = newMaxHp;
-    let effectiveCurrentHp = newCurrentHp;
+    let effectiveMaxHp = newMaxHp + lessonsToughBonusHp;
+    let effectiveCurrentHp = newCurrentHp + lessonsToughBonusHp;
     if (isBarbarianChar && newClassLevel === 20) {
       const prevConMod = Math.floor(((updatedStats.con || 10) - 10) / 2);
       updatedStats.str = Math.min(24, (updatedStats.str || 10) + 4);
@@ -1072,7 +1348,7 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
       addedNotes += `\n[Nivel 20] Campeón Primitivo (Primal Champion): +4 a Fuerza y +4 a Constitución (máximo aumentado a 24). Usos de Furia ilimitados.`;
     }
 
-    // 5.3. Actualizar competencias de habilidad adquiridas por decisiones (Lore, Clérigo, Bárbaro, etc.)
+    // 5.3. Actualizar competencias de habilidad adquiridas por decisiones (Lore, Clérigo, Bárbaro, Dotes de Origen, etc.)
     const updatedSkills = [...(character.skills || [])];
     const skillDecisionKeys = ['loreBonusSkills', 'totemTigerSkills6', 'clericKnowledgeSkills', 'clericNatureSkill', 'clericOrderSkill', 'clericPeaceSkill', 'primalKnowledge_3', 'primalKnowledge_10'];
     skillDecisionKeys.forEach((k) => {
@@ -1084,12 +1360,19 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
         }
       });
     });
+    featGrantedSkills.forEach((skName) => {
+      const cleanSk = skName.split('(')[0].trim();
+      if (!updatedSkills.some((s) => s.toLowerCase() === cleanSk.toLowerCase())) {
+        updatedSkills.push(cleanSk);
+      }
+    });
 
     // 6. Recalculate derived stats
     const effectiveEquipped = character.equippedItems || character.inventory || [];
     const recalculated = recalculateAllCharacterDerivedStats(
       {
         ...character,
+        edition: charEdition,
         level: newLevel,
         class: combinedClassName,
         multiclass: updatedMulticlass,
@@ -1100,6 +1383,8 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
         subclass: finalSubclass,
         notes: addedNotes.trim(),
         spells: updatedSpells,
+        feats: updatedFeats,
+        classDecisions: updatedClassDecisions,
       },
       newLevel,
       updatedStats,
@@ -1109,6 +1394,7 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
     // 7. Create final character
     const updated: Character = {
       ...character,
+      edition: charEdition,
       level: newLevel,
       class: combinedClassName,
       multiclass: updatedMulticlass,
@@ -1127,6 +1413,7 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
       attacks: recalculated.attacks,
       classResources: recalculated.classResources,
       classDecisions: updatedClassDecisions,
+      feats: updatedFeats,
     };
 
     onSave(updated);
@@ -1395,6 +1682,11 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
                   </h3>
                   <p className="text-xs text-[#786450]">
                     Dado de Golpe de clase: <strong className="text-[#8c672b]">1d{hitDieSides}</strong> | Modificador de CON: <strong className="text-[#8c672b]">{conModifier >= 0 ? `+${conModifier}` : conModifier}</strong>
+                    {autoAncestryFeatHpBonus > 0 && (
+                      <span className="ml-2 inline-block px-1.5 py-0.5 rounded bg-[#e6f4ea] text-[#137333] border border-[#a8dab5] font-mono text-[10px] font-bold">
+                        +{autoAncestryFeatHpBonus} PG (Enano / Duro)
+                      </span>
+                    )}
                   </p>
                 </div>
               </div>
@@ -1425,11 +1717,12 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
                     {hpMethod === 'fixed' && <Check className="w-3.5 h-3.5 text-[#8c672b]" />}
                   </div>
                   <p className="text-xs text-[#786450] mt-0.5">
-                    {Math.floor(hitDieSides / 2) + 1} (media de d{hitDieSides}) + {conModifier} (CON) = <strong>+{fixedHpGain} PG</strong>
+                    {Math.floor(hitDieSides / 2) + 1} (media de d{hitDieSides}) + {conModifier} (CON)
+                    {autoAncestryFeatHpBonus > 0 ? ` + ${autoAncestryFeatHpBonus} (Rasgo/Dote)` : ''} = <strong>+{fixedHpGain + autoAncestryFeatHpBonus} PG</strong>
                   </p>
                 </div>
                 <span className="text-sm font-bold font-mono text-[#8c672b]">
-                  +{fixedHpGain}
+                  +{fixedHpGain + autoAncestryFeatHpBonus}
                 </span>
               </div>
 
@@ -1585,7 +1878,7 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
                   </div>
                   <div>
                     <h3 className="font-fantasy font-bold text-sm text-[#382b20] uppercase tracking-wide">
-                      Mejora de Característica (ASI) o Dote de 5e
+                      Mejora de Característica (ASI) o Dote ({is55e ? 'D&D 5.5e / 2024' : 'D&D 5e'})
                     </h3>
                     <p className="text-xs text-[#786450]">
                       A nivel {newLevel} puedes aumentar tus puntuaciones o seleccionar una dote oficial.
@@ -1709,7 +2002,7 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
                 <div className="space-y-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <p className="text-xs font-fantasy font-bold text-[#6e5c4a]">
-                      Elige una dote oficial de D&D 5e:
+                      Elige una dote oficial de D&D {charEdition}:
                     </p>
                     <span className="text-xs font-mono font-bold text-[#8c672b]">
                       {filteredLevelUpFeats.length} dotes disponibles
@@ -1735,10 +2028,9 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
                       className="bg-[#faf3e8] border border-[#cfbeaa] rounded-lg px-2.5 py-1.5 text-xs text-[#2c221a] focus:outline-none focus:border-[#8c672b] cursor-pointer"
                     >
                       <option value="all">Todas las categorías</option>
-                      <option value="Combate">Combate</option>
-                      <option value="Magia">Magia</option>
-                      <option value="Utilidad">Utilidad</option>
-                      <option value="General">General</option>
+                      {availableFeatCategories.map((cat) => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
                     </select>
                   </div>
 
@@ -1865,7 +2157,20 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
                       )}
 
                       {/* Sub-choice Picker for Feat if available (e.g. Iniciado en la Magia, Adepto Elemental, etc.) */}
-                      {selectedFeat.subChoice && (
+                      {selectedFeat && isOriginFeatWithSubChoice(selectedFeat.id) && (
+                        <div className="pt-1">
+                          <OriginFeatSubChoicePicker
+                            featId={selectedFeat.id}
+                            featName={selectedFeat.name}
+                            value={featOriginSubChoice}
+                            onChange={setFeatOriginSubChoice}
+                            edition={charEdition}
+                            onInspectSpell={(sp) => setInspectingSpell(sp)}
+                          />
+                        </div>
+                      )}
+
+                      {selectedFeat.subChoice && !isOriginFeatWithSubChoice(selectedFeat.id) && (
                         <div className="p-3 bg-[#f5ede0] rounded-xl border border-[#cfbeaa] space-y-2">
                           <div className="flex items-center justify-between">
                             <span className="font-fantasy font-bold text-xs text-[#8c672b] uppercase">
@@ -1969,21 +2274,26 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
-                {METAMAGIC_OPTIONS.map((meta) => {
+                {activeMetamagicOptions.map((meta) => {
+                  const alreadyKnownMeta = ((character.classDecisions?.metamagic as string[]) || []).includes(meta.name);
                   const isChecked = selectedMetamagic.includes(meta.name);
                   return (
                     <div
                       key={meta.id}
-                      onClick={() => toggleMetamagic(meta.name)}
-                      className={`p-2.5 rounded-xl border transition cursor-pointer text-left ${
+                      onClick={() => {
+                        if (!alreadyKnownMeta) toggleMetamagic(meta.name);
+                      }}
+                      className={`p-2.5 rounded-xl border transition text-left ${
                         isChecked
-                          ? 'border-[#b5734c] bg-[#faeee8] shadow-xs ring-1 ring-[#b5734c]'
-                          : 'border-[#d8c8af] bg-[#faf3e8] hover:border-[#b88c32]'
+                          ? 'border-[#b5734c] bg-[#faeee8] shadow-xs ring-1 ring-[#b5734c] cursor-pointer'
+                          : alreadyKnownMeta
+                          ? 'border-[#c8b79d] bg-[#eee5d8] opacity-65 cursor-not-allowed'
+                          : 'border-[#d8c8af] bg-[#faf3e8] hover:border-[#b88c32] cursor-pointer'
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <span className="font-fantasy font-bold text-xs text-[#2c221a]">
-                          {meta.name}
+                          {meta.name} {alreadyKnownMeta ? '(Ya conocida)' : ''}
                         </span>
                         {meta.badge && (
                           <span className="text-[10px] font-mono text-[#b5734c] bg-white/70 px-1.5 py-0.5 rounded border border-[#e5c2b0]">
@@ -1998,11 +2308,45 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
                   );
                 })}
               </div>
+              {is55e && ((character.classDecisions?.metamagic as string[]) || []).length > 0 && newClassLevel >= 3 && (
+                <div className="p-3 bg-[#faeee8]/70 rounded-xl border border-[#e5c2b0] space-y-2 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-[#7c3e21] flex items-center gap-1.5">
+                      <RefreshCw className="w-3.5 h-3.5" /> Reemplazo Opcional de Metamagia (Regla Hechicero 5.5e)
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <select
+                      value={swappedMetamagic.out}
+                      onChange={(e) => setSwappedMetamagic({ out: e.target.value, in: '' })}
+                      className="bg-white border border-[#cfbeaa] rounded-lg p-1.5 text-xs"
+                    >
+                      <option value="">-- No reemplazar ninguna --</option>
+                      {((character.classDecisions?.metamagic as string[]) || []).map((m) => (
+                        <option key={m} value={m}>{m}</option>
+                      ))}
+                    </select>
+                    <select
+                      value={swappedMetamagic.in}
+                      disabled={!swappedMetamagic.out}
+                      onChange={(e) => setSwappedMetamagic((prev) => ({ ...prev, in: e.target.value }))}
+                      className="bg-white border border-[#cfbeaa] rounded-lg p-1.5 text-xs disabled:opacity-50"
+                    >
+                      <option value="">-- Elegir nueva Metamagia --</option>
+                      {activeMetamagicOptions
+                        .filter((m) => !((character.classDecisions?.metamagic as string[]) || []).includes(m.name) && !selectedMetamagic.includes(m.name))
+                        .map((m) => (
+                          <option key={m.id} value={m.name}>{m.name}</option>
+                        ))}
+                    </select>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
           {/* Section 5: Eldritch Invocations & Pact Boon (Brujo) */}
-          {needsInvocations && (
+          {(needsInvocations || (is55e && isWarlockClass && ((character.classDecisions?.invocations as string[]) || []).length > 0)) && (
             <div className="bg-[#fcf9f2] p-4 sm:p-5 rounded-2xl border-2 border-[#542d72] shadow-xs space-y-3">
               <div className="flex items-center justify-between border-b border-[#ebdcc7] pb-2">
                 <div className="flex items-center gap-2">
@@ -2011,52 +2355,117 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
                   </div>
                   <div>
                     <h3 className="font-fantasy font-bold text-sm text-[#382b20] uppercase tracking-wide">
-                      Invocaciones Sobrenaturales (Elige {invocationsCountNeeded})
+                      {needsInvocations
+                        ? `Invocaciones Sobrenaturales (Elige ${invocationsCountNeeded})`
+                        : 'Invocaciones Sobrenaturales (Intercambio de Nivel)'}
                     </h3>
                     <p className="text-xs text-[#786450]">
-                      Fragmentos de conocimiento arcano prohibido otorgados por tu Patrón del Pacto.
+                      {is55e
+                        ? `Reglas 5.5e (Nivel ${newClassLevel}): filtra automáticamente tus invocaciones por prerrequisito de nivel.`
+                        : 'Fragmentos de conocimiento arcano prohibido otorgados por tu Patrón del Pacto.'}
                     </p>
                   </div>
                 </div>
-                <span className={`text-xs font-mono font-bold px-2.5 py-1 rounded-lg border ${
-                  selectedInvocations.length === invocationsCountNeeded
-                    ? 'bg-[#e6f4ea] text-[#137333] border-[#a8dab5]'
-                    : 'bg-[#fef7e0] text-[#b06000] border-[#fce293]'
-                }`}>
-                  {selectedInvocations.length} / {invocationsCountNeeded} elegidas
-                </span>
+                {needsInvocations && (
+                  <span className={`text-xs font-mono font-bold px-2.5 py-1 rounded-lg border ${
+                    selectedInvocations.length === invocationsCountNeeded
+                      ? 'bg-[#e6f4ea] text-[#137333] border-[#a8dab5]'
+                      : 'bg-[#fef7e0] text-[#b06000] border-[#fce293]'
+                  }`}>
+                    {selectedInvocations.length} / {invocationsCountNeeded} elegidas
+                  </span>
+                )}
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
-                {ELDRITCH_INVOCATIONS.map((inv) => {
-                  const isChecked = selectedInvocations.includes(inv.name);
-                  return (
-                    <div
-                      key={inv.id}
-                      onClick={() => toggleInvocation(inv.name)}
-                      className={`p-2.5 rounded-xl border transition cursor-pointer text-left ${
-                        isChecked
-                          ? 'border-[#542d72] bg-[#f8f2fd] shadow-xs ring-1 ring-[#542d72]'
-                          : 'border-[#d8c8af] bg-[#faf3e8] hover:border-[#b88c32]'
-                      }`}
+              {is55e && ((character.classDecisions?.invocations as string[]) || []).length > 0 && currentClassLevel >= 1 && (
+                <div className="p-3 bg-[#f5effa] rounded-xl border border-[#d2b8ea] space-y-2 text-xs">
+                  <div className="flex items-center justify-between flex-wrap gap-1">
+                    <span className="font-bold text-[#43235b] flex items-center gap-1.5">
+                      <RefreshCw className="w-3.5 h-3.5" /> Reemplazar 1 Invocación Conocida (Opcional - Brujo 5.5e)
+                    </span>
+                    <span className="text-[10px] text-[#6d4c8a] italic">
+                      Actuales: {((character.classDecisions?.invocations as string[]) || []).join(', ')}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <select
+                      value={swappedInvocation.out}
+                      onChange={(e) => setSwappedInvocation({ out: e.target.value, in: '' })}
+                      className="bg-white border border-[#cfbeaa] rounded-lg p-1.5 text-xs"
                     >
-                      <div className="flex items-center justify-between">
-                        <span className="font-fantasy font-bold text-xs text-[#2c221a]">
-                          {inv.name}
-                        </span>
-                        {inv.badge && (
-                          <span className="text-[10px] font-mono text-[#542d72] bg-white/70 px-1.5 py-0.5 rounded border border-[#d2b8ea]">
-                            {inv.badge}
+                      <option value="">-- No reemplazar ninguna --</option>
+                      {((character.classDecisions?.invocations as string[]) || []).map((invName) => (
+                        <option key={invName} value={invName}>{invName}</option>
+                      ))}
+                    </select>
+                    <select
+                      value={swappedInvocation.in}
+                      disabled={!swappedInvocation.out}
+                      onChange={(e) => setSwappedInvocation((prev) => ({ ...prev, in: e.target.value }))}
+                      className="bg-white border border-[#cfbeaa] rounded-lg p-1.5 text-xs disabled:opacity-50"
+                    >
+                      <option value="">-- Elegir nueva invocación --</option>
+                      {activeEldritchInvocations
+                        .filter((inv) => {
+                          const known = (character.classDecisions?.invocations as string[]) || [];
+                          return (!known.includes(inv.name) || inv.name === swappedInvocation.out) && !selectedInvocations.includes(inv.name);
+                        })
+                        .map((inv) => (
+                          <option key={inv.id} value={inv.name}>
+                            {inv.name}{inv.badge ? ` (${inv.badge})` : ''}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                </div>
+              )}
+
+              {needsInvocations && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-60 overflow-y-auto pr-1">
+                  {activeEldritchInvocations.map((inv) => {
+                    const knownInvs = (character.classDecisions?.invocations as string[]) || [];
+                    const isAlreadyKnownInv = knownInvs.includes(inv.name) && swappedInvocation.out !== inv.name;
+                    const isChecked = selectedInvocations.includes(inv.name);
+                    const minLvl = (inv as any).minLevel as number | undefined;
+                    return (
+                      <div
+                        key={inv.id}
+                        onClick={() => {
+                          if (!isAlreadyKnownInv) toggleInvocation(inv.name);
+                        }}
+                        className={`p-2.5 rounded-xl border transition text-left ${
+                          isChecked
+                            ? 'border-[#542d72] bg-[#f8f2fd] shadow-xs ring-1 ring-[#542d72] cursor-pointer'
+                            : isAlreadyKnownInv
+                            ? 'border-[#c8b79d] bg-[#eee5d8] opacity-65 cursor-not-allowed'
+                            : 'border-[#d8c8af] bg-[#faf3e8] hover:border-[#b88c32] cursor-pointer'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="font-fantasy font-bold text-xs text-[#2c221a]">
+                            {inv.name} {isAlreadyKnownInv ? '(Ya conocida)' : ''}
                           </span>
-                        )}
+                          <div className="flex items-center gap-1 shrink-0">
+                            {minLvl && minLvl > 1 && (
+                              <span className="text-[9px] font-mono text-[#5a4837] bg-white/70 px-1 py-0.5 rounded border border-[#d8c8af]">
+                                Nv {minLvl}+
+                              </span>
+                            )}
+                            {inv.badge && (
+                              <span className="text-[10px] font-mono text-[#542d72] bg-white/70 px-1.5 py-0.5 rounded border border-[#d2b8ea]">
+                                {inv.badge}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <p className="text-[11px] text-[#6e5c4a] mt-1 leading-snug">
+                          {inv.desc}
+                        </p>
                       </div>
-                      <p className="text-[11px] text-[#6e5c4a] mt-1 leading-snug">
-                        {inv.desc}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
 
@@ -2115,24 +2524,24 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
                   </div>
                   <div>
                     <h3 className="font-fantasy font-bold text-sm text-[#382b20] uppercase tracking-wide">
-                      Pericia (Expertise - Elige 2 Habilidades)
+                      Pericia (Expertise - Elige {expertiseCountNeeded} {expertiseCountNeeded === 1 ? 'Habilidad' : 'Habilidades'})
                     </h3>
                     <p className="text-xs text-[#786450]">
-                      Duplica tu bonificador de competencia (+{newProf * 2}) en las 2 habilidades elegidas.
+                      Duplica tu bonificador de competencia (+{newProf * 2}) en {expertiseCountNeeded === 1 ? 'la habilidad elegida' : `las ${expertiseCountNeeded} habilidades elegidas`}.
                     </p>
                   </div>
                 </div>
                 <span className={`text-xs font-mono font-bold px-2.5 py-1 rounded-lg border ${
-                  selectedExpertise.length === 2
+                  selectedExpertise.length === expertiseCountNeeded
                     ? 'bg-[#e6f4ea] text-[#137333] border-[#a8dab5]'
                     : 'bg-[#fef7e0] text-[#b06000] border-[#fce293]'
                 }`}>
-                  {selectedExpertise.length} / 2 habilidades
+                  {selectedExpertise.length} / {expertiseCountNeeded} {expertiseCountNeeded === 1 ? 'habilidad' : 'habilidades'}
                 </span>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-52 overflow-y-auto pr-1">
-                {ALL_5E_SKILLS.map((sk) => {
+                {ALL_5E_SKILLS.filter((sk) => !expertiseNewConfig.restrictedSkills?.length || expertiseNewConfig.restrictedSkills.includes(sk.name)).map((sk) => {
                   const isChecked = selectedExpertise.includes(sk.name);
                   const isProf = (character.skills || []).includes(sk.name);
                   return (
@@ -2457,6 +2866,25 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
                       );
                     })}
                   </div>
+                  {dec.id === 'warlockLessonsFeat' && selectedList.length > 0 && (() => {
+                    const pickedLessonName = selectedList[0].split('(')[0].trim().toLowerCase();
+                    const pickedOriginFeat = DND_2024_AS_OFFICIAL_FEATS.find(
+                      (f) => f.id === selectedList[0] || f.name.toLowerCase() === pickedLessonName || f.name.toLowerCase().includes(pickedLessonName)
+                    );
+                    if (!pickedOriginFeat || !isOriginFeatWithSubChoice(pickedOriginFeat.id)) return null;
+                    return (
+                      <div className="mt-2 pt-2 border-t border-[#d8c8af]">
+                        <OriginFeatSubChoicePicker
+                          featId={pickedOriginFeat.id}
+                          featName={pickedOriginFeat.name}
+                          value={lessonsOriginSubChoice}
+                          onChange={setLessonsOriginSubChoice}
+                          edition={charEdition}
+                          onInspectSpell={(sp) => setInspectingSpell(sp)}
+                        />
+                      </div>
+                    );
+                  })()}
                 </div>
               );
             })}
@@ -2909,6 +3337,7 @@ export const LevelUpModal: React.FC<LevelUpModalProps> = ({
       {inspectingSpell && (
         <SpellDetailModal
           spell={inspectingSpell}
+          edition={charEdition}
           onClose={() => setInspectingSpell(null)}
         />
       )}

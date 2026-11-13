@@ -1,6 +1,8 @@
 import { Character, AbilityScores, Spell } from '../types';
-import { FIGHTING_STYLE_OPTIONS } from './characterCreatorData';
+import { FIGHTING_STYLE_OPTIONS, getFightingStyleOptions } from './characterCreatorData';
 import { OFFICIAL_SPELLS_COMPENDIUM } from './spellsData';
+import { getAllSpellsForEdition } from './spells2024Overrides';
+import { DND_2024_FEATS } from './dnd2024/featsData2024';
 
 export interface DecisionOption {
   id: string;
@@ -8,6 +10,408 @@ export interface DecisionOption {
   desc: string;
   badge?: string;
   prerequisite?: string;
+  minLevel?: number;
+  repeatable?: boolean;
+}
+
+// ==========================================================================
+// D&D 5.5e (PHB 2024) — OPCIONES OFICIALES DE CLASE Y DECISIONES
+// ==========================================================================
+
+export const METAMAGIC_2024: DecisionOption[] = [
+  {
+    id: 'careful-spell',
+    name: 'Conjuro Cuidadoso (Careful Spell)',
+    desc: 'Gastas 1 PH al lanzar un conjuro que obligue a otras criaturas a hacer una tirada de salvación: eliges hasta tu mod. de CAR criaturas (mín. 1) para que superen la salvación automáticamente y no reciban daño alguno si el conjuro normalmente haría mitad de daño al tener éxito.',
+    badge: '1 PH',
+  },
+  {
+    id: 'distant-spell',
+    name: 'Conjuro Distante (Distant Spell)',
+    desc: 'Gastas 1 PH para duplicar el alcance de un conjuro que tenga alcance de al menos 5 pies. Si el conjuro tiene alcance de toque, su alcance pasa a ser 30 pies.',
+    badge: '1 PH',
+  },
+  {
+    id: 'empowered-spell',
+    name: 'Conjuro Potenciado (Empowered Spell)',
+    desc: 'Tras tirar el daño de un conjuro, gastas 1 PH para volver a tirar hasta tu mod. de CAR dados de daño (mín. 1) y quedarte con los nuevos resultados. Se puede combinar con otra opción de Metamagia.',
+    badge: '1 PH',
+  },
+  {
+    id: 'extended-spell',
+    name: 'Conjuro Prolongado (Extended Spell)',
+    desc: 'Gastas 1 PH para duplicar la duración de un conjuro de 1 minuto o más (máx. 24 horas). Además, tienes Ventaja en las tiradas de salvación de Constitución para mantener su Concentración.',
+    badge: '1 PH',
+  },
+  {
+    id: 'heightened-spell',
+    name: 'Conjuro Intensificado (Heightened Spell)',
+    desc: 'Al lanzar un conjuro que obligue a una criatura a hacer una tirada de salvación, gastas 2 PH para darle Desventaja en las salvaciones contra ese conjuro.',
+    badge: '2 PH',
+  },
+  {
+    id: 'quickened-spell',
+    name: 'Conjuro Acelerado (Quickened Spell)',
+    desc: 'Al lanzar un conjuro con tiempo de lanzamiento de 1 acción, gastas 2 PH para lanzarlo como 1 acción adicional en ese turno (respetando el límite de un conjuro con espacio de conjuro por turno).',
+    badge: '2 PH',
+  },
+  {
+    id: 'seeking-spell',
+    name: 'Conjuro Buscador (Seeking Spell)',
+    desc: 'Si fallas una tirada de ataque de conjuro, gastas 1 PH para volver a tirar el d20 y usar el nuevo resultado. Puede usarse junto con otra Metamagia.',
+    badge: '1 PH',
+  },
+  {
+    id: 'subtle-spell',
+    name: 'Conjuro Sutil (Subtle Spell)',
+    desc: 'Gastas 1 PH para lanzar el conjuro sin componentes Verbales ni Somáticos, ni componentes Materiales salvo los que tengan coste en po o se consuman.',
+    badge: '1 PH',
+  },
+  {
+    id: 'transmuted-spell',
+    name: 'Conjuro Transmutado (Transmuted Spell)',
+    desc: 'Al lanzar un conjuro que inflija daño de ácido, frío, fuego, relámpago, veneno o trueno, gastas 1 PH para sustituir ese tipo de daño por otro de la misma lista.',
+    badge: '1 PH',
+  },
+  {
+    id: 'twinned-spell',
+    name: 'Conjuro Duplicado (Twinned Spell)',
+    desc: 'En 2024: cuando lanzas un conjuro (como Hechizar persona o Inmovilizar persona) que pueda lanzarse con un espacio superior para afectar a una criatura adicional, gastas 1 PH para aumentar en 1 su nivel efectivo y afectar a 1 criatura adicional.',
+    badge: '1 PH',
+  },
+];
+
+// Progresión oficial PHB 2024 de Invocaciones Sobrenaturales del Brujo (Niveles 1–20)
+export const WARLOCK_INVOCATION_TOTALS_2024: number[] = [
+  1, 3, 3, 3, 5, 5, 6, 6, 7, 7, 7, 8, 8, 8, 9, 9, 9, 10, 10, 10,
+];
+
+export function getWarlockInvocationCount2024(level: number): number {
+  const clamped = Math.max(1, Math.min(20, level));
+  return WARLOCK_INVOCATION_TOTALS_2024[clamped - 1];
+}
+
+// Las 28 Invocaciones Sobrenaturales oficiales de D&D 5.5e (PHB 2024)
+export const ELDRITCH_INVOCATIONS_2024: DecisionOption[] = [
+  // --- Nivel 1+ (Sin prerrequisito de nivel) ---
+  {
+    id: 'armor-of-shadows',
+    name: 'Armadura de Sombras (Armor of Shadows)',
+    desc: 'Puedes lanzar Armadura de mago sobre ti mismo sin gastar un espacio de conjuro.',
+    badge: 'Nivel 1+',
+    prerequisite: 'Ninguno',
+    minLevel: 1,
+  },
+  {
+    id: 'eldritch-mind',
+    name: 'Mente Sobrenatural (Eldritch Mind)',
+    desc: 'Tienes Ventaja en las tiradas de salvación de Constitución que realices para mantener la Concentración en un conjuro.',
+    badge: 'Nivel 1+',
+    prerequisite: 'Ninguno',
+    minLevel: 1,
+  },
+  {
+    id: 'pact-of-the-blade',
+    name: 'Pacto del Filo (Pact of the Blade)',
+    desc: 'Acción adicional: conjuras un arma cuerpo a cuerpo de pacto (tienes competencia con ella y puede servir de foco) o vinculas un arma mágica. Usas tu Carisma para atacar e infligir daño con ella, y puedes hacer que inflija daño necrótico, psíquico o radiante.',
+    badge: 'Nivel 1+ • Pacto',
+    prerequisite: 'Ninguno',
+    minLevel: 1,
+  },
+  {
+    id: 'pact-of-the-chain',
+    name: 'Pacto de la Cadena (Pact of the Chain)',
+    desc: 'Aprendes Encontrar familiar y puedes lanzarlo como acción mágica sin gastar espacio. Tu familiar puede adoptar formas especiales (Diablillo, Esfinge del Saber, Esqueleto, Pseudodragón, Quasit, Duendecillo o Renacuajo Slaad) y atacar usando tu reacción.',
+    badge: 'Nivel 1+ • Pacto',
+    prerequisite: 'Ninguno',
+    minLevel: 1,
+  },
+  {
+    id: 'pact-of-the-tome',
+    name: 'Pacto del Tomo (Pact of the Tome)',
+    desc: 'Al terminar un descanso corto o largo conjuras tu Libro de las Sombras (funciona como foco): eliges 3 trucos y 2 conjuros de nivel 1 con la etiqueta Ritual de la lista de cualquier clase; los tienes preparados mientras portes el libro.',
+    badge: 'Nivel 1+ • Pacto',
+    prerequisite: 'Ninguno',
+    minLevel: 1,
+  },
+  // --- Nivel 2+ ---
+  {
+    id: 'agonizing-blast',
+    name: 'Descarga Agónica (Agonizing Blast)',
+    desc: 'Elige uno de tus trucos de brujo conocidos que inflija daño: puedes sumar tu modificador de Carisma a las tiradas de daño de ese truco. (Repetible con otro truco distinto).',
+    badge: 'Nivel 2+ • Repetible',
+    prerequisite: 'Brujo Nv 2+, truco de brujo de daño',
+    minLevel: 2,
+    repeatable: true,
+  },
+  {
+    id: 'devils-sight',
+    name: 'Vista del Diablo (Devil\'s Sight)',
+    desc: 'Ves normalmente en oscuridad tenue, oscuridad normal y oscuridad mágica hasta 120 pies.',
+    badge: 'Nivel 2+',
+    prerequisite: 'Brujo Nv 2+',
+    minLevel: 2,
+  },
+  {
+    id: 'eldritch-spear',
+    name: 'Lanza Sobrenatural (Eldritch Spear)',
+    desc: 'Elige uno de tus trucos de brujo conocidos que inflija daño y tenga alcance de al menos 10 pies: su alcance aumenta en 30 pies multiplicado por tu nivel de brujo. (Repetible con otro truco distinto).',
+    badge: 'Nivel 2+ • Repetible',
+    prerequisite: 'Brujo Nv 2+, truco de daño (10+ pies)',
+    minLevel: 2,
+    repeatable: true,
+  },
+  {
+    id: 'fiendish-vigor',
+    name: 'Vigor Infernal (Fiendish Vigor)',
+    desc: 'Puedes lanzar Falsa vida sobre ti mismo sin gastar espacio de conjuro. Al lanzarlo con esta invocación no tiras el dado: obtienes automáticamente el máximo de puntos de golpe temporales (12 PG temporales).',
+    badge: 'Nivel 2+',
+    prerequisite: 'Brujo Nv 2+',
+    minLevel: 2,
+  },
+  {
+    id: 'lessons-of-the-first-ones',
+    name: 'Lecciones de los Primeros (Lessons of the First Ones)',
+    desc: 'Obtienes una dote de Origen de tu elección (como Iniciado en la Magia, Duro, Hábil, Alerta o Afortunado). Repetible eligiendo una dote de Origen diferente.',
+    badge: 'Nivel 2+ • Repetible',
+    prerequisite: 'Brujo Nv 2+',
+    minLevel: 2,
+    repeatable: true,
+  },
+  {
+    id: 'mask-of-many-faces',
+    name: 'Máscara de los Mil Rostros (Mask of Many Faces)',
+    desc: 'Puedes lanzar Disfrazarse sin gastar un espacio de conjuro.',
+    badge: 'Nivel 2+',
+    prerequisite: 'Brujo Nv 2+',
+    minLevel: 2,
+  },
+  {
+    id: 'misty-visions',
+    name: 'Visiones Brumosas (Misty Visions)',
+    desc: 'Puedes lanzar Imagen silenciosa sin gastar un espacio de conjuro.',
+    badge: 'Nivel 2+',
+    prerequisite: 'Brujo Nv 2+',
+    minLevel: 2,
+  },
+  {
+    id: 'otherworldly-leap',
+    name: 'Salto de Otro Mundo (Otherworldly Leap)',
+    desc: 'Puedes lanzar Salto sobre ti mismo sin gastar un espacio de conjuro.',
+    badge: 'Nivel 2+',
+    prerequisite: 'Brujo Nv 2+',
+    minLevel: 2,
+  },
+  {
+    id: 'repelling-blast',
+    name: 'Explosión Repelente (Repelling Blast)',
+    desc: 'Elige uno de tus trucos de brujo conocidos que requiera una tirada de ataque: al impactar a una criatura Grande o más pequeña con ese truco, puedes empujarla hasta 10 pies en línea recta alejándola de ti. (Repetible con otro truco).',
+    badge: 'Nivel 2+ • Repetible',
+    prerequisite: 'Brujo Nv 2+, truco con tirada de ataque',
+    minLevel: 2,
+    repeatable: true,
+  },
+  // --- Nivel 5+ ---
+  {
+    id: 'ascendant-step',
+    name: 'Paso Ascendente (Ascendant Step)',
+    desc: 'Puedes lanzar Levitar sobre ti mismo sin gastar un espacio de conjuro.',
+    badge: 'Nivel 5+',
+    prerequisite: 'Brujo Nv 5+',
+    minLevel: 5,
+  },
+  {
+    id: 'eldritch-smite',
+    name: 'Castigo Sobrenatural (Eldritch Smite)',
+    desc: 'Una vez por turno, al impactar con tu arma de pacto, puedes gastar un espacio de Magia del Pacto para infligir 1d8 de daño de fuerza adicional (+1d8 por nivel del espacio) y derribar al objetivo si es Enorme o menor.',
+    badge: 'Nivel 5+',
+    prerequisite: 'Brujo Nv 5+, Pacto del Filo',
+    minLevel: 5,
+  },
+  {
+    id: 'gaze-of-two-minds',
+    name: 'Mirada de Dos Mentes (Gaze of Two Minds)',
+    desc: 'Acción adicional: percibes a través de los sentidos de un humanoide voluntario (mismo plano, dentro de 60 pies al activar). Mientras mantengas el vínculo, puedes lanzar conjuros como si estuvieras en su espacio.',
+    badge: 'Nivel 5+',
+    prerequisite: 'Brujo Nv 5+',
+    minLevel: 5,
+  },
+  {
+    id: 'gift-of-the-depths',
+    name: 'Don de las Profundidades (Gift of the Depths)',
+    desc: 'Puedes respirar bajo el agua y tienes velocidad de nado igual a tu velocidad caminando. Además, puedes lanzar Respirar bajo el agua 1 vez por descanso largo sin gastar espacio.',
+    badge: 'Nivel 5+',
+    prerequisite: 'Brujo Nv 5+',
+    minLevel: 5,
+  },
+  {
+    id: 'investment-of-the-chain-master',
+    name: 'Inversión del Amo de las Cadenas (Investment of the Chain Master)',
+    desc: 'Al lanzar Encontrar familiar: el familiar gana vuelo o nado 40 pies, como acción adicional le ordenas atacar, sus ataques infligen daño necrótico o radiante, usa tu CD de conjuros y puedes darle resistencia como reacción.',
+    badge: 'Nivel 5+',
+    prerequisite: 'Brujo Nv 5+, Pacto de la Cadena',
+    minLevel: 5,
+  },
+  {
+    id: 'master-of-myriad-forms',
+    name: 'Maestro de las Mil Formas (Master of Myriad Forms)',
+    desc: 'Puedes lanzar Alterar el propio aspecto sin gastar un espacio de conjuro.',
+    badge: 'Nivel 5+',
+    prerequisite: 'Brujo Nv 5+',
+    minLevel: 5,
+  },
+  {
+    id: 'one-with-shadows',
+    name: 'Uno con las Sombras (One with Shadows)',
+    desc: 'Mientras estés en un área de luz tenue u oscuridad, puedes lanzar Invisibilidad sobre ti mismo sin gastar un espacio de conjuro.',
+    badge: 'Nivel 5+',
+    prerequisite: 'Brujo Nv 5+',
+    minLevel: 5,
+  },
+  {
+    id: 'thirsting-blade',
+    name: 'Filo Sediento (Thirsting Blade)',
+    desc: 'Obtienes Ataque Extra solo con tu arma de pacto: puedes atacar dos veces con ella en lugar de una cuando realices la acción de Atacar en tu turno.',
+    badge: 'Nivel 5+',
+    prerequisite: 'Brujo Nv 5+, Pacto del Filo',
+    minLevel: 5,
+  },
+  // --- Nivel 7+ ---
+  {
+    id: 'whispers-of-the-grave',
+    name: 'Susurros de la Tumba (Whispers of the Grave)',
+    desc: 'Puedes lanzar Hablar con los muertos sin gastar un espacio de conjuro.',
+    badge: 'Nivel 7+',
+    prerequisite: 'Brujo Nv 7+',
+    minLevel: 7,
+  },
+  // --- Nivel 9+ ---
+  {
+    id: 'gift-of-the-protectors',
+    name: 'Don de los Protectores (Gift of the Protectors)',
+    desc: 'Aparece una página en tu Libro de las Sombras donde hasta tu mod. de CAR criaturas pueden escribir su nombre (mín. 1): 1 vez por descanso largo, si una de ellas cae a 0 PG sin morir al instante, se queda en 1 PG.',
+    badge: 'Nivel 9+',
+    prerequisite: 'Brujo Nv 9+, Pacto del Tomo',
+    minLevel: 9,
+  },
+  {
+    id: 'lifedrinker',
+    name: 'Bebevidas (Lifedrinker)',
+    desc: 'Una vez por turno, al impactar con tu arma de pacto, infliges 1d6 de daño necrótico, psíquico o radiante adicional y puedes gastar 1 Dado de Golpe para curarte tirando el dado + mod. CON.',
+    badge: 'Nivel 9+',
+    prerequisite: 'Brujo Nv 9+, Pacto del Filo',
+    minLevel: 9,
+  },
+  {
+    id: 'visions-of-distant-realms',
+    name: 'Visiones de Reinos Lejanos (Visions of Distant Realms)',
+    desc: 'Puedes lanzar Ojo arcano sin gastar un espacio de conjuro.',
+    badge: 'Nivel 9+',
+    prerequisite: 'Brujo Nv 9+',
+    minLevel: 9,
+  },
+  // --- Nivel 12+ ---
+  {
+    id: 'devouring-blade',
+    name: 'Filo Devorador (Devouring Blade)',
+    desc: 'El Ataque Extra de Filo Sediento te otorga dos ataques adicionales con tu arma de pacto (3 ataques en total con la acción de Atacar).',
+    badge: 'Nivel 12+',
+    prerequisite: 'Brujo Nv 12+, Filo Sediento',
+    minLevel: 12,
+  },
+  // --- Nivel 15+ ---
+  {
+    id: 'witch-sight',
+    name: 'Vista de Bruja (Witch Sight)',
+    desc: 'Tienes Visión Verdadera (Truesight) con un alcance de 30 pies.',
+    badge: 'Nivel 15+',
+    prerequisite: 'Brujo Nv 15+',
+    minLevel: 15,
+  },
+];
+
+export const DIVINE_ORDER_2024: DecisionOption[] = [
+  {
+    id: 'protector',
+    name: 'Protector',
+    desc: 'Entrenado para la batalla: ganas competencia con Armas Marciales y entrenamiento con Armaduras Pesadas.',
+    badge: 'Marcial',
+  },
+  {
+    id: 'thaumaturge',
+    name: 'Taumaturgo (Thaumaturge)',
+    desc: 'Aprendes 1 truco adicional de Clérigo. Además, tu conocimiento sagrado te otorga un bonificador igual a tu mod. de Sabiduría (mín. +1) a las pruebas de Inteligencia (Arcanos o Religión).',
+    badge: 'Mágico',
+  },
+];
+
+export const PRIMAL_ORDER_2024: DecisionOption[] = [
+  {
+    id: 'warden',
+    name: 'Guardián (Warden)',
+    desc: 'Entrenado para la defensa natural: ganas competencia con Armas Marciales y entrenamiento con Armaduras Intermedias.',
+    badge: 'Marcial',
+  },
+  {
+    id: 'magician',
+    name: 'Mago Primigenio (Magician)',
+    desc: 'Aprendes 1 truco adicional de Druida. Además, tu vínculo místico suma tu mod. de Sabiduría (mín. +1) a tus pruebas de Inteligencia (Arcanos o Naturaleza).',
+    badge: 'Mágico',
+  },
+];
+
+export const CLERIC_BLESSED_STRIKES_2024: DecisionOption[] = [
+  {
+    id: 'divine-strike',
+    name: 'Golpe Divino (Divine Strike)',
+    desc: 'Una vez por turno, cuando impactas a una criatura con una tirada de ataque con arma, puedes hacer que el objetivo reciba 1d8 de daño necrótico o radiante adicional (a tu elección).',
+    badge: '+1d8 Arma',
+  },
+  {
+    id: 'potent-spellcasting',
+    name: 'Lanzamiento Potente (Potent Spellcasting)',
+    desc: 'Sumas tu modificador de Sabiduría al daño que inflijas con cualquier truco de Clérigo.',
+    badge: '+SAB Trucos',
+  },
+];
+
+export const DRUID_ELEMENTAL_FURY_2024: DecisionOption[] = [
+  {
+    id: 'primal-strike',
+    name: 'Golpe Primigenio (Primal Strike)',
+    desc: 'Una vez por turno, cuando impactas a una criatura con una tirada de ataque usando un arma o una forma de bestia de Forma Salvaje, infliges 1d8 de daño elemental adicional (frío, fuego, relámpago o trueno).',
+    badge: '+1d8 Arma/Forma',
+  },
+  {
+    id: 'potent-spellcasting',
+    name: 'Lanzamiento Potente (Potent Spellcasting)',
+    desc: 'Sumas tu modificador de Sabiduría al daño que inflijas con cualquier truco de Druida.',
+    badge: '+SAB Trucos',
+  },
+];
+
+export const ORIGIN_FEATS_2024_OPTIONS: DecisionOption[] = DND_2024_FEATS
+  .filter((f) => f.category === 'Origen (Nivel 1)')
+  .map((f) => ({
+    id: f.id,
+    name: `${f.name} (${f.nameEn})`,
+    desc: f.description,
+    badge: 'Dote de Origen',
+  }));
+
+export function getMetamagicOptionsForEdition(edition: '5e' | '5.5e' = '5e'): DecisionOption[] {
+  return edition === '5.5e' ? METAMAGIC_2024 : METAMAGIC_OPTIONS;
+}
+
+export function getEldritchInvocationsForEdition(
+  edition: '5e' | '5.5e' = '5e',
+  characterLevel: number = 20
+): DecisionOption[] {
+  if (edition === '5.5e') {
+    const lvl = characterLevel > 0 ? characterLevel : 20;
+    return ELDRITCH_INVOCATIONS_2024.filter((inv) => (inv.minLevel ?? 1) <= lvl);
+  }
+  return ELDRITCH_INVOCATIONS;
 }
 
 export interface LevelUpSpellRules {
@@ -1396,8 +1800,92 @@ export function getDruidCantripOptions(): DecisionOption[] {
     }));
 }
 
-export function getWizardCantripOptions(): DecisionOption[] {
-  return OFFICIAL_SPELLS_COMPENDIUM
+export function getMulticlassCantripOptionsForEdition(edition: '5e' | '5.5e' = '5e'): DecisionOption[] {
+  return getAllSpellsForEdition(OFFICIAL_SPELLS_COMPENDIUM, edition)
+    .filter((s) => s.level === 0)
+    .map((s) => ({
+      id: `cantrip-${s.id || s.name.toLowerCase().replace(/\s+/g, '-')}`,
+      name: `${s.name} (${s.nameEn || s.name})`,
+      desc: `[${s.school}] ${(s.classes || []).join(', ')} • ${s.description}`,
+      badge: 'Truco (Cualquier clase)',
+    }));
+}
+
+export function getDruidCantripOptionsForEdition(edition: '5e' | '5.5e' = '5e'): DecisionOption[] {
+  return getAllSpellsForEdition(OFFICIAL_SPELLS_COMPENDIUM, edition)
+    .filter((s) => s.level === 0 && (s.classes || []).some((c) => c.toLowerCase().includes('druid') || c.toLowerCase().includes('druida')))
+    .map((s) => ({
+      id: `druid-cantrip-${s.id || s.name.toLowerCase().replace(/\s+/g, '-')}`,
+      name: `${s.name} (${s.nameEn || s.name})`,
+      desc: `[${s.school}] Alcance: ${s.range} • ${s.description}`,
+      badge: 'Truco de Druida',
+    }));
+}
+
+export function getClericCantripOptions(edition: '5e' | '5.5e' = '5e'): DecisionOption[] {
+  return getAllSpellsForEdition(OFFICIAL_SPELLS_COMPENDIUM, edition)
+    .filter((s) => s.level === 0 && (s.classes || []).some((c) => c.toLowerCase().includes('cleric') || c.toLowerCase().includes('clerigo') || c.toLowerCase().includes('clérigo')))
+    .map((s) => ({
+      id: `cleric-cantrip-${s.id || s.name.toLowerCase().replace(/\s+/g, '-')}`,
+      name: `${s.name} (${s.nameEn || s.name})`,
+      desc: `[${s.school}] Alcance: ${s.range} • ${s.description}`,
+      badge: 'Truco de Clérigo',
+    }));
+}
+
+export function getWarlockDamageCantripOptions(edition: '5e' | '5.5e' = '5e'): DecisionOption[] {
+  return getAllSpellsForEdition(OFFICIAL_SPELLS_COMPENDIUM, edition)
+    .filter((s) => {
+      if (s.level !== 0) return false;
+      const isWarlockSpell = (s.classes || []).some((c) => c.toLowerCase().includes('warlock') || c.toLowerCase().includes('brujo'));
+      if (!isWarlockSpell) return false;
+      const sAny = s as any;
+      const hasDmg = (sAny.damage && sAny.damage.trim() !== '' && sAny.damage !== '-' && sAny.damage !== '—') || /\d+d\d+|daño|damage/i.test(s.description || '');
+      return hasDmg;
+    })
+    .map((s) => ({
+      id: `warlock-dmg-cantrip-${s.id || s.name.toLowerCase().replace(/\s+/g, '-')}`,
+      name: `${s.name} (${s.nameEn || s.name})`,
+      desc: `[${s.school}] ${(s as any).damage || ''} • Alcance: ${s.range}. ${s.description}`,
+      badge: 'Truco de Brujo (Daño)',
+    }));
+}
+
+export function getAnyClassLevel1RitualOptions(edition: '5e' | '5.5e' = '5e'): DecisionOption[] {
+  return getAllSpellsForEdition(OFFICIAL_SPELLS_COMPENDIUM, edition)
+    .filter((s) => s.level === 1 && s.ritual === true)
+    .map((s) => ({
+      id: `ritual1-${s.id || s.name.toLowerCase().replace(/\s+/g, '-')}`,
+      name: `${s.name} (${s.nameEn || s.name})`,
+      desc: `[Nivel 1 • Ritual • ${s.school}] ${(s.classes || []).join(', ')} • ${s.description}`,
+      badge: 'Ritual Nivel 1',
+    }));
+}
+
+export const PACT_CHAIN_FAMILIARS_2024: DecisionOption[] = [
+  ...PACT_CHAIN_FAMILIARS,
+  {
+    id: 'sphinx-of-wonder',
+    name: 'Esfinge del Saber (Sphinx of Wonder)',
+    desc: 'Celestial Menudo (CR 1, PHB 2024): vuela 40 pies, Visión en la Oscuridad 60 pies, resistencia mágica (+2 a tiradas de salvación cercanas como reacción) y golpe de fuerza radiante.',
+    badge: 'Celestial (CR 1)',
+  },
+  {
+    id: 'skeleton',
+    name: 'Esqueleto (Skeleton)',
+    desc: 'No-muerto Mediano (PHB 2024): inmune a veneno y cansancio, ataca con espada corta o arco corto y obedece órdenes tácticas sin descanso.',
+    badge: 'No-muerto (2024)',
+  },
+  {
+    id: 'slaad-tadpole',
+    name: 'Renacuajo Slaad (Slaad Tadpole)',
+    desc: 'Aberración Menuda (PHB 2024): resistencia a ácido, frío, fuego, relámpago y trueno, Visión en la Oscuridad 60 pies.',
+    badge: 'Aberración (2024)',
+  },
+];
+
+export function getWizardCantripOptions(edition: '5e' | '5.5e' = '5e'): DecisionOption[] {
+  return getAllSpellsForEdition(OFFICIAL_SPELLS_COMPENDIUM, edition)
     .filter((s) => s.level === 0 && (s.classes || []).some((c) => c.toLowerCase().includes('wizard') || c.toLowerCase().includes('mago')))
     .map((s) => ({
       id: `wizard-cantrip-${s.id || s.name.toLowerCase().replace(/\s+/g, '-')}`,
@@ -1407,8 +1895,8 @@ export function getWizardCantripOptions(): DecisionOption[] {
     }));
 }
 
-export function getNecromancyCantripOptions(): DecisionOption[] {
-  return OFFICIAL_SPELLS_COMPENDIUM
+export function getNecromancyCantripOptions(edition: '5e' | '5.5e' = '5e'): DecisionOption[] {
+  return getAllSpellsForEdition(OFFICIAL_SPELLS_COMPENDIUM, edition)
     .filter((s) => s.level === 0 && (s.school.toLowerCase().includes('nigro') || s.school.toLowerCase().includes('necro')))
     .map((s) => ({
       id: `necro-cantrip-${s.id || s.name.toLowerCase().replace(/\s+/g, '-')}`,
@@ -1418,8 +1906,8 @@ export function getNecromancyCantripOptions(): DecisionOption[] {
     }));
 }
 
-export function getWizardHighLevelSpellOptions(): DecisionOption[] {
-  return OFFICIAL_SPELLS_COMPENDIUM
+export function getWizardHighLevelSpellOptions(edition: '5e' | '5.5e' = '5e'): DecisionOption[] {
+  return getAllSpellsForEdition(OFFICIAL_SPELLS_COMPENDIUM, edition)
     .filter((s) => s.level >= 6 && s.level <= 9 && (s.classes || []).some((c) => c.toLowerCase().includes('wizard') || c.toLowerCase().includes('mago')))
     .map((s) => ({
       id: `arcana-mastery-${s.id || s.name.toLowerCase().replace(/\s+/g, '-')}`,
@@ -1438,8 +1926,8 @@ export const BLADESINGING_WEAPONS_OPTIONS: DecisionOption[] = [
   { id: 'dagger', name: 'Daga (Dagger)', desc: '1d4 perforante, sutil, ligera, arrojadiza (20/60 pies).', badge: '1d4 Arrojadiza' },
 ];
 
-export function getWizardMasterySpellOptions(): DecisionOption[] {
-  return OFFICIAL_SPELLS_COMPENDIUM
+export function getWizardMasterySpellOptions(edition: '5e' | '5.5e' = '5e'): DecisionOption[] {
+  return getAllSpellsForEdition(OFFICIAL_SPELLS_COMPENDIUM, edition)
     .filter((s) => (s.level === 1 || s.level === 2) && (s.classes || []).some((c) => c.toLowerCase().includes('wizard') || c.toLowerCase().includes('mago')))
     .map((s) => ({
       id: `mastery-${s.id || s.name.toLowerCase().replace(/\s+/g, '-')}`,
@@ -1449,8 +1937,8 @@ export function getWizardMasterySpellOptions(): DecisionOption[] {
     }));
 }
 
-export function getWizardSignatureSpellOptions(): DecisionOption[] {
-  return OFFICIAL_SPELLS_COMPENDIUM
+export function getWizardSignatureSpellOptions(edition: '5e' | '5.5e' = '5e'): DecisionOption[] {
+  return getAllSpellsForEdition(OFFICIAL_SPELLS_COMPENDIUM, edition)
     .filter((s) => s.level === 3 && (s.classes || []).some((c) => c.toLowerCase().includes('wizard') || c.toLowerCase().includes('mago')))
     .map((s) => ({
       id: `signature-${s.id || s.name.toLowerCase().replace(/\s+/g, '-')}`,
@@ -1460,8 +1948,8 @@ export function getWizardSignatureSpellOptions(): DecisionOption[] {
     }));
 }
 
-export function getMagicalSecretsSpellOptions(maxLevel: number): DecisionOption[] {
-  return OFFICIAL_SPELLS_COMPENDIUM
+export function getMagicalSecretsSpellOptions(maxLevel: number, edition: '5e' | '5.5e' = '5e'): DecisionOption[] {
+  return getAllSpellsForEdition(OFFICIAL_SPELLS_COMPENDIUM, edition)
     .filter((s) => s.level > 0 && s.level <= maxLevel)
     .map((s) => ({
       id: `secret-${s.id || s.name.toLowerCase().replace(/\s+/g, '-')}`,
@@ -1550,8 +2038,12 @@ export function getClassDecisionsForLevel(
   subclass: string | undefined,
   currentLevel: number,
   newLevel: number,
-  existingDecisions: Record<string, any> = {}
+  existingDecisions: Record<string, any> = {},
+  edition: '5e' | '5.5e' = '5e'
 ): PendingClassDecision[] {
+  if (edition === '5.5e') {
+    return getClassDecisionsForLevel2024(className, subclass, currentLevel, newLevel, existingDecisions);
+  }
   const norm = (className || '').toLowerCase();
   const subNorm = (subclass || '').toLowerCase();
   const results: PendingClassDecision[] = [];
@@ -2612,19 +3104,515 @@ export function getClassDecisionsForLevel(
 // --------------------------------------------------------------------------
 // 13.5 HELPER FUNCTION: GET ALL CLASS DECISIONS FOR CREATION
 // --------------------------------------------------------------------------
+// ==========================================================================
+// 13B. DECISIONES DE CLASE Y SUBIDA DE NIVEL — D&D 5.5e (PHB 2024)
+// ==========================================================================
+export function getClassDecisionsForLevel2024(
+  className: string,
+  subclass: string | undefined,
+  currentLevel: number,
+  newLevel: number,
+  existingDecisions: Record<string, any> = {}
+): PendingClassDecision[] {
+  const norm = (className || '').toLowerCase();
+  const subNorm = (subclass || '').toLowerCase();
+
+  const toArr = (v: unknown): string[] => {
+    if (Array.isArray(v)) return v.map(String).filter(Boolean);
+    if (typeof v === 'string' && v.trim()) return [v.trim()];
+    return [];
+  };
+  const hasTerm = (key: string, ...terms: string[]): boolean => {
+    const hay = toArr(existingDecisions[key]).join(' | ').toLowerCase();
+    return terms.some((t) => hay.includes(t.toLowerCase()));
+  };
+  const existingCount = (key: string): number => toArr(existingDecisions[key]).length;
+
+  const isFighter = norm.includes('guerrero') || norm.includes('fighter');
+  const isChampion = subNorm.includes('campeon') || subNorm.includes('campeón') || subNorm.includes('champion');
+  const isPaladin = norm.includes('paladin') || norm.includes('paladín');
+  const isRanger = norm.includes('explorador') || norm.includes('ranger');
+  const isCleric = norm.includes('cler') || norm.includes('clérigo');
+  const isDruid = norm.includes('druida') || norm.includes('druid');
+  const isSorcerer = norm.includes('hechicero') || norm.includes('sorcerer');
+  const isWarlock = norm.includes('brujo') || norm.includes('warlock');
+  const isBard = norm.includes('bardo') || norm.includes('bard');
+  const isWizard = norm.includes('mago') || norm.includes('wizard');
+
+  // Reutilizar decisiones de subclases compatibles de 5e filtrando reglas base reemplazadas en 5.5e
+  const raw5e = getClassDecisionsForLevel(className, subclass, currentLevel, newLevel, existingDecisions, '5e');
+  const shiftedSubclassDecisions: PendingClassDecision[] = [];
+
+  if (isCleric && newLevel === 3 && subclass) {
+    shiftedSubclassDecisions.push(
+      ...getClassDecisionsForLevel(className, subclass, 0, 1, existingDecisions, '5e').filter((d) =>
+        ['clericKnowledgeSkills', 'clericKnowledgeLanguages', 'clericNatureCantrip', 'clericNatureSkill', 'clericArcanaCantrips', 'clericOrderSkill', 'clericPeaceSkill', 'clericDeathCantrip'].includes(d.id)
+      )
+    );
+  }
+  if (isDruid && newLevel === 3 && subclass) {
+    shiftedSubclassDecisions.push(
+      ...getClassDecisionsForLevel(className, subclass, 1, 2, existingDecisions, '5e').filter((d) =>
+        ['druidLandCantrip', 'landBiome', 'druidShepherdLanguage'].includes(d.id)
+      )
+    );
+  }
+  if (isSorcerer && newLevel === 3 && subclass) {
+    shiftedSubclassDecisions.push(
+      ...getClassDecisionsForLevel(className, subclass, 0, 1, existingDecisions, '5e').filter((d) =>
+        ['draconicAncestry', 'divineSoulAffinity_1', 'lunarSorceryPhase_1'].includes(d.id)
+      )
+    );
+  }
+  if (isWizard && newLevel === 3 && subclass) {
+    shiftedSubclassDecisions.push(
+      ...getClassDecisionsForLevel(className, subclass, 1, 2, existingDecisions, '5e').filter((d) =>
+        d.id === 'bladesingingWeapon_2'
+      )
+    );
+  }
+
+  const skippedIds = new Set<string>([
+    'elementalDisciplines',
+    'fighterFightingStyle_1',
+    'championSecondFightingStyle',
+    'paladinFightingStyle_2',
+    'rangerFightingStyle_2',
+    'metamagic',
+    'metamagicVersatility',
+    'invocations',
+    'pactBoon',
+    'pactTomeCantrips',
+    'pactChainFamiliar',
+    'bardExpertise_3',
+    'bardExpertise_10',
+  ]);
+
+  const results: PendingClassDecision[] = [];
+  for (const d of [...raw5e, ...shiftedSubclassDecisions]) {
+    if (skippedIds.has(d.id)) continue;
+    if (d.id.startsWith('favoredEnemy_') || d.id.startsWith('naturalExplorer_')) continue;
+    if (isSorcerer && newLevel === 1 && ['draconicAncestry', 'divineSoulAffinity_1', 'lunarSorceryPhase_1'].includes(d.id)) continue;
+    if (isCleric && newLevel === 1 && ['clericKnowledgeSkills', 'clericKnowledgeLanguages', 'clericNatureCantrip', 'clericNatureSkill', 'clericArcanaCantrips', 'clericOrderSkill', 'clericPeaceSkill', 'clericDeathCantrip'].includes(d.id)) continue;
+    if (isDruid && newLevel === 2 && ['druidLandCantrip', 'landBiome', 'druidShepherdLanguage'].includes(d.id)) continue;
+    if (isWizard && newLevel === 2 && d.id === 'bladesingingWeapon_2') continue;
+
+    // Actualizar listas de conjuros a 5.5e en decisiones compartidas
+    if (d.id === 'bardMagicalSecrets_6') results.push({ ...d, options: getMagicalSecretsSpellOptions(3, '5.5e') });
+    else if (d.id === 'bardMagicalSecrets_10') results.push({ ...d, options: getMagicalSecretsSpellOptions(5, '5.5e') });
+    else if (d.id === 'bardMagicalSecrets_14') results.push({ ...d, options: getMagicalSecretsSpellOptions(7, '5.5e') });
+    else if (d.id === 'bardMagicalSecrets_18') results.push({ ...d, options: getMagicalSecretsSpellOptions(9, '5.5e') });
+    else if (d.id === 'wizardSpellMastery_18') results.push({ ...d, options: getWizardMasterySpellOptions('5.5e') });
+    else if (d.id === 'wizardSignatureSpells_20') results.push({ ...d, options: getWizardSignatureSpellOptions('5.5e') });
+    else if (d.id === 'clericArcanaMastery_17') results.push({ ...d, options: getWizardHighLevelSpellOptions('5.5e') });
+    else if (d.id === 'druidLandCantrip' || d.id === 'clericNatureCantrip') results.push({ ...d, options: getDruidCantripOptionsForEdition('5.5e') });
+    else if (d.id === 'clericArcanaCantrips') results.push({ ...d, options: getWizardCantripOptions('5.5e') });
+    else if (d.id === 'clericDeathCantrip') results.push({ ...d, options: getNecromancyCantripOptions('5.5e') });
+    else results.push(d);
+  }
+
+  const allKnownFightingStyles: string[] = [
+    ...toArr(existingDecisions['fighterFightingStyle_1']),
+    ...toArr(existingDecisions['championSecondFightingStyle']),
+    ...toArr(existingDecisions['paladinFightingStyle_2']),
+    ...toArr(existingDecisions['rangerFightingStyle_2']),
+  ];
+  const styles2024 = getFightingStyleOptions('5.5e');
+
+  // 1. Guerrero 5.5e (Estilo Lv 1 + Segundo Estilo de Campeón Lv 7)
+  if (isFighter) {
+    if (newLevel === 1) {
+      results.push({
+        id: 'fighterFightingStyle_1',
+        title: 'Estilo de Combate (Guerrero 5.5e • Nivel 1)',
+        description: 'En 5.5e los Estilos de Combate son dotes de Estilo de Combate. Elige uno para tu guerrero.',
+        countNeeded: 1,
+        options: styles2024
+          .filter((f) => f.allowedClasses.includes('guerrero'))
+          .map((f) => ({ id: f.id, name: f.name, desc: f.shortDesc, badge: 'Estilo de Combate' })),
+        alreadyChosen: allKnownFightingStyles,
+      });
+    }
+    if (isChampion && newLevel === 7) {
+      results.push({
+        id: 'championSecondFightingStyle',
+        title: 'Estilo de Combate Adicional (Campeón 5.5e • Nivel 7)',
+        description: 'En PHB 2024 el Campeón obtiene su segundo Estilo de Combate a nivel 7 (antes nivel 10).',
+        countNeeded: 1,
+        options: styles2024
+          .filter((f) => f.allowedClasses.includes('guerrero'))
+          .map((f) => ({ id: f.id, name: f.name, desc: f.shortDesc, badge: 'Estilo 5.5e' })),
+        alreadyChosen: allKnownFightingStyles,
+      });
+    }
+  }
+
+  // 2. Paladín 5.5e (Estilo de Combate Lv 2 incl. Guerrero Bendito)
+  if (isPaladin) {
+    if (newLevel === 2) {
+      results.push({
+        id: 'paladinFightingStyle_2',
+        title: 'Estilo de Combate (Paladín 5.5e • Nivel 2)',
+        description: 'Elige una dote de Estilo de Combate para tu paladín (incluye Guerrero Bendito: 2 trucos de Clérigo).',
+        countNeeded: 1,
+        options: styles2024
+          .filter((f) => f.allowedClasses.includes('paladin'))
+          .map((f) => ({ id: f.id, name: f.name, desc: f.shortDesc, badge: 'Paladín 5.5e' })),
+        alreadyChosen: allKnownFightingStyles,
+      });
+    }
+    if (hasTerm('paladinFightingStyle_2', 'bendito', 'blessed') && (newLevel === 2 || existingCount('paladinBlessedCantrips') < 2)) {
+      results.push({
+        id: 'paladinBlessedCantrips',
+        title: 'Guerrero Bendito — Trucos de Clérigo (Paladín)',
+        description: 'Aprendes 2 trucos de Clérigo a tu elección que cuentan como conjuros de paladín y usan Carisma.',
+        countNeeded: 2,
+        options: getClericCantripOptions('5.5e'),
+        alreadyChosen: toArr(existingDecisions['paladinBlessedCantrips']),
+      });
+    }
+  }
+
+  // 3. Explorador 5.5e (Estilo Lv 2 incl. Guerrero Druídico + Explorador Hábil)
+  if (isRanger) {
+    if (newLevel === 2) {
+      results.push({
+        id: 'rangerFightingStyle_2',
+        title: 'Estilo de Combate (Explorador 5.5e • Nivel 2)',
+        description: 'Elige un Estilo de Combate de 5.5e (incluye Guerrero Druídico: 2 trucos de Druida).',
+        countNeeded: 1,
+        options: styles2024
+          .filter((f) => f.allowedClasses.includes('explorador'))
+          .map((f) => ({ id: f.id, name: f.name, desc: f.shortDesc, badge: 'Explorador 5.5e' })),
+        alreadyChosen: allKnownFightingStyles,
+      });
+      results.push({
+        id: 'rangerDeftLanguages_2',
+        title: 'Explorador Hábil — Idiomas (Explorador 5.5e • Nivel 2)',
+        description: 'Aprendes 2 idiomas adicionales gracias a Explorador Hábil (Deft Explorer). Además ganas Pericia en 1 habilidad.',
+        countNeeded: 2,
+        options: ALL_5E_LANGUAGES_OPTIONS,
+        alreadyChosen: toArr(existingDecisions['rangerDeftLanguages_2']),
+      });
+      if (currentLevel > 0) {
+        results.push({
+          id: 'rangerDeftExpertise_2',
+          title: 'Explorador Hábil — Pericia (Explorador 5.5e • Nivel 2)',
+          description: 'Elige 1 de tus habilidades con competencia para ganar Pericia (bonificador de competencia duplicado).',
+          countNeeded: 1,
+          options: ALL_5E_SKILLS_OPTIONS,
+          alreadyChosen: toArr(existingDecisions['rangerDeftExpertise_2']),
+        });
+      }
+    }
+    if (hasTerm('rangerFightingStyle_2', 'druidico', 'druídico', 'druidic') && (newLevel === 2 || existingCount('rangerDruidicCantrips') < 2)) {
+      results.push({
+        id: 'rangerDruidicCantrips',
+        title: 'Guerrero Druídico — Trucos de Druida (Explorador)',
+        description: 'Aprendes 2 trucos de Druida a tu elección que cuentan como conjuros de explorador y usan Sabiduría.',
+        countNeeded: 2,
+        options: getDruidCantripOptionsForEdition('5.5e'),
+        alreadyChosen: toArr(existingDecisions['rangerDruidicCantrips']),
+      });
+    }
+    if (newLevel === 9 && currentLevel > 0) {
+      results.push({
+        id: 'rangerDeftExpertise_9',
+        title: 'Vagabundo Experto — Pericia Adicional (Explorador 5.5e • Nivel 9)',
+        description: 'Elige otras 2 habilidades con competencia para obtener Pericia (duplicar bonificador de competencia).',
+        countNeeded: 2,
+        options: ALL_5E_SKILLS_OPTIONS,
+        alreadyChosen: toArr(existingDecisions['rangerDeftExpertise_9']),
+      });
+    }
+  }
+
+  // 4. Clérigo 5.5e (Orden Divina Lv 1 + Golpes Benditos Lv 7)
+  if (isCleric) {
+    if (newLevel === 1) {
+      results.push({
+        id: 'clericDivineOrder',
+        title: 'Orden Divina (Clérigo 5.5e • Nivel 1)',
+        description: 'Elige tu rol sagrado en PHB 2024: Protector (armas marciales + armaduras pesadas) o Taumaturgo (+1 truco y +SAB a Arcanos/Religión).',
+        countNeeded: 1,
+        options: DIVINE_ORDER_2024,
+        alreadyChosen: toArr(existingDecisions['clericDivineOrder']),
+      });
+    }
+    if (hasTerm('clericDivineOrder', 'taumaturgo', 'thaumaturge') && (newLevel === 1 || existingCount('clericThaumaturgeCantrip') < 1)) {
+      results.push({
+        id: 'clericThaumaturgeCantrip',
+        title: 'Taumaturgo — Truco Adicional (Clérigo)',
+        description: 'Aprendes 1 truco adicional de la lista de Clérigo gracias a tu Orden Divina de Taumaturgo.',
+        countNeeded: 1,
+        options: getClericCantripOptions('5.5e'),
+        alreadyChosen: toArr(existingDecisions['clericThaumaturgeCantrip']),
+      });
+    }
+    if (newLevel === 7) {
+      results.push({
+        id: 'clericBlessedStrikes',
+        title: 'Golpes Benditos (Clérigo 5.5e • Nivel 7)',
+        description: 'Elige cómo manifiestas tu poder divino: Golpe Divino (+1d8 radiante/necrótico con arma) o Lanzamiento Potente (+SAB al daño de trucos).',
+        countNeeded: 1,
+        options: CLERIC_BLESSED_STRIKES_2024,
+        alreadyChosen: toArr(existingDecisions['clericBlessedStrikes']),
+      });
+    }
+  }
+
+  // 5. Druida 5.5e (Orden Primigenio Lv 1 + Furia Elemental Lv 7)
+  if (isDruid) {
+    if (newLevel === 1) {
+      results.push({
+        id: 'druidPrimalOrder',
+        title: 'Orden Primigenio (Druida 5.5e • Nivel 1)',
+        description: 'Elige tu vocación druídica en PHB 2024: Guardián (armas marciales + armaduras intermedias) o Mago Primigenio (+1 truco y +SAB a Arcanos/Naturaleza).',
+        countNeeded: 1,
+        options: PRIMAL_ORDER_2024,
+        alreadyChosen: toArr(existingDecisions['druidPrimalOrder']),
+      });
+    }
+    if (hasTerm('druidPrimalOrder', 'mago', 'magician') && (newLevel === 1 || existingCount('druidMagicianCantrip') < 1)) {
+      results.push({
+        id: 'druidMagicianCantrip',
+        title: 'Orden de Mago Primigenio — Truco Adicional (Druida)',
+        description: 'Aprendes 1 truco adicional de la lista de Druida.',
+        countNeeded: 1,
+        options: getDruidCantripOptionsForEdition('5.5e'),
+        alreadyChosen: toArr(existingDecisions['druidMagicianCantrip']),
+      });
+    }
+    if (newLevel === 7) {
+      results.push({
+        id: 'druidElementalFury',
+        title: 'Furia Elemental (Druida 5.5e • Nivel 7)',
+        description: 'Elige entre Golpe Primigenio (+1d8 elemental con armas o Forma Salvaje) o Lanzamiento Potente (+SAB al daño de trucos de Druida).',
+        countNeeded: 1,
+        options: DRUID_ELEMENTAL_FURY_2024,
+        alreadyChosen: toArr(existingDecisions['druidElementalFury']),
+      });
+    }
+  }
+
+  // 6. Hechicero 5.5e (Metamagia se desbloquea en Nivel 2 en PHB 2024)
+  if (isSorcerer) {
+    if (newLevel === 2 || newLevel === 10 || newLevel === 17) {
+      results.push({
+        id: 'metamagic',
+        title: `Metamagia (Hechicero 5.5e • Nivel ${newLevel})`,
+        description:
+          newLevel === 2
+            ? 'En 5.5e la Metamagia se desbloquea al Nivel 2. Elige 2 opciones de Metamagia de tu repertorio innato.'
+            : 'Aprendes 1 nueva opción de Metamagia adicional.',
+        countNeeded: newLevel === 2 ? 2 : 1,
+        options: METAMAGIC_2024,
+        alreadyChosen: toArr(existingDecisions['metamagic']),
+        canSwap: currentLevel > 0 && newLevel > 2,
+        swapLabel: 'También puedes reemplazar 1 opción de Metamagia ya conocida al subir de nivel.',
+      });
+    } else if (currentLevel > 0 && newLevel >= 3) {
+      results.push({
+        id: 'metamagicVersatility',
+        title: `Intercambio de Metamagia (Opcional • Nivel ${newLevel})`,
+        description: 'En 5.5e, cada vez que subes un nivel de Hechicero puedes cambiar 1 opción de Metamagia conocida por otra.',
+        countNeeded: 0,
+        options: METAMAGIC_2024,
+        alreadyChosen: toArr(existingDecisions['metamagic']),
+        canSwap: true,
+      });
+    }
+  }
+
+  // 7. Brujo 5.5e (1 Invocación en Nv 1! Pactos incluidos como Invocaciones + Sub-elecciones dinámicas)
+  if (isWarlock) {
+    const prevCount = currentLevel >= 1 ? getWarlockInvocationCount2024(currentLevel) : 0;
+    const newCount = getWarlockInvocationCount2024(newLevel);
+    const delta = newCount - prevCount;
+    const availableInvocations = getEldritchInvocationsForEdition('5.5e', newLevel);
+
+    if (delta > 0) {
+      results.push({
+        id: 'invocations',
+        title: `Invocaciones Sobrenaturales (Brujo 5.5e • Nivel ${newLevel})`,
+        description:
+          newLevel === 1
+            ? 'En 5.5e el Brujo obtiene su primera Invocación Sobrenatural a Nivel 1 (entre las elegibles: Armadura de Sombras, Mente Sobrenatural o Pacto del Filo/Cadena/Tomo).'
+            : `Ganas +${delta} Invocación(es) Sobrenatural(es) (total conocido a Nv ${newLevel}: ${newCount}). Además puedes reemplazar 1 invocación previa si lo deseas.`,
+        countNeeded: delta,
+        options: availableInvocations,
+        alreadyChosen: toArr(existingDecisions['invocations']),
+        canSwap: currentLevel > 0,
+        swapLabel: 'Puedes intercambiar 1 invocación anterior al subir de nivel.',
+      });
+    } else if (delta === 0 && currentLevel > 0 && newLevel >= 2) {
+      results.push({
+        id: 'invocationsSwap',
+        title: `Reemplazar Invocación Sobrenatural (Opcional • Nv ${newLevel})`,
+        description: 'En este nivel no aumentas tu número total de invocaciones (sigues con ' + newCount + '), pero puedes sustituir 1 invocación anterior por otra elegible en la hoja o al subir.',
+        countNeeded: 0,
+        options: availableInvocations,
+        alreadyChosen: toArr(existingDecisions['invocations']),
+        canSwap: true,
+      });
+    }
+
+    // Sub-decisiones dinámicas por invocaciones elegidas
+    if (hasTerm('invocations', 'tomo', 'tome')) {
+      if (newLevel === 1 || existingCount('pactTomeCantrips') < 3) {
+        results.push({
+          id: 'pactTomeCantrips',
+          title: 'Pacto del Tomo — 3 Trucos del Libro de las Sombras',
+          description: 'Elige 3 trucos de la lista de cualquier clase para tu Libro de las Sombras (cuentan como conjuros de brujo y usan Carisma).',
+          countNeeded: 3,
+          options: getMulticlassCantripOptionsForEdition('5.5e'),
+          alreadyChosen: toArr(existingDecisions['pactTomeCantrips']),
+        });
+      }
+      if (newLevel === 1 || existingCount('pactTomeRituals') < 2) {
+        results.push({
+          id: 'pactTomeRituals',
+          title: 'Pacto del Tomo — 2 Conjuros Rituales de Nivel 1',
+          description: 'Elige 2 conjuros de Nivel 1 con etiqueta Ritual de la lista de cualquier clase para inscribirlos en tu Libro de las Sombras.',
+          countNeeded: 2,
+          options: getAnyClassLevel1RitualOptions('5.5e'),
+          alreadyChosen: toArr(existingDecisions['pactTomeRituals']),
+        });
+      }
+    }
+
+    if (hasTerm('invocations', 'cadena', 'chain') && (newLevel === 1 || existingCount('pactChainFamiliar') < 1)) {
+      results.push({
+        id: 'pactChainFamiliar',
+        title: 'Pacto de la Cadena — Forma de Familiar Especial',
+        description: 'Elige la forma inicial habitual de tu familiar convocado mediante Pacto de la Cadena (incluye Esfinge del Saber, Esqueleto y Renacuajo Slaad de 5.5e).',
+        countNeeded: 1,
+        options: PACT_CHAIN_FAMILIARS_2024,
+        alreadyChosen: toArr(existingDecisions['pactChainFamiliar']),
+      });
+    }
+
+    if (hasTerm('invocations', 'agonica', 'agónica', 'agonizing') && (newLevel === 1 || existingCount('warlockAgonizingCantrip') < 1)) {
+      results.push({
+        id: 'warlockAgonizingCantrip',
+        title: 'Descarga Agónica — Truco Potenciado (+CAR al daño)',
+        description: 'Elige el truco de brujo de daño al que sumas tu modificador de Carisma en cada tirada de daño (en 5.5e aplica a cualquier truco de daño, no solo Descarga Sobrenatural).',
+        countNeeded: 1,
+        options: getWarlockDamageCantripOptions('5.5e'),
+        alreadyChosen: toArr(existingDecisions['warlockAgonizingCantrip']),
+      });
+    }
+
+    if (hasTerm('invocations', 'lanza sobrenatural', 'eldritch spear') && (newLevel === 1 || existingCount('warlockSpearCantrip') < 1)) {
+      results.push({
+        id: 'warlockSpearCantrip',
+        title: 'Lanza Sobrenatural — Truco con Alcance Extendido',
+        description: 'Elige el truco de brujo de daño cuyo alcance aumenta en +30 pies × nivel de brujo.',
+        countNeeded: 1,
+        options: getWarlockDamageCantripOptions('5.5e'),
+        alreadyChosen: toArr(existingDecisions['warlockSpearCantrip']),
+      });
+    }
+
+    if (hasTerm('invocations', 'repelente', 'repelling') && (newLevel === 1 || existingCount('warlockRepellingCantrip') < 1)) {
+      results.push({
+        id: 'warlockRepellingCantrip',
+        title: 'Explosión Repelente — Truco Empujador',
+        description: 'Elige el truco de brujo con tirada de ataque que empujará objetivos hasta 10 pies al impactar.',
+        countNeeded: 1,
+        options: getWarlockDamageCantripOptions('5.5e'),
+        alreadyChosen: toArr(existingDecisions['warlockRepellingCantrip']),
+      });
+    }
+
+    if (hasTerm('invocations', 'lecciones', 'lessons')) {
+      const lessonsInstances = Math.max(
+        1,
+        toArr(existingDecisions['invocations']).filter((v) => /lecciones|lessons/i.test(v)).length
+      );
+      if (newLevel === 1 || existingCount('warlockLessonsFeat') < lessonsInstances) {
+        results.push({
+          id: 'warlockLessonsFeat',
+          title: 'Lecciones de los Primeros — Dote de Origen (5.5e)',
+          description: 'Elige la Dote de Origen (Nivel 1) otorgada por esta invocación.',
+          countNeeded: lessonsInstances,
+          options: ORIGIN_FEATS_2024_OPTIONS,
+          alreadyChosen: toArr(existingDecisions['warlockLessonsFeat']),
+        });
+      }
+    }
+  }
+
+  // 8. Bardo 5.5e (Pericia en Nv 2 y Nv 9 en lugar de 3 y 10 — solo en subida de nivel)
+  if (isBard && currentLevel > 0) {
+    if (newLevel === 2) {
+      results.push({
+        id: 'bardExpertise_2',
+        title: 'Pericia (Bardo 5.5e • Nivel 2)',
+        description: 'Elige 2 habilidades en las que seas competente para duplicar tu bonificador por competencia.',
+        countNeeded: 2,
+        options: ALL_5E_SKILLS_OPTIONS,
+        alreadyChosen: toArr(existingDecisions['bardExpertise_2']),
+      });
+    }
+    if (newLevel === 9) {
+      results.push({
+        id: 'bardExpertise_9',
+        title: 'Pericia Adicional (Bardo 5.5e • Nivel 9)',
+        description: 'Elige otras 2 habilidades con competencia para duplicar tu bonificador por competencia.',
+        countNeeded: 2,
+        options: ALL_5E_SKILLS_OPTIONS,
+        alreadyChosen: toArr(existingDecisions['bardExpertise_9']),
+      });
+    }
+  }
+
+  // 9. Mago 5.5e (Erudito en Nv 2 — solo en subida de nivel, creador usa expertiseConfig)
+  if (isWizard && currentLevel > 0 && newLevel === 2) {
+    results.push({
+      id: 'wizardScholar_2',
+      title: 'Erudito (Mago 5.5e • Nivel 2)',
+      description: 'Elige 1 habilidad académica o de erudición en la que seas competente (Arcanos, Historia, Investigación, Medicina, Naturaleza o Religión) para ganar Pericia.',
+      countNeeded: 1,
+      options: ALL_5E_SKILLS_OPTIONS.filter((s) =>
+        ['arcanos', 'historia', 'investigacion', 'medicina', 'naturaleza', 'religion'].some((k) =>
+          s.id.toLowerCase().includes(k)
+        )
+      ),
+      alreadyChosen: toArr(existingDecisions['wizardScholar_2']),
+    });
+  }
+
+  return results;
+}
+
+const CUMULATIVE_DECISION_IDS = new Set([
+  'invocations',
+  'metamagic',
+  'artificerInfusions',
+  'battleMasterManeuvers',
+  'runeKnightRunes',
+  'arcaneArcherShots',
+  'elementalDisciplines',
+  'kenseiWeapons',
+]);
+
 export function getAllClassDecisionsForCreation(
   className: string,
   subclass: string | undefined,
   level: number,
-  existingDecisions: Record<string, any> = {}
+  existingDecisions: Record<string, any> = {},
+  edition: '5e' | '5.5e' = '5e'
 ): PendingClassDecision[] {
   const all: PendingClassDecision[] = [];
   for (let lvl = 1; lvl <= level; lvl++) {
-    const decs = getClassDecisionsForLevel(className, subclass, lvl - 1, lvl, existingDecisions);
+    const decs = getClassDecisionsForLevel(className, subclass, lvl - 1, lvl, existingDecisions, edition);
     for (const d of decs) {
       const existing = all.find((x) => x.id === d.id);
       if (existing) {
-        existing.countNeeded += d.countNeeded;
+        if (CUMULATIVE_DECISION_IDS.has(d.id)) {
+          existing.countNeeded += d.countNeeded;
+        }
         if (d.options) {
           existing.options = d.options;
         }
@@ -2639,12 +3627,145 @@ export function getAllClassDecisionsForCreation(
 // --------------------------------------------------------------------------
 // 14. HELPER FUNCTION: GET SPELLCASTING LEVEL UP RULES & TARGETS
 // --------------------------------------------------------------------------
-export function getSpellcastingLevelUpRules(
+export function getSpellcastingLevelUpRules2024(
   className: string,
   currentLevel: number,
   newLevel: number,
   subclass?: string
 ): LevelUpSpellRules {
+  const norm = (className || '').toLowerCase();
+  const subNorm = (subclass || '').toLowerCase();
+  const curIdx = Math.max(0, Math.min(19, currentLevel - 1));
+  const newIdx = Math.max(0, Math.min(19, newLevel - 1));
+
+  // Mago 5.5e
+  if (norm.includes('mago') || norm.includes('wizard')) {
+    const newCantrips = newLevel === 4 || newLevel === 10 ? 1 : 0;
+    return {
+      newSpellsToLearn: 2,
+      newCantripsToLearn: newCantrips,
+      canSwapSpell: false,
+      canUseCantripFormulas: true,
+      canUseCantripVersatility: true,
+      explanation: `Regla Oficial 5.5e (Mago): Agregas 2 conjuros nuevos a tu libro de conjuros en cada nivel (y tu subclase Sabio otorga conjuros extra de escuela a Nv 3). Puedes cambiar 1 truco y memorizar conjuros tras descansos.`,
+    };
+  }
+
+  // Hechicero 5.5e (Preparados: [2,4,6,7,9,10,11,12,14,15,16,16,17,17,18,18,19,20,21,22])
+  if (norm.includes('hechicero') || norm.includes('sorcerer')) {
+    const sorcTable = [2, 4, 6, 7, 9, 10, 11, 12, 14, 15, 16, 16, 17, 17, 18, 18, 19, 20, 21, 22];
+    const diff = Math.max(0, sorcTable[newIdx] - (currentLevel > 0 ? sorcTable[curIdx] : 0));
+    const newCantrips = newLevel === 4 || newLevel === 10 ? 1 : 0;
+    return {
+      newSpellsToLearn: diff,
+      newCantripsToLearn: newCantrips,
+      canSwapSpell: true,
+      canUseCantripFormulas: false,
+      canUseCantripVersatility: true,
+      explanation: `Regla Oficial 5.5e (Hechicero): Al Nivel ${newLevel} tienes ${sorcTable[newIdx]} conjuros preparados (+${diff} nuevo(s)). También puedes reemplazar 1 conjuro preparado (y 1 truco en 2024) al subir de nivel.`,
+    };
+  }
+
+  // Bardo 5.5e (Preparados: [4,5,6,7,9,10,11,12,14,15,16,16,17,17,18,18,19,20,21,22])
+  if (norm.includes('bardo') || norm.includes('bard')) {
+    const bardTable = [4, 5, 6, 7, 9, 10, 11, 12, 14, 15, 16, 16, 17, 17, 18, 18, 19, 20, 21, 22];
+    const diff = Math.max(0, bardTable[newIdx] - (currentLevel > 0 ? bardTable[curIdx] : 0));
+    const newCantrips = newLevel === 4 || newLevel === 10 ? 1 : 0;
+    return {
+      newSpellsToLearn: diff,
+      newCantripsToLearn: newCantrips,
+      canSwapSpell: true,
+      canUseCantripFormulas: false,
+      canUseCantripVersatility: true,
+      explanation: `Regla Oficial 5.5e (Bardo): Al Nivel ${newLevel} preparas ${bardTable[newIdx]} conjuros (+${diff} nuevo(s)). A partir de Nivel 10 Secretos Mágicos permite elegir de Bardo, Clérigo, Druida o Mago.`,
+    };
+  }
+
+  // Brujo 5.5e (Preparados: [2,3,4,5,6,7,8,9,10,10,11,11,12,12,13,13,14,14,15,15])
+  if (norm.includes('brujo') || norm.includes('warlock')) {
+    const warlockTable = [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15];
+    const diff = Math.max(0, warlockTable[newIdx] - (currentLevel > 0 ? warlockTable[curIdx] : 0));
+    const newCantrips = newLevel === 4 || newLevel === 10 ? 1 : 0;
+    return {
+      newSpellsToLearn: diff,
+      newCantripsToLearn: newCantrips,
+      canSwapSpell: true,
+      canUseCantripFormulas: false,
+      canUseCantripVersatility: true,
+      explanation: `Regla Oficial 5.5e (Brujo): Tienes ${warlockTable[newIdx]} conjuros preparados de Magia del Pacto (+${diff} nuevo(s)) y puedes reemplazar 1 conjuro y 1 truco al subir de nivel.`,
+    };
+  }
+
+  // Clérigo / Druida 5.5e (Tabla fija [4,5,6,7,9,10,11,12,14,15,16,16,17,17,18,18,19,20,21,22])
+  if (norm.includes('clérigo') || norm.includes('clerigo') || norm.includes('cleric') || norm.includes('druida') || norm.includes('druid')) {
+    const prepTable = [4, 5, 6, 7, 9, 10, 11, 12, 14, 15, 16, 16, 17, 17, 18, 18, 19, 20, 21, 22];
+    const newCantrips = newLevel === 4 || newLevel === 10 ? 1 : 0;
+    return {
+      newSpellsToLearn: 0,
+      newCantripsToLearn: newCantrips,
+      canSwapSpell: false,
+      canUseCantripFormulas: false,
+      canUseCantripVersatility: true,
+      explanation: `Regla Oficial 5.5e: En PHB 2024 preparas exactamente ${prepTable[newIdx]} conjuros de tu lista completa tras cada Descanso Largo (no depende de tu modificador de SAB).`,
+    };
+  }
+
+  // Explorador 5.5e (Semiconjurador desde Nv 1, tabla preparada [2,3,4,5,6,6,7,7,9,9,10,10,11,11,12,12,14,14,15,15])
+  if (norm.includes('explorador') || norm.includes('ranger')) {
+    const rangerTable = [2, 3, 4, 5, 6, 6, 7, 7, 9, 9, 10, 10, 11, 11, 12, 12, 14, 14, 15, 15];
+    const diff = Math.max(0, rangerTable[newIdx] - (currentLevel > 0 ? rangerTable[curIdx] : 0));
+    return {
+      newSpellsToLearn: diff,
+      newCantripsToLearn: 0,
+      canSwapSpell: true,
+      canUseCantripFormulas: false,
+      canUseCantripVersatility: false,
+      explanation: `Regla Oficial 5.5e (Explorador): Conjurador preparado desde Nivel 1 (${rangerTable[newIdx]} conjuros preparados a Nv ${newLevel}, además de Marca del Cazador siempre preparada). Elige ${diff} conjuro(s) nuevo(s) para tu lista preparada; tras cada Descanso Largo puedes cambiar 1.`,
+    };
+  }
+
+  // Paladín 5.5e (Semiconjurador desde Nv 1, prepara de lista completa)
+  if (norm.includes('paladín') || norm.includes('paladin')) {
+    const palTable = [2, 3, 4, 5, 6, 6, 7, 7, 9, 9, 10, 10, 11, 11, 12, 12, 14, 14, 15, 15];
+    return {
+      newSpellsToLearn: 0,
+      newCantripsToLearn: 0,
+      canSwapSpell: false,
+      canUseCantripFormulas: false,
+      canUseCantripVersatility: false,
+      explanation: `Regla Oficial 5.5e (Paladín): Preparas ${palTable[newIdx]} conjuros diarios de toda la lista de paladín desde Nivel 1 (además de Castigo Divino y conjuros de Juramento siempre preparados).`,
+    };
+  }
+
+  // Caballero Arcano / Embaucador Arcano 5.5e (sin restricción de escuelas en PHB 2024)
+  if (subNorm.includes('arcano') || subNorm.includes('eldritch') || subNorm.includes('arcane')) {
+    const thirdTable = [0, 0, 3, 4, 4, 4, 5, 6, 6, 7, 8, 8, 9, 10, 10, 11, 11, 11, 12, 13];
+    const diff = Math.max(0, thirdTable[newIdx] - (currentLevel > 0 ? thirdTable[curIdx] : 0));
+    const isTrickster = subNorm.includes('embaucador') || subNorm.includes('trickster');
+    const cantrips = newLevel === 3 ? (isTrickster ? 3 : 2) : newLevel === 10 ? 1 : 0;
+    return {
+      newSpellsToLearn: diff,
+      newCantripsToLearn: cantrips,
+      canSwapSpell: true,
+      canUseCantripFormulas: false,
+      canUseCantripVersatility: false,
+      explanation: `Regla Oficial 5.5e (${subclass}): Aprendes ${diff} conjuro(s) de Mago de cualquier escuela (en 2024 ya no hay restricción de escuelas).`,
+    };
+  }
+
+  return getSpellcastingLevelUpRules(className, currentLevel, newLevel, subclass, '5e');
+}
+
+export function getSpellcastingLevelUpRules(
+  className: string,
+  currentLevel: number,
+  newLevel: number,
+  subclass?: string,
+  edition: '5e' | '5.5e' = '5e'
+): LevelUpSpellRules {
+  if (edition === '5.5e') {
+    return getSpellcastingLevelUpRules2024(className, currentLevel, newLevel, subclass);
+  }
   const norm = (className || '').toLowerCase();
   const subNorm = (subclass || '').toLowerCase();
 

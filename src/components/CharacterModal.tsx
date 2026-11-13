@@ -6,6 +6,7 @@ import {
   WIKIDOT_BACKGROUNDS,
   FULL_CASTER_SLOTS_TABLE,
   HALF_CASTER_SLOTS_TABLE,
+  getHalfCasterSlotsTable,
   WARLOCK_PACT_SLOTS_TABLE,
   getMaxSpellLevelForClass,
 } from '../data/wikidotData';
@@ -13,6 +14,7 @@ import {
   filterSpellsForCharacter,
   isSpellcasterClass,
   OFFICIAL_SPELLS_COMPENDIUM,
+  getCompendiumForEdition,
   getSpellcastingLimits,
 } from '../data/spellsData';
 import { SpellDetailModal } from './SpellDetailModal';
@@ -107,6 +109,8 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
   const isCaster = isSpellcasterClass(formData.class);
 
   // Auto-calculate spell slots when class or level changes
+  const charEdition: '5e' | '5.5e' = formData.edition === '5.5e' ? '5.5e' : '5e';
+
   const updateSpellSlotsForClassAndLevel = (className: string, lvl: number) => {
     const norm = className.toLowerCase();
     let newSlots = {};
@@ -114,7 +118,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
       const row = FULL_CASTER_SLOTS_TABLE[lvl] || {};
       newSlots = Object.fromEntries(Object.entries(row).map(([k, max]) => [k, { max, used: 0 }]));
     } else if (norm.includes('palad') || norm.includes('explorador') || norm.includes('ranger')) {
-      const row = HALF_CASTER_SLOTS_TABLE[lvl] || {};
+      const row = getHalfCasterSlotsTable(charEdition)[lvl] || {};
       newSlots = Object.fromEntries(Object.entries(row).map(([k, max]) => [k, { max, used: 0 }]));
     } else if (norm.includes('brujo') || norm.includes('warlock')) {
       const pact = WARLOCK_PACT_SLOTS_TABLE[lvl] || { count: 1, slotLevel: 1 };
@@ -150,8 +154,9 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
     // Inherit racial innate spells if any
     let updatedSpells = [...(formData.spells || [])];
     if (selected.innateSpells) {
+      const comp = getCompendiumForEdition(charEdition);
       selected.innateSpells.forEach((is) => {
-        const found = OFFICIAL_SPELLS_COMPENDIUM.find((s) => s.name.toLowerCase().includes(is.spellName.toLowerCase()));
+        const found = comp.find((s) => s.name.toLowerCase().includes(is.spellName.toLowerCase()));
         if (found && !updatedSpells.some((us) => us.name.toLowerCase() === found.name.toLowerCase())) {
           updatedSpells.push({ ...found, prepared: true });
         }
@@ -206,13 +211,13 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
 
   // Filtered Spells based on race, class, and level
   const filteredSpells = React.useMemo(() => {
-    return filterSpellsForCharacter(formData.class, formData.level, formData.race);
-  }, [formData.class, formData.level, formData.race]);
+    return filterSpellsForCharacter(formData.class, formData.level, formData.race, charEdition);
+  }, [formData.class, formData.level, formData.race, charEdition]);
 
-  // Spellcasting official 5e limits (cantrips + prepared/known spells)
+  // Spellcasting official limits (cantrips + prepared/known spells)
   const spellLimits = React.useMemo(() => {
-    return getSpellcastingLimits(formData.class, formData.level, formData.stats, formData.race);
-  }, [formData.class, formData.level, formData.stats, formData.race]);
+    return getSpellcastingLimits(formData.class, formData.level, formData.stats, formData.race, charEdition);
+  }, [formData.class, formData.level, formData.stats, formData.race, charEdition]);
 
   const selectedCantripsCount = (formData.spells || []).filter((s) => s.level === 0).length;
   const selectedSpellsCount = (formData.spells || []).filter((s) => s.level > 0).length;
@@ -969,6 +974,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
       {selectedDetailSpell && (
         <SpellDetailModal
           spell={selectedDetailSpell}
+          edition={charEdition}
           onClose={() => setSelectedDetailSpell(null)}
           isKnown={(formData.spells || []).some(
             (s) => s.name.toLowerCase() === selectedDetailSpell.name.toLowerCase()

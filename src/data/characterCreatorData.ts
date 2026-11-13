@@ -1,4 +1,5 @@
 import { CharacterAttack } from '../types';
+import { DND_2024_FEATS, Feat2024 } from './dnd2024/featsData2024';
 
 export interface SkillDefinition {
   name: string;
@@ -337,6 +338,108 @@ export const FIGHTING_STYLE_OPTIONS: FightingStyleOption[] = [
   },
 ];
 
+export const FIGHTING_STYLE_OPTIONS_2024: FightingStyleOption[] = [
+  {
+    id: 'defensa',
+    name: 'Defensa (Defense)',
+    icon: '🛡️',
+    shortDesc: '+1 a tu Clase de Armadura mientras vistas armadura ligera, media o pesada.',
+    detailedDesc: 'Dote de Estilo de Combate 5.5e. Excelente base defensiva para primera línea.',
+    allowedClasses: ['guerrero', 'paladin', 'explorador'],
+  },
+  {
+    id: 'duelo',
+    name: 'Duelo (Dueling)',
+    icon: '⚔️',
+    shortDesc: '+2 al daño con un arma cuerpo a cuerpo empuñada a una mano y sin otra arma.',
+    detailedDesc: 'Dote de Estilo de Combate 5.5e. Compatible con escudo en la otra mano.',
+    allowedClasses: ['guerrero', 'paladin', 'explorador'],
+  },
+  {
+    id: 'gran-arma',
+    name: 'Combate con Armas Grandes (Great Weapon Fighting)',
+    icon: '🪓',
+    shortDesc: 'Cuando sacas 1 o 2 en un dado de daño con arma Dos Manos o Versátil a dos manos, lo tratas como un 3.',
+    detailedDesc: 'Actualizado en 5.5e: convierte cualquier 1 o 2 del dado de daño en un 3 automático (sin relanzar).',
+    allowedClasses: ['guerrero', 'paladin', 'explorador'],
+  },
+  {
+    id: 'tiro-arco',
+    name: 'Arquería (Archery)',
+    icon: '🏹',
+    shortDesc: '+2 a las tiradas de ataque con armas a distancia.',
+    detailedDesc: 'Dote de Estilo de Combate 5.5e ideal para arcos, ballestas y hondas.',
+    allowedClasses: ['guerrero', 'paladin', 'explorador'],
+  },
+  {
+    id: 'dos-armas',
+    name: 'Combate con Dos Armas (Two-Weapon Fighting)',
+    icon: '🗡️🗡️',
+    shortDesc: 'Sumas tu modificador de característica al daño del ataque adicional de arma Ligera (también con maestría Nick).',
+    detailedDesc: 'Sinergiza con la nueva propiedad de maestría Ágil (Nick) de 5.5e para no gastar Acción Adicional.',
+    allowedClasses: ['guerrero', 'paladin', 'explorador'],
+  },
+  {
+    id: 'proteccion',
+    name: 'Protección (Protection)',
+    icon: '🔰',
+    shortDesc: 'Reacción con escudo: impones Desventaja al ataque desencadenante y a otros ataques contra ese aliado a 5 pies hasta tu siguiente turno.',
+    detailedDesc: 'Mejorado en 5.5e: protege contra todos los ataques al aliado adyacente hasta el inicio de tu próximo turno.',
+    allowedClasses: ['guerrero', 'paladin', 'explorador'],
+  },
+  {
+    id: 'intercepcion',
+    name: 'Intercepción (Interception)',
+    icon: '✋',
+    shortDesc: 'Reacción con arma o escudo: reduces en 1d10 + Bonificador de Competencia el daño sufrido por un aliado a 5 pies.',
+    detailedDesc: 'Dote de Estilo de Combate 5.5e para mitigar golpes enemigos sobre compañeros cercanos.',
+    allowedClasses: ['guerrero', 'paladin', 'explorador'],
+  },
+  {
+    id: 'lucha-ciegas',
+    name: 'Lucha a Ciegas (Blind Fighting)',
+    icon: '👁️',
+    shortDesc: 'Obtienes Vista Ciega (Blindsight) en un radio de 10 pies.',
+    detailedDesc: 'Ves criaturas invisibles, ocultas en oscuridad mágica o niebla dentro de 10 pies.',
+    allowedClasses: ['guerrero', 'paladin', 'explorador'],
+  },
+  {
+    id: 'armas-arrojadizas',
+    name: 'Lucha con Armas Arrojadizas (Thrown Weapon Fighting)',
+    icon: '🔱',
+    shortDesc: '+2 al daño con ataques a distancia realizados con armas arrojadizas.',
+    detailedDesc: 'Incluye dagas, hachas de mano, jabalinas, tridentes y lanzas.',
+    allowedClasses: ['guerrero', 'paladin', 'explorador'],
+  },
+  {
+    id: 'desarmado',
+    name: 'Lucha Desarmada (Unarmed Fighting)',
+    icon: '🥊',
+    shortDesc: 'Golpes desarmados de 1d6 + FUE (1d8 si no llevas armas ni escudo) y 1d4 automático al inicio de tu turno contra un apresado.',
+    detailedDesc: 'Ideal para luchadores de presa y guerreros cuerpo a cuerpo.',
+    allowedClasses: ['guerrero', 'paladin', 'explorador'],
+  },
+  {
+    id: 'guerrero-bendito',
+    name: 'Guerrero Bendito (Blessed Warrior)',
+    icon: '✨',
+    shortDesc: 'Solo Paladín (5.5e): aprendes 2 trucos de la lista de Clérigo (usan Carisma).',
+    detailedDesc: 'Opción divina exclusiva de Paladín en el nivel 2 en lugar de un Estilo de Combate marcial.',
+    allowedClasses: ['paladin'],
+  },
+  {
+    id: 'guerrero-druidico',
+    name: 'Guerrero Druídico (Druidic Warrior)',
+    icon: '🌿',
+    shortDesc: 'Solo Explorador (5.5e): aprendes 2 trucos de la lista de Druida (usan Sabiduría).',
+    detailedDesc: 'Opción primigenia exclusiva de Explorador en el nivel 2 en lugar de un Estilo de Combate marcial.',
+    allowedClasses: ['explorador'],
+  },
+];
+
+export const getFightingStyleOptions = (edition: '5e' | '5.5e' = '5e'): FightingStyleOption[] =>
+  edition === '5.5e' ? FIGHTING_STYLE_OPTIONS_2024 : FIGHTING_STYLE_OPTIONS;
+
 export interface AlignmentOption {
   id: string;
   name: string;
@@ -489,7 +592,13 @@ export interface OfficialFeat {
   name: string;
   nameEn: string;
   source?: string;
-  category: 'Combate' | 'Magia' | 'Utilidad' | 'General';
+  category: 'Combate' | 'Magia' | 'Utilidad' | 'General' | 'Origen' | 'Origen (Nivel 1)' | 'Dote de Combate' | 'Estilo de Combate' | 'Bendición Épica';
+  category2024?: string;
+  edition?: '5e' | '5.5e';
+  prerequisiteLevel?: number;
+  repeatable?: boolean;
+  subChoiceType?: Feat2024['subChoiceType'];
+  maxCap?: number;
   prerequisite?: string;
   description: string;
   abilityBonus?: {
@@ -1782,10 +1891,126 @@ export const getAvailableAsiCount = (classId: string, level: number, isVariantHu
 // ==========================================
 // CONFIGURACIÓN DE PERICIA (EXPERTISE / DOBLE PROFICIENCY)
 // ==========================================
+const buildSubChoiceFor2024Feat = (f: Feat2024): FeatSubChoiceConfig | undefined => {
+  if (f.subChoiceType === 'elemental-adept') {
+    return {
+      title: 'Elemento de Afinidad (Adepto Elemental)',
+      description: 'Elige un tipo de daño: ignoras su Resistencia y tratas los 1 en sus dados de daño como un 2.',
+      maxSelections: 1,
+      options: [
+        { id: 'Ácido', name: 'Ácido', desc: 'Conjuros que inflijan daño de ácido.' },
+        { id: 'Frío', name: 'Frío', desc: 'Conjuros que inflijan daño de frío.' },
+        { id: 'Fuego', name: 'Fuego', desc: 'Conjuros que inflijan daño de fuego.' },
+        { id: 'Relámpago', name: 'Relámpago', desc: 'Conjuros que inflijan daño de relámpago.' },
+        { id: 'Trueno', name: 'Trueno', desc: 'Conjuros que inflijan daño de trueno.' },
+      ],
+    };
+  }
+  if (f.subChoiceType === 'resilient') {
+    return {
+      title: 'Característica de Salvación (Resiliente)',
+      description: 'Obtienes +1 en esta característica y competencia en su tirada de salvación.',
+      maxSelections: 1,
+      options: [
+        { id: 'str', name: 'Fuerza (FUE)', desc: '+1 FUE y competencia en salvaciones de Fuerza.' },
+        { id: 'dex', name: 'Destreza (DES)', desc: '+1 DES y competencia en salvaciones de Destreza.' },
+        { id: 'con', name: 'Constitución (CON)', desc: '+1 CON y competencia en salvaciones de Constitución.' },
+        { id: 'int', name: 'Inteligencia (INT)', desc: '+1 INT y competencia en salvaciones de Inteligencia.' },
+        { id: 'wis', name: 'Sabiduría (SAB)', desc: '+1 SAB y competencia en salvaciones de Sabiduría.' },
+        { id: 'cha', name: 'Carisma (CAR)', desc: '+1 CAR y competencia en salvaciones de Carisma.' },
+      ],
+    };
+  }
+  if (f.subChoiceType === 'keen-mind') {
+    return {
+      title: 'Conocimiento Especializado (Mente Aguda)',
+      description: 'Elige 1 habilidad académica para obtener competencia (o Pericia si ya eras competente).',
+      maxSelections: 1,
+      options: ['Conocimiento Arcano', 'Historia', 'Investigación', 'Naturaleza', 'Religión'].map((s) => ({
+        id: s,
+        name: s,
+        desc: `Competencia o Pericia en ${s}.`,
+      })),
+    };
+  }
+  if (f.subChoiceType === 'skill-expert') {
+    return {
+      title: 'Pericia de Especialista (Experto en Habilidades)',
+      description: 'Elige 1 habilidad en la que obtienes Pericia (doble competencia).',
+      maxSelections: 1,
+      options: ALL_5E_SKILLS.map((s) => ({ id: s.name, name: s.name, desc: s.description })),
+    };
+  }
+  return undefined;
+};
+
+const classify2024FeatCategory = (f: Feat2024): OfficialFeat['category'] => {
+  if (f.category.includes('Estilo')) return 'Combate';
+  const low = `${f.name} ${f.nameEn}`.toLowerCase();
+  if (
+    low.includes('magi') ||
+    low.includes('spell') ||
+    low.includes('war caster') ||
+    low.includes('conjuro') ||
+    low.includes('ritual') ||
+    low.includes('fey') ||
+    low.includes('shadow') ||
+    low.includes('telepathic') ||
+    low.includes('telekinetic') ||
+    low.includes('elemental')
+  ) {
+    return 'Magia';
+  }
+  if (f.category.includes('Origen')) return 'Utilidad';
+  return 'General';
+};
+
+export const feat2024ToOfficialFeat = (f: Feat2024): OfficialFeat => ({
+  id: f.id,
+  name: f.name,
+  nameEn: f.nameEn,
+  source: f.source,
+  category: classify2024FeatCategory(f),
+  category2024: f.category,
+  edition: '5.5e',
+  prerequisiteLevel: f.prerequisiteLevel,
+  repeatable: f.repeatable,
+  subChoiceType: f.subChoiceType,
+  maxCap: f.abilityBonus?.maxCap,
+  prerequisite:
+    f.prerequisite ||
+    (f.prerequisiteLevel
+      ? `Nivel ${f.prerequisiteLevel}+`
+      : f.category.includes('Origen')
+      ? 'Dote de Origen (Nivel 1+)'
+      : undefined),
+  description: f.description,
+  abilityBonus: f.abilityBonus
+    ? {
+        stats: f.abilityBonus.stats,
+        amount: f.abilityBonus.amount,
+        flexible: f.abilityBonus.stats.length > 1,
+      }
+    : undefined,
+  benefits: f.benefits.map((b) => (b.desc ? `${b.name}: ${b.desc}` : b.name)),
+  subChoice: buildSubChoiceFor2024Feat(f),
+});
+
+export const DND_2024_AS_OFFICIAL_FEATS: OfficialFeat[] = DND_2024_FEATS.map(feat2024ToOfficialFeat);
+
+export const getFeatsForEdition = (edition: '5e' | '5.5e' = '5e', level?: number): OfficialFeat[] => {
+  if (edition !== '5.5e') return OFFICIAL_5E_FEATS;
+  return DND_2024_AS_OFFICIAL_FEATS.filter((f) => {
+    if (level === undefined || f.prerequisiteLevel === undefined) return true;
+    return level >= f.prerequisiteLevel;
+  });
+};
+
 export const getExpertiseConfig = (
   classId: string,
-  level: number
-): { allowedCount: number; title: string; desc: string } => {
+  level: number,
+  edition: '5e' | '5.5e' = '5e'
+): { allowedCount: number; title: string; desc: string; restrictedSkills?: string[] } => {
   if (classId === 'picaro') {
     const allowed = level >= 6 ? 4 : 2;
     return {
@@ -1798,7 +2023,19 @@ export const getExpertiseConfig = (
     };
   }
   if (classId === 'bardo') {
-    if (level >= 3) {
+    if (edition === '5.5e') {
+      if (level >= 2) {
+        const allowed = level >= 9 ? 4 : 2;
+        return {
+          allowedCount: allowed,
+          title: 'Pericia de Bardo (5.5e - Expertise x2)',
+          desc:
+            level >= 9
+              ? 'Como Bardo de nivel 9+ (PHB 2024), eliges 4 habilidades con competencia para duplicar tu bonificador de competencia.'
+              : 'Como Bardo de nivel 2+ (PHB 2024), eliges 2 habilidades con competencia para duplicar tu bonificador de competencia.',
+        };
+      }
+    } else if (level >= 3) {
       const allowed = level >= 10 ? 4 : 2;
       return {
         allowedCount: allowed,
@@ -1810,11 +2047,33 @@ export const getExpertiseConfig = (
       };
     }
   }
-  if (classId === 'explorador' && level >= 1) {
+  if (classId === 'explorador') {
+    if (edition === '5.5e') {
+      if (level >= 2) {
+        const allowed = level >= 9 ? 3 : 1;
+        return {
+          allowedCount: allowed,
+          title: level >= 9 ? 'Pericia de Explorador (5.5e Nvl 9+)' : 'Explorador Diestro (Deft Explorer - Nvl 2)',
+          desc:
+            level >= 9
+              ? 'Como Explorador de nivel 9+ en 5.5e, obtienes Pericia en 3 habilidades con competencia en total (1 a nivel 2 + 2 adicionales a nivel 9).'
+              : 'En 5.5e (nivel 2), Explorador Diestro te otorga Pericia en 1 habilidad con competencia.',
+        };
+      }
+    } else if (level >= 1) {
+      return {
+        allowedCount: 1,
+        title: 'Explorador Sagaz (Canny x2)',
+        desc: 'Elige 1 habilidad en la que tengas competencia para duplicar tu bonificador de competencia.',
+      };
+    }
+  }
+  if (classId === 'mago' && edition === '5.5e' && level >= 2) {
     return {
       allowedCount: 1,
-      title: 'Explorador Sagaz (Canny x2)',
-      desc: 'Elige 1 habilidad en la que tengas competencia para duplicar tu bonificador de competencia.',
+      title: 'Erudito de Mago (Scholar - 5.5e Nvl 2)',
+      desc: 'En 5.5e (nivel 2+), eliges 1 habilidad académica en la que seas competente (Conocimiento Arcano, Historia, Investigación, Medicina, Naturaleza o Religión) para obtener Pericia (x2).',
+      restrictedSkills: ['Conocimiento Arcano', 'Historia', 'Investigación', 'Medicina', 'Naturaleza', 'Religión'],
     };
   }
   return { allowedCount: 0, title: '', desc: '' };

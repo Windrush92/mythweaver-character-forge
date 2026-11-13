@@ -1,4 +1,12 @@
 // Compendio Oficial de Trasfondos D&D 5.5e (2024 Revised Rules) - Bilingüe
+export interface Background2024ToolChoice {
+  count: number;
+  category: 'artisan' | 'instrument' | 'gaming';
+  label: string;
+  labelEn?: string;
+  options: string[];
+}
+
 export interface Background2024 {
   id: string;
   slug: string;
@@ -10,14 +18,59 @@ export interface Background2024 {
   abilityScores: ('str' | 'dex' | 'con' | 'int' | 'wis' | 'cha')[];
   feat: string;
   featEn?: string;
+  bonusFeatId: string;
+  bonusFeatSpellList?: 'Clérigo' | 'Druida' | 'Mago';
+  skills: string[];
   skillProficiencies: string;
   skillProficienciesEn?: string;
   toolProficiency: string;
   toolProficiencyEn?: string;
+  toolChoice?: Background2024ToolChoice;
   equipment: string;
   equipmentEn?: string;
+  startingGold?: number;
   source: string;
 }
+
+export const ARTISAN_TOOLS_2024: string[] = [
+  "Herramientas de albañil",
+  "Herramientas de alfarero",
+  "Herramientas de carpintero",
+  "Herramientas de cartógrafo",
+  "Herramientas de curtidor",
+  "Herramientas de ebanista",
+  "Herramientas de herrero",
+  "Herramientas de hojalatero",
+  "Herramientas de joyero",
+  "Herramientas de manitas",
+  "Herramientas de soplador de vidrio",
+  "Herramientas de tejedor",
+  "Herramientas de zapatero",
+  "Suministros de alquimista",
+  "Suministros de cervecero",
+  "Suministros de pintor",
+  "Útiles de calígrafo"
+];
+
+export const MUSICAL_INSTRUMENTS_2024: string[] = [
+  "Laúd",
+  "Lira",
+  "Flauta",
+  "Flauta de pan",
+  "Cuerno",
+  "Tambor",
+  "Dulcimer",
+  "Gaita",
+  "Chirimía",
+  "Viola"
+];
+
+export const GAMING_SETS_2024: string[] = [
+  "Juego de dados",
+  "Naipes",
+  "Ajedrez dragón",
+  "Juego de los Tres Dragones"
+];
 
 export const DND_2024_BACKGROUNDS: Background2024[] = [
   {
@@ -39,9 +92,16 @@ export const DND_2024_BACKGROUNDS: Background2024[] = [
     "skillProficienciesEn": "Insight and Religion",
     "toolProficiency": "Útiles de calígrafo",
     "toolProficiencyEn": "Calligrapher's Supplies",
-    "equipment": "Útiles de calígrafo, libro sagrado de rezos, símbolo sagrado, 10 hojas de pergamino, ropajes de culto, 8 po; o 50 po.",
-    "equipmentEn": "Calligrapher's Supplies, Prayer Book, Holy Symbol, 10 sheets of parchment, Robe, 8 GP; or 50 GP.",
-    "source": "Player's Handbook 2024"
+    "equipment": "Útiles de calígrafo, libro (rezos), símbolo sagrado, 10 hojas de pergamino, túnica, 8 po; o 50 po.",
+    "equipmentEn": "Choose A or B: (A) Calligrapher's Supplies, Book (prayers), Holy Symbol, Parchment (10 sheets), Robe, 8 GP; or (B) 50 GP.",
+    "source": "Player's Handbook 2024",
+    "bonusFeatId": "feat-2024-magic-initiate",
+    "bonusFeatSpellList": "Clérigo",
+    "skills": [
+      "Perspicacia",
+      "Religión"
+    ],
+    "startingGold": 8
   },
   {
     "id": "bg-2024-artisan",
@@ -60,11 +120,42 @@ export const DND_2024_BACKGROUNDS: Background2024[] = [
     "featEn": "Crafter",
     "skillProficiencies": "Investigación y Persuasión",
     "skillProficienciesEn": "Investigation and Persuasion",
-    "toolProficiency": "Un tipo de herramientas de artesano",
-    "toolProficiencyEn": "One kind of Artisan's Tools",
-    "equipment": "Herramientas de artesano a tu elección, 2 faltriqueras, ropa de viajero, 32 po; o 50 po.",
-    "equipmentEn": "Artisan's Tools of your choice, 2 Pouches, Traveler's Clothes, 32 GP; or 50 GP.",
-    "source": "Player's Handbook 2024"
+    "toolProficiency": "Un tipo de herramientas de artesano (a elección)",
+    "toolProficiencyEn": "Choose one kind of Artisan's Tools",
+    "equipment": "Herramientas de artesano (elegidas arriba), 2 faltriqueras, ropa de viajero, 32 po; o 50 po.",
+    "equipmentEn": "Choose A or B: (A) Artisan's Tools (same as above), 2 Pouches, Traveler's Clothes, 32 GP; or (B) 50 GP.",
+    "source": "Player's Handbook 2024",
+    "bonusFeatId": "feat-2024-crafter",
+    "skills": [
+      "Investigación",
+      "Persuasión"
+    ],
+    "toolChoice": {
+      "count": 1,
+      "category": "artisan",
+      "label": "Elige un tipo de Herramientas de Artesano",
+      "labelEn": "Choose one kind of Artisan's Tools",
+      "options": [
+        "Herramientas de albañil",
+        "Herramientas de alfarero",
+        "Herramientas de carpintero",
+        "Herramientas de cartógrafo",
+        "Herramientas de curtidor",
+        "Herramientas de ebanista",
+        "Herramientas de herrero",
+        "Herramientas de hojalatero",
+        "Herramientas de joyero",
+        "Herramientas de manitas",
+        "Herramientas de soplador de vidrio",
+        "Herramientas de tejedor",
+        "Herramientas de zapatero",
+        "Suministros de alquimista",
+        "Suministros de cervecero",
+        "Suministros de pintor",
+        "Útiles de calígrafo"
+      ]
+    },
+    "startingGold": 32
   },
   {
     "id": "bg-2024-charlatan",
@@ -83,11 +174,17 @@ export const DND_2024_BACKGROUNDS: Background2024[] = [
     "featEn": "Skilled",
     "skillProficiencies": "Engaño y Juego de Manos",
     "skillProficienciesEn": "Deception and Sleight of Hand",
-    "toolProficiency": "Kit de disfraz",
-    "toolProficiencyEn": "Disguise Kit",
-    "equipment": "Kit de disfraz, ropa fina elegante, documentos falsificados, 15 po; o 50 po.",
-    "equipmentEn": "Disguise Kit, Fine Clothes, Forged Documents, 15 GP; or 50 GP.",
-    "source": "Player's Handbook 2024"
+    "toolProficiency": "Kit de falsificación",
+    "toolProficiencyEn": "Forgery Kit",
+    "equipment": "Kit de falsificación, disfraz, ropa fina, 15 po; o 50 po.",
+    "equipmentEn": "Choose A or B: (A) Forgery Kit, Costume, Fine Clothes, 15 GP; or (B) 50 GP.",
+    "source": "Player's Handbook 2024",
+    "bonusFeatId": "feat-2024-skilled",
+    "skills": [
+      "Engaño",
+      "Juego de Manos"
+    ],
+    "startingGold": 15
   },
   {
     "id": "bg-2024-criminal",
@@ -108,9 +205,15 @@ export const DND_2024_BACKGROUNDS: Background2024[] = [
     "skillProficienciesEn": "Sleight of Hand and Stealth",
     "toolProficiency": "Herramientas de ladrón",
     "toolProficiencyEn": "Thieves' Tools",
-    "equipment": "Herramientas de ladrón, 2 dagas, palanqueta, ropa oscura con capucha, 16 po; o 50 po.",
-    "equipmentEn": "Thieves' Tools, 2 Daggers, Crowbar, Dark Hooded Clothes, 16 GP; or 50 GP.",
-    "source": "Player's Handbook 2024"
+    "equipment": "2 dagas, herramientas de ladrón, palanqueta, 2 faltriqueras, ropa de viajero, 16 po; o 50 po.",
+    "equipmentEn": "Choose A or B: (A) 2 Daggers, Thieves' Tools, Crowbar, 2 Pouches, Traveler's Clothes, 16 GP; or (B) 50 GP.",
+    "source": "Player's Handbook 2024",
+    "bonusFeatId": "feat-2024-alert",
+    "skills": [
+      "Juego de Manos",
+      "Sigilo"
+    ],
+    "startingGold": 16
   },
   {
     "id": "bg-2024-entertainer",
@@ -129,11 +232,35 @@ export const DND_2024_BACKGROUNDS: Background2024[] = [
     "featEn": "Musician",
     "skillProficiencies": "Acrobacias e Interpretación",
     "skillProficienciesEn": "Acrobatics and Performance",
-    "toolProficiency": "Un instrumento musical",
-    "toolProficiencyEn": "One Musical Instrument",
-    "equipment": "Instrumento musical a tu elección, disfraz de gala, espejo de acero, 16 po; o 50 po.",
-    "equipmentEn": "Musical Instrument of your choice, Costume, Steel Mirror, 16 GP; or 50 GP.",
-    "source": "Player's Handbook 2024"
+    "toolProficiency": "Un instrumento musical (a elección)",
+    "toolProficiencyEn": "Choose one kind of Musical Instrument",
+    "equipment": "Instrumento musical (elegido arriba), 2 disfraces, espejo, perfume, ropa de viajero, 11 po; o 50 po.",
+    "equipmentEn": "Choose A or B: (A) Musical Instrument (same as above), 2 Costumes, Mirror, Perfume, Traveler's Clothes, 11 GP; or (B) 50 GP.",
+    "source": "Player's Handbook 2024",
+    "bonusFeatId": "feat-2024-musician",
+    "skills": [
+      "Acrobacias",
+      "Interpretación"
+    ],
+    "toolChoice": {
+      "count": 1,
+      "category": "instrument",
+      "label": "Elige un Instrumento Musical",
+      "labelEn": "Choose one kind of Musical Instrument",
+      "options": [
+        "Laúd",
+        "Lira",
+        "Flauta",
+        "Flauta de pan",
+        "Cuerno",
+        "Tambor",
+        "Dulcimer",
+        "Gaita",
+        "Chirimía",
+        "Viola"
+      ]
+    },
+    "startingGold": 11
   },
   {
     "id": "bg-2024-farmer",
@@ -150,13 +277,19 @@ export const DND_2024_BACKGROUNDS: Background2024[] = [
     ],
     "feat": "Duro",
     "featEn": "Tough",
-    "skillProficiencies": "Manejo de Animales y Naturaleza",
+    "skillProficiencies": "Trato con Animales y Naturaleza",
     "skillProficienciesEn": "Animal Handling and Nature",
     "toolProficiency": "Herramientas de carpintero",
     "toolProficiencyEn": "Carpenter's Tools",
-    "equipment": "Herramientas de carpintero, horca, pala, ropa rústica de trabajo resistente, 23 po; o 50 po.",
-    "equipmentEn": "Carpenter's Tools, Pitchfork, Shovel, Work Clothes, 23 GP; or 50 GP.",
-    "source": "Player's Handbook 2024"
+    "equipment": "Hoz, herramientas de carpintero, kit de curandero, olla de hierro, pala, ropa de viajero, 30 po; o 50 po.",
+    "equipmentEn": "Choose A or B: (A) Sickle, Carpenter's Tools, Healer's Kit, Iron Pot, Shovel, Traveler's Clothes, 30 GP; or (B) 50 GP.",
+    "source": "Player's Handbook 2024",
+    "bonusFeatId": "feat-2024-tough",
+    "skills": [
+      "Trato con Animales",
+      "Naturaleza"
+    ],
+    "startingGold": 30
   },
   {
     "id": "bg-2024-guard",
@@ -175,11 +308,29 @@ export const DND_2024_BACKGROUNDS: Background2024[] = [
     "featEn": "Alert",
     "skillProficiencies": "Atletismo y Percepción",
     "skillProficienciesEn": "Athletics and Perception",
-    "toolProficiency": "Un juego (dados o cartas)",
-    "toolProficiencyEn": "One Gaming Set",
-    "equipment": "Lanza, silbato de alarma de bronce, esposas de hierro, linterna sorda, uniforme, 12 po; o 50 po.",
-    "equipmentEn": "Spear, Horn/Whistle, Manacles, Hooded Lantern, Guard Uniform, 12 GP; or 50 GP.",
-    "source": "Player's Handbook 2024"
+    "toolProficiency": "Un juego de azar (a elección)",
+    "toolProficiencyEn": "Choose one kind of Gaming Set",
+    "equipment": "Lanza, ballesta ligera, 20 virotes, juego de azar (elegido arriba), linterna sorda, esposas, carcaj, ropa de viajero, 12 po; o 50 po.",
+    "equipmentEn": "Choose A or B: (A) Spear, Light Crossbow, 20 Bolts, Gaming Set (same as above), Hooded Lantern, Manacles, Quiver, Traveler's Clothes, 12 GP; or (B) 50 GP.",
+    "source": "Player's Handbook 2024",
+    "bonusFeatId": "feat-2024-alert",
+    "skills": [
+      "Atletismo",
+      "Percepción"
+    ],
+    "toolChoice": {
+      "count": 1,
+      "category": "gaming",
+      "label": "Elige un Juego de Azar",
+      "labelEn": "Choose one kind of Gaming Set",
+      "options": [
+        "Juego de dados",
+        "Naipes",
+        "Ajedrez dragón",
+        "Juego de los Tres Dragones"
+      ]
+    },
+    "startingGold": 12
   },
   {
     "id": "bg-2024-guide",
@@ -200,9 +351,16 @@ export const DND_2024_BACKGROUNDS: Background2024[] = [
     "skillProficienciesEn": "Stealth and Survival",
     "toolProficiency": "Herramientas de cartógrafo",
     "toolProficiencyEn": "Cartographer's Tools",
-    "equipment": "Herramientas de cartógrafo, brújula de latón, arco corto, 20 flechas, saco de dormir, 10 po; o 50 po.",
-    "equipmentEn": "Cartographer's Tools, Brass Compass, Shortbow, 20 Arrows, Bedroll, 10 GP; or 50 GP.",
-    "source": "Player's Handbook 2024"
+    "equipment": "Arco corto, 20 flechas, herramientas de cartógrafo, saco de dormir, carcaj, tienda de campaña, ropa de viajero, 3 po; o 50 po.",
+    "equipmentEn": "Choose A or B: (A) Shortbow, 20 Arrows, Cartographer's Tools, Bedroll, Quiver, Tent, Traveler's Clothes, 3 GP; or (B) 50 GP.",
+    "source": "Player's Handbook 2024",
+    "bonusFeatId": "feat-2024-magic-initiate",
+    "bonusFeatSpellList": "Druida",
+    "skills": [
+      "Sigilo",
+      "Supervivencia"
+    ],
+    "startingGold": 3
   },
   {
     "id": "bg-2024-hermit",
@@ -223,9 +381,15 @@ export const DND_2024_BACKGROUNDS: Background2024[] = [
     "skillProficienciesEn": "Medicine and Religion",
     "toolProficiency": "Kit de herboristería",
     "toolProficiencyEn": "Herbalism Kit",
-    "equipment": "Kit de herboristería, estuche de pergamino con notas filosóficas, manta de viaje abrigada, 15 po; o 50 po.",
-    "equipmentEn": "Herbalism Kit, Scroll Case with Philosophy Notes, Winter Blanket, 15 GP; or 50 GP.",
-    "source": "Player's Handbook 2024"
+    "equipment": "Bastón, kit de herboristería, saco de dormir, libro (filosofía), lámpara, aceite (3 frascos), ropa de viajero, 16 po; o 50 po.",
+    "equipmentEn": "Choose A or B: (A) Quarterstaff, Herbalism Kit, Bedroll, Book (philosophy), Lamp, Oil (3 flasks), Traveler's Clothes, 16 GP; or (B) 50 GP.",
+    "source": "Player's Handbook 2024",
+    "bonusFeatId": "feat-2024-healer",
+    "skills": [
+      "Medicina",
+      "Religión"
+    ],
+    "startingGold": 16
   },
   {
     "id": "bg-2024-merchant",
@@ -242,13 +406,19 @@ export const DND_2024_BACKGROUNDS: Background2024[] = [
     ],
     "feat": "Afortunado",
     "featEn": "Lucky",
-    "skillProficiencies": "Perspicacia y Persuasión",
-    "skillProficienciesEn": "Insight and Persuasion",
-    "toolProficiency": "Herramientas de navegante o balanza",
+    "skillProficiencies": "Trato con Animales y Persuasión",
+    "skillProficienciesEn": "Animal Handling and Persuasion",
+    "toolProficiency": "Herramientas de navegante",
     "toolProficiencyEn": "Navigator's Tools",
-    "equipment": "Balanza de precisión de comerciante, carta de crédito comercial, ropa elegante de viaje, 22 po; o 50 po.",
-    "equipmentEn": "Merchant's Scale, Letter of Credit, Traveler's Clothes, 22 GP; or 50 GP.",
-    "source": "Player's Handbook 2024"
+    "equipment": "Herramientas de navegante, 2 faltriqueras, ropa de viajero, 22 po; o 50 po.",
+    "equipmentEn": "Choose A or B: (A) Navigator's Tools, 2 Pouches, Traveler's Clothes, 22 GP; or (B) 50 GP.",
+    "source": "Player's Handbook 2024",
+    "bonusFeatId": "feat-2024-lucky",
+    "skills": [
+      "Trato con Animales",
+      "Persuasión"
+    ],
+    "startingGold": 22
   },
   {
     "id": "bg-2024-noble",
@@ -267,11 +437,29 @@ export const DND_2024_BACKGROUNDS: Background2024[] = [
     "featEn": "Skilled",
     "skillProficiencies": "Historia y Persuasión",
     "skillProficienciesEn": "History and Persuasion",
-    "toolProficiency": "Un juego (ajedrez dragón)",
-    "toolProficiencyEn": "One Gaming Set (Dragonchess)",
-    "equipment": "Sello señorial de tu casa, pergamino de árbol genealógico, ropa fina de seda noble, perfume, 24 po; o 50 po.",
-    "equipmentEn": "Signet Ring, Pedigree Scroll, Fine Silk Clothes, Perfume, 24 GP; or 50 GP.",
-    "source": "Player's Handbook 2024"
+    "toolProficiency": "Un juego de azar (a elección)",
+    "toolProficiencyEn": "Choose one kind of Gaming Set",
+    "equipment": "Juego de azar (elegido arriba), ropa fina, perfume, 29 po; o 50 po.",
+    "equipmentEn": "Choose A or B: (A) Gaming Set (same as above), Fine Clothes, Perfume, 29 GP; or (B) 50 GP.",
+    "source": "Player's Handbook 2024",
+    "bonusFeatId": "feat-2024-skilled",
+    "skills": [
+      "Historia",
+      "Persuasión"
+    ],
+    "toolChoice": {
+      "count": 1,
+      "category": "gaming",
+      "label": "Elige un Juego de Azar",
+      "labelEn": "Choose one kind of Gaming Set",
+      "options": [
+        "Juego de dados",
+        "Naipes",
+        "Ajedrez dragón",
+        "Juego de los Tres Dragones"
+      ]
+    },
+    "startingGold": 29
   },
   {
     "id": "bg-2024-sage",
@@ -288,13 +476,20 @@ export const DND_2024_BACKGROUNDS: Background2024[] = [
     ],
     "feat": "Iniciado en la Magia (Mago)",
     "featEn": "Magic Initiate (Wizard)",
-    "skillProficiencies": "Arcanos e Historia",
+    "skillProficiencies": "Conocimiento Arcano e Historia",
     "skillProficienciesEn": "Arcana and History",
     "toolProficiency": "Útiles de calígrafo",
     "toolProficiencyEn": "Calligrapher's Supplies",
-    "equipment": "Tinta negra, pluma de ave, cuchillo para pergaminos, tomo de sabiduría arcana, ropa de erudito, 8 po; o 50 po.",
-    "equipmentEn": "Black Ink, Quill, Parchment Knife, Book of Arcane Lore, Scholar's Robes, 8 GP; or 50 GP.",
-    "source": "Player's Handbook 2024"
+    "equipment": "Bastón, útiles de calígrafo, libro (historia), pergamino (8 hojas), túnica, 8 po; o 50 po.",
+    "equipmentEn": "Choose A or B: (A) Quarterstaff, Calligrapher's Supplies, Book (history), Parchment (8 sheets), Robe, 8 GP; or (B) 50 GP.",
+    "source": "Player's Handbook 2024",
+    "bonusFeatId": "feat-2024-magic-initiate",
+    "bonusFeatSpellList": "Mago",
+    "skills": [
+      "Conocimiento Arcano",
+      "Historia"
+    ],
+    "startingGold": 8
   },
   {
     "id": "bg-2024-sailor",
@@ -311,13 +506,19 @@ export const DND_2024_BACKGROUNDS: Background2024[] = [
     ],
     "feat": "Luchador de Taberna",
     "featEn": "Tavern Brawler",
-    "skillProficiencies": "Atletismo y Percepción",
-    "skillProficienciesEn": "Athletics and Perception",
+    "skillProficiencies": "Acrobacias y Percepción",
+    "skillProficienciesEn": "Acrobatics and Perception",
     "toolProficiency": "Herramientas de navegante",
     "toolProficiencyEn": "Navigator's Tools",
-    "equipment": "Herramientas de navegante, cuerda de cáñamo de 50 pies, amuleto de caracola de la suerte, daga marinera, 10 po; o 50 po.",
-    "equipmentEn": "Navigator's Tools, 50 ft Silk/Hemp Rope, Lucky Conch Charm, Dagger, 10 GP; or 50 GP.",
-    "source": "Player's Handbook 2024"
+    "equipment": "Daga, herramientas de navegante, cuerda, ropa de viajero, 20 po; o 50 po.",
+    "equipmentEn": "Choose A or B: (A) Dagger, Navigator's Tools, Rope, Traveler's Clothes, 20 GP; or (B) 50 GP.",
+    "source": "Player's Handbook 2024",
+    "bonusFeatId": "feat-2024-tavern-brawler",
+    "skills": [
+      "Acrobacias",
+      "Percepción"
+    ],
+    "startingGold": 20
   },
   {
     "id": "bg-2024-scribe",
@@ -334,13 +535,19 @@ export const DND_2024_BACKGROUNDS: Background2024[] = [
     ],
     "feat": "Hábil",
     "featEn": "Skilled",
-    "skillProficiencies": "Historia e Investigación",
-    "skillProficienciesEn": "History and Investigation",
+    "skillProficiencies": "Investigación y Percepción",
+    "skillProficienciesEn": "Investigation and Perception",
     "toolProficiency": "Útiles de calígrafo",
     "toolProficiencyEn": "Calligrapher's Supplies",
-    "equipment": "Útiles de calígrafo, 3 frascos de tinta de colores, estuche con 20 hojas de papel vitela, 23 po; o 50 po.",
-    "equipmentEn": "Calligrapher's Supplies, 3 Inks, Scroll Case with 20 Vellum Sheets, 23 GP; or 50 GP.",
-    "source": "Player's Handbook 2024"
+    "equipment": "Útiles de calígrafo, ropa fina, lámpara, aceite (3 frascos), pergamino (12 hojas), 23 po; o 50 po.",
+    "equipmentEn": "Choose A or B: (A) Calligrapher's Supplies, Fine Clothes, Lamp, Oil (3 flasks), Parchment (12 sheets), 23 GP; or (B) 50 GP.",
+    "source": "Player's Handbook 2024",
+    "bonusFeatId": "feat-2024-skilled",
+    "skills": [
+      "Investigación",
+      "Percepción"
+    ],
+    "startingGold": 23
   },
   {
     "id": "bg-2024-soldier",
@@ -359,11 +566,29 @@ export const DND_2024_BACKGROUNDS: Background2024[] = [
     "featEn": "Savage Attacker",
     "skillProficiencies": "Atletismo e Intimidación",
     "skillProficienciesEn": "Athletics and Intimidation",
-    "toolProficiency": "Un juego (dados o cartas)",
-    "toolProficiencyEn": "One Gaming Set",
-    "equipment": "Insignia militar de tu rango, trofeo tomado de un enemigo caído, juego de dados, ropa de campaña, 14 po; o 50 po.",
-    "equipmentEn": "Rank Insignia, Battle Trophy, Bone Dice Set, Uniform, 14 GP; or 50 GP.",
-    "source": "Player's Handbook 2024"
+    "toolProficiency": "Un juego de azar (a elección)",
+    "toolProficiencyEn": "Choose one kind of Gaming Set",
+    "equipment": "Lanza, arco corto, 20 flechas, juego de azar (elegido arriba), kit de curandero, carcaj, ropa de viajero, 14 po; o 50 po.",
+    "equipmentEn": "Choose A or B: (A) Spear, Shortbow, 20 Arrows, Gaming Set (same as above), Healer's Kit, Quiver, Traveler's Clothes, 14 GP; or (B) 50 GP.",
+    "source": "Player's Handbook 2024",
+    "bonusFeatId": "feat-2024-savage-attacker",
+    "skills": [
+      "Atletismo",
+      "Intimidación"
+    ],
+    "toolChoice": {
+      "count": 1,
+      "category": "gaming",
+      "label": "Elige un Juego de Azar",
+      "labelEn": "Choose one kind of Gaming Set",
+      "options": [
+        "Juego de dados",
+        "Naipes",
+        "Ajedrez dragón",
+        "Juego de los Tres Dragones"
+      ]
+    },
+    "startingGold": 14
   },
   {
     "id": "bg-2024-wayfarer",
@@ -384,8 +609,14 @@ export const DND_2024_BACKGROUNDS: Background2024[] = [
     "skillProficienciesEn": "Insight and Stealth",
     "toolProficiency": "Herramientas de ladrón",
     "toolProficiencyEn": "Thieves' Tools",
-    "equipment": "Herramientas de ladrón, daga, saco de viaje gastado, saco de dormir, mapa de caminos, 16 po; o 50 po.",
-    "equipmentEn": "Thieves' Tools, Dagger, Traveler's Pack, Road Map, 16 GP; or 50 GP.",
-    "source": "Player's Handbook 2024"
+    "equipment": "2 dagas, herramientas de ladrón, juego de azar (cualquiera), saco de dormir, 2 faltriqueras, ropa de viajero, 16 po; o 50 po.",
+    "equipmentEn": "Choose A or B: (A) 2 Daggers, Thieves' Tools, Gaming Set (any), Bedroll, 2 Pouches, Traveler's Clothes, 16 GP; or (B) 50 GP.",
+    "source": "Player's Handbook 2024",
+    "bonusFeatId": "feat-2024-lucky",
+    "skills": [
+      "Perspicacia",
+      "Sigilo"
+    ],
+    "startingGold": 16
   }
 ];

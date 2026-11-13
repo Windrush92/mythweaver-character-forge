@@ -3356,10 +3356,13 @@ export function recalculateAllCharacterDerivedStats(
     strength: stats.str,
   });
 
-  // Helper para verificar dotes en creatorState.asiChoices o notas
+  // Helper para verificar dotes en character.feats, creatorState.asiChoices o notas
   const asiChoicesObj = (character.creatorState?.asiChoices || {}) as Record<string | number, any>;
   const hasCharacterFeat = (featId: string) => {
     return (
+      (character.feats || []).some(
+        (f) => f.id?.toLowerCase() === featId.toLowerCase() || f.name?.toLowerCase() === featId.toLowerCase()
+      ) ||
       Object.values(asiChoicesObj).some((c: any) => c?.type === 'feat' && (c?.featId === featId || c?.id === featId)) ||
       (character.notes?.toLowerCase().includes(featId) ?? false)
     );
@@ -3429,7 +3432,8 @@ export function recalculateAllCharacterDerivedStats(
     level >= 2;
   const chronurgyIntBonus = isChronurgyWizard ? Math.max(0, getAbilityModifier(stats.int || 10)) : 0;
   const hasAlert = hasCharacterFeat('alerta') || character.notes?.toLowerCase().includes('alerta') || false;
-  const initiativeBonus = dexMod + jackBonus + gloomWisBonus + watchersInitiativeBonus + swashbucklerChaBonus + warWizardIntBonus + chronurgyIntBonus + (hasAlert ? 5 : 0);
+  const alertBonus = hasAlert ? (character.edition === '5.5e' ? profBonus : 5) : 0;
+  const initiativeBonus = dexMod + jackBonus + gloomWisBonus + watchersInitiativeBonus + swashbucklerChaBonus + warWizardIntBonus + chronurgyIntBonus + alertBonus;
 
   // D. Percepción Pasiva (10 + Wis mod + profBonus si competente / Jack of All Trades si no competente + Observador)
   const wisMod = getAbilityModifier(stats.wis || 10);
@@ -3446,8 +3450,12 @@ export function recalculateAllCharacterDerivedStats(
     character.notes?.toLowerCase().includes('pericia: percepción') ||
     character.notes?.toLowerCase().includes('pericia: percepcion') ||
     (character.classDecisions?.['expertise'] || []).some((s: string) => s.toLowerCase().includes('percep')) ||
+    (character.classDecisions?.['bardExpertise_2'] || []).some((s: string) => s.toLowerCase().includes('percep')) ||
     (character.classDecisions?.['bardExpertise_3'] || []).some((s: string) => s.toLowerCase().includes('percep')) ||
+    (character.classDecisions?.['bardExpertise_9'] || []).some((s: string) => s.toLowerCase().includes('percep')) ||
     (character.classDecisions?.['bardExpertise_10'] || []).some((s: string) => s.toLowerCase().includes('percep')) ||
+    (character.classDecisions?.['rangerDeftExplorerSkill'] || []).some((s: string) => s.toLowerCase().includes('percep')) ||
+    (character.classDecisions?.['rangerExpertise_9'] || []).some((s: string) => s.toLowerCase().includes('percep')) ||
     (character.classDecisions?.['rogueExpertise_1'] || []).some((s: string) => s.toLowerCase().includes('percep')) ||
     (character.classDecisions?.['rogueExpertise_6'] || []).some((s: string) => s.toLowerCase().includes('percep'));
   const hasObservant = hasCharacterFeat('observador') || character.notes?.toLowerCase().includes('observador') || false;
@@ -3522,7 +3530,10 @@ export function getWarlockPactSlots(level: number): { slotsCount: number; slotLe
 }
 
 // 10. Motor Multiclase Oficial D&D 5e / Baldur's Gate 3
-export function calculateMulticlassSpellSlots(classes: MulticlassEntry[]): {
+export function calculateMulticlassSpellSlots(
+  classes: MulticlassEntry[],
+  edition: '5e' | '5.5e' = '5e'
+): {
   slots: Partial<CharacterSpellSlots>;
   pactSlots?: { count: number; slotLevel: number };
   effectiveCasterLevel: number;
@@ -3545,12 +3556,12 @@ export function calculateMulticlassSpellSlots(classes: MulticlassEntry[]): {
     ) {
       casterLevels += lvl;
     }
-    // Half Casters (floor(level / 2))
+    // Half Casters (5e: floor(level / 2); 5.5e 2024: ceil(level / 2))
     else if (
       name.includes('paladín') || name.includes('paladin') ||
       name.includes('explorador') || name.includes('ranger')
     ) {
-      casterLevels += Math.floor(lvl / 2);
+      casterLevels += edition === '5.5e' ? Math.ceil(lvl / 2) : Math.floor(lvl / 2);
     }
     // Artificer (ceil(level / 2))
     else if (name.includes('artífice') || name.includes('artifice') || name.includes('artificer')) {

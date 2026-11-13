@@ -11,6 +11,7 @@ import {
   getMaxSpellLevelForClass,
   FULL_CASTER_SLOTS_TABLE,
   HALF_CASTER_SLOTS_TABLE,
+  getHalfCasterSlotsTable,
   WARLOCK_PACT_SLOTS_TABLE,
   getClassSubclassLevel,
   BackgroundEquipmentChoice,
@@ -27,10 +28,13 @@ import {
   ALL_5E_SKILLS,
   CLASS_SKILL_CONFIGS,
   FIGHTING_STYLE_OPTIONS,
+  getFightingStyleOptions,
   ALIGNMENT_OPTIONS,
   ABILITY_SCORE_EXPLANATIONS,
   OfficialFeat,
   OFFICIAL_5E_FEATS,
+  DND_2024_AS_OFFICIAL_FEATS,
+  getFeatsForEdition,
   getAvailableAsiCount,
   getExpertiseConfig,
 } from '../data/characterCreatorData';
@@ -39,8 +43,12 @@ import {
   isSpellcasterClass,
   getSpellcastingLimits,
   OFFICIAL_SPELLS_COMPENDIUM,
+  getCompendiumForEdition,
   findSpellByNameOrAlias,
 } from '../data/spellsData';
+import { getAllSpellsForEdition } from '../data/spells2024Overrides';
+import { getWeaponMasteryLimit2024 } from '../data/dnd2024/classesData2024';
+import { OriginFeatSubChoicePicker, OriginFeatChoiceData } from './OriginFeatSubChoicePicker';
 import {
   getClassStartingEquipment,
   ClassStartingEquipment,
@@ -243,6 +251,17 @@ interface InitialCreatorState {
   racialSpellcastingAbility?: 'int' | 'wis' | 'cha';
   selectedRacialCantrip?: string;
   classDecisions?: Record<string, string[]>;
+  selectedEdition?: '5e' | '5.5e';
+  bgAsiMode2024?: '+2+1' | '+1+1+1';
+  bgAsiStatPlusTwo?: keyof AbilityScores | '';
+  bgAsiStatPlusOne?: keyof AbilityScores | '';
+  selectedWeaponMasteries?: string[];
+  speciesLineage2024?: string;
+  speciesSize2024?: string;
+  humanSkill2024?: string;
+  humanVersatileFeat2024?: string;
+  backgroundTool2024?: string;
+  originFeatChoices?: Record<string, OriginFeatChoiceData>;
 }
 
 function getInitialCreatorState(initialChar?: Character | null): InitialCreatorState | null {
@@ -384,6 +403,17 @@ function getInitialCreatorState(initialChar?: Character | null): InitialCreatorS
     racialSpellcastingAbility: (cs.racialSpellcastingAbility ?? initialChar.spellcastingAbility ?? 'wis') as 'int' | 'wis' | 'cha',
     selectedRacialCantrip: String(cs.selectedRacialCantrip ?? ''),
     classDecisions: (cs.classDecisions ?? initialChar.classDecisions ?? {}) as Record<string, string[]>,
+    selectedEdition: (cs.selectedEdition ?? initialChar.edition ?? '5e') as '5e' | '5.5e',
+    bgAsiMode2024: (cs.bgAsiMode2024 ?? '+2+1') as '+2+1' | '+1+1+1',
+    bgAsiStatPlusTwo: (cs.bgAsiStatPlusTwo ?? '') as keyof AbilityScores | '',
+    bgAsiStatPlusOne: (cs.bgAsiStatPlusOne ?? '') as keyof AbilityScores | '',
+    selectedWeaponMasteries: (cs.selectedWeaponMasteries ?? initialChar.weaponMasteries ?? []) as string[],
+    speciesLineage2024: String(cs.speciesLineage2024 ?? ''),
+    speciesSize2024: String(cs.speciesSize2024 ?? ''),
+    humanSkill2024: String(cs.humanSkill2024 ?? ''),
+    humanVersatileFeat2024: String(cs.humanVersatileFeat2024 ?? ''),
+    backgroundTool2024: String(cs.backgroundTool2024 ?? ''),
+    originFeatChoices: (cs.originFeatChoices ?? {}) as Record<string, OriginFeatChoiceData>,
   };
 }
 
@@ -557,6 +587,28 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
   );
   const [selectedWeaponMasteries, setSelectedWeaponMasteries] = useState<string[]>(
     (initState as any)?.selectedWeaponMasteries || (initialCharacter?.creatorState as any)?.selectedWeaponMasteries || (initialCharacter?.weaponMasteries) || []
+  );
+  const [speciesLineage2024, setSpeciesLineage2024] = useState<string>(
+    initState?.speciesLineage2024 || ''
+  );
+  const [speciesSize2024, setSpeciesSize2024] = useState<string>(
+    initState?.speciesSize2024 || ''
+  );
+  const [humanSkill2024, setHumanSkill2024] = useState<string>(
+    initState?.humanSkill2024 || ''
+  );
+  const [humanVersatileFeat2024, setHumanVersatileFeat2024] = useState<string>(
+    initState?.humanVersatileFeat2024 || ''
+  );
+  const [backgroundTool2024, setBackgroundTool2024] = useState<string>(
+    initState?.backgroundTool2024 || ''
+  );
+  const [originFeatChoices, setOriginFeatChoices] = useState<Record<string, OriginFeatChoiceData>>(
+    initState?.originFeatChoices || {}
+  );
+  const allFeatsCatalog = useMemo(
+    () => [...OFFICIAL_5E_FEATS, ...DND_2024_AS_OFFICIAL_FEATS],
+    []
   );
 
   // STEP 1: IDENTITY & ROLEPLAY
@@ -855,29 +907,88 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
     if (selectedEdition === '5.5e') {
       const sp = DND_2024_SPECIES.find((s) => s.id === selectedRaceId);
       if (sp) {
+        const chosenLineage =
+          sp.lineages?.find((l) => l.id === speciesLineage2024 || l.name === speciesLineage2024) ||
+          sp.lineages?.[0];
+        const effSize =
+          speciesSize2024 ||
+          (sp.allowSizeChoice ? 'Mediano' : sp.size.includes('Pequeño') ? 'Pequeño' : 'Mediano');
+        const effSpeed = chosenLineage?.speedOverride || sp.speed;
+        const effDarkvision = chosenLineage?.darkvisionOverride ?? sp.darkvision ?? 0;
+        const effInnate = [
+          ...(sp.baseSpells || []),
+          ...(chosenLineage?.spells || []),
+        ].map((s) => ({
+          spellName: isSpanish ? s.spellName : (s.spellNameEn || s.spellName),
+          requiredLevel: s.minLevel,
+          traitName: chosenLineage ? chosenLineage.name : sp.name,
+        }));
+        const hasHighElfCantrip =
+          sp.id === 'species-2024-elf' && chosenLineage?.id === 'lineage-high-elf';
+        const effSpellConfig =
+          sp.spellcastingAbilityChoice || sp.fixedSpellcastingAbility || effInnate.length > 0 || hasHighElfCantrip
+            ? {
+                abilityChoices:
+                  sp.spellcastingAbilityChoice ||
+                  (sp.fixedSpellcastingAbility ? [sp.fixedSpellcastingAbility] : (['int', 'wis', 'cha'] as const)),
+                defaultAbility: sp.fixedSpellcastingAbility || sp.spellcastingAbilityChoice?.[0] || 'cha',
+                hasCantripChoice: hasHighElfCantrip,
+              }
+            : undefined;
+        const humanExtraSkills =
+          sp.id === 'species-2024-human' && humanSkill2024 ? [humanSkill2024] : [];
+
         return {
           id: sp.id,
           name: isSpanish ? sp.name : (sp.nameEn || sp.name),
           nameEn: sp.nameEn || sp.name,
           category: 'Común' as const,
           description: isSpanish ? sp.description : (sp.descriptionEn || sp.description),
-          traits: (sp.traits || []).map((t) => ({
-            name: isSpanish ? t.name : (t.nameEn || t.name),
-            desc: isSpanish ? t.desc : (t.descEn || t.desc),
-          })),
-          size: (sp.size.includes('Pequeño') || sp.sizeEn?.toLowerCase().includes('small') ? 'Pequeño' : 'Mediano') as 'Pequeño' | 'Mediano',
-          speed: isSpanish ? sp.speed : sp.speed.replace('pies', 'feet'),
+          traits: [
+            ...(sp.traits || []).map((t) => ({
+              name: isSpanish ? t.name : (t.nameEn || t.name),
+              desc: isSpanish ? t.desc : (t.descEn || t.desc),
+            })),
+            ...(chosenLineage
+              ? [{ name: `Linaje: ${chosenLineage.name}`, desc: isSpanish ? chosenLineage.summary : (chosenLineage.summaryEn || chosenLineage.summary) }]
+              : []),
+          ],
+          size: (effSize.includes('Pequeño') ? 'Pequeño' : 'Mediano') as 'Pequeño' | 'Mediano',
+          speed: isSpanish ? effSpeed : effSpeed.replace('pies', 'feet'),
           languages: isSpanish ? ['Común'] : ['Common'],
           abilityScoreBonuses: {},
-          darkvision: sp.darkvision || 0,
+          darkvision: effDarkvision,
+          skillProficiencies: humanExtraSkills,
           subraces: [],
-          innateSpells: [],
-          spellcastingConfig: undefined,
+          innateSpells: effInnate,
+          spellcastingConfig: effSpellConfig,
         } as unknown as (typeof WIKIDOT_RACES)[number];
       }
     }
     return WIKIDOT_RACES.find((r) => r.id === selectedRaceId) || null;
-  }, [selectedRaceId, selectedEdition, isSpanish]);
+  }, [selectedRaceId, selectedEdition, isSpanish, speciesLineage2024, speciesSize2024, humanSkill2024]);
+
+  // Inicializar linaje y tamaño por defecto al cambiar de especie en 5.5e
+  useEffect(() => {
+    if (selectedEdition !== '5.5e' || !activeSpecies2024) return;
+    if (activeSpecies2024.lineages && activeSpecies2024.lineages.length > 0) {
+      const valid = activeSpecies2024.lineages.some(
+        (l) => l.id === speciesLineage2024 || l.name === speciesLineage2024
+      );
+      if (!valid) {
+        setSpeciesLineage2024(activeSpecies2024.lineages[0].id);
+      }
+    } else if (speciesLineage2024) {
+      setSpeciesLineage2024('');
+    }
+    if (activeSpecies2024.allowSizeChoice) {
+      if (speciesSize2024 !== 'Mediano' && speciesSize2024 !== 'Pequeño') {
+        setSpeciesSize2024('Mediano');
+      }
+    } else if (speciesSize2024) {
+      setSpeciesSize2024('');
+    }
+  }, [selectedEdition, activeSpecies2024, speciesLineage2024, speciesSize2024]);
 
   const activeSubrace = useMemo(() => {
     if (!activeRace || !activeRace.subraces || activeRace.subraces.length === 0 || !selectedSubraceId) return null;
@@ -927,9 +1038,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
       activeClass.name,
       activeSubclass?.name,
       characterLevel,
-      creatorClassDecisions
+      creatorClassDecisions,
+      selectedEdition
     );
-  }, [activeClass, activeSubclass, characterLevel, creatorClassDecisions]);
+  }, [activeClass, activeSubclass, characterLevel, creatorClassDecisions, selectedEdition]);
 
   const toggleCreatorClassDecision = (decisionId: string, optionName: string, maxCount: number) => {
     setCreatorClassDecisions((prev) => {
@@ -959,6 +1071,12 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
     if (selectedEdition === '5.5e') {
       const bg = DND_2024_BACKGROUNDS.find((b) => b.id === selectedBackgroundId);
       if (bg) {
+        const chosenTool =
+          bg.toolChoice && backgroundTool2024
+            ? backgroundTool2024
+            : bg.toolChoice
+            ? bg.toolChoice.options[0]
+            : bg.toolProficiency;
         return {
           id: bg.id,
           name: bg.name,
@@ -967,19 +1085,22 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
           description: isSpanish
             ? `${bg.description}\n\n**Dote de Origen (2024):** ${bg.feat}\n**Atributos Permitidos:** ${bg.abilityScores.map((a) => a.toUpperCase()).join(', ')}`
             : `${bg.descriptionEn || bg.description}\n\n**Origin Feat (2024):** ${bg.featEn || bg.feat}\n**Allowed Abilities:** ${bg.abilityScores.map((a) => a.toUpperCase()).join(', ')}`,
-          skillProficiencies: bg.skillProficiencies.split(',').map((s) => s.trim()),
-          toolProficiencies: [bg.toolProficiency],
+          skillProficiencies: bg.skills?.length ? [...bg.skills] : bg.skillProficiencies.split(/\s*(?:,| y | e )\s*/i).map((s) => s.trim()).filter(Boolean),
+          toolProficiencies: chosenTool ? [chosenTool] : [],
           equipmentText: bg.equipment,
+          suggestedEquipment: bg.equipment,
+          bonusFeatId: bg.bonusFeatId,
+          bonusFeatName: bg.feat,
           fixedLanguages: [],
           copper: 0,
           silver: 0,
-          gold: 50,
+          gold: bg.startingGold ?? 50,
           platinum: 0,
         } as unknown as (typeof WIKIDOT_BACKGROUNDS)[number];
       }
     }
     return WIKIDOT_BACKGROUNDS.find((b) => b.id === selectedBackgroundId) || null;
-  }, [selectedBackgroundId, selectedEdition, isSpanish]);
+  }, [selectedBackgroundId, selectedEdition, isSpanish, backgroundTool2024]);
 
   const knownRacialLanguages = useMemo(() => {
     return activeRace?.languages && activeRace.languages.length > 0
@@ -996,8 +1117,41 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
         return Array.from(next);
       });
     }
+    if (selectedEdition === '5.5e' && activeBackground2024) {
+      if (activeBackground2024.toolChoice && activeBackground2024.toolChoice.options.length > 0) {
+        setBackgroundTool2024((prev) =>
+          prev && activeBackground2024.toolChoice!.options.includes(prev)
+            ? prev
+            : activeBackground2024.toolChoice!.options[0]
+        );
+      } else {
+        setBackgroundTool2024('');
+      }
+      if (activeBackground2024.bonusFeatId) {
+        setOriginFeatChoices((prev) => {
+          const cur = prev.background;
+          const nextFeatId = activeBackground2024.bonusFeatId;
+          const nextList = activeBackground2024.bonusFeatSpellList || cur?.spellList;
+          if (cur && cur.featId === nextFeatId && (!activeBackground2024.bonusFeatSpellList || cur.spellList === activeBackground2024.bonusFeatSpellList)) {
+            return prev;
+          }
+          return {
+            ...prev,
+            background: {
+              featId: nextFeatId,
+              spellList: nextList,
+              spellAbility: cur?.spellAbility || (nextList === 'cleric' || nextList === 'druid' ? 'wis' : 'int'),
+              cantrips: cur?.featId === nextFeatId ? cur.cantrips : [],
+              level1Spell: cur?.featId === nextFeatId ? cur.level1Spell : '',
+              skillsOrTools: cur?.featId === nextFeatId ? cur.skillsOrTools : [],
+              tools: cur?.featId === nextFeatId ? cur.tools : [],
+            },
+          };
+        });
+      }
+    }
     if (activeBackground.bonusFeatId) {
-      const bFeat = OFFICIAL_5E_FEATS.find((f) => f.id === activeBackground.bonusFeatId);
+      const bFeat = allFeatsCatalog.find((f) => f.id === activeBackground.bonusFeatId);
       if (bFeat?.subChoice?.options && bFeat.subChoice.options.length > 0) {
         const validIds = bFeat.subChoice.options.map((o) => o.id);
         setBackgroundFeatSubChoice((current) => {
@@ -1006,7 +1160,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
         });
       }
     }
-  }, [activeBackground]);
+  }, [activeBackground, activeBackground2024, selectedEdition, allFeatsCatalog]);
 
   const backgroundOrientationCounts = useMemo(() => {
     const counts: Record<string, number> = {
@@ -1086,12 +1240,12 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
       return false;
     }
     const c = activeClass.name.toLowerCase();
-    // In D&D 5e, Paladin and Ranger only gain spellcasting at level 2+
-    if ((c.includes('palad') || c.includes('explorador') || c.includes('ranger')) && characterLevel < 2) {
+    // In D&D 5e Paladin and Ranger unlock spellcasting at level 2+, whereas in 5.5e (2024) at level 1!
+    if ((c.includes('palad') || c.includes('explorador') || c.includes('ranger')) && selectedEdition !== '5.5e' && characterLevel < 2) {
       return false;
     }
     return true;
-  }, [activeClass, characterLevel, selectedSubclassId]);
+  }, [activeClass, characterLevel, selectedSubclassId, selectedEdition]);
 
   // Assign a roll or standard array value to a specific ability score
   const assignRollToStat = (sourceIdx: number, val: number, targetStat: keyof AbilityScores) => {
@@ -1394,7 +1548,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
           if (choice.asiStat2) bonuses[choice.asiStat2] += 1;
         }
       } else if (choice.type === 'feat' && choice.featId) {
-        const feat = OFFICIAL_5E_FEATS.find((f) => f.id === choice.featId);
+        const feat = allFeatsCatalog.find((f) => f.id === choice.featId);
         if (feat?.abilityBonus) {
           if (choice.featAbilityChoice) {
             bonuses[choice.featAbilityChoice] += feat.abilityBonus.amount;
@@ -1406,7 +1560,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
     }
 
     return bonuses;
-  }, [availableAsiCount, asiChoices]);
+  }, [availableAsiCount, asiChoices, allFeatsCatalog]);
 
   // Final Total Stats (Base + Racial Bonus + ASI/Feat Bonus, max 20)
   const finalStats: AbilityScores = useMemo(() => {
@@ -1482,7 +1636,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
     selectedClassSkills.forEach((s) => set.add(s));
     bonusRacialSkills.forEach((s) => set.add(s));
 
-    // Feat-granted skills (Skilled, Eldritch Adept Beguiling Influence, etc.)
+    // Feat-granted skills (5e Habilidoso, Adepto Sobrenatural, and 5.5e Hábil / Humano Hábil)
     Object.values(asiChoices).forEach((c) => {
       if (c.type === 'feat') {
         if (c.featId === 'habilidoso' && c.featSubChoices) {
@@ -1499,37 +1653,73 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
       }
     });
 
+    if (selectedEdition === '5.5e' && activeSpecies2024?.id === 'species-2024-human' && humanSkill2024) {
+      set.add(humanSkill2024);
+    }
+
+    Object.values(originFeatChoices).forEach((ofData) => {
+      (ofData.skillsOrTools || []).forEach((item) => {
+        if (ALL_5E_SKILLS.some((sk) => sk.name === item)) {
+          set.add(item);
+        }
+      });
+    });
+
     return Array.from(set);
-  }, [backgroundSkills, racialSkills, selectedClassSkills, bonusRacialSkills, asiChoices]);
+  }, [backgroundSkills, racialSkills, selectedClassSkills, bonusRacialSkills, asiChoices, selectedEdition, activeSpecies2024, humanSkill2024, originFeatChoices]);
 
   // Expertise (Pericia x2) configuration
   const expertiseConfig = useMemo(() => {
     if (!activeClass) return { allowedCount: 0, title: '', desc: '' };
-    return getExpertiseConfig(activeClass.id, characterLevel);
-  }, [activeClass, characterLevel]);
+    return getExpertiseConfig(activeClass.id, characterLevel, selectedEdition);
+  }, [activeClass, characterLevel, selectedEdition]);
 
   // Valid expertise skills must be currently proficient skills
   const validExpertiseSkills = useMemo(() => {
-    return expertiseSkills.filter((s) => totalSkills.includes(s)).slice(0, expertiseConfig.allowedCount);
-  }, [expertiseSkills, totalSkills, expertiseConfig.allowedCount]);
+    return expertiseSkills
+      .filter((s) => totalSkills.includes(s))
+      .filter((s) => !expertiseConfig.restrictedSkills || expertiseConfig.restrictedSkills.includes(s))
+      .slice(0, expertiseConfig.allowedCount);
+  }, [expertiseSkills, totalSkills, expertiseConfig]);
 
-  // Hit Points Calculation (including Hill Dwarf toughness and Tough feat)
+  // Hit Points Calculation (including Hill Dwarf / 2024 Dwarf toughness and Tough feat from any source)
   const calculatedMaxHp = useMemo(() => {
     const conMod = getMod(finalStats.con);
     const hitDie = activeClass?.hitDie || 10;
     const level1Hp = hitDie + conMod;
     const additionalLevels = Math.max(0, characterLevel - 1);
     const avgPerLevel = Math.floor(hitDie / 2) + 1 + conMod;
-    
-    // Hill dwarf bonus (+1 HP per level)
-    const dwarfBonus = selectedSubraceId === 'enano-colinas' ? characterLevel : 0;
-    
-    // Tough feat (+2 HP per level)
-    const hasTough = Object.values(asiChoices).some((c) => c.type === 'feat' && c.featId === 'robusto');
+
+    // Dwarf toughness (+1 HP per level: Hill Dwarf in 5e, all Dwarves in 5.5e)
+    const dwarfBonus =
+      selectedSubraceId === 'enano-colinas' ||
+      (selectedEdition === '5.5e' && activeRace?.id === 'species-2024-dwarf')
+        ? characterLevel
+        : 0;
+
+    // Tough feat (+2 HP per level from ASI, 5.5e Background, Human Versatile, or Warlock Lessons)
+    const lessonFeats = creatorClassDecisions.warlockLessonsFeat || [];
+    const hasTough =
+      Object.values(asiChoices).some((c) => c.type === 'feat' && (c.featId === 'robusto' || c.featId === 'feat-2024-tough')) ||
+      activeBackground?.bonusFeatId === 'feat-2024-tough' ||
+      (selectedEdition === '5.5e' && activeSpecies2024?.id === 'species-2024-human' && humanVersatileFeat2024 === 'feat-2024-tough') ||
+      lessonFeats.some((lf) => lf.toLowerCase().includes('duro') || lf.toLowerCase().includes('tough'));
     const toughBonus = hasTough ? 2 * characterLevel : 0;
 
     return Math.max(1, level1Hp + additionalLevels * Math.max(1, avgPerLevel) + dwarfBonus + toughBonus);
-  }, [activeClass, finalStats.con, characterLevel, selectedSubraceId, asiChoices]);
+  }, [
+    activeClass,
+    finalStats.con,
+    characterLevel,
+    selectedSubraceId,
+    selectedEdition,
+    activeRace,
+    asiChoices,
+    activeBackground,
+    activeSpecies2024,
+    humanVersatileFeat2024,
+    creatorClassDecisions.warlockLessonsFeat,
+  ]);
 
   // Chosen equipment items list (dynamically integrates custom weapons from compendium and user added items)
   const chosenEquipmentList: string[] = useMemo(() => {
@@ -1643,16 +1833,23 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
     });
   }, [activeRace, activeClass, characterLevel, activeEquippedList, asiChoices, finalStats.str]);
 
-  // Initiative Bonus (Dex mod + Alert feat (+5) + War Magic wizard)
+  // Initiative Bonus (Dex mod + Alert feat (+5 in 5e, +PB in 5.5e) + War Magic wizard)
   const calculatedInitiative = useMemo(() => {
     let bonus = getMod(finalStats.dex);
     if (selectedSubclassId.includes('guerra') && activeClass?.id === 'mago') {
       bonus += getMod(finalStats.int);
     }
-    const hasAlert = Object.values(asiChoices).some((c) => c.type === 'feat' && c.featId === 'alerta');
-    if (hasAlert) bonus += 5;
+    const lessonFeats = creatorClassDecisions.warlockLessonsFeat || [];
+    const hasAlert2024 =
+      activeBackground?.bonusFeatId === 'feat-2024-alert' ||
+      (selectedEdition === '5.5e' && activeRace?.id === 'species-2024-human' && humanVersatileFeat2024 === 'feat-2024-alert') ||
+      lessonFeats.some((lf) => lf.toLowerCase().includes('alerta') || lf.toLowerCase().includes('alert')) ||
+      Object.values(asiChoices).some((c) => c.type === 'feat' && c.featId === 'feat-2024-alert');
+    const hasAlert5e = Object.values(asiChoices).some((c) => c.type === 'feat' && c.featId === 'alerta');
+    if (hasAlert2024) bonus += profBonus;
+    else if (hasAlert5e) bonus += 5;
     return bonus;
-  }, [finalStats.dex, finalStats.int, selectedSubclassId, activeClass, asiChoices]);
+  }, [finalStats.dex, finalStats.int, selectedSubclassId, activeClass, asiChoices, activeBackground, selectedEdition, activeRace, humanVersatileFeat2024, creatorClassDecisions.warlockLessonsFeat, profBonus]);
 
   // Passive Perception (incorporates double proficiency for Expertise and Observant feat)
   const calculatedPassivePerception = useMemo(() => {
@@ -1689,8 +1886,10 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
 
   // Wizard cantrips compendium list (for High Elf / Kobold / etc. cantrip choices)
   const wizardCantripsList = useMemo(() => {
-    return OFFICIAL_SPELLS_COMPENDIUM.filter((s) => s.level === 0 && (s.classes || []).some((cls) => cls.toLowerCase() === 'mago')).sort((a, b) => a.name.localeCompare(b.name));
-  }, []);
+    return getAllSpellsForEdition(OFFICIAL_SPELLS_COMPENDIUM, selectedEdition)
+      .filter((s) => s.level === 0 && (s.classes || []).some((cls) => cls.toLowerCase() === 'mago' || cls.toLowerCase() === 'wizard'))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [selectedEdition]);
 
   // Racial innate spellcasting configuration & traits
   const racialSpellcastingInfo = useMemo(() => {
@@ -1728,7 +1927,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
     // 1. Spells granted automatically by level (e.g. Earth Genasi: Blade Ward at lv1, Pass Without Trace at lv5)
     for (const entry of racialSpellcastingInfo.innateSpells) {
       if (characterLevel >= entry.requiredLevel) {
-        const found = findSpellByNameOrAlias(entry.spellName);
+        const found = findSpellByNameOrAlias(entry.spellName, selectedEdition);
         if (found) {
           spells.push({
             ...found,
@@ -1745,7 +1944,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
 
     // 2. Chosen Cantrip (e.g. High Elf / Alto Elfo)
     if (racialSpellcastingInfo.config?.hasCantripChoice && selectedRacialCantrip) {
-      const found = findSpellByNameOrAlias(selectedRacialCantrip);
+      const found = findSpellByNameOrAlias(selectedRacialCantrip, selectedEdition);
       if (found) {
         spells.push({
           ...found,
@@ -1760,21 +1959,132 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
     }
 
     return spells;
-  }, [racialSpellcastingInfo, characterLevel, activeRace, activeSubrace, effectiveRacialSpellAbility, selectedRacialCantrip]);
+  }, [racialSpellcastingInfo, characterLevel, activeRace, activeSubrace, effectiveRacialSpellAbility, selectedRacialCantrip, selectedEdition]);
 
-  // Synchronize granted racial spells into selectedSpells automatically
+  // Conjuros otorgados por Dotes de Origen (Iniciado en la Magia) y decisiones especiales de clase 5.5e
+  const grantedBonusFeatAndClassSpells = useMemo<Spell[]>(() => {
+    const spells: Spell[] = [];
+    const pushBonusSpell = (spellName: string, originLabel: string, tag: string) => {
+      const cleanName = spellName.split('(')[0].trim();
+      if (!cleanName) return;
+      const found = findSpellByNameOrAlias(cleanName, selectedEdition) || findSpellByNameOrAlias(spellName, selectedEdition);
+      if (!found) return;
+      if (spells.some((s) => s.name.toLowerCase() === found.name.toLowerCase())) return;
+      spells.push({
+        ...found,
+        id: `char-spl-feat-${tag}-${found.id || found.name.toLowerCase().replace(/\s+/g, '-')}`,
+        prepared: true,
+        isFeatSpell: true,
+        featOrigin: originLabel,
+        notes: `${originLabel} — No consume tu límite de conjuros de clase.`,
+      });
+    };
+
+    // A) Iniciado en la Magia u otras dotes de Origen con conjuros
+    const activeOriginKeys: { key: string; label: string; active: boolean }[] = [
+      {
+        key: 'background',
+        label: `Iniciado en la Magia (${activeBackground?.name || 'Trasfondo'})`,
+        active: Boolean(
+          activeBackground?.bonusFeatId &&
+          (activeBackground.bonusFeatId.includes('magic-initiate') || activeBackground.bonusFeatId.includes('iniciado'))
+        ),
+      },
+      {
+        key: 'human-versatile',
+        label: 'Iniciado en la Magia (Humano Versátil)',
+        active: Boolean(
+          selectedEdition === '5.5e' &&
+          activeSpecies2024?.id === 'species-2024-human' &&
+          (humanVersatileFeat2024.includes('magic-initiate') || humanVersatileFeat2024.includes('iniciado'))
+        ),
+      },
+      {
+        key: 'warlock-lessons',
+        label: 'Iniciado en la Magia (Lecciones de los Primeros)',
+        active: Boolean(
+          (creatorClassDecisions.warlockLessonsFeat || []).some(
+            (lf) => lf.toLowerCase().includes('iniciado') || lf.toLowerCase().includes('magic')
+          )
+        ),
+      },
+    ];
+
+    Object.entries(asiChoices).forEach(([slotKey, ch]) => {
+      if (ch?.type === 'feat' && ch.featId && (ch.featId.includes('magic-initiate') || ch.featId.includes('iniciado'))) {
+        activeOriginKeys.push({
+          key: `asi-${slotKey}`,
+          label: 'Iniciado en la Magia (Dote)',
+          active: true,
+        });
+      }
+    });
+
+    activeOriginKeys.forEach(({ key, label, active }) => {
+      if (!active) return;
+      const data = originFeatChoices[key];
+      if (!data) return;
+      const abLabel = data.spellAbility === 'int' ? 'INT' : data.spellAbility === 'cha' ? 'CAR' : 'SAB';
+      const fullLabel = `${label} [${abLabel}]`;
+      (data.cantrips || []).forEach((cName) => pushBonusSpell(cName, fullLabel, key));
+      if (data.level1Spell) {
+        pushBonusSpell(data.level1Spell, `${fullLabel} • 1/descanso largo gratis`, key);
+      }
+    });
+
+    // B) Decisiones de clase que otorgan conjuros/trucos gratuitos fuera del límite base
+    const decisionSpellKeys: { key: string; label: string }[] = [
+      { key: 'clericThaumaturgeCantrip', label: 'Orden Divina: Taumaturgo' },
+      { key: 'druidMagicianCantrip', label: 'Orden Primigenio: Mago Primigenio' },
+      { key: 'paladinBlessedCantrips', label: 'Estilo: Guerrero Bendito' },
+      { key: 'rangerDruidicCantrips', label: 'Estilo: Guerrero Druídico' },
+      { key: 'pactTomeCantrips', label: 'Pacto del Tomo (Truco)' },
+      { key: 'pactTomeRituals', label: 'Pacto del Tomo (Ritual)' },
+      { key: 'druidLandCantrip', label: 'Círculo de la Tierra' },
+      { key: 'clericNatureCantrip', label: 'Acólito de la Naturaleza' },
+      { key: 'clericArcanaCantrips', label: 'Iniciado Arcano' },
+      { key: 'clericDeathCantrip', label: 'Segador (Nigromancia)' },
+    ];
+    decisionSpellKeys.forEach(({ key, label }) => {
+      (creatorClassDecisions[key] || []).forEach((spName) => pushBonusSpell(spName, label, key));
+    });
+
+    // C) Conjuros siempre preparados automáticos de clase en 5.5e
+    if (selectedEdition === '5.5e' && activeClass) {
+      if (activeClass.id === 'explorador' && characterLevel >= 1) {
+        pushBonusSpell('Marca del Cazador', 'Enemigo Predilecto (Explorador 5.5e)', 'auto-ranger-hm');
+      }
+      if (activeClass.id === 'paladin' && characterLevel >= 2) {
+        pushBonusSpell('Castigo Divino', 'Castigo de Paladín (5.5e)', 'auto-paladin-smite');
+      }
+    }
+
+    return spells;
+  }, [
+    selectedEdition,
+    activeBackground,
+    activeSpecies2024,
+    humanVersatileFeat2024,
+    creatorClassDecisions,
+    asiChoices,
+    originFeatChoices,
+    activeClass,
+    characterLevel,
+  ]);
+
+  // Synchronize granted racial spells and Origin Feat / class bonus spells into selectedSpells automatically
   useEffect(() => {
     setSelectedSpells((prev) => {
-      const nonRacial = prev.filter((s) => !s.isRacial);
-      const combined = [...nonRacial];
-      for (const rSpell of grantedRacialSpells) {
+      const baseUserSpells = prev.filter((s) => !s.isRacial && !s.isFeatSpell);
+      const combined = [...baseUserSpells];
+      for (const rSpell of [...grantedRacialSpells, ...grantedBonusFeatAndClassSpells]) {
         if (!combined.some((s) => s.name.toLowerCase() === rSpell.name.toLowerCase())) {
           combined.push(rSpell);
         }
       }
       return combined;
     });
-  }, [grantedRacialSpells]);
+  }, [grantedRacialSpells, grantedBonusFeatAndClassSpells]);
 
   const spellLimits = useMemo(() => {
     if (!activeClass) {
@@ -1788,8 +2098,8 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
         explanation: 'Sin clase seleccionada',
       } as import('../data/spellsData').SpellcastingLimits;
     }
-    return getSpellcastingLimits(activeClass.name, characterLevel, finalStats, activeRace?.name || '');
-  }, [activeClass, characterLevel, finalStats, activeRace]);
+    return getSpellcastingLimits(activeClass.name, characterLevel, finalStats, activeRace?.name || '', selectedEdition);
+  }, [activeClass, characterLevel, finalStats, activeRace, selectedEdition]);
 
   const filteredSpells = useMemo(() => {
     if (!activeClass) {
@@ -1801,13 +2111,14 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
         isCaster: false,
       };
     }
-    return filterSpellsForCharacter(activeClass.name, characterLevel, activeRace?.name || '');
-  }, [activeClass, characterLevel, activeRace]);
+    return filterSpellsForCharacter(activeClass.name, characterLevel, activeRace?.name || '', selectedEdition);
+  }, [activeClass, characterLevel, activeRace, selectedEdition]);
 
   const getRequiredCasterLevel = (spellLevel: number) => {
     if (spellLevel <= 0) return 1;
     const cName = (activeClass?.name || '').toLowerCase();
-    if (cName.includes('paladín') || cName.includes('explorador')) {
+    if (cName.includes('paladín') || cName.includes('paladin') || cName.includes('explorador')) {
+      if (spellLevel === 1 && selectedEdition === '5.5e') return 1;
       return Math.max(2, (spellLevel - 1) * 4 + 2);
     }
     return spellLevel * 2 - 1;
@@ -1815,15 +2126,16 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
 
   // Computed spells with level grouping, search, school filter, and sort mode
   const displayedSpellsData = useMemo(() => {
+    const editionCompendium = getCompendiumForEdition(selectedEdition);
     let sourceList: Spell[] = [];
     if (!isCaster) {
-      sourceList = spellScopeMode === 'all_compendium' ? OFFICIAL_SPELLS_COMPENDIUM : [];
+      sourceList = spellScopeMode === 'all_compendium' ? editionCompendium : [];
     } else if (spellScopeMode === 'available') {
       sourceList = filteredSpells.availableToChoose;
     } else if (spellScopeMode === 'all_class') {
       sourceList = [...filteredSpells.availableToChoose, ...filteredSpells.higherLevelToBrowse];
     } else if (spellScopeMode === 'all_compendium') {
-      sourceList = OFFICIAL_SPELLS_COMPENDIUM;
+      sourceList = editionCompendium;
     } else {
       sourceList = filteredSpells.availableToChoose;
     }
@@ -1890,8 +2202,8 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
     spellSortMode,
   ]);
 
-  const selectedCantripsCount = selectedSpells.filter((s) => s.level === 0 && !s.isRacial).length;
-  const selectedLeveledCount = selectedSpells.filter((s) => s.level > 0 && !s.isRacial).length;
+  const selectedCantripsCount = selectedSpells.filter((s) => s.level === 0 && !s.isRacial && !s.isFeatSpell).length;
+  const selectedLeveledCount = selectedSpells.filter((s) => s.level > 0 && !s.isRacial && !s.isFeatSpell).length;
 
   const toggleSpellChoice = (spell: Spell) => {
     const existingIndex = selectedSpells.findIndex((s) => s.name.toLowerCase() === spell.name.toLowerCase());
@@ -1937,33 +2249,109 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
     }
   };
 
-  // List of chosen feats with their choice details
-  const chosenFeatsList = useMemo(() => {
-    const list: { feat: OfficialFeat; choice: AsiFeatChoice }[] = [];
-    Object.values(asiChoices).forEach((c) => {
-      if (c.type === 'feat' && c.featId) {
-        const feat = OFFICIAL_5E_FEATS.find((f) => f.id === c.featId);
-        if (feat) {
-          list.push({ feat, choice: c });
-        }
+  // Format sub-choices from Origin Feats cleanly for sheet & summary
+  const formatOriginFeatSummary = (data?: OriginFeatChoiceData, extraSub?: string): string[] | undefined => {
+    const parts: string[] = [];
+    if (extraSub) parts.push(extraSub);
+    if (data) {
+      if (data.spellList) {
+        const listName = data.spellList === 'cleric' ? 'Clérigo' : data.spellList === 'druid' ? 'Druida' : 'Mago';
+        const ab = data.spellAbility === 'int' ? 'INT' : data.spellAbility === 'cha' ? 'CAR' : 'SAB';
+        parts.push(`Lista: ${listName} (${ab})`);
       }
-    });
-    // Include bonus feat granted by active background (e.g. Strike of the Giants, Rune Shaper)
+      if (data.cantrips && data.cantrips.length > 0) parts.push(`Trucos: ${data.cantrips.join(', ')}`);
+      if (data.level1Spell) parts.push(`Conjuro Nv 1: ${data.level1Spell}`);
+      if (data.skillsOrTools && data.skillsOrTools.length > 0) parts.push(`Competencias: ${data.skillsOrTools.join(', ')}`);
+      if (data.tools && data.tools.length > 0) parts.push(`Herramientas: ${data.tools.join(', ')}`);
+    }
+    return parts.length > 0 ? parts : undefined;
+  };
+
+  // List of chosen feats with their choice details and origin metadata
+  const chosenFeatsList = useMemo(() => {
+    const list: { feat: OfficialFeat; choice: AsiFeatChoice; originLabel?: string }[] = [];
+
+    // 1. Background Origin / Bonus Feat (5.5e PHB 2024 or 5e)
     if (activeBackground?.bonusFeatId) {
-      const bFeat = OFFICIAL_5E_FEATS.find((f) => f.id === activeBackground.bonusFeatId);
+      const bFeat = allFeatsCatalog.find((f) => f.id === activeBackground.bonusFeatId);
       if (bFeat) {
         list.push({
           feat: bFeat,
+          originLabel: `Trasfondo: ${activeBackground.name}`,
           choice: {
             type: 'feat',
             featId: bFeat.id,
-            featSubChoices: backgroundFeatSubChoice ? [backgroundFeatSubChoice] : undefined,
+            featSubChoices: formatOriginFeatSummary(originFeatChoices.background, backgroundFeatSubChoice),
           },
         });
       }
     }
+
+    // 2. Human 5.5e Versatile Origin Feat
+    if (selectedEdition === '5.5e' && activeSpecies2024?.id === 'species-2024-human' && humanVersatileFeat2024) {
+      const vFeat = allFeatsCatalog.find((f) => f.id === humanVersatileFeat2024);
+      if (vFeat) {
+        list.push({
+          feat: vFeat,
+          originLabel: 'Especie: Humano (Versátil)',
+          choice: {
+            type: 'feat',
+            featId: vFeat.id,
+            featSubChoices: formatOriginFeatSummary(originFeatChoices['human-versatile']),
+          },
+        });
+      }
+    }
+
+    // 3. Warlock Invocation: Lecciones de los Primeros
+    (creatorClassDecisions.warlockLessonsFeat || []).forEach((lessonChoice) => {
+      const cleanName = lessonChoice.split('(')[0].trim().toLowerCase();
+      const lFeat = allFeatsCatalog.find(
+        (f) => f.id === lessonChoice || f.name.toLowerCase().includes(cleanName) || f.nameEn.toLowerCase().includes(cleanName)
+      );
+      if (lFeat) {
+        list.push({
+          feat: lFeat,
+          originLabel: 'Invocación: Lecciones de los Primeros',
+          choice: {
+            type: 'feat',
+            featId: lFeat.id,
+            featSubChoices: formatOriginFeatSummary(originFeatChoices['warlock-lessons']),
+          },
+        });
+      }
+    });
+
+    // 4. ASI / Feat slots & Bonus Campaign Feat
+    Object.entries(asiChoices).forEach(([slotKey, c]) => {
+      if (c.type === 'feat' && c.featId) {
+        const feat = allFeatsCatalog.find((f) => f.id === c.featId);
+        if (feat) {
+          const ofSummary = formatOriginFeatSummary(originFeatChoices[`asi-${slotKey}`]);
+          list.push({
+            feat,
+            originLabel: 'Mejora de Nivel / Dote Elegida',
+            choice: {
+              ...c,
+              featSubChoices: c.featSubChoices?.length ? c.featSubChoices : ofSummary,
+            },
+          });
+        }
+      }
+    });
+
     return list;
-  }, [asiChoices, activeBackground, backgroundFeatSubChoice]);
+  }, [
+    asiChoices,
+    activeBackground,
+    backgroundFeatSubChoice,
+    allFeatsCatalog,
+    originFeatChoices,
+    selectedEdition,
+    activeSpecies2024,
+    humanVersatileFeat2024,
+    creatorClassDecisions.warlockLessonsFeat,
+  ]);
 
   // Equipped attacks from chosen equipment or defaults (dynamically responds to equipped items)
   const equippedAttacks: CharacterAttack[] = useMemo(() => {
@@ -2118,7 +2506,18 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
     const saveDc = 8 + profBonus + abilityMod;
     const attackBonus = profBonus + abilityMod;
     const attackStr = attackBonus >= 0 ? `+${attackBonus}` : `${attackBonus}`;
-    const slots = isCaster ? (FULL_CASTER_SLOTS_TABLE[characterLevel] || {}) : {};
+    const cId = (activeClass?.id || '').toLowerCase();
+    let slots: Record<number, number> = {};
+    if (isCaster) {
+      if (cId === 'brujo') {
+        const pact = WARLOCK_PACT_SLOTS_TABLE[characterLevel];
+        if (pact) slots = { [pact.slotLevel]: pact.count };
+      } else if (cId === 'paladin' || cId === 'explorador' || cId === 'artifice') {
+        slots = getHalfCasterSlotsTable(selectedEdition)[characterLevel] || {};
+      } else {
+        slots = FULL_CASTER_SLOTS_TABLE[characterLevel] || {};
+      }
+    }
 
     return {
       ability,
@@ -2180,7 +2579,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
         const row = FULL_CASTER_SLOTS_TABLE[characterLevel] || {};
         casterSlots = Object.fromEntries(Object.entries(row).map(([k, max]) => [k, { max, used: 0 }]));
       } else if (norm.includes('palad') || norm.includes('explorador') || norm.includes('ranger')) {
-        const row = HALF_CASTER_SLOTS_TABLE[characterLevel] || {};
+        const row = getHalfCasterSlotsTable(selectedEdition)[characterLevel] || {};
         casterSlots = Object.fromEntries(Object.entries(row).map(([k, max]) => [k, { max, used: 0 }]));
       } else if (norm.includes('brujo') || norm.includes('warlock')) {
         const pact = WARLOCK_PACT_SLOTS_TABLE[characterLevel] || { count: 1, slotLevel: 1 };
@@ -2212,6 +2611,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
     }
     const decisionSpellKeys = [
       'pactTomeCantrips',
+      'pactTomeRituals',
       'clericNatureCantrip',
       'clericArcanaCantrips',
       'bardMagicalSecrets_6',
@@ -2224,12 +2624,14 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
       chosen.forEach((spellName) => {
         const cleanName = spellName.split('(')[0].trim();
         if (!combinedSpells.some((s) => s.name.toLowerCase() === cleanName.toLowerCase())) {
-          const found = findSpellByNameOrAlias(cleanName) || findSpellByNameOrAlias(spellName);
+          const found = findSpellByNameOrAlias(cleanName, selectedEdition) || findSpellByNameOrAlias(spellName, selectedEdition);
           if (found) {
+            const isTomeDecision = key === 'pactTomeCantrips' || key === 'pactTomeRituals';
             combinedSpells.push({
               ...found,
               id: `char-spl-decision-${found.id || found.name.toLowerCase().replace(/\s+/g, '-')}`,
               prepared: true,
+              ...(isTomeDecision ? { isFeatSpell: true, featOrigin: 'Pacto del Tomo' } : {}),
               notes: `Concedido por decisión de clase: ${key}`,
             });
           }
@@ -2245,7 +2647,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
         const cleanName = splName.split('(')[0].trim();
         const alreadyHas = combinedSpells.some((s) => s.name.toLowerCase() === cleanName.toLowerCase());
         if (!alreadyHas) {
-          const found = findSpellByNameOrAlias(cleanName) || findSpellByNameOrAlias(splName);
+          const found = findSpellByNameOrAlias(cleanName, selectedEdition) || findSpellByNameOrAlias(splName, selectedEdition);
           if (found) {
             combinedSpells.push({
               ...found,
@@ -2353,9 +2755,26 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
       platinum: initialCharacter?.platinum !== undefined ? initialCharacter.platinum : (activeBackground?.platinum ?? 0),
       inventory: chosenEquipmentList.length > 0 ? chosenEquipmentList : (initialCharacter?.inventory || []),
       equippedItems: activeEquippedList,
-      tools: backgroundTools.length > 0 ? backgroundTools : (initialCharacter?.tools || []),
+      tools: Array.from(
+        new Set([
+          ...(backgroundTools.length > 0 ? backgroundTools : (initialCharacter?.tools || [])),
+          ...Object.values(originFeatChoices).flatMap((d) => [
+            ...(d.tools || []),
+            ...((d.skillsOrTools || []).filter((item) => !ALL_5E_SKILLS.some((sk) => sk.name === item))),
+          ]),
+        ])
+      ),
       languages: finalLanguagesList,
       classDecisions: creatorClassDecisions,
+      feats: chosenFeatsList.map(({ feat, choice, originLabel }) => ({
+        id: feat.id,
+        name: feat.name,
+        category: feat.category,
+        origin: originLabel,
+        summary: feat.description,
+        abilityBonus: choice.featAbilityChoice,
+        subChoices: choice.featSubChoices,
+      })),
       edition: selectedEdition,
       weaponMasteries: selectedWeaponMasteries,
       isDraft: false,
@@ -2366,6 +2785,12 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
         bgAsiStatPlusTwo,
         bgAsiStatPlusOne,
         selectedWeaponMasteries,
+        speciesLineage2024,
+        speciesSize2024,
+        humanSkill2024,
+        humanVersatileFeat2024,
+        backgroundTool2024,
+        originFeatChoices,
         currentStep,
         characterName,
         playerName,
@@ -3944,16 +4369,235 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
 
                   {/* 2024 SPECIES PICKER vs 5e RACE CATALOG */}
                   {selectedEdition === '5.5e' ? (
-                    <Creator2024SpeciesPicker
-                      selectedSpeciesId={selectedRaceId}
-                      onSelectSpecies={(id) => {
-                        setSelectedRaceId(id);
-                        setSelectedSubraceId('');
-                        setFlexibleRacialChoices([]);
-                        setBonusRacialSkills([]);
-                      }}
-                      onInspect={(data) => setInspectingCompendium(data)}
-                    />
+                    <div className="space-y-4">
+                      <Creator2024SpeciesPicker
+                        selectedSpeciesId={selectedRaceId}
+                        onSelectSpecies={(id) => {
+                          setSelectedRaceId(id);
+                          setSelectedSubraceId('');
+                          setFlexibleRacialChoices([]);
+                          setBonusRacialSkills([]);
+                          setSpeciesLineage2024('');
+                          setSpeciesSize2024('');
+                          setHumanSkill2024('');
+                          setHumanVersatileFeat2024('');
+                        }}
+                        onInspect={(data) => setInspectingCompendium(data)}
+                      />
+
+                      {activeSpecies2024 && (
+                        <div className="p-4 bg-[#fcf9f2] rounded-xl border-2 border-[#b88c32] space-y-4 shadow-sm">
+                          <div className="flex items-center justify-between border-b border-[#ebdcc7] pb-2">
+                            <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase tracking-wide flex items-center gap-1.5">
+                              <Sparkles className="w-4 h-4 text-[#8c672b]" />
+                              Personalización de Especie 5.5e — {activeSpecies2024.name}
+                            </h5>
+                            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#ebdcc4] text-[#4a361c]">
+                              {activeRace?.speed} • Visión {activeRace?.darkvision || 0} pies
+                            </span>
+                          </div>
+
+                          {/* Tamaño elegible */}
+                          {activeSpecies2024.allowSizeChoice && (
+                            <div className="space-y-1.5">
+                              <span className="text-[11px] font-bold text-[#4a361c] uppercase block">
+                                Tamaño de Especie (5.5e):
+                              </span>
+                              <div className="flex gap-2">
+                                {(['Mediano', 'Pequeño'] as const).map((sz) => {
+                                  const isSel = (speciesSize2024 || 'Mediano') === sz;
+                                  return (
+                                    <button
+                                      key={sz}
+                                      type="button"
+                                      onClick={() => setSpeciesSize2024(sz)}
+                                      className={`px-3 py-1.5 rounded-lg border text-xs font-bold cursor-pointer transition ${
+                                        isSel
+                                          ? 'bg-[#8c672b] text-white border-[#8c672b] shadow-xs'
+                                          : 'bg-white text-[#4a361c] border-[#d6c4aa] hover:border-[#8c672b]'
+                                      }`}
+                                    >
+                                      {sz}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Linaje / Ancestría (Elfo, Gnomo, Tiefling, Dracónido, Goliat) */}
+                          {activeSpecies2024.lineages && activeSpecies2024.lineages.length > 0 && (
+                            <div className="space-y-2">
+                              <span className="text-[11px] font-bold text-[#4a361c] uppercase block">
+                                Linaje / Ancestría de {activeSpecies2024.name}:
+                              </span>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                                {activeSpecies2024.lineages.map((lin) => {
+                                  const isSel =
+                                    speciesLineage2024 === lin.id ||
+                                    (!speciesLineage2024 && activeSpecies2024.lineages![0].id === lin.id);
+                                  return (
+                                    <div
+                                      key={lin.id}
+                                      onClick={() => setSpeciesLineage2024(lin.id)}
+                                      className={`p-2.5 rounded-xl border-2 cursor-pointer transition text-xs ${
+                                        isSel
+                                          ? 'bg-[#f4e8d2] border-[#8c672b] shadow-xs ring-1 ring-[#8c672b]'
+                                          : 'bg-white border-[#d6c4aa] hover:border-[#b88c32]'
+                                      }`}
+                                    >
+                                      <div className="font-fantasy font-bold text-[#3b2a14] flex items-center justify-between">
+                                        <span>{lin.name}</span>
+                                        {isSel && <Check className="w-3.5 h-3.5 text-[#8c672b] shrink-0" />}
+                                      </div>
+                                      <p className="text-[10px] text-[#5c4a35] mt-1 leading-snug">{isSpanish ? lin.summary : (lin.summaryEn || lin.summary)}</p>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Aptitud mágica y truco innato (Elfo / Gnomo / Tiefling / Aasimar) */}
+                          {activeRace?.spellcastingConfig && (
+                            <div className="p-3 bg-[#f7f2fc] rounded-xl border border-[#c8b2df] space-y-2.5">
+                              <div className="flex flex-wrap items-center justify-between gap-2">
+                                <span className="text-[11px] font-fantasy font-bold text-[#41216b] uppercase">
+                                  ✨ Aptitud Mágica del Linaje (INT / SAB / CAR):
+                                </span>
+                                <div className="flex gap-1.5">
+                                  {(['int', 'wis', 'cha'] as const).map((ab) => {
+                                    const active = effectiveRacialSpellAbility === ab;
+                                    const label = ab === 'int' ? 'INT' : ab === 'wis' ? 'SAB' : 'CAR';
+                                    return (
+                                      <button
+                                        key={ab}
+                                        type="button"
+                                        onClick={() => setRacialSpellcastingAbility(ab)}
+                                        className={`px-2.5 py-1 rounded border text-[11px] font-bold cursor-pointer transition ${
+                                          active
+                                            ? 'bg-[#6a3ca3] text-white border-[#6a3ca3]'
+                                            : 'bg-white text-[#41216b] border-[#d2bee8] hover:border-[#6a3ca3]'
+                                        }`}
+                                      >
+                                        {label}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+
+                              {activeRace.spellcastingConfig.hasCantripChoice && (
+                                <div className="space-y-1">
+                                  <span className="text-[11px] font-bold text-[#41216b] block">
+                                    Truco de Mago (Alto Elfo — intercambiable cada Descanso Largo):
+                                  </span>
+                                  <select
+                                    value={selectedRacialCantrip}
+                                    onChange={(e) => setSelectedRacialCantrip(e.target.value)}
+                                    className="w-full bg-white border border-[#d2bee8] rounded-lg p-2 text-xs text-[#2c241b] focus:outline-none focus:border-[#6a3ca3]"
+                                  >
+                                    <option value="">-- Elige un truco de Mago --</option>
+                                    {wizardCantripsList.map((c) => (
+                                      <option key={c.id} value={c.name}>
+                                        {c.name} ({c.school})
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+                              )}
+
+                              {(activeRace.innateSpells?.length || 0) > 0 && (
+                                <div className="flex flex-wrap gap-1.5 pt-1">
+                                  {activeRace.innateSpells!.map((sp, i) => (
+                                    <span
+                                      key={i}
+                                      className={`text-[10px] px-2 py-0.5 rounded border font-medium ${
+                                        characterLevel >= sp.requiredLevel
+                                          ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                                          : 'bg-white/70 text-[#7a6448] border-[#dfd1ee]'
+                                      }`}
+                                    >
+                                      {sp.spellName} (Nv {sp.requiredLevel}+)
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Rasgos especiales de Humano 5.5e (Hábil + Versátil) */}
+                          {activeSpecies2024.id === 'species-2024-human' && (
+                            <div className="p-3.5 bg-[#f4e8d2]/70 rounded-xl border border-[#b88c32] space-y-3">
+                              <h6 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase">
+                                Rasgos Especiales de Humano (2024): Hábil & Versátil
+                              </h6>
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div>
+                                  <label className="text-[11px] font-bold text-[#4a361c] block mb-1">
+                                    1. Hábil (Skillful) — 1 Competencia Adicional:
+                                  </label>
+                                  <select
+                                    value={humanSkill2024}
+                                    onChange={(e) => setHumanSkill2024(e.target.value)}
+                                    className="w-full bg-white border border-[#d6c4aa] rounded-lg p-2 text-xs text-[#2c241b] focus:outline-none focus:border-[#8c672b]"
+                                  >
+                                    <option value="">-- Elige 1 habilidad adicional --</option>
+                                    {ALL_5E_SKILLS.map((sk) => (
+                                      <option key={sk.name} value={sk.name}>
+                                        {sk.name} ({sk.ability.toUpperCase()})
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+
+                                <div>
+                                  <label className="text-[11px] font-bold text-[#4a361c] block mb-1">
+                                    2. Versátil (Versatile) — Dote de Origen Adicional:
+                                  </label>
+                                  <select
+                                    value={humanVersatileFeat2024}
+                                    onChange={(e) => {
+                                      const nextId = e.target.value;
+                                      setHumanVersatileFeat2024(nextId);
+                                      setOriginFeatChoices((prev) => ({
+                                        ...prev,
+                                        'human-versatile': { featId: nextId },
+                                      }));
+                                    }}
+                                    className="w-full bg-white border border-[#d6c4aa] rounded-lg p-2 text-xs text-[#2c241b] focus:outline-none focus:border-[#8c672b]"
+                                  >
+                                    <option value="">-- Elige 1 Dote de Origen (Nivel 1) --</option>
+                                    {DND_2024_AS_OFFICIAL_FEATS.filter((f) => f.category === 'Origen (Nivel 1)').map((f) => (
+                                      <option key={f.id} value={f.id}>
+                                        {f.name} ({f.nameEn})
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+                              </div>
+
+                              {humanVersatileFeat2024 && (
+                                <OriginFeatSubChoicePicker
+                                  featId={humanVersatileFeat2024}
+                                  featName={allFeatsCatalog.find((f) => f.id === humanVersatileFeat2024)?.name}
+                                  edition="5.5e"
+                                  value={originFeatChoices['human-versatile'] || { featId: humanVersatileFeat2024 }}
+                                  onChange={(nextData) =>
+                                    setOriginFeatChoices((prev) => ({
+                                      ...prev,
+                                      'human-versatile': nextData,
+                                    }))
+                                  }
+                                  onInspectSpell={(sp) => setInspectingSpell(sp)}
+                                />
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   ) : (
                     <>
                   {/* Entire Race Selection: Filters + Search + Race Cards Grid */}
@@ -4330,7 +4974,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                               {racialSpellcastingInfo.innateSpells.map((entry, idx) => {
                                 const isUnlocked = characterLevel >= entry.requiredLevel;
-                                const spellObj = findSpellByNameOrAlias(entry.spellName);
+                                const spellObj = findSpellByNameOrAlias(entry.spellName, selectedEdition);
 
                                 return (
                                   <div
@@ -4373,7 +5017,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                 <div className="p-2.5 rounded-lg border text-xs flex flex-col justify-between bg-white border-[#8c672b]/50 shadow-2xs">
                                   <div className="flex items-center justify-between gap-1">
                                     <span className="font-fantasy font-bold text-[#4a361c]">
-                                      {isSpanish ? selectedRacialCantrip : (findSpellByNameOrAlias(selectedRacialCantrip)?.nameEn || translateDndTitle(selectedRacialCantrip))}
+                                      {isSpanish ? selectedRacialCantrip : (findSpellByNameOrAlias(selectedRacialCantrip, selectedEdition)?.nameEn || translateDndTitle(selectedRacialCantrip))}
                                     </span>
                                     <span className="text-[9px] px-1.5 py-0.5 rounded font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
                                       {isSpanish ? '✓ Elegido' : '✓ Chosen'}
@@ -4732,13 +5376,18 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[46vh] overflow-y-auto pr-1">
-                                  {OFFICIAL_5E_FEATS
+                                  {getFeatsForEdition(selectedEdition)
                                     .filter((feat) => {
-                                      if (featCategory !== 'Todos' && feat.category !== featCategory) return false;
+                                      if (featCategory !== 'Todos') {
+                                        const catNorm = feat.category.toLowerCase();
+                                        const filNorm = featCategory.toLowerCase();
+                                        if (feat.category !== featCategory && !catNorm.includes(filNorm)) return false;
+                                      }
                                       if (featSearch.trim()) {
                                         const q = featSearch.toLowerCase();
                                         return (
                                           feat.name.toLowerCase().includes(q) ||
+                                          feat.nameEn.toLowerCase().includes(q) ||
                                           feat.description.toLowerCase().includes(q) ||
                                           feat.benefits.some((b) => b.toLowerCase().includes(q))
                                         );
@@ -4765,16 +5414,38 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                         });
                                       };
 
+                                      const needsOriginPicker =
+                                        isFeatSelected &&
+                                        ['magic-initiate', 'iniciado', 'skilled', 'habil', 'crafter', 'artesano', 'musician', 'musico'].some((k) =>
+                                          feat.id.toLowerCase().includes(k)
+                                        );
+
                                       return (
-                                        <FeatCard
-                                          key={feat.id}
-                                          feat={feat}
-                                          isSelected={isFeatSelected}
-                                          onSelect={handleSelectFeat}
-                                          onInspect={(data) => setInspectingCompendium(data)}
-                                          currentChoice={currentChoice}
-                                          setSlotChoice={setSlotChoice}
-                                        />
+                                        <div key={feat.id} className="space-y-1">
+                                          <FeatCard
+                                            feat={feat}
+                                            isSelected={isFeatSelected}
+                                            onSelect={handleSelectFeat}
+                                            onInspect={(data) => setInspectingCompendium(data)}
+                                            currentChoice={currentChoice}
+                                            setSlotChoice={setSlotChoice}
+                                          />
+                                          {needsOriginPicker && (
+                                            <OriginFeatSubChoicePicker
+                                              featId={feat.id}
+                                              featName={feat.name}
+                                              edition={selectedEdition}
+                                              value={originFeatChoices[`asi-${slotIdx}`] || { featId: feat.id }}
+                                              onChange={(nextData) =>
+                                                setOriginFeatChoices((prev) => ({
+                                                  ...prev,
+                                                  [`asi-${slotIdx}`]: nextData,
+                                                }))
+                                              }
+                                              onInspectSpell={(sp) => setInspectingSpell(sp)}
+                                            />
+                                          )}
+                                        </div>
                                       );
                                     })}
                                 </div>
@@ -5158,6 +5829,31 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                     );
                                   })}
                                 </div>
+
+                                {dec.id === 'warlockLessonsFeat' &&
+                                  (creatorClassDecisions.warlockLessonsFeat || []).map((chosenName, lIdx) => {
+                                    const cleanLesson = chosenName.split('(')[0].trim().toLowerCase();
+                                    const matchedFeat = DND_2024_AS_OFFICIAL_FEATS.find(
+                                      (f) => f.name.toLowerCase().includes(cleanLesson) || chosenName.toLowerCase().includes(f.nameEn.toLowerCase())
+                                    );
+                                    if (!matchedFeat) return null;
+                                    return (
+                                      <OriginFeatSubChoicePicker
+                                        key={`warlock-lesson-picker-${lIdx}-${matchedFeat.id}`}
+                                        featId={matchedFeat.id}
+                                        featName={matchedFeat.name}
+                                        edition={selectedEdition}
+                                        value={originFeatChoices['warlock-lessons'] || { featId: matchedFeat.id }}
+                                        onChange={(nextData) =>
+                                          setOriginFeatChoices((prev) => ({
+                                            ...prev,
+                                            'warlock-lessons': nextData,
+                                          }))
+                                        }
+                                        onInspectSpell={(sp) => setInspectingSpell(sp)}
+                                      />
+                                    );
+                                  })}
                               </div>
                             );
                           })}
@@ -5287,7 +5983,12 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                             </div>
 
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                              {totalSkills.map((sk) => {
+                              {totalSkills
+                                .filter((sk) =>
+                                  !expertiseConfig.restrictedSkills ||
+                                  expertiseConfig.restrictedSkills.some((rk) => rk.toLowerCase() === sk.toLowerCase())
+                                )
+                                .map((sk) => {
                                 const isExpert = validExpertiseSkills.includes(sk);
                                 return (
                                   <button
@@ -5325,13 +6026,13 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                               </div>
                               <span className="text-[11px] text-[#8c672b] font-mono font-bold">
                                 {selectedFightingStyle
-                                  ? FIGHTING_STYLE_OPTIONS.find((f) => f.id === selectedFightingStyle)?.name
+                                  ? getFightingStyleOptions(selectedEdition).find((f) => f.id === selectedFightingStyle)?.name
                                   : (isSpanish ? 'Sin seleccionar' : 'Unselected')}
                               </span>
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                              {FIGHTING_STYLE_OPTIONS.filter((f) => f.allowedClasses.includes(activeClass.id)).map((style) => {
+                              {getFightingStyleOptions(selectedEdition).filter((f) => f.allowedClasses.includes(activeClass.id)).map((style) => {
                                 const isSelected = style.id === selectedFightingStyle;
                                 return (
                                   <FightingStyleCard
@@ -5480,16 +6181,84 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
 
                   {/* 2024 BACKGROUND PICKER vs 5e BACKGROUND CATALOG */}
                   {selectedEdition === '5.5e' ? (
-                    <Creator2024BackgroundPicker
-                      selectedBackgroundId={selectedBackgroundId}
-                      onSelectBackground={(id) => setSelectedBackgroundId(id)}
-                      bgAsiMode={bgAsiMode2024}
-                      setBgAsiMode={setBgAsiMode2024}
-                      bgAsiStatPlusTwo={bgAsiStatPlusTwo}
-                      setBgAsiStatPlusTwo={setBgAsiStatPlusTwo}
-                      bgAsiStatPlusOne={bgAsiStatPlusOne}
-                      setBgAsiStatPlusOne={setBgAsiStatPlusOne}
-                    />
+                    <div className="space-y-4">
+                      <Creator2024BackgroundPicker
+                        selectedBackgroundId={selectedBackgroundId}
+                        onSelectBackground={(id) => setSelectedBackgroundId(id)}
+                        bgAsiMode={bgAsiMode2024}
+                        setBgAsiMode={setBgAsiMode2024}
+                        bgAsiStatPlusTwo={bgAsiStatPlusTwo}
+                        setBgAsiStatPlusTwo={setBgAsiStatPlusTwo}
+                        bgAsiStatPlusOne={bgAsiStatPlusOne}
+                        setBgAsiStatPlusOne={setBgAsiStatPlusOne}
+                      />
+
+                      {activeBackground2024 && (
+                        <div className="p-4 bg-[#fcf9f2] rounded-xl border-2 border-[#b88c32] space-y-3 shadow-sm">
+                          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#ebdcc7] pb-2">
+                            <div>
+                              <span className="text-[10px] font-mono uppercase tracking-wider text-[#9c6a1e] font-bold block">
+                                ★ Dote de Origen & Herramienta de Trasfondo (PHB 2024)
+                              </span>
+                              <h4 className="font-fantasy font-bold text-sm text-[#4a361c] flex items-center gap-1.5">
+                                <Star className="w-4 h-4 text-[#b88c32] fill-[#b88c32]" />
+                                {activeBackground2024.feat}
+                              </h4>
+                            </div>
+                            <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded bg-[#ebdcc4] text-[#4a361c]">
+                              {activeBackground2024.skills?.join(' + ')} • +{activeBackground2024.startingGold ?? 50} po
+                            </span>
+                          </div>
+
+                          {activeBackground2024.toolChoice && (
+                            <div className="space-y-1.5">
+                              <span className="text-[11px] font-bold text-[#4a361c] uppercase block">
+                                Herramienta Específica ({activeBackground2024.toolChoice.label}):
+                              </span>
+                              <div className="flex flex-wrap gap-1.5">
+                                {activeBackground2024.toolChoice.options.map((toolOpt) => {
+                                  const isSel = backgroundTool2024 === toolOpt;
+                                  return (
+                                    <button
+                                      key={toolOpt}
+                                      type="button"
+                                      onClick={() => setBackgroundTool2024(toolOpt)}
+                                      className={`px-2.5 py-1 rounded-lg border text-xs font-medium cursor-pointer transition ${
+                                        isSel
+                                          ? 'bg-[#8c672b] text-white border-[#8c672b] shadow-xs'
+                                          : 'bg-white text-[#4a361c] border-[#d6c4aa] hover:border-[#8c672b]'
+                                      }`}
+                                    >
+                                      {isSel ? '✓ ' : ''}{toolOpt}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+
+                          <OriginFeatSubChoicePicker
+                            featId={activeBackground2024.bonusFeatId}
+                            featName={activeBackground2024.feat}
+                            lockedSpellList={activeBackground2024.bonusFeatSpellList}
+                            edition="5.5e"
+                            value={
+                              originFeatChoices.background || {
+                                featId: activeBackground2024.bonusFeatId,
+                                spellList: activeBackground2024.bonusFeatSpellList,
+                              }
+                            }
+                            onChange={(nextData) =>
+                              setOriginFeatChoices((prev) => ({
+                                ...prev,
+                                background: nextData,
+                              }))
+                            }
+                            onInspectSpell={(sp) => setInspectingSpell(sp)}
+                          />
+                        </div>
+                      )}
+                    </div>
                   ) : (
                     <>
                   {/* Entire Background Selection: Filters + Search + Catalog Accordion */}
@@ -6443,9 +7212,9 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                         </div>
                       )}
 
-                      {/* Background Bonus Feat Banner & Subchoice Selection */}
+                      {/* Background Bonus Feat Banner & Subchoice Selection (5e or detailed inspection) */}
                       {activeBackground.bonusFeatId && (() => {
-                        const bonusFeat = OFFICIAL_5E_FEATS.find((f) => f.id === activeBackground.bonusFeatId);
+                        const bonusFeat = allFeatsCatalog.find((f) => f.id === activeBackground.bonusFeatId);
                         return (
                           <div id="creator-background-bonus-feat" className="p-4 bg-gradient-to-br from-[#fcf6e9] via-[#f7edd8] to-[#f4e6c8] rounded-xl border-2 border-[#b88c32] shadow-md space-y-3">
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#d8be8a] pb-2.5">
@@ -7367,16 +8136,46 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                         </div>
                       ) : null}
 
-                      {/* 2. CONJUROS ADICIONALES POR TRASFONDO O DOTES */}
-                      {selectedSpells.filter((s) => !s.isRacial).length > 0 && (
+                      {/* 2. CONJUROS CONCEDIDOS POR DOTE DE ORIGEN (Iniciado en la Magia) / INVOCACIÓN / CLASE */}
+                      {selectedSpells.filter((s) => s.isFeatSpell).length > 0 && (
+                        <div className="p-4 rounded-xl bg-[#f7f2fc] border-2 border-[#6a3ca3]/40 space-y-3">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <h5 className="font-fantasy font-bold text-xs text-[#41216b] uppercase tracking-wide flex items-center gap-2">
+                              <Sparkles className="w-4 h-4 text-[#6a3ca3]" />
+                              {isSpanish
+                                ? 'Conjuros de Dote de Origen / Invocación / Clase (No consumen límite)'
+                                : 'Origin Feat / Invocation / Bonus Spells (Do not count toward class limit)'}
+                            </h5>
+                            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-purple-100 text-[#41216b] border border-purple-300">
+                              ✓ {selectedSpells.filter((s) => s.isFeatSpell).length} preparados automáticos
+                            </span>
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {selectedSpells
+                              .filter((s) => s.isFeatSpell)
+                              .map((spell) => (
+                                <SpellCardComponent
+                                  key={spell.id}
+                                  spell={spell}
+                                  isSelected={true}
+                                  onToggle={() => setInspectingSpell(spell)}
+                                  onInspect={(spl) => setInspectingSpell(spl)}
+                                />
+                              ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 2B. CONJUROS ADICIONALES POR TRASFONDO O EXCEPCIÓN DM */}
+                      {selectedSpells.filter((s) => !s.isRacial && !s.isFeatSpell && !isCaster).length > 0 && (
                         <div className="p-4 rounded-xl bg-[#f5ede0] border border-[#d6c4aa] space-y-3">
                           <h5 className="font-fantasy font-bold text-xs text-[#4a361c] uppercase tracking-wide flex items-center gap-2">
                             <Star className="w-4 h-4 text-[#8c672b]" />
-                            {isSpanish ? 'Conjuros Adicionales Registrados (Dotes / Trasfondo / Excepción)' : 'Additional Recorded Spells (Feats / Background / DM Exception)'}
+                            {isSpanish ? 'Conjuros Adicionales Registrados (Excepción / DM)' : 'Additional Recorded Spells (DM Exception)'}
                           </h5>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             {selectedSpells
-                              .filter((s) => !s.isRacial)
+                              .filter((s) => !s.isRacial && !s.isFeatSpell)
                               .map((spell) => (
                                 <SpellCardComponent
                                   key={spell.id}
@@ -7440,7 +8239,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                                   setSpellSearchQuery(e.target.value);
                                   if (spellScopeMode !== 'all_compendium') setSpellScopeMode('all_compendium');
                                 }}
-                                placeholder={isSpanish ? "Buscar en el compendio general de 515 conjuros..." : "Search the full compendium of 515 spells..."}
+                                placeholder={isSpanish ? `Buscar en el compendio general de ${getCompendiumForEdition(selectedEdition).length} conjuros...` : `Search the full compendium of ${getCompendiumForEdition(selectedEdition).length} spells...`}
                                 className="w-full bg-white border border-[#d6c4aa] rounded-lg pl-8 pr-3 py-1.5 text-xs text-[#2c241b] focus:outline-none focus:border-[#8c672b]"
                               />
                             </div>
@@ -7453,7 +8252,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                               className="px-3 py-1.5 rounded-lg border border-[#8c672b] bg-[#ebdcc4] hover:bg-[#dfcdb1] text-xs font-fantasy font-bold text-[#4a361c] flex items-center gap-1.5 shrink-0 cursor-pointer"
                             >
                               <Maximize2 className="w-3.5 h-3.5 text-[#8c672b]" />
-                              <span>{isSpanish ? 'Compendio' : 'Compendium'} ({OFFICIAL_SPELLS_COMPENDIUM.length})</span>
+                              <span>{isSpanish ? 'Compendio' : 'Compendium'} ({getCompendiumForEdition(selectedEdition).length})</span>
                             </button>
                           </div>
                           {spellSearchQuery.trim() && displayedSpellsData.totalCount > 0 && (
@@ -7588,7 +8387,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                               }`}
                               title="Compendio Completo Oficial con conjuros de todas las clases"
                             >
-                              📖 {isSpanish ? `Compendio Completo (${OFFICIAL_SPELLS_COMPENDIUM.length})` : `Full Compendium (${OFFICIAL_SPELLS_COMPENDIUM.length})`}
+                              📖 {isSpanish ? `Compendio Completo (${getCompendiumForEdition(selectedEdition).length})` : `Full Compendium (${getCompendiumForEdition(selectedEdition).length})`}
                             </button>
                           </div>
 
@@ -9435,7 +10234,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
               <div className="bg-amber-100 border-b border-amber-300 px-6 py-2 text-xs text-amber-950 flex items-center gap-2 shrink-0">
                 <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0" />
                 <span>
-                  <strong>Límite de Conjuración 5e superado:</strong> Tienes más trucos o conjuros de los estipulados para tu nivel. Avanza solo si el DM así lo autoriza o lo permite.
+                  <strong>Límite de Conjuración {selectedEdition}:</strong> Tienes más trucos o conjuros de los estipulados para tu nivel. Avanza solo si el DM así lo autoriza o lo permite (o si provienen de una dote extra).
                 </span>
               </div>
             )}
@@ -9492,7 +10291,7 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
                       }`}
                       title="Compendio Completo Oficial con conjuros de todas las clases"
                     >
-                      📖 {isSpanish ? `Compendio Completo (${OFFICIAL_SPELLS_COMPENDIUM.length})` : `Full Compendium (${OFFICIAL_SPELLS_COMPENDIUM.length})`}
+                      📖 {isSpanish ? `Compendio Completo (${getCompendiumForEdition(selectedEdition).length})` : `Full Compendium (${getCompendiumForEdition(selectedEdition).length})`}
                     </button>
                   </div>
               </div>
@@ -9905,13 +10704,18 @@ export const CharacterCreatorModal: React.FC<CharacterCreatorModalProps> = ({
 
                 return (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {OFFICIAL_5E_FEATS
+                    {getFeatsForEdition(selectedEdition)
                       .filter((feat) => {
-                        if (featCategory !== 'Todos' && feat.category !== featCategory) return false;
+                        if (featCategory !== 'Todos') {
+                          const catNorm = feat.category.toLowerCase();
+                          const filNorm = featCategory.toLowerCase();
+                          if (feat.category !== featCategory && !catNorm.includes(filNorm)) return false;
+                        }
                         if (featSearch.trim()) {
                           const q = featSearch.toLowerCase();
                           return (
                             feat.name.toLowerCase().includes(q) ||
+                            feat.nameEn.toLowerCase().includes(q) ||
                             feat.description.toLowerCase().includes(q) ||
                             feat.benefits.some((b) => b.toLowerCase().includes(q))
                           );

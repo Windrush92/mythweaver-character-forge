@@ -41,7 +41,32 @@ export interface Spell {
   isRacial?: boolean;
   racialOrigin?: string;
   racialAbility?: 'int' | 'wis' | 'cha';
+  edition?: '5e' | '5.5e' | 'both';
+  isFeatSpell?: boolean;
+  featOrigin?: string;
   notes?: string;
+  rules2024?: {
+    name?: string;
+    nameEn?: string;
+    level?: number;
+    school?: string;
+    castingTime?: string;
+    castingTimeEn?: string;
+    range?: string;
+    rangeEn?: string;
+    components?: string;
+    componentsEn?: string;
+    duration?: string;
+    durationEn?: string;
+    description?: string;
+    descriptionEn?: string;
+    higherLevels?: string;
+    higherLevelsEn?: string;
+    ritual?: boolean;
+    concentration?: boolean;
+    classes?: string[];
+    notes?: string;
+  };
 }
 
 export interface SpellSlotLevel {
@@ -184,6 +209,33 @@ export interface Character {
   isRaging?: boolean;
   creatorState?: Record<string, any>;
   classDecisions?: Record<string, any>;
+  feats?: CharacterFeatEntry[];
+}
+
+export interface CharacterFeatEntry {
+  id: string;
+  name: string;
+  nameEn?: string;
+  category?: 'Origen' | 'Origen (Nivel 1)' | 'Estilo de Combate' | 'Dote de Combate' | 'General' | 'Bendición Épica' | string;
+  source?: string;
+  origin?: string;
+  summary?: string;
+  description?: string;
+  benefits?: string[];
+  abilityChoice?: 'str' | 'dex' | 'con' | 'int' | 'wis' | 'cha';
+  subChoices?:
+    | {
+        featId?: string;
+        spellList?: 'cleric' | 'druid' | 'wizard' | 'Clérigo' | 'Druida' | 'Mago';
+        spellClass?: 'Clérigo' | 'Druida' | 'Mago' | string;
+        spellAbility?: 'int' | 'wis' | 'cha';
+        cantrips?: string[];
+        level1Spell?: string;
+        skillsOrTools?: string[];
+        tools?: string[];
+        instruments?: string[];
+      }
+    | string[];
 }
 
 export interface StatblockAction {

@@ -36,7 +36,7 @@ import {
 } from '../data/wikidotClassTables';
 import { WIKIDOT_RACES, WikidotRace } from '../data/wikidotRacesData';
 import { WIKIDOT_BACKGROUNDS, WikidotBackground, formatBackgroundWealth } from '../data/wikidotBackgroundsData';
-import { OFFICIAL_SPELLS_COMPENDIUM } from '../data/spellsData';
+import { OFFICIAL_SPELLS_COMPENDIUM, getCompendiumForEdition, getSpellForEdition } from '../data/spellsData';
 import { OFFICIAL_5E_FEATS, OfficialFeat } from '../data/characterCreatorData';
 import { ALL_WIKIDOT_FEATS } from '../data/wikidotFeatsData';
 import { ALL_5E_WEAPONS, ALL_5E_ARMORS, WeaponDef, ArmorDef } from '../data/weaponsAndArmorData';
@@ -320,13 +320,15 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
   const [spellLevelFilter, setSpellLevelFilter] = useState<'all' | number>('all');
   const [spellSchoolFilter, setSpellSchoolFilter] = useState<string>('all');
   const [spellClassFilter, setSpellClassFilter] = useState<string>('all');
+  const activeSpellCompendium = useMemo(() => getCompendiumForEdition(edition), [edition]);
+
   const [selectedSpell, setSelectedSpell] = useState<Spell | null>(
     OFFICIAL_SPELLS_COMPENDIUM[0] || null
   );
   const [modalSpell, setModalSpell] = useState<Spell | null>(null);
 
   const filteredSpells = useMemo(() => {
-    return OFFICIAL_SPELLS_COMPENDIUM.filter((sp) => {
+    return activeSpellCompendium.filter((sp) => {
       if (spellLevelFilter !== 'all' && sp.level !== spellLevelFilter) return false;
       if (spellSchoolFilter !== 'all' && !sp.school.toLowerCase().includes(spellSchoolFilter.toLowerCase()))
         return false;
@@ -344,7 +346,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
       }
       return true;
     });
-  }, [spellLevelFilter, spellSchoolFilter, spellClassFilter, searchTerm]);
+  }, [activeSpellCompendium, spellLevelFilter, spellSchoolFilter, spellClassFilter, searchTerm]);
 
   // ---------------------------------------------------------------------------
   // 6. FEATS STATE
@@ -615,7 +617,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
           }`}
         >
           <Shield className="w-4 h-4" />
-          {edition === '5.5e' ? t('Clases 2024', '2024 Classes') : t('Clases & Progresión 1-20', 'Classes & Progression 1-20')}
+          {edition === '5.5e' ? `${t('Clases 2024', '2024 Classes')} (${DND_2024_CLASSES.length})` : t('Clases & Progresión 1-20', 'Classes & Progression 1-20')}
         </button>
 
         <button
@@ -663,7 +665,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
           }`}
         >
           <Award className="w-4 h-4" />
-          {edition === '5.5e' ? t('Dotes (Origen & Nvl 4+)', 'Feats (Origin & Lv 4+)') : `${t('Dotes', 'Feats')} (${OFFICIAL_5E_FEATS.length})`}
+          {edition === '5.5e' ? `${t('Dotes 2024', '2024 Feats')} (${DND_2024_FEATS.length})` : `${t('Dotes', 'Feats')} (${OFFICIAL_5E_FEATS.length})`}
         </button>
 
         <button
@@ -687,7 +689,7 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
           }`}
         >
           <Sparkles className="w-4 h-4" />
-          {t('Grimorio Oficial', 'Official Spellbook')} ({OFFICIAL_SPELLS_COMPENDIUM.length})
+          {t('Grimorio Oficial', 'Official Spellbook')} ({activeSpellCompendium.length})
         </button>
 
         <button
@@ -3064,7 +3066,8 @@ export const CompendiumView: React.FC<CompendiumViewProps> = ({
       {/* Modal Pergamino Completo del Conjuro */}
       {modalSpell && (
         <SpellDetailModal
-          spell={modalSpell}
+          spell={getSpellForEdition(modalSpell, edition)}
+          edition={edition}
           onClose={() => setModalSpell(null)}
         />
       )}

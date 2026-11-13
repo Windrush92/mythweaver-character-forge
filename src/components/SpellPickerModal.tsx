@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { OFFICIAL_SPELLS_COMPENDIUM } from '../data/spellsData';
+import { getCompendiumForEdition } from '../data/spellsData';
 import { Spell } from '../types';
 import { useLanguageStore } from '../hooks/useLanguageStore';
 import { localizeReactNode, translateDndTitle, translateDndText, translateSpellSchool, translateSpellMeta } from '../utils/dndEnglishTranslator';
@@ -23,6 +23,7 @@ interface SpellPickerModalProps {
   selectedSpellNames?: string[];
   title?: string;
   subtitle?: string;
+  edition?: '5e' | '5.5e';
 }
 
 export const SpellPickerModal: React.FC<SpellPickerModalProps> = ({
@@ -32,14 +33,17 @@ export const SpellPickerModal: React.FC<SpellPickerModalProps> = ({
   selectedSpellNames = [],
   title,
   subtitle,
+  edition = '5e',
 }) => {
   const { isSpanish } = useLanguageStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLevel, setSelectedLevel] = useState<number | 'all'>('all');
   const [selectedSchool, setSelectedSchool] = useState<string>('all');
 
+  const editionCompendium = useMemo(() => getCompendiumForEdition(edition), [edition]);
+
   const filteredSpells = useMemo(() => {
-    return OFFICIAL_SPELLS_COMPENDIUM.filter((spell) => {
+    return editionCompendium.filter((spell) => {
       // Level filter
       if (selectedLevel !== 'all' && spell.level !== selectedLevel) {
         return false;
@@ -68,7 +72,7 @@ export const SpellPickerModal: React.FC<SpellPickerModalProps> = ({
       if (a.level !== b.level) return a.level - b.level;
       return isSpanish ? a.name.localeCompare(b.name) : (a.nameEn || a.name).localeCompare(b.nameEn || b.name);
     });
-  }, [selectedLevel, selectedSchool, searchTerm, isSpanish]);
+  }, [editionCompendium, selectedLevel, selectedSchool, searchTerm, isSpanish]);
 
   if (!isOpen) return null;
 
@@ -309,9 +313,9 @@ export const SpellPickerModal: React.FC<SpellPickerModalProps> = ({
         <div className="p-3.5 sm:p-4 bg-[#f4ebd9] border-t border-[#d6c4aa] flex items-center justify-between text-xs text-[#5c4a35] shrink-0">
           <span>
             {isSpanish ? (
-              <>Mostrando <strong>{filteredSpells.length}</strong> de {OFFICIAL_SPELLS_COMPENDIUM.length} conjuros</>
+              <>Mostrando <strong>{filteredSpells.length}</strong> de {editionCompendium.length} conjuros</>
             ) : (
-              <>Showing <strong>{filteredSpells.length}</strong> of {OFFICIAL_SPELLS_COMPENDIUM.length} spells</>
+              <>Showing <strong>{filteredSpells.length}</strong> of {editionCompendium.length} spells</>
             )}
           </span>
           <button

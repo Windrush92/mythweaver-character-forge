@@ -6,6 +6,24 @@ export interface SpeciesTrait2024 {
   descEn?: string;
 }
 
+export interface Species2024LineageSpell {
+  spellName: string;
+  spellNameEn: string;
+  minLevel: number;
+}
+
+export interface Species2024LineageOption {
+  id: string;
+  name: string;
+  nameEn: string;
+  summary: string;
+  summaryEn: string;
+  darkvisionOverride?: number;
+  speedOverride?: string;
+  damageResistance?: string;
+  spells?: Species2024LineageSpell[];
+}
+
 export interface Species2024 {
   id: string;
   slug: string;
@@ -16,8 +34,24 @@ export interface Species2024 {
   descriptionEn?: string;
   size: string;
   sizeEn?: string;
+  allowSizeChoice?: boolean;
   speed: string;
   darkvision: number;
+  hpPerLevelBonus?: number;
+  grantsExtraSkill?: boolean;
+  grantsOriginFeat?: boolean;
+  skillChoice?: {
+    count: number;
+    label: string;
+    labelEn: string;
+    options: string[];
+  };
+  spellcastingAbilityChoice?: ('int' | 'wis' | 'cha')[];
+  baseSpells?: Species2024LineageSpell[];
+  fixedSpellcastingAbility?: 'int' | 'wis' | 'cha';
+  lineageTitle?: string;
+  lineageTitleEn?: string;
+  lineages?: Species2024LineageOption[];
   traits: SpeciesTrait2024[];
 }
 
@@ -30,8 +64,8 @@ export const DND_2024_SPECIES: Species2024[] = [
     "edition": "5.5e",
     "description": "Los aasimar son mortales que llevan una chispa de los Planos Superiores en sus almas. Ya sea descendientes de un ser celestial o imbuidos de gracia divina, pueden avivar esa chispa para irradiar luz, sanar heridas y desatar furia sagrada.",
     "descriptionEn": "Aasimar are mortals who carry a spark of the Upper Planes within their souls. Whether descended from an angelic being or infused with celestial power, they can fan that spark to bring light, healing, and heavenly fury.",
-    "size": "Mediano",
-    "sizeEn": "Medium",
+    "size": "Mediano o Pequeño",
+    "sizeEn": "Medium or Small",
     "speed": "30 pies (9m)",
     "darkvision": 60,
     "traits": [
@@ -64,6 +98,15 @@ export const DND_2024_SPECIES: Species2024[] = [
         "nameEn": "Celestial Revelation",
         "desc": "A partir de nivel 3, puedes transformarte como Acción Adicional durante 1 minuto (Alas Celestiales para volar 30 pies, Radiancia Interior para quemar enemigos cercanos con daño radiante, o Sudario Necrótico para atemorizar a los enemigos). Recuperas este poder tras un Descanso Largo.",
         "descEn": "At level 3, transform as a Bonus Action for 1 minute (Heavenly Wings, Inner Radiance, or Necrotic Shroud). Recovers on Long Rest."
+      }
+    ],
+    "allowSizeChoice": true,
+    "fixedSpellcastingAbility": "cha",
+    "baseSpells": [
+      {
+        "spellName": "Luz",
+        "spellNameEn": "Light",
+        "minLevel": 1
       }
     ]
   },
@@ -110,6 +153,90 @@ export const DND_2024_SPECIES: Species2024[] = [
         "desc": "A partir de nivel 5, puedes manifestar alas espectrales como Acción Adicional durante 10 minutos, obteniendo una velocidad de vuelo igual a tu velocidad a pie. Recuperas este uso tras un Descanso Largo.",
         "descEn": "At level 5, sprout spectral wings as a Bonus Action for 10 minutes, gaining a fly speed equal to your speed. Recovers on Long Rest."
       }
+    ],
+    "lineageTitle": "Ascendencia Dracónica",
+    "lineageTitleEn": "Draconic Ancestry",
+    "lineages": [
+      {
+        "id": "black",
+        "name": "Dragón Negro (Ácido)",
+        "nameEn": "Black Dragon (Acid)",
+        "summary": "Arma de aliento y resistencia al daño Ácido.",
+        "summaryEn": "Acid Breath Weapon & Damage Resistance.",
+        "damageResistance": "Ácido"
+      },
+      {
+        "id": "blue",
+        "name": "Dragón Azul (Relámpago)",
+        "nameEn": "Blue Dragon (Lightning)",
+        "summary": "Arma de aliento y resistencia al daño Relámpago.",
+        "summaryEn": "Lightning Breath Weapon & Damage Resistance.",
+        "damageResistance": "Relámpago"
+      },
+      {
+        "id": "brass",
+        "name": "Dragón de Latón (Fuego)",
+        "nameEn": "Brass Dragon (Fire)",
+        "summary": "Arma de aliento y resistencia al daño Fuego.",
+        "summaryEn": "Fire Breath Weapon & Damage Resistance.",
+        "damageResistance": "Fuego"
+      },
+      {
+        "id": "bronze",
+        "name": "Dragón de Bronce (Relámpago)",
+        "nameEn": "Bronze Dragon (Lightning)",
+        "summary": "Arma de aliento y resistencia al daño Relámpago.",
+        "summaryEn": "Lightning Breath Weapon & Damage Resistance.",
+        "damageResistance": "Relámpago"
+      },
+      {
+        "id": "copper",
+        "name": "Dragón de Cobre (Ácido)",
+        "nameEn": "Copper Dragon (Acid)",
+        "summary": "Arma de aliento y resistencia al daño Ácido.",
+        "summaryEn": "Acid Breath Weapon & Damage Resistance.",
+        "damageResistance": "Ácido"
+      },
+      {
+        "id": "gold",
+        "name": "Dragón Dorado (Fuego)",
+        "nameEn": "Gold Dragon (Fire)",
+        "summary": "Arma de aliento y resistencia al daño Fuego.",
+        "summaryEn": "Fire Breath Weapon & Damage Resistance.",
+        "damageResistance": "Fuego"
+      },
+      {
+        "id": "green",
+        "name": "Dragón Verde (Veneno)",
+        "nameEn": "Green Dragon (Poison)",
+        "summary": "Arma de aliento y resistencia al daño Veneno.",
+        "summaryEn": "Poison Breath Weapon & Damage Resistance.",
+        "damageResistance": "Veneno"
+      },
+      {
+        "id": "red",
+        "name": "Dragón Rojo (Fuego)",
+        "nameEn": "Red Dragon (Fire)",
+        "summary": "Arma de aliento y resistencia al daño Fuego.",
+        "summaryEn": "Fire Breath Weapon & Damage Resistance.",
+        "damageResistance": "Fuego"
+      },
+      {
+        "id": "silver",
+        "name": "Dragón Plateado (Frío)",
+        "nameEn": "Silver Dragon (Cold)",
+        "summary": "Arma de aliento y resistencia al daño Frío.",
+        "summaryEn": "Cold Breath Weapon & Damage Resistance.",
+        "damageResistance": "Frío"
+      },
+      {
+        "id": "white",
+        "name": "Dragón Blanco (Frío)",
+        "nameEn": "White Dragon (Cold)",
+        "summary": "Arma de aliento y resistencia al daño Frío.",
+        "summaryEn": "Cold Breath Weapon & Damage Resistance.",
+        "damageResistance": "Frío"
+      }
     ]
   },
   {
@@ -149,7 +276,8 @@ export const DND_2024_SPECIES: Species2024[] = [
         "desc": "Como Acción Adicional mientras estés sobre piedra, ganas Visión Temblorosa (Tremorsense) hasta 60 pies durante 10 minutos. Puedes usar este rasgo tantas veces como tu Bono de Competencia por Descanso Largo.",
         "descEn": "As a Bonus Action on stone, gain Tremorsense up to 60 feet for 10 minutes. Uses equal to Proficiency Bonus per Long Rest."
       }
-    ]
+    ],
+    "hpPerLevelBonus": 1
   },
   {
     "id": "species-2024-elf",
@@ -188,6 +316,99 @@ export const DND_2024_SPECIES: Species2024[] = [
         "desc": "No necesitas dormir y la magia no te puede dormir. Puedes completar un descanso largo en tan solo 4 horas de meditación.",
         "descEn": "You don't need sleep and cannot be put to sleep by magic. Complete a Long Rest in 4 hours of meditation."
       }
+    ],
+    "skillChoice": {
+      "count": 1,
+      "label": "Sentidos Agudos (elige 1 habilidad)",
+      "labelEn": "Keen Senses (choose 1 skill)",
+      "options": [
+        "Perspicacia",
+        "Percepción",
+        "Supervivencia"
+      ]
+    },
+    "spellcastingAbilityChoice": [
+      "int",
+      "wis",
+      "cha"
+    ],
+    "lineageTitle": "Linaje Élfico",
+    "lineageTitleEn": "Elven Lineage",
+    "lineages": [
+      {
+        "id": "drow",
+        "name": "Drow",
+        "nameEn": "Drow",
+        "summary": "Visión en la Oscuridad 120 pies + Luces Danzantes (nv 1), Fuego Feérico (nv 3), Oscuridad (nv 5).",
+        "summaryEn": "Darkvision 120 ft + Dancing Lights (lv 1), Faerie Fire (lv 3), Darkness (lv 5).",
+        "darkvisionOverride": 120,
+        "spells": [
+          {
+            "spellName": "Luces Danzantes",
+            "spellNameEn": "Dancing Lights",
+            "minLevel": 1
+          },
+          {
+            "spellName": "Fuego Feérico",
+            "spellNameEn": "Faerie Fire",
+            "minLevel": 3
+          },
+          {
+            "spellName": "Oscuridad",
+            "spellNameEn": "Darkness",
+            "minLevel": 5
+          }
+        ]
+      },
+      {
+        "id": "high-elf",
+        "name": "Alto Elfo",
+        "nameEn": "High Elf",
+        "summary": "Prestidigitación (nv 1, cambiable por otro truco de Mago en Descanso Largo), Detectar Magia (nv 3), Paso Brumoso (nv 5).",
+        "summaryEn": "Prestidigitation (lv 1, swappable with Wizard cantrip on Long Rest), Detect Magic (lv 3), Misty Step (lv 5).",
+        "spells": [
+          {
+            "spellName": "Prestidigitación",
+            "spellNameEn": "Prestidigitation",
+            "minLevel": 1
+          },
+          {
+            "spellName": "Detectar Magia",
+            "spellNameEn": "Detect Magic",
+            "minLevel": 3
+          },
+          {
+            "spellName": "Paso Brumoso",
+            "spellNameEn": "Misty Step",
+            "minLevel": 5
+          }
+        ]
+      },
+      {
+        "id": "wood-elf",
+        "name": "Elfo de los Bosques",
+        "nameEn": "Wood Elf",
+        "summary": "Velocidad 35 pies + Saber Druídico (nv 1), Zancada Prodigiosa (nv 3), Pasar sin Rastro (nv 5).",
+        "summaryEn": "Speed 35 ft + Druidcraft (lv 1), Longstrider (lv 3), Pass without Trace (lv 5).",
+        "speedOverride": "35 pies (10.5m)",
+        "spells": [
+          {
+            "spellName": "Saber Druídico",
+            "spellNameEn": "Druidcraft",
+            "minLevel": 1
+          },
+          {
+            "spellName": "Zancada Prodigiosa",
+            "spellNameEn": "Longstrider",
+            "minLevel": 3
+          },
+          {
+            "spellName": "Pasar sin Rastro",
+            "spellNameEn": "Pass without Trace",
+            "minLevel": 5
+          }
+        ]
+      }
     ]
   },
   {
@@ -221,6 +442,53 @@ export const DND_2024_SPECIES: Species2024[] = [
         "desc": "Elige entre Gnomo de los Bosques (conoces el truco Ilusión Menor y puedes hablar con animales pequeños) o Gnomo de las Rocas (conoces los trucos Reparar y Prestidigitación, y puedes fabricar artilugios mecánicos).",
         "descEn": "Choose Forest Gnome (Minor Illusion & Speak with Animals) or Rock Gnome (Mending, Prestidigitation & Clockwork Devices)."
       }
+    ],
+    "spellcastingAbilityChoice": [
+      "int",
+      "wis",
+      "cha"
+    ],
+    "lineageTitle": "Linaje Gnómico",
+    "lineageTitleEn": "Gnomish Lineage",
+    "lineages": [
+      {
+        "id": "forest-gnome",
+        "name": "Gnomo de los Bosques",
+        "nameEn": "Forest Gnome",
+        "summary": "Aprendes Ilusión Menor y siempre tienes preparado Hablar con los Animales (lanzable = Bono de Comp. veces/DL sin espacio).",
+        "summaryEn": "Know Minor Illusion + Speak with Animals always prepared (PB free uses per Long Rest).",
+        "spells": [
+          {
+            "spellName": "Ilusión Menor",
+            "spellNameEn": "Minor Illusion",
+            "minLevel": 1
+          },
+          {
+            "spellName": "Hablar con los Animales",
+            "spellNameEn": "Speak with Animals",
+            "minLevel": 1
+          }
+        ]
+      },
+      {
+        "id": "rock-gnome",
+        "name": "Gnomo de las Rocas",
+        "nameEn": "Rock Gnome",
+        "summary": "Aprendes Remendar y Prestidigitación; fabricas pequeños mecanismos de relojería mágicos.",
+        "summaryEn": "Know Mending & Prestidigitation + create Tiny clockwork devices.",
+        "spells": [
+          {
+            "spellName": "Remendar",
+            "spellNameEn": "Mending",
+            "minLevel": 1
+          },
+          {
+            "spellName": "Prestidigitación",
+            "spellNameEn": "Prestidigitation",
+            "minLevel": 1
+          }
+        ]
+      }
     ]
   },
   {
@@ -253,6 +521,52 @@ export const DND_2024_SPECIES: Species2024[] = [
         "nameEn": "Powerful Build",
         "desc": "Tienes Ventaja en pruebas para evitar o escapar de la condición Agarrado (Grappled), y tu capacidad de carga se cuenta como si fueras una criatura de tamaño Grande.",
         "descEn": "Advantage to escape grapples, and carrying capacity is counted as one size larger."
+      }
+    ],
+    "lineageTitle": "Ascendencia Gigante",
+    "lineageTitleEn": "Giant Ancestry",
+    "lineages": [
+      {
+        "id": "cloud",
+        "name": "Salto de las Nubes (Gigante de las Nubes)",
+        "nameEn": "Cloud's Jaunt (Cloud Giant)",
+        "summary": "Acción Adicional: teletransporte mágico de hasta 30 pies.",
+        "summaryEn": "Bonus Action: magically teleport up to 30 ft."
+      },
+      {
+        "id": "fire",
+        "name": "Ardor del Fuego (Gigante de Fuego)",
+        "nameEn": "Fire's Burn (Fire Giant)",
+        "summary": "Al impactar con un ataque, añades +1d10 de daño por Fuego.",
+        "summaryEn": "On attack hit, deal an extra 1d10 Fire damage."
+      },
+      {
+        "id": "frost",
+        "name": "Escalofrío Glacial (Gigante de Escarcha)",
+        "nameEn": "Frost's Chill (Frost Giant)",
+        "summary": "Al impactar con un ataque, añades +1d6 Frío y reduces su Velocidad en 10 pies.",
+        "summaryEn": "On attack hit, deal +1d6 Cold and reduce Speed by 10 ft."
+      },
+      {
+        "id": "hill",
+        "name": "Tumba de las Colinas (Gigante de las Colinas)",
+        "nameEn": "Hill's Tumble (Hill Giant)",
+        "summary": "Al impactar a una criatura Grande o menor, la dejas Derribada (Prone).",
+        "summaryEn": "On hit against Large or smaller, knock target Prone."
+      },
+      {
+        "id": "stone",
+        "name": "Enteza de la Piedra (Gigante de Piedra)",
+        "nameEn": "Stone's Endurance (Stone Giant)",
+        "summary": "Reacción al recibir daño: reduces el daño en 1d12 + mod. de Constitución.",
+        "summaryEn": "Reaction when damaged: reduce damage by 1d12 + CON mod."
+      },
+      {
+        "id": "storm",
+        "name": "Trueno de la Tormenta (Gigante de las Tormentas)",
+        "nameEn": "Storm's Thunder (Storm Giant)",
+        "summary": "Reacción al ser dañado a 60 pies: devuelves 1d8 de daño de Trueno.",
+        "summaryEn": "Reaction when damaged within 60 ft: deal 1d8 Thunder damage back."
       }
     ]
   },
@@ -326,7 +640,10 @@ export const DND_2024_SPECIES: Species2024[] = [
         "desc": "Ganas una Dote de Origen adicional a tu elección (además de la otorgada por tu Trasfondo).",
         "descEn": "You gain one additional Origin Feat of your choice."
       }
-    ]
+    ],
+    "allowSizeChoice": true,
+    "grantsExtraSkill": true,
+    "grantsOriginFeat": true
   },
   {
     "id": "species-2024-orc",
@@ -391,6 +708,98 @@ export const DND_2024_SPECIES: Species2024[] = [
         "nameEn": "Otherworldly Presence",
         "desc": "Conoces el truco Taumaturgia (Thaumaturgy). Tu aptitud mágica para este truco es Carisma.",
         "descEn": "You know the Thaumaturgy cantrip (Charisma)."
+      }
+    ],
+    "allowSizeChoice": true,
+    "spellcastingAbilityChoice": [
+      "int",
+      "wis",
+      "cha"
+    ],
+    "baseSpells": [
+      {
+        "spellName": "Taumaturgia",
+        "spellNameEn": "Thaumaturgy",
+        "minLevel": 1
+      }
+    ],
+    "lineageTitle": "Legado Fiéndico",
+    "lineageTitleEn": "Fiendish Legacy",
+    "lineages": [
+      {
+        "id": "abyssal",
+        "name": "Abisal (Caos Demoníaco)",
+        "nameEn": "Abyssal",
+        "summary": "Resistencia al Veneno + Rociada Venenosa (nv 1), Rayo de Enfermedad (nv 3), Inmovilizar Persona (nv 5).",
+        "summaryEn": "Poison Resistance + Poison Spray (lv 1), Ray of Sickness (lv 3), Hold Person (lv 5).",
+        "damageResistance": "Veneno",
+        "spells": [
+          {
+            "spellName": "Rociada Venenosa",
+            "spellNameEn": "Poison Spray",
+            "minLevel": 1
+          },
+          {
+            "spellName": "Rayo de Enfermedad",
+            "spellNameEn": "Ray of Sickness",
+            "minLevel": 3
+          },
+          {
+            "spellName": "Inmovilizar Persona",
+            "spellNameEn": "Hold Person",
+            "minLevel": 5
+          }
+        ]
+      },
+      {
+        "id": "chthonic",
+        "name": "Ctónico (Hades / Sombras)",
+        "nameEn": "Chthonic",
+        "summary": "Resistencia al daño Necrótico + Toque Helado (nv 1), Vida Falsa (nv 3), Rayo de Debilitamiento (nv 5).",
+        "summaryEn": "Necrotic Resistance + Chill Touch (lv 1), False Life (lv 3), Ray of Enfeeblement (lv 5).",
+        "damageResistance": "Necrótico",
+        "spells": [
+          {
+            "spellName": "Toque Helado",
+            "spellNameEn": "Chill Touch",
+            "minLevel": 1
+          },
+          {
+            "spellName": "Vida Falsa",
+            "spellNameEn": "False Life",
+            "minLevel": 3
+          },
+          {
+            "spellName": "Rayo de Debilitamiento",
+            "spellNameEn": "Ray of Enfeeblement",
+            "minLevel": 5
+          }
+        ]
+      },
+      {
+        "id": "infernal",
+        "name": "Infernal (Nueve Infiernos)",
+        "nameEn": "Infernal",
+        "summary": "Resistencia al Fuego + Saeta de Fuego (nv 1), Reprensión Infernal (nv 3), Oscuridad (nv 5).",
+        "summaryEn": "Fire Resistance + Fire Bolt (lv 1), Hellish Rebuke (lv 3), Darkness (lv 5).",
+        "damageResistance": "Fuego",
+        "spells": [
+          {
+            "spellName": "Saeta de Fuego",
+            "spellNameEn": "Fire Bolt",
+            "minLevel": 1
+          },
+          {
+            "spellName": "Reprensión Infernal",
+            "spellNameEn": "Hellish Rebuke",
+            "minLevel": 3
+          },
+          {
+            "spellName": "Oscuridad",
+            "spellNameEn": "Darkness",
+            "minLevel": 5
+          }
+        ]
       }
     ]
   }

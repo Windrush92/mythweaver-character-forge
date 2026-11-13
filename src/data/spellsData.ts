@@ -1,4 +1,5 @@
 import { Spell, AbilityScores } from '../types';
+import { getAllSpellsForEdition, getSpellForEdition, SPELLS_2024_OVERRIDES } from './spells2024Overrides';
 
 export interface SpellcastingLimits {
   isCaster: boolean;
@@ -13750,6 +13751,486 @@ export const OFFICIAL_SPELLS_COMPENDIUM: Spell[] = [
     "durationEn": "Instantaneous",
     "descriptionEn": "Wish is the mightiest spell a mortal creature can cast. By simply speaking aloud, you can alter the very foundations of reality in accord with your desires.\n\nThe basic use of this spell is to duplicate any other spell of 8th level or lower. You don’t need to meet any requirements in that spell, including costly components. The spell simply takes effect.\n\nAlternatively, you can create one of the following effects of your choice:\n\n- You create one object of up to 25,000 gp in value that isn’t a magic item. The object can be no more than 300 feet in any dimension, and it appears in an unoccupied space you can see on the ground.\n\n- You allow up to twenty creatures that you can see to regain all hit points, and you end all effects on them described in the greater restoration spell.\n\n- You grant up to ten creatures that you can see resistance to a damage type you choose.\n\n- You grant up to ten creatures you can see immunity to a single spell or other magical effect for 8 hours. For instance, you could make yourself and all your companions immune to a lich’s life drain attack.\n\n- You undo a single recent event by forcing a reroll of any roll made within the last round (including your last turn). Reality reshapes itself to accommodate the new result. For example, a wish spell could undo an opponent’s successful save, a foe’s critical hit, or a friend’s failed save. You can force the reroll to be made with advantage or disadvantage, and you can choose whether to use the reroll or the original roll.\n\nYou might be able to achieve something beyond the scope of the above examples. State your wish to the DM as precisely as possible. The DM has great latitude in ruling what occurs in such an instance; the greater the wish, the greater the likelihood that something goes wrong. This spell might simply fail, the effect you desire might only be partly achieved, or you might suffer some unforeseen consequence as a result of how you worded the wish. For example, wishing that a villain were dead might propel you forward in time to a period when that villain is no longer alive, effectively removing you from the game. Similarly, wishing for a legendary magic item or artifact might instantly transport you to the presence of the item’s current owner.\n\nThe stress of casting this spell to produce any effect other than duplicating another spell weakens you. After enduring that stress, each time you cast a spell until you finish a long rest, you take 1d10 necrotic damage per level of that spell. This damage can’t be reduced or prevented in any way. In addition, your Strength drops to 3, if it isn’t 3 or lower already, for 2d4 days. For each of those days that you spend resting and doing nothing more than light activity, your remaining recovery time decreases by 2 days. Finally, there is a 33 percent chance that you are unable to cast wish ever again if you suffer this stress.",
     "higherLevelsEn": ""
+  },
+  {
+    "id": "spl-elementalism",
+    "name": "Elementalismo",
+    "nameEn": "Elementalism",
+    "level": 0,
+    "school": "Transmutación",
+    "castingTime": "1 acción",
+    "castingTimeEn": "Action",
+    "range": "30 pies",
+    "rangeEn": "30 feet",
+    "components": "V, S",
+    "componentsEn": "V, S",
+    "duration": "Instantáneo",
+    "durationEn": "Instantaneous",
+    "description": "Ejerces control sobre los elementos para crear uno de estos efectos dentro del alcance:\n• Convocar Aire: creas una brisa capaz de ondular telas, levantar polvo, agitar hojas o cerrar puertas/contraventanas abiertas sin trabas en un Cubo de 5 pies.\n• Convocar Tierra: cubres un área de 5 pies cuadrados con polvo o arena, o haces que una sola palabra aparezca escrita sobre tierra o arena.\n• Convocar Fuego: creas una nube inofensiva de brasas y humo perfumado del color que elijas en un Cubo de 5 pies (las brasas pueden encender velas, antorchas o lámparas).\n• Convocar Agua: rocías bruma fresca que humedece ligeramente un Cubo de 5 pies, o creas 1 taza de agua limpia que se evapora tras 1 minuto.\n• Esculpir Elemento: das forma burda durante 1 hora a tierra, arena, fuego, humo, bruma o agua que quepa en un Cubo de 1 pie.",
+    "descriptionEn": "You exert control over the elements, creating Beckon Air, Beckon Earth, Beckon Fire, Beckon Water, or Sculpt Element effects within 30 feet.",
+    "higherLevels": "",
+    "higherLevelsEn": "",
+    "ritual": false,
+    "concentration": false,
+    "classes": [
+      "Artífice",
+      "Druida",
+      "Hechicero",
+      "Mago"
+    ],
+    "source": "Player's Handbook (2024)",
+    "edition": "5.5e"
+  },
+  {
+    "id": "spl-sorcerous-burst",
+    "name": "Estallido Hechicero",
+    "nameEn": "Sorcerous Burst",
+    "level": 0,
+    "school": "Evocación",
+    "castingTime": "1 acción",
+    "castingTimeEn": "Action",
+    "range": "120 pies",
+    "rangeEn": "120 feet",
+    "components": "V, S",
+    "componentsEn": "V, S",
+    "duration": "Instantáneo",
+    "durationEn": "Instantaneous",
+    "description": "Lanzas energía hechicera contra una criatura u objeto dentro del alcance mediante un ataque de conjuro a distancia. Si impactas, el objetivo recibe 1d8 de daño del tipo que elijas: Ácido, Frío, Fuego, Relámpago, Veneno, Psíquico o Trueno. Cada vez que saques un 8 en un d8 de este conjuro, puedes lanzar otro d8 adicional y sumarlo al daño (hasta un máximo de dados extra igual a tu modificador de aptitud mágica).",
+    "descriptionEn": "Make a ranged spell attack against a creature or object within 120 feet. On a hit, deal 1d8 damage (Acid, Cold, Fire, Lightning, Poison, Psychic, or Thunder). Rolling an 8 lets you roll and add another d8 (up to your spellcasting modifier extra dice).",
+    "higherLevels": "El daño base aumenta en 1d8 al nivel 5 (2d8), nivel 11 (3d8) y nivel 17 (4d8).",
+    "higherLevelsEn": "Cantrip Upgrade. The damage increases by 1d8 at levels 5 (2d8), 11 (3d8), and 17 (4d8).",
+    "ritual": false,
+    "concentration": false,
+    "classes": [
+      "Hechicero"
+    ],
+    "source": "Player's Handbook (2024)",
+    "edition": "5.5e"
+  },
+  {
+    "id": "spl-starry-wisp",
+    "name": "Fuego Fatuo Estelar",
+    "nameEn": "Starry Wisp",
+    "level": 0,
+    "school": "Evocación",
+    "castingTime": "1 acción",
+    "castingTimeEn": "Action",
+    "range": "60 pies",
+    "rangeEn": "60 feet",
+    "components": "V, S",
+    "componentsEn": "V, S",
+    "duration": "Instantáneo",
+    "durationEn": "Instantaneous",
+    "description": "Lanzas una mota de luz estelar contra una criatura u objeto dentro del alcance mediante un ataque de conjuro a distancia. Si impactas, el objetivo sufre 1d8 de daño radiante y, hasta el final de tu siguiente turno, emite luz tenue en un radio de 10 pies y no puede beneficiarse de la condición Invisible.",
+    "descriptionEn": "Make a ranged spell attack against a target within 60 feet. On a hit, it takes 1d8 Radiant damage and sheds Dim Light in a 10-foot radius while unable to benefit from the Invisible condition until the end of your next turn.",
+    "higherLevels": "El daño aumenta en 1d8 al nivel 5 (2d8), nivel 11 (3d8) y nivel 17 (4d8).",
+    "higherLevelsEn": "Cantrip Upgrade. The damage increases by 1d8 at levels 5 (2d8), 11 (3d8), and 17 (4d8).",
+    "ritual": false,
+    "concentration": false,
+    "classes": [
+      "Bardo",
+      "Druida"
+    ],
+    "source": "Player's Handbook (2024)",
+    "edition": "5.5e"
+  },
+  {
+    "id": "spl-divine-smite",
+    "name": "Castigo Divino",
+    "nameEn": "Divine Smite",
+    "level": 1,
+    "school": "Evocación",
+    "castingTime": "1 acción adicional (justo tras impactar cuerpo a cuerpo o ataque desarmado)",
+    "castingTimeEn": "Bonus Action (immediately after hitting)",
+    "range": "Personal",
+    "rangeEn": "Self",
+    "components": "V",
+    "componentsEn": "V",
+    "duration": "Instantáneo",
+    "durationEn": "Instantaneous",
+    "description": "El objetivo golpeado por tu ataque recibe 2d8 de daño radiante adicional. El daño aumenta en 1d8 adicional si el objetivo es un Infernal o un No Muerto.",
+    "descriptionEn": "The target hit by your melee weapon or Unarmed Strike takes an extra 2d8 Radiant damage (increases by 1d8 if the target is a Fiend or Undead).",
+    "higherLevels": "El daño aumenta en 1d8 por cada nivel de espacio de conjuro por encima de 1.",
+    "higherLevelsEn": "Using a Higher-Level Spell Slot. Damage increases by 1d8 for each spell slot level above 1.",
+    "ritual": false,
+    "concentration": false,
+    "classes": [
+      "Paladín"
+    ],
+    "source": "Player's Handbook (2024)",
+    "edition": "5.5e"
+  },
+  {
+    "id": "spl-sanctuary",
+    "name": "Santuario",
+    "nameEn": "Sanctuary",
+    "level": 1,
+    "school": "Abjuración",
+    "castingTime": "1 acción adicional",
+    "castingTimeEn": "1 bonus action",
+    "range": "30 pies",
+    "rangeEn": "30 feet",
+    "components": "V, S, M (un pequeño espejo de plata)",
+    "componentsEn": "V, S, M (a small silver mirror)",
+    "duration": "1 minuto",
+    "durationEn": "1 minute",
+    "description": "Proteges a una criatura dentro del alcance contra ataques. Hasta que el conjuro termine, cualquier criatura que dirija un ataque o un conjuro dañino contra la criatura protegida debe superar primero una salvación de Sabiduría o elegir un nuevo objetivo o perder el ataque/conjuro. Si la criatura protegida realiza un ataque o lanza un conjuro que afecte a una criatura enemiga, este conjuro termina.",
+    "descriptionEn": "You ward a creature within range against attack. Any creature who targets the warded creature with an attack or harmful spell must first make a Wisdom save or choose a new target.",
+    "higherLevels": "",
+    "higherLevelsEn": "",
+    "ritual": false,
+    "concentration": false,
+    "classes": [
+      "Artífice",
+      "Clérigo"
+    ],
+    "source": "Player's Handbook",
+    "edition": "both",
+    "rules2024": {
+      "description": "Proteges a una criatura dentro del alcance. Cualquier criatura que dirija una tirada de ataque o un conjuro dañino contra el objetivo debe superar primero una salvación de Sabiduría o elegir otro objetivo o desperdiciar el ataque/conjuro. El conjuro termina inmediatamente si el objetivo protegido hace una tirada de ataque, lanza cualquier conjuro o inflige daño.",
+      "descriptionEn": "You ward a creature within 30 feet. Attackers/harmful spellcasters must pass a Wisdom save or choose a new target. Ends if the warded creature makes an attack roll, casts a spell, or deals damage."
+    }
+  },
+  {
+    "id": "spl-comprehend-languages",
+    "name": "Comprender Idiomas",
+    "nameEn": "Comprehend Languages",
+    "level": 1,
+    "school": "Adivinación",
+    "castingTime": "1 acción",
+    "castingTimeEn": "1 action",
+    "range": "Personal",
+    "rangeEn": "Self",
+    "components": "V, S, M (una pizca de hollín y sal)",
+    "componentsEn": "V, S, M (a pinch of soot and salt)",
+    "duration": "1 hora",
+    "durationEn": "1 hour",
+    "description": "Mientras dure el conjuro, comprendes el significado literal de cualquier idioma hablado que escuches. También entiendes cualquier idioma escrito que veas tocando la superficie donde figure (1 minuto por página). No descifra mensajes secretos ni glifos mágicos.",
+    "descriptionEn": "For the duration, you understand the literal meaning of any spoken language that you hear, and any written language you see while touching its surface.",
+    "higherLevels": "",
+    "higherLevelsEn": "",
+    "ritual": true,
+    "concentration": false,
+    "classes": [
+      "Bardo",
+      "Hechicero",
+      "Brujo",
+      "Mago"
+    ],
+    "source": "Player's Handbook",
+    "edition": "both",
+    "rules2024": {
+      "description": "Comprendes el significado literal de cualquier idioma que oigas o veas expresado mediante lenguaje de señas, así como cualquier texto escrito que toques (1 minuto por página). No descifra códigos secretos ni glifos arcanos.",
+      "descriptionEn": "Understand any language you hear or see signed, as well as written text you touch (1 minute per page). Does not decode secret messages or glyphs."
+    }
+  },
+  {
+    "id": "spl-arcane-vigor",
+    "name": "Vigor Arcano",
+    "nameEn": "Arcane Vigor",
+    "level": 2,
+    "school": "Abjuración",
+    "castingTime": "1 acción adicional",
+    "castingTimeEn": "Bonus Action",
+    "range": "Personal",
+    "rangeEn": "Self",
+    "components": "V, S",
+    "componentsEn": "V, S",
+    "duration": "Instantáneo",
+    "durationEn": "Instantaneous",
+    "description": "Canalizas energía arcana para revitalizar tu propio cuerpo. Lanza uno o dos de tus Dados de Golpe sin gastar: recuperas Puntos de Golpe iguales al total de la tirada + tu modificador de aptitud mágica. Los dados lanzados cuentan como gastados.",
+    "descriptionEn": "Tap into your vitality as a Bonus Action: roll one or two unexpended Hit Point Dice and regain Hit Points equal to the roll + your spellcasting ability modifier (those dice are expended).",
+    "higherLevels": "El número de Dados de Golpe sin gastar que puedes lanzar aumenta en 1 por cada nivel de espacio de conjuro por encima de 2.",
+    "higherLevelsEn": "Using a Higher-Level Spell Slot. The number of unexpended Hit Point Dice you can roll increases by one for each spell slot level above 2.",
+    "ritual": false,
+    "concentration": false,
+    "classes": [
+      "Hechicero",
+      "Mago"
+    ],
+    "source": "Player's Handbook (2024)",
+    "edition": "5.5e"
+  },
+  {
+    "id": "spl-continual-flame",
+    "name": "Llama Continua",
+    "nameEn": "Continual Flame",
+    "level": 2,
+    "school": "Evocación",
+    "castingTime": "1 acción",
+    "castingTimeEn": "1 action",
+    "range": "Toque",
+    "rangeEn": "Touch",
+    "components": "V, S, M (polvo de rubí por valor de 50 po, que el conjuro consume)",
+    "componentsEn": "V, S, M (ruby dust worth 50+ gp, which the spell consumes)",
+    "duration": "Hasta ser disipado",
+    "durationEn": "Until dispelled",
+    "description": "Una llama del brillo de una antorcha brota de un objeto que toques (luz brillante en 20 pies y luz tenue 20 pies más). Parece una llama normal, pero no genera calor ni consume combustible; puede cubrirse u ocultarse, mas no sofocarse ni apagarse.",
+    "descriptionEn": "A flame equivalent to a torch springs forth from an object you touch, shedding bright light in 20 ft and dim light 20 ft further without heat or consuming oxygen/fuel.",
+    "higherLevels": "",
+    "higherLevelsEn": "",
+    "ritual": false,
+    "concentration": false,
+    "classes": [
+      "Artífice",
+      "Clérigo",
+      "Druida",
+      "Mago"
+    ],
+    "source": "Player's Handbook",
+    "edition": "both"
+  },
+  {
+    "id": "spl-spiritual-weapon",
+    "name": "Arma Espiritual",
+    "nameEn": "Spiritual Weapon",
+    "level": 2,
+    "school": "Evocación",
+    "castingTime": "1 acción adicional",
+    "castingTimeEn": "1 bonus action",
+    "range": "60 pies",
+    "rangeEn": "60 feet",
+    "components": "V, S",
+    "componentsEn": "V, S",
+    "duration": "1 minuto",
+    "durationEn": "1 minute",
+    "description": "Creas un arma espectral flotante dentro del alcance que dura 1 minuto. Al lanzarla, realizas un ataque de conjuro cuerpo a cuerpo contra una criatura a 5 pies del arma infligiendo 1d8 + tu modificador de aptitud mágica de daño de fuerza. Con tu Acción Adicional puedes moverla 20 pies y repetir el ataque.",
+    "descriptionEn": "Create a floating spectral weapon within 60 feet. Make a melee spell attack on cast (1d8 + spellcasting modifier Force damage), and move it 20 ft + attack as a Bonus Action on later turns.",
+    "higherLevels": "El daño aumenta en 1d8 por cada dos niveles de espacio por encima de 2.",
+    "higherLevelsEn": "At Higher Levels. Damage increases by 1d8 for every two slot levels above 2nd.",
+    "ritual": false,
+    "concentration": false,
+    "classes": [
+      "Clérigo"
+    ],
+    "source": "Player's Handbook",
+    "edition": "both",
+    "rules2024": {
+      "duration": "Concentración, hasta 1 minuto",
+      "durationEn": "Concentration, up to 1 minute",
+      "concentration": true,
+      "higherLevels": "El daño aumenta en 1d8 por cada nivel de espacio por encima de 2.",
+      "higherLevelsEn": "Using a Higher-Level Spell Slot. The damage increases by 1d8 for each spell slot level above 2.",
+      "description": "En 5.5e requiere Concentración. Creas una fuerza espectral con forma de arma a 60 pies. Al lanzarla y con Acción Adicional en turnos posteriores (pudiendo moverla 20 pies), realizas un ataque de conjuro cuerpo a cuerpo de 1d8 + tu modificador por lanzamiento de daño de fuerza."
+    }
+  },
+  {
+    "id": "spl-spirit-guardians",
+    "name": "Espíritus Guardianes",
+    "nameEn": "Spirit Guardians",
+    "level": 3,
+    "school": "Conjuración",
+    "castingTime": "1 acción",
+    "castingTimeEn": "1 action",
+    "range": "Personal (Emanación de 15 pies)",
+    "rangeEn": "Self (15-foot Emanation)",
+    "components": "V, S, M (un símbolo sagrado)",
+    "componentsEn": "V, S, M (a prayer scroll / holy symbol)",
+    "duration": "Concentración, hasta 10 minutos",
+    "durationEn": "Concentration, up to 10 minutes",
+    "description": "Espíritus protectores revolotean en un radio de 15 pies a tu alrededor. Puedes designar criaturas no afectadas; la velocidad de las demás se reduce a la mitad en el área y, cuando entran por primera vez en un turno o comienzan allí su turno, realizan una salvación de Sabiduría: sufren 3d8 de daño radiante (o necrótico) si fallan, o la mitad si superan.",
+    "descriptionEn": "Protective spirits flit around you in a 15-foot radius, halving hostile speed and dealing 3d8 Radiant or Necrotic damage (Wisdom save half).",
+    "higherLevels": "El daño aumenta en 1d8 por cada nivel de espacio de conjuro por encima de 3.",
+    "higherLevelsEn": "Using a Higher-Level Spell Slot. The damage increases by 1d8 for each spell slot level above 3.",
+    "ritual": false,
+    "concentration": true,
+    "classes": [
+      "Clérigo"
+    ],
+    "source": "Player's Handbook",
+    "edition": "both",
+    "rules2024": {
+      "description": "Emanación de 15 pies centrada en ti. Las criaturas hostiles tienen la velocidad reducida a la mitad dentro del área y realizan una salvación de Sabiduría (3d8 radiante o necrótico, mitad si supera) cuando la Emanación entra en su espacio, cuando entran en ella o cuando terminan allí su turno (máx. una vez por turno)."
+    }
+  },
+  {
+    "id": "spl-fount-of-moonlight",
+    "name": "Fuente de Luz Lunar",
+    "nameEn": "Fount of Moonlight",
+    "level": 4,
+    "school": "Evocación",
+    "castingTime": "1 acción",
+    "castingTimeEn": "Action",
+    "range": "Personal",
+    "rangeEn": "Self",
+    "components": "V, S",
+    "componentsEn": "V, S",
+    "duration": "Concentración, hasta 10 minutos",
+    "durationEn": "Concentration, up to 10 minutes",
+    "description": "Una luz lunar plateada envuelve tu cuerpo (luz brillante en 20 pies y tenue 20 pies más). Obtienes Resistencia al daño radiante y tus ataques cuerpo a cuerpo infligen 2d6 de daño radiante adicional al impactar. Además, cuando una criatura que puedas ver a 60 pies te inflige daño, puedes usar tu Reacción para obligarla a superar una salvación de Constitución o quedar Cegada hasta el final de su siguiente turno.",
+    "descriptionEn": "Radiate 20-ft Bright Light and gain Resistance to Radiant damage plus +2d6 Radiant damage on melee hits. Use Reaction when damaged by a creature within 60 ft to force a CON save or Blind it until end of its next turn.",
+    "higherLevels": "",
+    "higherLevelsEn": "",
+    "ritual": false,
+    "concentration": true,
+    "classes": [
+      "Bardo",
+      "Druida"
+    ],
+    "source": "Player's Handbook (2024)",
+    "edition": "5.5e"
+  },
+  {
+    "id": "spl-guardian-of-faith",
+    "name": "Guardián de la Fe",
+    "nameEn": "Guardian of Faith",
+    "level": 4,
+    "school": "Conjuración",
+    "castingTime": "1 acción",
+    "castingTimeEn": "1 action",
+    "range": "30 pies",
+    "rangeEn": "30 feet",
+    "components": "V",
+    "componentsEn": "V",
+    "duration": "8 horas",
+    "durationEn": "8 hours",
+    "description": "Un guardián espectral Grande aparece y flota durante la duración en un espacio desocupado a 30 pies. Cualquier criatura hostil que se mueva a un espacio a 10 pies o menos del guardián por primera vez en un turno (o comience allí su turno en 5.5e) debe superar una salvación de Destreza, sufriendo 20 de daño radiante si falla o 10 si tiene éxito. El guardián desaparece tras infligir 60 de daño total.",
+    "descriptionEn": "A Large spectral guardian appears within 30 feet for 8 hours, dealing 20 Radiant damage (Dexterity save half) to hostile creatures within 10 feet until it has dealt 60 total damage.",
+    "higherLevels": "",
+    "higherLevelsEn": "",
+    "ritual": false,
+    "concentration": false,
+    "classes": [
+      "Clérigo"
+    ],
+    "source": "Player's Handbook",
+    "edition": "both"
+  },
+  {
+    "id": "spl-jallarzis-storm-of-radiance",
+    "name": "Tormenta de Resplandor de Jallarzi",
+    "nameEn": "Jallarzi's Storm of Radiance",
+    "level": 5,
+    "school": "Evocación",
+    "castingTime": "1 acción",
+    "castingTimeEn": "Action",
+    "range": "120 pies",
+    "rangeEn": "120 feet",
+    "components": "V, S, M (una pizca de fósforo)",
+    "componentsEn": "V, S, M (a pinch of phosphorus)",
+    "duration": "Concentración, hasta 1 minuto",
+    "durationEn": "Concentration, up to 1 minute",
+    "description": "Desatas una columna tempestuosa de 10 pies de radio y 40 pies de alto dentro del alcance. Las criaturas en el interior quedan Cegadas y Ensordecidas y no pueden lanzar conjuros con componente Verbal. Al aparecer y cuando una criatura entra por primera vez en un turno o termina su turno dentro (una vez por turno), debe hacer una salvación de Constitución: recibe 2d10 de daño radiante + 2d10 de daño de trueno si falla, o la mitad si supera.",
+    "descriptionEn": "10-ft-radius, 40-ft-high Cylinder within 120 feet. Creatures inside are Blinded, Deafened, and cannot cast spells with Verbal components. Deals 2d10 Radiant + 2d10 Thunder damage (CON save half) once per turn.",
+    "higherLevels": "Tanto el daño radiante como el de trueno aumentan en 1d10 por cada nivel de espacio por encima de 5.",
+    "higherLevelsEn": "Using a Higher-Level Spell Slot. Both the Radiant and Thunder damage increase by 1d10 per slot level above 5.",
+    "ritual": false,
+    "concentration": true,
+    "classes": [
+      "Brujo",
+      "Mago"
+    ],
+    "source": "Player's Handbook (2024)",
+    "edition": "5.5e"
+  },
+  {
+    "id": "spl-yolandes-regal-presence",
+    "name": "Presencia Regia de Yolande",
+    "nameEn": "Yolande's Regal Presence",
+    "level": 5,
+    "school": "Encantamiento",
+    "castingTime": "1 acción",
+    "castingTimeEn": "Action",
+    "range": "Personal (Emanación de 10 pies)",
+    "rangeEn": "Self (10-foot Emanation)",
+    "components": "V, S, M (una tiara en miniatura)",
+    "componentsEn": "V, S, M (a miniature tiara)",
+    "duration": "Concentración, hasta 1 minuto",
+    "durationEn": "Concentration, up to 1 minute",
+    "description": "Te rodeas de una majestad feérica sobrenatural en una Emanación de 10 pies. Cuando la Emanación entra en el espacio de una criatura, cuando entra en ella o cuando termina su turno dentro (una vez por turno), puedes obligarla a hacer una salvación de Sabiduría: si falla, recibe 4d6 de daño psíquico, queda Derribada y puedes empujarla hasta 10 pies lejos de ti.",
+    "descriptionEn": "10-ft Emanation around you. Once per turn when entering a creature’s space or when a creature enters/ends its turn inside, force a Wisdom save: 4d6 Psychic damage, Prone, and pushed up to 10 feet on fail.",
+    "higherLevels": "",
+    "higherLevelsEn": "",
+    "ritual": false,
+    "concentration": true,
+    "classes": [
+      "Bardo",
+      "Mago"
+    ],
+    "source": "Player's Handbook (2024)",
+    "edition": "5.5e"
+  },
+  {
+    "id": "spl-tashas-bubbling-cauldron",
+    "name": "Caldero Burbujeante de Tasha",
+    "nameEn": "Tasha's Bubbling Cauldron",
+    "level": 6,
+    "school": "Conjuración",
+    "castingTime": "1 acción",
+    "castingTimeEn": "Action",
+    "range": "5 pies",
+    "rangeEn": "5 feet",
+    "components": "V, S, M (un cucharón dorado por valor de 500+ po)",
+    "componentsEn": "V, S, M (a gilded ladle worth 500+ gp)",
+    "duration": "10 minutos",
+    "durationEn": "10 minutes",
+    "description": "Invocas un caldero mágico con patas de garra en un espacio a 5 pies que produce una cantidad de pociones idénticas (de categoría Común o Poco Común a tu elección, como Poción de Curación Mayor) igual a tu modificador de aptitud mágica (mínimo 1). Tú o tus aliados a 5 pies podéis sacar y tomar una poción como Acción Adicional; las pociones sobrantes desaparecen al terminar el conjuro.",
+    "descriptionEn": "Conjure a cauldron within 5 feet filled with a number of chosen Common or Uncommon potions equal to your spellcasting modifier. You or allies can draw a potion as a Bonus Action.",
+    "higherLevels": "",
+    "higherLevelsEn": "",
+    "ritual": false,
+    "concentration": false,
+    "classes": [
+      "Brujo",
+      "Mago"
+    ],
+    "source": "Player's Handbook (2024)",
+    "edition": "5.5e"
+  },
+  {
+    "id": "spl-power-word-fortify",
+    "name": "Palabra de Poder: Fortificar",
+    "nameEn": "Power Word Fortify",
+    "level": 7,
+    "school": "Encantamiento",
+    "castingTime": "1 acción",
+    "castingTimeEn": "Action",
+    "range": "60 pies",
+    "rangeEn": "60 feet",
+    "components": "V",
+    "componentsEn": "V",
+    "duration": "Instantáneo",
+    "durationEn": "Instantaneous",
+    "description": "Pronuncias una palabra de poder que otorga 120 Puntos de Golpe Temporales, los cuales repartes a tu elección entre hasta seis criaturas que puedas ver dentro del alcance.",
+    "descriptionEn": "You fortify up to six creatures you can see within range, bestowing 120 Temporary Hit Points divided among them however you choose.",
+    "higherLevels": "",
+    "higherLevelsEn": "",
+    "ritual": false,
+    "concentration": false,
+    "classes": [
+      "Bardo",
+      "Clérigo"
+    ],
+    "source": "Player's Handbook (2024)",
+    "edition": "5.5e"
+  },
+  {
+    "id": "spl-earthquake",
+    "name": "Terremoto",
+    "nameEn": "Earthquake",
+    "level": 8,
+    "school": "Transmutación",
+    "castingTime": "1 acción",
+    "castingTimeEn": "1 action",
+    "range": "500 pies",
+    "rangeEn": "500 feet",
+    "components": "V, S, M (un guijarro fracturado)",
+    "componentsEn": "V, S, M (a fractured rock)",
+    "duration": "Concentración, hasta 1 minuto",
+    "durationEn": "Concentration, up to 1 minute",
+    "description": "Provocas un temblor intenso en un círculo de 100 pies de radio centrado en un punto en el suelo dentro del alcance. El área pasa a ser terreno difícil, rompe la Concentración de lanzadores en el suelo (salvación de Constitución) y derriba criaturas (salvación de Destreza). Además abre fisuras y daña estructuras con 50 de daño contundente por turno (pudiendo derrumbar edificios e infligir 12d6 de daño).",
+    "descriptionEn": "Intense seismic tremor in a 100-foot-radius circle within 500 feet: difficult terrain, breaks concentration, knocks creatures Prone (DEX save), opens fissures, and deals 50 Bludgeoning damage per turn to structures.",
+    "higherLevels": "",
+    "higherLevelsEn": "",
+    "ritual": false,
+    "concentration": true,
+    "classes": [
+      "Clérigo",
+      "Druida",
+      "Hechicero"
+    ],
+    "source": "Player's Handbook",
+    "edition": "both"
   }
 ];
 
@@ -13770,13 +14251,17 @@ export function isSpellcasterClass(className: string): boolean {
   );
 }
 
-export function getMaxSpellLevel(className: string, level: number): number {
+export function getMaxSpellLevel(
+  className: string,
+  level: number,
+  edition: '5e' | '5.5e' = '5e'
+): number {
   if (!isSpellcasterClass(className)) return 0;
   const c = className.toLowerCase();
   if (
     c.includes('mago') || c.includes('wizard') ||
     c.includes('hechicero') || c.includes('sorcerer') ||
-    c.includes('clérigo') || c.includes('cleric') ||
+    c.includes('clérigo') || c.includes('clerigo') || c.includes('cleric') ||
     c.includes('druida') || c.includes('druid') ||
     c.includes('bardo') || c.includes('bard')
   ) {
@@ -13790,10 +14275,13 @@ export function getMaxSpellLevel(className: string, level: number): number {
     return 5;
   }
   if (c.includes('paladín') || c.includes('paladin') || c.includes('explorador') || c.includes('ranger')) {
+    if (edition === '5.5e') {
+      return Math.min(5, Math.ceil(level / 4));
+    }
     if (level < 2) return 0;
     return Math.min(5, Math.ceil(level / 4));
   }
-  if (c.includes('artífice') || c.includes('artificer')) {
+  if (c.includes('artífice') || c.includes('artifice') || c.includes('artificer')) {
     return Math.min(5, Math.ceil(level / 4));
   }
   if (level < 3) return 0;
@@ -13803,11 +14291,18 @@ export function getMaxSpellLevel(className: string, level: number): number {
   return 4;
 }
 
+const PREPARED_2024_FULL_CLERIC_DRUID_BARD = [4, 5, 6, 7, 9, 10, 11, 12, 14, 15, 16, 16, 17, 17, 18, 18, 19, 20, 21, 22];
+const PREPARED_2024_SORCERER = [2, 4, 6, 7, 9, 10, 11, 12, 14, 15, 16, 16, 17, 17, 18, 18, 19, 20, 21, 22];
+const PREPARED_2024_WIZARD = [4, 5, 6, 7, 9, 10, 11, 12, 14, 15, 16, 16, 17, 18, 19, 21, 22, 23, 24, 25];
+const PREPARED_2024_WARLOCK = [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15];
+const PREPARED_2024_HALF_CASTER = [2, 3, 4, 5, 6, 6, 7, 7, 9, 9, 10, 10, 11, 11, 12, 12, 14, 14, 15, 15];
+
 export function getSpellcastingLimits(
   className: string,
   level: number,
   abilityScores: AbilityScores,
-  raceName: string = ''
+  _raceName: string = '',
+  edition: '5e' | '5.5e' = '5e'
 ): SpellcastingLimits {
   const isCaster = isSpellcasterClass(className);
   if (!isCaster) {
@@ -13823,24 +14318,25 @@ export function getSpellcastingLimits(
   }
 
   const c = className.toLowerCase();
+  const lvlIdx = Math.min(20, Math.max(1, level)) - 1;
   let abilityUsed: 'int' | 'wis' | 'cha' = 'int';
   let casterType: 'prepared' | 'known' = 'known';
   let maxCantrips = 2;
   let maxPreparedOrKnown = 2;
   let spellbookTotal: number | undefined = undefined;
+  let maxPrepared: number | undefined = undefined;
 
   const getMod = (score: number = 10) => Math.floor((score - 10) / 2);
-
-  let maxPrepared: number | undefined = undefined;
 
   if (c.includes('mago') || c.includes('wizard')) {
     abilityUsed = 'int';
     casterType = 'prepared';
     maxCantrips = level >= 10 ? 5 : level >= 4 ? 4 : 3;
     const mod = getMod(abilityScores?.int);
-    const dailyPrepared = Math.max(1, mod + level);
+    const dailyPrepared = edition === '5.5e'
+      ? PREPARED_2024_WIZARD[lvlIdx]
+      : Math.max(1, mod + level);
     spellbookTotal = 6 + (level - 1) * 2;
-    // Capacidad oficial del Grimorio (6 a nv 1, 8 a nv 2, 10 a nv 3, etc.)
     maxPreparedOrKnown = spellbookTotal;
     maxPrepared = dailyPrepared;
   } else if (c.includes('clérigo') || c.includes('clerigo') || c.includes('cleric')) {
@@ -13848,61 +14344,78 @@ export function getSpellcastingLimits(
     casterType = 'prepared';
     maxCantrips = level >= 10 ? 5 : level >= 4 ? 4 : 3;
     const mod = getMod(abilityScores?.wis);
-    maxPreparedOrKnown = Math.max(1, mod + level);
+    maxPreparedOrKnown = edition === '5.5e'
+      ? PREPARED_2024_FULL_CLERIC_DRUID_BARD[lvlIdx]
+      : Math.max(1, mod + level);
   } else if (c.includes('druida') || c.includes('druid')) {
     abilityUsed = 'wis';
     casterType = 'prepared';
     maxCantrips = level >= 10 ? 4 : level >= 4 ? 3 : 2;
     const mod = getMod(abilityScores?.wis);
-    maxPreparedOrKnown = Math.max(1, mod + level);
+    maxPreparedOrKnown = edition === '5.5e'
+      ? PREPARED_2024_FULL_CLERIC_DRUID_BARD[lvlIdx]
+      : Math.max(1, mod + level);
   } else if (c.includes('hechicero') || c.includes('sorcerer')) {
     abilityUsed = 'cha';
-    casterType = 'known';
+    casterType = edition === '5.5e' ? 'prepared' : 'known';
     maxCantrips = level >= 10 ? 6 : level >= 4 ? 5 : 4;
-    const knownTable = [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 12, 13, 13, 14, 14, 15, 15, 15];
-    maxPreparedOrKnown = knownTable[Math.min(20, Math.max(1, level)) - 1] || 2;
+    const knownTable = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 12, 13, 13, 14, 14, 15, 15, 15, 15];
+    maxPreparedOrKnown = edition === '5.5e'
+      ? PREPARED_2024_SORCERER[lvlIdx]
+      : knownTable[lvlIdx];
   } else if (c.includes('bardo') || c.includes('bard')) {
     abilityUsed = 'cha';
-    casterType = 'known';
+    casterType = edition === '5.5e' ? 'prepared' : 'known';
     maxCantrips = level >= 10 ? 4 : level >= 4 ? 3 : 2;
-    const knownTable = [0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 15, 16, 18, 19, 19, 20, 22, 22];
-    maxPreparedOrKnown = knownTable[Math.min(20, Math.max(1, level)) - 1] || 4;
+    const knownTable = [4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 15, 16, 18, 19, 19, 20, 22, 22, 22];
+    maxPreparedOrKnown = edition === '5.5e'
+      ? PREPARED_2024_FULL_CLERIC_DRUID_BARD[lvlIdx]
+      : knownTable[lvlIdx];
   } else if (c.includes('brujo') || c.includes('warlock')) {
     abilityUsed = 'cha';
-    casterType = 'known';
+    casterType = edition === '5.5e' ? 'prepared' : 'known';
     maxCantrips = level >= 10 ? 4 : level >= 4 ? 3 : 2;
-    const knownTable = [0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15];
-    maxPreparedOrKnown = knownTable[Math.min(20, Math.max(1, level)) - 1] || 2;
+    const knownTable = [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15];
+    maxPreparedOrKnown = edition === '5.5e'
+      ? PREPARED_2024_WARLOCK[lvlIdx]
+      : knownTable[lvlIdx];
   } else if (c.includes('paladín') || c.includes('paladin')) {
     abilityUsed = 'cha';
     casterType = 'prepared';
     maxCantrips = 0;
     const mod = getMod(abilityScores?.cha);
-    maxPreparedOrKnown = level < 2 ? 0 : Math.max(1, mod + Math.floor(level / 2));
+    maxPreparedOrKnown = edition === '5.5e'
+      ? PREPARED_2024_HALF_CASTER[lvlIdx]
+      : (level < 2 ? 0 : Math.max(1, mod + Math.floor(level / 2)));
   } else if (c.includes('explorador') || c.includes('ranger')) {
     abilityUsed = 'wis';
-    casterType = 'known';
+    casterType = edition === '5.5e' ? 'prepared' : 'known';
     maxCantrips = 0;
-    const knownTable = [0, 0, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11];
-    maxPreparedOrKnown = knownTable[Math.min(20, Math.max(1, level)) - 1] || 0;
-  } else if (c.includes('artífice') || c.includes('artificer')) {
+    const knownTable = [0, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11];
+    maxPreparedOrKnown = edition === '5.5e'
+      ? PREPARED_2024_HALF_CASTER[lvlIdx]
+      : knownTable[lvlIdx];
+  } else if (c.includes('artífice') || c.includes('artifice') || c.includes('artificer')) {
     abilityUsed = 'int';
     casterType = 'prepared';
     maxCantrips = level >= 14 ? 4 : level >= 10 ? 3 : 2;
     const mod = getMod(abilityScores?.int);
-    maxPreparedOrKnown = Math.max(1, mod + Math.floor(level / 2));
+    maxPreparedOrKnown = edition === '5.5e'
+      ? PREPARED_2024_HALF_CASTER[lvlIdx]
+      : Math.max(1, mod + Math.floor(level / 2));
   }
 
   const abilityMod = getMod(abilityScores?.[abilityUsed]);
 
   let explanation = '';
   if (spellbookTotal && maxPrepared !== undefined) {
-    explanation = `${className}: ${spellbookTotal} conjuros en tu Grimorio (${level === 1 ? '6 a nivel 1' : `6 iniciales + ${(level - 1) * 2} por nivel ${level}`}). Preparas ${maxPrepared} diarios para combate (${abilityUsed.toUpperCase()} ${abilityMod >= 0 ? '+' : ''}${abilityMod} + nivel).`;
+    explanation = edition === '5.5e'
+      ? `${className} (5.5e): ${spellbookTotal} conjuros en tu Grimorio (${level === 1 ? '6 a nivel 1' : `6 iniciales + ${(level - 1) * 2} por nivel ${level}`}). Preparas ${maxPrepared} diarios según la tabla oficial PHB 2024.`
+      : `${className}: ${spellbookTotal} conjuros en tu Grimorio (${level === 1 ? '6 a nivel 1' : `6 iniciales + ${(level - 1) * 2} por nivel ${level}`}). Preparas ${maxPrepared} diarios para combate (${abilityUsed.toUpperCase()} ${abilityMod >= 0 ? '+' : ''}${abilityMod} + nivel).`;
+  } else if (edition === '5.5e') {
+    explanation = `${className} (5.5e): prepara ${maxPreparedOrKnown} conjuros según la tabla oficial PHB 2024 (aptitud mágica ${abilityUsed.toUpperCase()} ${abilityMod >= 0 ? '+' : ''}${abilityMod}).`;
   } else if (casterType === 'prepared') {
     explanation = `${className} prepara conjuros diariamente: modificador de ${abilityUsed.toUpperCase()} (${abilityMod >= 0 ? '+' : ''}${abilityMod}) + nivel de clase. Total: ${maxPreparedOrKnown} conjuros preparados.`;
-    if (spellbookTotal) {
-      explanation += ` Grimorio inicial: ${spellbookTotal} conjuros registrados.`;
-    }
   } else {
     explanation = `${className} conoce una cantidad fija de ${maxPreparedOrKnown} conjuros basados en la tabla oficial de la clase.`;
   }
@@ -13920,10 +14433,15 @@ export function getSpellcastingLimits(
   };
 }
 
+export function getCompendiumForEdition(edition: '5e' | '5.5e' = '5e'): Spell[] {
+  return getAllSpellsForEdition(OFFICIAL_SPELLS_COMPENDIUM, edition);
+}
+
 export function filterSpellsForCharacter(
   className: string,
   level: number,
-  raceName: string = ''
+  _raceName: string = '',
+  edition: '5e' | '5.5e' = '5e'
 ): {
   availableToChoose: Spell[];
   higherLevelToBrowse: Spell[];
@@ -13932,7 +14450,7 @@ export function filterSpellsForCharacter(
   cantrips: Spell[];
   spells: Spell[];
 } {
-  const maxSpellLevel = getMaxSpellLevel(className, level);
+  const maxSpellLevel = getMaxSpellLevel(className, level, edition);
   const c = (className || '').toLowerCase();
 
   let targetClass = '';
@@ -13944,9 +14462,10 @@ export function filterSpellsForCharacter(
   else if (c.includes('brujo') || c.includes('warlock')) targetClass = 'Brujo';
   else if (c.includes('paladín') || c.includes('paladin')) targetClass = 'Paladín';
   else if (c.includes('explorador') || c.includes('ranger')) targetClass = 'Explorador';
-  else if (c.includes('artífice') || c.includes('artificer')) targetClass = 'Artífice';
+  else if (c.includes('artífice') || c.includes('artifice') || c.includes('artificer')) targetClass = 'Artífice';
 
-  const allForClass = OFFICIAL_SPELLS_COMPENDIUM.filter((s) => {
+  const editionPool = getAllSpellsForEdition(OFFICIAL_SPELLS_COMPENDIUM, edition);
+  const allForClass = editionPool.filter((s) => {
     if (!targetClass) return true;
     return (s.classes || []).some((cls) => cls.toLowerCase() === targetClass.toLowerCase());
   });
@@ -13968,45 +14487,50 @@ export function filterSpellsForCharacter(
 
 /**
  * Busca un conjuro en el compendio oficial por nombre en inglés, ID o nombre tradicional en español.
- * Permite emparejar nombres canónicos oficiales como "Blade Ward", "Pass Without Trace", etc.
+ * Permite emparejar nombres canónicos oficiales de 5e y 5.5e (PHB 2024).
  */
-export function findSpellByNameOrAlias(query: string): Spell | undefined {
+export function findSpellByNameOrAlias(
+  query: string,
+  edition: '5e' | '5.5e' = '5e'
+): Spell | undefined {
   if (!query) return undefined;
   const clean = query.trim().toLowerCase();
+  const pool = getAllSpellsForEdition(OFFICIAL_SPELLS_COMPENDIUM, edition);
+
+  const matchTerm = (s: Spell, term: string) => {
+    const ov = SPELLS_2024_OVERRIDES[s.id];
+    return (
+      s.name.toLowerCase() === term ||
+      (s.nameEn && s.nameEn.toLowerCase() === term) ||
+      s.id.toLowerCase() === term ||
+      (s.rules2024?.name && s.rules2024.name.toLowerCase() === term) ||
+      (s.rules2024?.nameEn && s.rules2024.nameEn.toLowerCase() === term) ||
+      (ov?.name && ov.name.toLowerCase() === term) ||
+      (ov?.nameEn && ov.nameEn.toLowerCase() === term)
+    );
+  };
 
   // 1. Coincidencia directa por nombre exacto, nombre en inglés o ID
-  let found = OFFICIAL_SPELLS_COMPENDIUM.find(
-    (s) =>
-      s.name.toLowerCase() === clean ||
-      (s.nameEn && s.nameEn.toLowerCase() === clean) ||
-      s.id.toLowerCase() === clean
-  );
-  if (found) return found;
+  let found = pool.find((s) => matchTerm(s, clean)) ||
+    OFFICIAL_SPELLS_COMPENDIUM.find((s) => matchTerm(s, clean));
+  if (found) return getSpellForEdition(found, edition);
 
-  // 2. Extraer paréntesis: ej. "Protección contra las Armas (Blade Ward)" o "Blade Ward (Protección contra las Armas)"
+  // 2. Extraer paréntesis: ej. "Protección contra las Armas (Blade Ward)"
   const inParenMatch = clean.match(/\(([^)]+)\)/);
   if (inParenMatch && inParenMatch[1]) {
     const inside = inParenMatch[1].trim();
-    found = OFFICIAL_SPELLS_COMPENDIUM.find(
-      (s) =>
-        s.name.toLowerCase() === inside ||
-        (s.nameEn && s.nameEn.toLowerCase() === inside) ||
-        s.id.toLowerCase() === inside
-    );
-    if (found) return found;
+    found = pool.find((s) => matchTerm(s, inside)) ||
+      OFFICIAL_SPELLS_COMPENDIUM.find((s) => matchTerm(s, inside));
+    if (found) return getSpellForEdition(found, edition);
   }
   const beforeParen = clean.split('(')[0].trim();
   if (beforeParen && beforeParen !== clean) {
-    found = OFFICIAL_SPELLS_COMPENDIUM.find(
-      (s) =>
-        s.name.toLowerCase() === beforeParen ||
-        (s.nameEn && s.nameEn.toLowerCase() === beforeParen) ||
-        s.id.toLowerCase() === beforeParen
-    );
-    if (found) return found;
+    found = pool.find((s) => matchTerm(s, beforeParen)) ||
+      OFFICIAL_SPELLS_COMPENDIUM.find((s) => matchTerm(s, beforeParen));
+    if (found) return getSpellForEdition(found, edition);
   }
 
-  // 3. Diccionario canónico de traducciones y variantes oficiales ES <-> EN
+  // 3. Diccionario canónico de traducciones y variantes oficiales ES <-> EN (5e y 5.5e)
   const canonicalAliases: Record<string, string> = {
     'misil mágico': 'Magic Missile',
     'misil magico': 'Magic Missile',
@@ -14018,109 +14542,126 @@ export function findSpellByNameOrAlias(query: string): Spell | undefined {
     'proteccion contra las armas': 'Blade Ward',
     'pass without trace': 'Pass Without Trace',
     'pasar sin rastro': 'Pass Without Trace',
-    'produce flame': 'Produce Flame',
-    'producir llama': 'Produce Flame',
-    'llama sagrada': 'Sacred Flame',
-    'burning hands': 'Burning Hands',
-    'manos ardientes': 'Burning Hands',
-    'flame blade': 'Flame Blade',
-    'hoja de fuego': 'Flame Blade',
-    'hoja llameante': 'Flame Blade',
-    'acid splash': 'Acid Splash',
-    'salpicadura ácida': 'Acid Splash',
-    'salpicadura acida': 'Acid Splash',
-    'create or destroy water': 'Create or Destroy Water',
-    'crear o destruir agua': 'Create or Destroy Water',
-    'water walk': 'Water Walk',
-    'caminar sobre las aguas': 'Water Walk',
-    'shocking grasp': 'Shocking Grasp',
-    'agarre electrizante': 'Shocking Grasp',
-    'toque electrizante': 'Shocking Grasp',
-    'feather fall': 'Feather Fall',
-    'caída de pluma': 'Feather Fall',
-    'caida de pluma': 'Feather Fall',
-    'levitate': 'Levitate',
-    'levitar': 'Levitate',
-    'dancing lights': 'Dancing Lights',
-    'luces danzantes': 'Dancing Lights',
+    'darkness': 'Darkness',
+    'oscuridad': 'Darkness',
     'faerie fire': 'Faerie Fire',
     'fuego feérico': 'Faerie Fire',
     'fuego feerico': 'Faerie Fire',
-    'darkness': 'Darkness',
-    'oscuridad': 'Darkness',
+    'light': 'Light',
+    'luz': 'Light',
     'thaumaturgy': 'Thaumaturgy',
     'taumaturgia': 'Thaumaturgy',
     'hellish rebuke': 'Hellish Rebuke',
-    'reprensión infernal': 'Hellish Rebuke',
-    'reprension infernal': 'Hellish Rebuke',
+    'represalia infernal': 'Hellish Rebuke',
+    'disguise self': 'Disguise Self',
+    'disfrazarse': 'Disguise Self',
     'minor illusion': 'Minor Illusion',
     'ilusión menor': 'Minor Illusion',
     'ilusion menor': 'Minor Illusion',
-    'druidcraft': 'Druidcraft',
-    'artesanía druídica': 'Druidcraft',
-    'artesania druidica': 'Druidcraft',
-    'light': 'Light',
-    'luz': 'Light',
-    'mage hand': 'Mage Hand',
-    'mano de mago': 'Mage Hand',
     'misty step': 'Misty Step',
     'paso brumoso': 'Misty Step',
-    'jump': 'Jump',
-    'salto': 'Jump',
-    'shield': 'Shield',
-    'escudo': 'Shield',
+    'invisibility': 'Invisibility',
+    'invisibilidad': 'Invisibility',
+    'enlarge/reduce': 'Enlarge/Reduce',
+    'agrandar/reducir': 'Enlarge/Reduce',
+    'produce flame': 'Produce Flame',
+    'producir llama': 'Produce Flame',
+    'burning hands': 'Burning Hands',
+    'manos ardientes': 'Burning Hands',
+    'levitate': 'Levitate',
+    'levitar': 'Levitate',
+    'shape water': 'Shape Water',
+    'moldear agua': 'Shape Water',
+    'create or destroy water': 'Create or Destroy Water',
+    'crear o destruir agua': 'Create or Destroy Water',
+    'gust': 'Gust',
+    'ráfaga': 'Gust',
+    'rafaga': 'Gust',
+    'feather fall': 'Feather Fall',
+    'caída de pluma': 'Feather Fall',
+    'caida de pluma': 'Feather Fall',
+    'dancing lights': 'Dancing Lights',
+    'luces danzantes': 'Dancing Lights',
+    'control flames': 'Control Flames',
+    'controlar llamas': 'Control Flames',
+    'shocking grasp': 'Shocking Grasp',
+    'agarre electrizante': 'Shocking Grasp',
+    'ray of frost': 'Ray of Frost',
+    'rayo de escarcha': 'Ray of Frost',
+    'fire bolt': 'Fire Bolt',
+    'descarga de fuego': 'Fire Bolt',
+    'mage hand': 'Mage Hand',
+    'mano de mago': 'Mage Hand',
+    'detect magic': 'Detect Magic',
+    'detectar magia': 'Detect Magic',
     'detect thoughts': 'Detect Thoughts',
     'detectar pensamientos': 'Detect Thoughts',
+    'speak with animals': 'Speak with Animals',
+    'hablar con los animales': 'Speak with Animals',
+    'animal friendship': 'Animal Friendship',
+    'amistad con los animales': 'Animal Friendship',
+    'mold earth': 'Mold Earth',
+    'moldear tierra': 'Mold Earth',
+    'acid splash': 'Acid Splash',
+    'salpicadura ácida': 'Acid Splash',
+    'salpicadura acida': 'Acid Splash',
     'fog cloud': 'Fog Cloud',
     'nube de niebla': 'Fog Cloud',
-    'nube de oscurecimiento': 'Fog Cloud',
+    'shield': 'Shield',
+    'escudo': 'Shield',
+    'poison spray': 'Poison Spray',
+    'rociada de veneno': 'Poison Spray',
+    'rociada venenosa': 'Poison Spray',
+    'spare the dying': 'Spare the Dying',
+    'piedad con los moribundos': 'Spare the Dying',
+    'sacred flame': 'Sacred Flame',
+    'llama sagrada': 'Sacred Flame',
+    'lesser restoration': 'Lesser Restoration',
+    'restablecimiento menor': 'Lesser Restoration',
+    'daylight': 'Daylight',
+    'luz del día': 'Daylight',
+    'luz del dia': 'Daylight',
+    'shillelagh': 'Shillelagh',
+    'bordón': 'Shillelagh',
+    'bordon': 'Shillelagh',
+    'entangle': 'Entangle',
+    'enmarañar': 'Entangle',
+    'druidcraft': 'Druidcraft',
+    'artimaña druídica': 'Druidcraft',
+    'artimana druidica': 'Druidcraft',
+    'saber druídico': 'Druidcraft',
+    'saber druidico': 'Druidcraft',
+    'longstrider': 'Longstrider',
+    'zancada prodigiosa': 'Longstrider',
+    'passwall': 'Passwall',
+    'abrir camino': 'Passwall',
+    'jump': 'Jump',
+    'salto': 'Jump',
+    'barkskin': 'Barkskin',
+    'piel robliza': 'Barkskin',
+    'alter self': 'Alter Self',
+    'alterar el propio aspecto': 'Alter Self',
+    'vicious mockery': 'Vicious Mockery',
+    'burla dañina': 'Vicious Mockery',
+    'burla danina': 'Vicious Mockery',
+    'charm person': 'Charm Person',
+    'hechizar persona': 'Charm Person',
+    'enthrall': 'Enthrall',
+    'cautivar': 'Enthrall',
     'gust of wind': 'Gust of Wind',
     'ráfaga de viento': 'Gust of Wind',
     'rafaga de viento': 'Gust of Wind',
-    'poison spray': 'Poison Spray',
-    'rociada de veneno': 'Poison Spray',
-    'animal friendship': 'Animal Friendship',
-    'amistad con animales': 'Animal Friendship',
-    'suggestion': 'Suggestion',
-    'sugestión': 'Suggestion',
-    'sugestion': 'Suggestion',
-    'detect magic': 'Detect Magic',
-    'detectar magia': 'Detect Magic',
-    'disguise self': 'Disguise Self',
-    'disfrazarse': 'Disguise Self',
-    'enlarge/reduce': 'Enlarge/Reduce',
-    'agrandar / reducir': 'Enlarge/Reduce',
-    'agrandar/reducir': 'Enlarge/Reduce',
-    'agrandar o reducir': 'Enlarge/Reduce',
-    'sleep': 'Sleep',
-    'dormir': 'Sleep',
-    'invisibility': 'Invisibility',
-    'invisibilidad': 'Invisibility',
-    'sacred flame': 'Sacred Flame',
-    'fire bolt': 'Fire Bolt',
-    'saeta de fuego': 'Fire Bolt',
-    'mending': 'Mending',
-    'remendar': 'Mending',
-    'friends': 'Friends',
-    'amigos': 'Friends',
-    'charm person': 'Charm Person',
-    'hechizar persona': 'Charm Person',
-    'ray of frost': 'Ray of Frost',
-    'rayo de escarcha': 'Ray of Frost',
-    'armor of agathys': 'Armor of Agathys',
-    'armadura de agathys': 'Armor of Agathys',
-    'tensers floating disk': "Tenser's Floating Disk",
-    "tenser's floating disk": "Tenser's Floating Disk",
-    'disco flotante de tenser': "Tenser's Floating Disk",
-    'arcane lock': 'Arcane Lock',
-    'cierre arcano': 'Arcane Lock',
-    'cerradura arcana': 'Arcane Lock',
-    'searing smite': 'Searing Smite',
-    'castigo abrasador': 'Searing Smite',
-    'branding smite': 'Branding Smite',
-    'castigo marcador': 'Branding Smite',
-    'ray of sickness': 'Ray of Sickness',
-    'rayo de enfermedad': 'Ray of Sickness',
+    'silence': 'Silence',
+    'silencio': 'Silence',
+    'thorn whip': 'Thorn Whip',
+    'látigo de espinas': 'Thorn Whip',
+    'latigo de espinas': 'Thorn Whip',
+    'spike growth': 'Spike Growth',
+    'crecimiento de espinas': 'Spike Growth',
+    'sleet storm': 'Sleet Storm',
+    'tormenta de aguanieve': 'Sleet Storm',
+    'nondetection': 'Nondetection',
+    'indetectable': 'Nondetection',
     'crown of madness': 'Crown of Madness',
     'corona de locura': 'Crown of Madness',
     'prestidigitation': 'Prestidigitation',
@@ -14130,24 +14671,81 @@ export function findSpellByNameOrAlias(query: string): Spell | undefined {
     'toque helado': 'Chill Touch',
     'ray of enfeeblement': 'Ray of Enfeeblement',
     'rayo de debilitamiento': 'Ray of Enfeeblement',
+    'witch bolt': 'Witch Bolt',
+    'rayo de hechicería': 'Witch Bolt',
+    'rayo de hechiceria': 'Witch Bolt',
+    'saeta de bruja': 'Witch Bolt',
+    'castigo brillante': 'Branding Smite',
+    'shining smite': 'Branding Smite',
+    'castigo marcador': 'Branding Smite',
+    'branding smite': 'Branding Smite',
+    'invocar dragón': 'Summon Draconic Spirit',
+    'invocar dragon': 'Summon Draconic Spirit',
+    'summon dragon': 'Summon Draconic Spirit',
+    'ofuscación': 'Feeblemind',
+    'ofuscacion': 'Feeblemind',
+    'befuddlement': 'Feeblemind',
+    'castigo divino': 'Divine Smite',
+    'divine smite': 'Divine Smite',
+    'elementalismo': 'Elementalism',
+    'elementalism': 'Elementalism',
+    'estallido hechicero': 'Sorcerous Burst',
+    'sorcerous burst': 'Sorcerous Burst',
+    'fuego fatuo estelar': 'Starry Wisp',
+    'starry wisp': 'Starry Wisp',
+    'vigor arcano': 'Arcane Vigor',
+    'arcane vigor': 'Arcane Vigor',
+    'fuente de luz lunar': 'Fount of Moonlight',
+    'fount of moonlight': 'Fount of Moonlight',
+    'santuario': 'Sanctuary',
+    'sanctuary': 'Sanctuary',
+    'comprender idiomas': 'Comprehend Languages',
+    'comprehend languages': 'Comprehend Languages',
+    'llama continua': 'Continual Flame',
+    'continual flame': 'Continual Flame',
+    'arma espiritual': 'Spiritual Weapon',
+    'spiritual weapon': 'Spiritual Weapon',
+    'espíritus guardianes': 'Spirit Guardians',
+    'espiritus guardianes': 'Spirit Guardians',
+    'spirit guardians': 'Spirit Guardians',
+    'guardián de la fe': 'Guardian of Faith',
+    'guardian de la fe': 'Guardian of Faith',
+    'guardian of faith': 'Guardian of Faith',
+    'terremoto': 'Earthquake',
+    'earthquake': 'Earthquake',
+    'tormenta de resplandor de jallarzi': "Jallarzi's Storm of Radiance",
+    "jallarzi's storm of radiance": "Jallarzi's Storm of Radiance",
+    'presencia regia de yolande': "Yolande's Regal Presence",
+    "yolande's regal presence": "Yolande's Regal Presence",
+    'caldero burbujeante de tasha': "Tasha's Bubbling Cauldron",
+    "tasha's bubbling cauldron": "Tasha's Bubbling Cauldron",
+    'palabra de poder: fortificar': 'Power Word Fortify',
+    'palabra de poder fortificar': 'Power Word Fortify',
+    'power word fortify': 'Power Word Fortify',
   };
 
   const aliasTarget = canonicalAliases[clean] || canonicalAliases[beforeParen];
   if (aliasTarget) {
-    found = OFFICIAL_SPELLS_COMPENDIUM.find(
-      (s) =>
-        s.name.toLowerCase() === aliasTarget.toLowerCase() ||
-        (s.nameEn && s.nameEn.toLowerCase() === aliasTarget.toLowerCase())
-    );
-    if (found) return found;
+    const tLow = aliasTarget.toLowerCase();
+    found = pool.find((s) => matchTerm(s, tLow)) ||
+      OFFICIAL_SPELLS_COMPENDIUM.find((s) => matchTerm(s, tLow));
+    if (found) return getSpellForEdition(found, edition);
   }
 
   // 4. Búsqueda por subcadena parcial
+  found = pool.find(
+    (s) =>
+      s.name.toLowerCase().includes(clean) ||
+      (s.nameEn && s.nameEn.toLowerCase().includes(clean))
+  );
+  if (found) return found;
+
   found = OFFICIAL_SPELLS_COMPENDIUM.find(
     (s) =>
       s.name.toLowerCase().includes(clean) ||
       (s.nameEn && s.nameEn.toLowerCase().includes(clean))
   );
-  return found;
+  return found ? getSpellForEdition(found, edition) : undefined;
 }
 
+export { getSpellForEdition, getAllSpellsForEdition } from './spells2024Overrides';

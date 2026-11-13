@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Character, Spell, CharacterSpellSlots, SpellSlotLevel } from '../types';
-import { OFFICIAL_SPELLS_COMPENDIUM, findSpellByNameOrAlias } from '../data/spellsData';
+import { findSpellByNameOrAlias, getCompendiumForEdition, getSpellForEdition } from '../data/spellsData';
 import { useLanguageStore } from '../hooks/useLanguageStore';
 import {
   translateDndTitle,
@@ -50,6 +50,7 @@ export const GrimoireModal: React.FC<GrimoireModalProps> = ({
   onLogSpellCast,
 }) => {
   const { isSpanish, t } = useLanguageStore();
+  const charEdition: '5e' | '5.5e' = character.edition === '5.5e' ? '5.5e' : '5e';
 
   // Ensure spellSlots and spells exist on character
   const slots: CharacterSpellSlots = {
@@ -57,9 +58,10 @@ export const GrimoireModal: React.FC<GrimoireModalProps> = ({
     ...(character.spellSlots || {}),
   };
 
-  const characterSpells: Spell[] = (character.spells || []).map((s) => {
+  const characterSpells: Spell[] = (character.spells || []).map((rawSpell) => {
+    const s = getSpellForEdition(rawSpell, charEdition);
     if (s.descriptionEn && s.castingTimeEn) return s;
-    const canonical = findSpellByNameOrAlias(s.id || s.nameEn || s.name);
+    const canonical = findSpellByNameOrAlias(s.id || s.nameEn || s.name, charEdition);
     if (!canonical) return s;
     return {
       ...s,
@@ -179,7 +181,7 @@ export const GrimoireModal: React.FC<GrimoireModalProps> = ({
   });
 
   // Filtered compendium spells
-  const filteredCompendium = OFFICIAL_SPELLS_COMPENDIUM.filter((s) => {
+  const filteredCompendium = getCompendiumForEdition(charEdition).filter((s) => {
     return s.name.toLowerCase().includes(compendiumSearch.toLowerCase()) ||
       (s.nameEn && s.nameEn.toLowerCase().includes(compendiumSearch.toLowerCase())) ||
       s.school.toLowerCase().includes(compendiumSearch.toLowerCase()) ||

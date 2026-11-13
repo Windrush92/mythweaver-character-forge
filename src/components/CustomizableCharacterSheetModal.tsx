@@ -8,6 +8,7 @@ import {
   AbilityScores,
   ClassResource,
   AvatarFrameStyle,
+  CharacterFeatEntry,
 } from '../types';
 import { FantasyAvatarFrame } from './FantasyAvatarFrame';
 import { AvatarLightboxModal } from './AvatarLightboxModal';
@@ -16,6 +17,7 @@ import {
   WIKIDOT_RACES,
   FULL_CASTER_SLOTS_TABLE,
   HALF_CASTER_SLOTS_TABLE,
+  getHalfCasterSlotsTable,
   WARLOCK_PACT_SLOTS_TABLE,
   getMaxSpellLevelForClass,
   WIKIDOT_BACKGROUNDS,
@@ -23,8 +25,28 @@ import {
 import {
   OFFICIAL_SPELLS_COMPENDIUM,
   isSpellcasterClass,
+  getCompendiumForEdition,
+  getSpellForEdition,
+  findSpellByNameOrAlias,
 } from '../data/spellsData';
-import { OFFICIAL_5E_FEATS } from '../data/characterCreatorData';
+import {
+  OFFICIAL_5E_FEATS,
+  DND_2024_AS_OFFICIAL_FEATS,
+} from '../data/characterCreatorData';
+import { DND_2024_BACKGROUNDS } from '../data/dnd2024/backgroundsData2024';
+import {
+  getWarlockInvocationCount2024,
+  getEldritchInvocationsForEdition,
+  PACT_CHAIN_FAMILIARS_2024,
+  ORIGIN_FEATS_2024_OPTIONS,
+  getAnyClassLevel1RitualOptions,
+  getWarlockDamageCantripOptions,
+} from '../data/levelUpDecisionsData';
+import {
+  OriginFeatSubChoicePicker,
+  OriginFeatChoiceData,
+  isOriginFeatWithSubChoice,
+} from './OriginFeatSubChoicePicker';
 import { exportCharacterToOfficialPdf } from '../utils/pdfCharacterExporter';
 import { SpellDetailModal } from './SpellDetailModal';
 import { LevelUpModal } from './LevelUpModal';
@@ -62,6 +84,7 @@ import {
   generateClassResourcesForCharacter,
   getBarbarianMaxRages,
   getBarbarianRageDamageBonus,
+  recalculateAllCharacterDerivedStats,
 } from '../data/characterRulesEngine';
 import {
   calculateEquippedAc,
@@ -566,7 +589,8 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
       className.includes('explorador') ||
       className.includes('ranger')
     ) {
-      const row = HALF_CASTER_SLOTS_TABLE[charData.level] || {};
+      const halfTable = getHalfCasterSlotsTable(charData.edition || '5e');
+      const row = halfTable[charData.level] || {};
       calculated = Object.fromEntries(
         Object.entries(row).map(([k, max]) => [k, { max, used: 0 }])
       );
@@ -995,14 +1019,15 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
   const [newCantripSelectedSheet, setNewCantripSelectedSheet] = useState<Spell | null>(null);
 
   const wizardCantripsForSheet = useMemo(() => {
-    return OFFICIAL_SPELLS_COMPENDIUM.filter((sp) => {
+    const comp = getCompendiumForEdition(charData.edition || '5e');
+    return comp.filter((sp) => {
       if (sp.level !== 0) return false;
       return (sp.classes || []).some((c) => {
         const cLower = c.toLowerCase();
         return cLower.includes('mago') || cLower.includes('wizard');
       });
     });
-  }, []);
+  }, [charData.edition]);
 
   const handleConfirmCantripSwap = () => {
     if (!cantripToSwapSheet || !newCantripSelectedSheet) {
@@ -1045,6 +1070,248 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
     });
   };
 
+  // --- Brujo: Gestión Interactiva de Invocaciones Sobrenaturales (5e & 5.5e) ---
+  const sheetEdition: '5e' | '5.5e' = charData.edition === '5.5e' ? '5.5e' : '5e';
+  const warlockEntrySheet = (charData.multiclass || []).find(
+    (m) => m.className.toLowerCase().includes('brujo') || m.className.toLowerCase().includes('warlock')
+  );
+  const isWarlockSheet =
+    Boolean(warlockEntrySheet) ||
+    (charData.class || '').toLowerCase().includes('brujo') ||
+    (charData.class || '').toLowerCase().includes('warlock');
+  const warlockLevelSheet = warlockEntrySheet ? warlockEntrySheet.level : (isWarlockSheet ? (charData.level || 1) : 0);
+  const warlockMaxInvocationsSheet = !isWarlockSheet
+    ? 0
+    : sheetEdition === '5.5e'
+    ? getWarlockInvocationCount2024(warlockLevelSheet)
+    : (warlockLevelSheet < 2 ? 0 : warlockLevelSheet < 5 ? 2 : warlockLevelSheet < 7 ? 3 : warlockLevelSheet < 9 ? 4 : warlockLevelSheet < 12 ? 5 : warlockLevelSheet < 15 ? 6 : warlockLevelSheet < 18 ? 7 : 8);
+
+  const warlockAvailableInvocationsSheet = useMemo(() => {
+    if (!isWarlockSheet) return [];
+    return getEldritchInvocationsForEdition(sheetEdition, Math.max(1, warlockLevelSheet));
+  }, [isWarlockSheet, sheetEdition, warlockLevelSheet]);
+
+  const [isInvocationsModalOpen, setIsInvocationsModalOpen] = useState(false);
+  const [draftInvocations, setDraftInvocations] = useState<string[]>([]);
+  const [draftInvocationFilter, setDraftInvocationFilter] = useState('');
+  const [draftTomeCantrips, setDraftTomeCantrips] = useState<string[]>([]);
+  const [draftTomeRituals, setDraftTomeRituals] = useState<string[]>([]);
+  const [draftChainFamiliar, setDraftChainFamiliar] = useState<string>('');
+  const [draftAgonizingCantrip, setDraftAgonizingCantrip] = useState<string>('');
+  const [draftSpearCantrip, setDraftSpearCantrip] = useState<string>('');
+  const [draftRepellingCantrip, setDraftRepellingCantrip] = useState<string>('');
+  const [draftLessonsFeatName, setDraftLessonsFeatName] = useState<string>('');
+  const [draftLessonsOriginData, setDraftLessonsOriginData] = useState<OriginFeatChoiceData>({
+    featId: '',
+    skillsOrTools: [],
+    tools: [],
+    cantrips: [],
+    level1Spell: '',
+    spellList: 'Mago',
+    spellAbility: 'cha',
+  });
+
+  const openWarlockInvocationsModal = () => {
+    const decs = charData.classDecisions || {};
+    setDraftInvocations(Array.isArray(decs['invocations']) ? [...decs['invocations']] : []);
+    setDraftInvocationFilter('');
+    setDraftTomeCantrips(Array.isArray(decs['pactTomeCantrips']) ? [...decs['pactTomeCantrips']] : []);
+    setDraftTomeRituals(Array.isArray(decs['pactTomeRituals']) ? [...decs['pactTomeRituals']] : []);
+    setDraftChainFamiliar(Array.isArray(decs['pactChainFamiliar']) ? (decs['pactChainFamiliar'][0] || '') : (decs['pactChainFamiliar'] || ''));
+    setDraftAgonizingCantrip(Array.isArray(decs['warlockAgonizingCantrip']) ? (decs['warlockAgonizingCantrip'][0] || '') : (decs['warlockAgonizingCantrip'] || ''));
+    setDraftSpearCantrip(Array.isArray(decs['warlockSpearCantrip']) ? (decs['warlockSpearCantrip'][0] || '') : (decs['warlockSpearCantrip'] || ''));
+    setDraftRepellingCantrip(Array.isArray(decs['warlockRepellingCantrip']) ? (decs['warlockRepellingCantrip'][0] || '') : (decs['warlockRepellingCantrip'] || ''));
+    const existingLesson = Array.isArray(decs['warlockLessonsFeat']) ? (decs['warlockLessonsFeat'][0] || '') : (decs['warlockLessonsFeat'] || '');
+    setDraftLessonsFeatName(existingLesson);
+    setDraftLessonsOriginData({
+      featId: '',
+      skillsOrTools: [],
+      tools: [],
+      cantrips: [],
+      level1Spell: '',
+      spellList: 'Mago',
+      spellAbility: 'cha',
+    });
+    setIsInvocationsModalOpen(true);
+  };
+
+  const toggleDraftInvocation = (invName: string) => {
+    setDraftInvocations((prev) => {
+      if (prev.includes(invName)) {
+        return prev.filter((x) => x !== invName);
+      }
+      if (warlockMaxInvocationsSheet > 0 && prev.length >= warlockMaxInvocationsSheet) {
+        setThemedAlert({
+          isOpen: true,
+          title: isSpanish ? 'Límite de Invocaciones Alcanzado' : 'Invocation Limit Reached',
+          subtitle: isSpanish ? `Brujo Nivel ${warlockLevelSheet}` : `Warlock Level ${warlockLevelSheet}`,
+          type: 'warning',
+          message: isSpanish
+            ? `A nivel ${warlockLevelSheet} puedes tener hasta ${warlockMaxInvocationsSheet} invocación(es) activa(s). Quita una antes de elegir otra.`
+            : `At level ${warlockLevelSheet} you can have up to ${warlockMaxInvocationsSheet} active invocation(s). Remove one first.`,
+        });
+        return prev;
+      }
+      return [...prev, invName];
+    });
+  };
+
+  const handleSaveWarlockInvocations = () => {
+    const updatedDecisions: Record<string, any> = {
+      ...(charData.classDecisions || {}),
+      invocations: draftInvocations,
+    };
+    const hasTome = draftInvocations.includes('Pacto del Tomo');
+    const hasChain = draftInvocations.includes('Pacto de la Cadena');
+    const hasAgonizing = draftInvocations.includes('Explosión Agonizante');
+    const hasSpear = draftInvocations.includes('Lanza Sobrenatural');
+    const hasRepelling = draftInvocations.includes('Explosión Repulsiva');
+    const hasLessons = draftInvocations.includes('Lecciones de los Primeros');
+
+    if (hasTome) {
+      updatedDecisions['pactTomeCantrips'] = draftTomeCantrips;
+      updatedDecisions['pactTomeRituals'] = draftTomeRituals;
+    } else {
+      delete updatedDecisions['pactTomeCantrips'];
+      delete updatedDecisions['pactTomeRituals'];
+    }
+    if (hasChain && draftChainFamiliar) updatedDecisions['pactChainFamiliar'] = [draftChainFamiliar];
+    else delete updatedDecisions['pactChainFamiliar'];
+
+    if (hasAgonizing && draftAgonizingCantrip) updatedDecisions['warlockAgonizingCantrip'] = [draftAgonizingCantrip];
+    else delete updatedDecisions['warlockAgonizingCantrip'];
+
+    if (hasSpear && draftSpearCantrip) updatedDecisions['warlockSpearCantrip'] = [draftSpearCantrip];
+    else delete updatedDecisions['warlockSpearCantrip'];
+
+    if (hasRepelling && draftRepellingCantrip) updatedDecisions['warlockRepellingCantrip'] = [draftRepellingCantrip];
+    else delete updatedDecisions['warlockRepellingCantrip'];
+
+    if (hasLessons && draftLessonsFeatName) updatedDecisions['warlockLessonsFeat'] = [draftLessonsFeatName];
+    else delete updatedDecisions['warlockLessonsFeat'];
+
+    // Sync Pact of the Tome & Lessons of the First Ones spells + feats
+    let updatedSpells = (charData.spells || []).filter(
+      (s) => s.featOrigin !== 'Pacto del Tomo' && s.featOrigin !== 'Lecciones de los Primeros'
+    );
+    if (hasTome) {
+      [...draftTomeCantrips, ...draftTomeRituals].forEach((spName) => {
+        const cleanName = spName.split('(')[0].trim();
+        const found = findSpellByNameOrAlias(cleanName, sheetEdition);
+        if (found && !updatedSpells.some((x) => x.name.toLowerCase() === found.name.toLowerCase())) {
+          updatedSpells.push({
+            ...found,
+            id: `char-spl-tome-${found.id || found.name.toLowerCase().replace(/\s+/g, '-')}`,
+            prepared: true,
+            isFeatSpell: true,
+            featOrigin: 'Pacto del Tomo',
+            notes: 'Concedido por Pacto del Tomo (no cuenta contra el límite de clase).',
+          });
+        }
+      });
+    }
+
+    let updatedFeats: CharacterFeatEntry[] = (charData.feats || []).filter(
+      (f) => f.source !== 'Invocación: Lecciones de los Primeros'
+    );
+    let updatedSkills = [...(charData.skills || [])];
+    if (hasLessons && draftLessonsFeatName) {
+      const cleanL = draftLessonsFeatName.split('(')[0].trim().toLowerCase();
+      const matchedOrigin = DND_2024_AS_OFFICIAL_FEATS.find(
+        (f) => f.id === draftLessonsFeatName || f.name.toLowerCase() === cleanL || f.name.toLowerCase().includes(cleanL)
+      );
+      if (matchedOrigin) {
+        const subParts: string[] = [];
+        if (draftLessonsOriginData.spellList) subParts.push(`Lista: ${draftLessonsOriginData.spellList}`);
+        if (draftLessonsOriginData.spellAbility) subParts.push(`Aptitud: ${draftLessonsOriginData.spellAbility.toUpperCase()}`);
+        (draftLessonsOriginData.skillsOrTools || []).forEach((sk: string) => {
+          subParts.push(`Competencia: ${sk}`);
+          if (!updatedSkills.some((s) => s.toLowerCase() === sk.toLowerCase())) {
+            updatedSkills.push(sk);
+          }
+        });
+        (draftLessonsOriginData.tools || []).forEach((tl: string) => subParts.push(`Herramienta: ${tl}`));
+        (draftLessonsOriginData.instruments || []).forEach((inst: string) => subParts.push(`Instrumento: ${inst}`));
+        const chosenLessonSpells = [
+          ...(draftLessonsOriginData.cantrips || []),
+          ...(draftLessonsOriginData.level1Spell ? [draftLessonsOriginData.level1Spell] : []),
+        ];
+        chosenLessonSpells.forEach((spName: string) => {
+          const resolved = findSpellByNameOrAlias(spName, sheetEdition);
+          const spellTitle = resolved?.name || spName;
+          subParts.push(spellTitle);
+          if (!updatedSpells.some((x) => x.name.toLowerCase() === spellTitle.toLowerCase())) {
+            if (resolved) {
+              updatedSpells.push({
+                ...resolved,
+                id: `char-spl-lessons-${resolved.id || spellTitle.toLowerCase().replace(/\s+/g, '-')}`,
+                prepared: true,
+                isFeatSpell: true,
+                featOrigin: 'Lecciones de los Primeros',
+                notes: `Concedido por ${matchedOrigin.name} (Lecciones de los Primeros).`,
+              });
+            } else {
+              updatedSpells.push({
+                id: `char-spl-lessons-${spellTitle.toLowerCase().replace(/\s+/g, '-')}`,
+                name: spellTitle,
+                level: (draftLessonsOriginData.cantrips || []).includes(spName) ? 0 : 1,
+                school: 'Abjuración',
+                castingTime: '1 acción',
+                range: 'Personal',
+                components: 'V, S',
+                duration: 'Instantáneo',
+                description: `Conjuro concedido por ${matchedOrigin.name}.`,
+                classes: [],
+                prepared: true,
+                isFeatSpell: true,
+                featOrigin: 'Lecciones de los Primeros',
+                notes: `Concedido por ${matchedOrigin.name} (Lecciones de los Primeros).`,
+              });
+            }
+          }
+        });
+        if (!updatedFeats.some((f) => f.id === matchedOrigin.id)) {
+          updatedFeats.push({
+            id: matchedOrigin.id,
+            name: matchedOrigin.name,
+            nameEn: matchedOrigin.nameEn,
+            source: 'Invocación: Lecciones de los Primeros',
+            category: matchedOrigin.category,
+            description: matchedOrigin.description,
+            benefits: matchedOrigin.benefits,
+            subChoices: subParts.length > 0 ? subParts : undefined,
+          });
+        }
+      }
+    }
+
+    const baseChar: Character = {
+      ...charData,
+      classDecisions: updatedDecisions,
+      spells: updatedSpells,
+      feats: updatedFeats,
+      skills: updatedSkills,
+    };
+    const recalc = recalculateAllCharacterDerivedStats(
+      baseChar,
+      charData.level || 1,
+      charData.stats,
+      charData.equippedItems || charData.inventory || []
+    );
+    const updated: Character = {
+      ...baseChar,
+      ac: recalc.ac,
+      speed: recalc.speed,
+      initiativeBonus: recalc.initiativeBonus,
+      passivePerception: recalc.passivePerception,
+      attacks: recalc.attacks,
+      classResources: recalc.classResources,
+    };
+    setCharData(updated);
+    onUpdateCharacter(updated);
+    setIsInvocationsModalOpen(false);
+  };
+
   // Handle ESC key to dismiss topmost open modals/panels or close character sheet
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -1053,6 +1320,10 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
       // Close topmost dialogs/modals in priority order
       if (themedAlert.isOpen) {
         setThemedAlert((prev) => ({ ...prev, isOpen: false }));
+        return;
+      }
+      if (isInvocationsModalOpen) {
+        setIsInvocationsModalOpen(false);
         return;
       }
       if (inspectFeatureModal) {
@@ -1627,16 +1898,116 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
     return (sub?.features || []).filter((f) => f.level <= charData.level);
   }, [classObj, charData.subclass, charData.level]);
 
-  // Identified feats from notes or official list
+  // Identified feats from character.feats, creatorState, 2024 background, classDecisions, or notes
   const identifiedFeats = useMemo(() => {
-    const feats: any[] = [];
-    OFFICIAL_5E_FEATS.forEach((feat) => {
-      if (charData.notes && charData.notes.includes(feat.name)) {
-        feats.push(feat);
-      }
+    type SheetFeatDisplay = CharacterFeatEntry & { isOrigin?: boolean };
+    const results: SheetFeatDisplay[] = [];
+    const seenKeys = new Set<string>();
+    const addFeatEntry = (entry: SheetFeatDisplay) => {
+      const key = (entry.id || entry.name).toLowerCase().trim();
+      const nameKey = entry.name.toLowerCase().trim();
+      if (seenKeys.has(key) || seenKeys.has(nameKey)) return;
+      seenKeys.add(key);
+      seenKeys.add(nameKey);
+      results.push(entry);
+    };
+
+    const allKnownFeats = [...DND_2024_AS_OFFICIAL_FEATS, ...OFFICIAL_5E_FEATS];
+    const findFeatDef = (idOrName: string) => {
+      const low = idOrName.toLowerCase().trim();
+      return allKnownFeats.find(
+        (f) => f.id.toLowerCase() === low || f.name.toLowerCase() === low || f.nameEn.toLowerCase() === low
+      );
+    };
+
+    (charData.feats || []).forEach((f) => {
+      addFeatEntry({
+        ...f,
+        isOrigin: f.category?.toLowerCase().includes('origen'),
+      });
     });
-    return feats;
-  }, [charData.notes]);
+
+    const cs = (charData.creatorState || {}) as Record<string, any>;
+    if (cs.humanVersatileFeatId) {
+      const def = findFeatDef(cs.humanVersatileFeatId);
+      if (def) {
+        addFeatEntry({
+          id: def.id,
+          name: def.name,
+          nameEn: def.nameEn,
+          source: 'Origen (Humano Versátil)',
+          category: def.category,
+          description: def.description,
+          benefits: def.benefits,
+          isOrigin: true,
+        });
+      }
+    }
+
+    if (charData.edition === '5.5e' && charData.background) {
+      const bgLow = charData.background.toLowerCase().trim();
+      const bg2024 = DND_2024_BACKGROUNDS.find(
+        (b) => b.id.toLowerCase() === bgLow || b.name.toLowerCase() === bgLow || b.nameEn.toLowerCase() === bgLow
+      );
+      if (bg2024?.bonusFeatId) {
+        const def = findFeatDef(bg2024.bonusFeatId);
+        if (def) {
+          const decSub = (charData.classDecisions?.[`featChoice_${def.id}`] as string[]) || undefined;
+          addFeatEntry({
+            id: def.id,
+            name: def.name,
+            nameEn: def.nameEn,
+            source: `Trasfondo (${bg2024.name})`,
+            category: def.category,
+            description: def.description,
+            benefits: def.benefits,
+            subChoices: decSub,
+            isOrigin: true,
+          });
+        }
+      }
+    }
+
+    if (cs.asiChoices && typeof cs.asiChoices === 'object') {
+      Object.entries(cs.asiChoices).forEach(([lvlKey, ch]: [string, any]) => {
+        if (ch?.type === 'feat' && ch?.featId) {
+          const def = findFeatDef(ch.featId);
+          if (def) {
+            addFeatEntry({
+              id: def.id,
+              name: def.name,
+              nameEn: def.nameEn,
+              source: `Nivel ${lvlKey}`,
+              category: def.category,
+              description: def.description,
+              benefits: def.benefits,
+              isOrigin: def.category?.toLowerCase().includes('origen'),
+            });
+          }
+        }
+      });
+    }
+
+    if (charData.notes) {
+      const notesLower = charData.notes.toLowerCase();
+      allKnownFeats.forEach((feat) => {
+        if (notesLower.includes(feat.name.toLowerCase()) || notesLower.includes(feat.nameEn.toLowerCase())) {
+          addFeatEntry({
+            id: feat.id,
+            name: feat.name,
+            nameEn: feat.nameEn,
+            source: 'Notas / Progresión',
+            category: feat.category,
+            description: feat.description,
+            benefits: feat.benefits,
+            isOrigin: feat.category?.toLowerCase().includes('origen'),
+          });
+        }
+      });
+    }
+
+    return results;
+  }, [charData.feats, charData.creatorState, charData.background, charData.edition, charData.classDecisions, charData.notes]);
 
   // Spellcasting stats
   const spellAbility = useMemo<keyof AbilityScores>(() => {
@@ -1657,9 +2028,9 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
     return charData.spellAttackBonus || profBonus + getMod(charData.stats[spellAbility]);
   }, [charData.spellAttackBonus, profBonus, charData.stats, spellAbility]);
 
-  // Filtered spells
+  // Filtered spells (edition-aware normalization for 5e / 5.5e)
   const filteredSpellsList = useMemo(() => {
-    const list = charData.spells || [];
+    const list = (charData.spells || []).map((sp) => getSpellForEdition(sp, charData.edition || '5e'));
     return list.filter((sp) => {
       const matchName =
         !spellSearchTerm.trim() ||
@@ -1669,7 +2040,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
         sp.school.toLowerCase().includes(spellSchoolFilter.toLowerCase());
       return matchName && matchSchool;
     });
-  }, [charData.spells, spellSearchTerm, spellSchoolFilter]);
+  }, [charData.spells, charData.edition, spellSearchTerm, spellSchoolFilter]);
 
   // Exact HP Bar Percentage (0 to 100%)
   const hpPercent = Math.max(0, Math.min(100, Math.round((charData.currentHp / (charData.maxHp || 1)) * 100)));
@@ -7125,9 +7496,19 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                             onClick={() => setSelectedSpellDetail(sp)}
                             className="p-2 bg-[#f5ede0] rounded-lg border border-[#d8c8af] hover:border-[#8c672b] cursor-pointer transition flex items-center justify-between text-xs group"
                           >
-                            <span className="font-fantasy font-bold text-[#2c221a] truncate">
-                              {isSpanish ? sp.name : ((sp as any).nameEn || translateDndTitle(sp.name))}
-                            </span>
+                            <div className="flex items-center gap-1.5 truncate">
+                              <span className="font-fantasy font-bold text-[#2c221a] truncate">
+                                {isSpanish ? sp.name : ((sp as any).nameEn || translateDndTitle(sp.name))}
+                              </span>
+                              {(sp as any).isFeatSpell && (
+                                <span
+                                  className="text-[9px] bg-[#e9d8fd] text-[#44337a] px-1 rounded font-mono font-bold shrink-0"
+                                  title={(sp as any).featOrigin || 'Conjuro adicional por Dote o Pacto'}
+                                >
+                                  {(sp as any).featOrigin?.includes('Tomo') ? 'Tomo' : 'Dote'}
+                                </span>
+                              )}
+                            </div>
                             <div className="flex items-center gap-1 shrink-0 ml-1">
                               <span className="text-[10px] text-[#786450] font-mono">
                                 {isSpanish ? sp.castingTime : (sp.castingTimeEn || translateSpellMeta(sp.castingTime))}
@@ -7179,6 +7560,14 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                               {sp.ritual && (
                                 <span className="text-[9px] bg-[#ede1ce] text-[#7a5a2b] px-1 rounded font-mono">
                                   R
+                                </span>
+                              )}
+                              {(sp as any).isFeatSpell && (
+                                <span
+                                  className="text-[9px] bg-[#e9d8fd] text-[#44337a] px-1 rounded font-mono font-bold"
+                                  title={(sp as any).featOrigin || 'Conjuro adicional por Dote o Pacto'}
+                                >
+                                  {(sp as any).featOrigin?.includes('Tomo') ? 'Tomo' : 'Dote'}
                                 </span>
                               )}
                             </div>
@@ -7246,35 +7635,108 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
               {identifiedFeats.length > 0 && (
                 <div className="space-y-2">
                   <span className="text-[11px] font-fantasy font-bold text-[#8c672b] uppercase tracking-wide block">
-                    {isSpanish ? '⭐ Dotes Consagradas (Feats)' : '⭐ Chosen Feats'}
+                    {isSpanish ? '⭐ Dotes & Dotes de Origen' : '⭐ Chosen & Origin Feats'}
                   </span>
                   {identifiedFeats.map((feat) => (
                     <div
-                      key={feat.id}
-                      className="p-3 bg-[#f5ede0] rounded-xl border border-[#d8c8af] space-y-1 shadow-2xs"
+                      key={feat.id || feat.name}
+                      className={`p-3 rounded-xl border space-y-1.5 shadow-2xs ${
+                        feat.isOrigin
+                          ? 'bg-[#faf6eb] border-[#c59b27]'
+                          : 'bg-[#f5ede0] border-[#d8c8af]'
+                      }`}
                     >
-                      <div className="font-fantasy font-bold text-xs text-[#2c221a]">
-                        {isSpanish ? feat.name : ((feat as any).nameEn || translateDndTitle(feat.name))}
+                      <div className="flex flex-wrap items-center justify-between gap-1.5">
+                        <div className="font-fantasy font-bold text-xs text-[#2c221a]">
+                          {isSpanish ? feat.name : ((feat as any).nameEn || translateDndTitle(feat.name))}
+                        </div>
+                        <div className="flex items-center gap-1 flex-wrap">
+                          {feat.source && (
+                            <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#e8dcc7] text-[#5c401b] border border-[#cfbe9f]">
+                              {feat.source}
+                            </span>
+                          )}
+                          {feat.category && (
+                            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/80 text-[#7a5a2b] border border-[#d8c8af]">
+                              {feat.category}
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <p className="text-[11px] text-[#5e4e3e] leading-relaxed">
                         {isSpanish
                           ? feat.description
-                          : ((feat as any).descriptionEn || translateDndText(feat.description))}
+                          : ((feat as any).descriptionEn || translateDndText(feat.description || ''))}
                       </p>
+                      {(() => {
+                        const rawSc = feat.subChoices;
+                        const items: string[] = Array.isArray(rawSc)
+                          ? rawSc
+                          : rawSc && typeof rawSc === 'object'
+                          ? [
+                              ...(rawSc.spellList || rawSc.spellClass ? [`Lista: ${rawSc.spellList || rawSc.spellClass}`] : []),
+                              ...(rawSc.spellAbility ? [`Aptitud: ${rawSc.spellAbility.toUpperCase()}`] : []),
+                              ...(rawSc.cantrips && rawSc.cantrips.length > 0 ? [`Trucos: ${rawSc.cantrips.join(', ')}`] : []),
+                              ...(rawSc.level1Spell ? [`Conjuro Nv 1: ${rawSc.level1Spell}`] : []),
+                              ...(rawSc.skillsOrTools && rawSc.skillsOrTools.length > 0 ? [`Competencias: ${rawSc.skillsOrTools.join(', ')}`] : []),
+                              ...(rawSc.tools && rawSc.tools.length > 0 ? [`Herramientas: ${rawSc.tools.join(', ')}`] : []),
+                              ...(rawSc.instruments && rawSc.instruments.length > 0 ? [`Instrumentos: ${rawSc.instruments.join(', ')}`] : []),
+                            ]
+                          : [];
+                        if (items.length === 0) return null;
+                        return (
+                          <div className="flex flex-wrap gap-1 pt-0.5">
+                            {items.map((sc: string, sIdx: number) => (
+                              <span
+                                key={sIdx}
+                                className="text-[10px] font-semibold bg-[#ede1ce] text-[#4a361c] px-2 py-0.5 rounded-md border border-[#d6c4aa]"
+                              >
+                                {sc}
+                              </span>
+                            ))}
+                          </div>
+                        );
+                      })()}
+                      {feat.benefits && feat.benefits.length > 0 && (
+                        <ul className="space-y-0.5 pt-1 border-t border-[#e5d7c1]">
+                          {feat.benefits.map((b, bIdx) => (
+                            <li key={bIdx} className="text-[10px] text-[#4a3b2c] flex items-start gap-1.5 leading-snug">
+                              <span className="text-[#8c672b] font-bold">•</span>
+                              <span>{isSpanish ? b : translateDndText(b)}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                     </div>
                   ))}
                 </div>
               )}
 
               {/* Class & Subclass Tactical Decisions (Disciplinas Elementales, Runas, Tótem, Maniobras, etc.) */}
-              {charData.classDecisions && Object.keys(charData.classDecisions).length > 0 && (
+              {(() => {
+                const warlockHandledKeys = [
+                  'invocations',
+                  'pactBoon',
+                  'pactTomeCantrips',
+                  'pactTomeRituals',
+                  'pactChainFamiliar',
+                  'warlockAgonizingCantrip',
+                  'warlockSpearCantrip',
+                  'warlockRepellingCantrip',
+                  'warlockLessonsFeat',
+                ];
+                const decisionEntries = Object.entries(charData.classDecisions || {}).filter(
+                  ([k]) => !isWarlockSheet || !warlockHandledKeys.includes(k)
+                );
+                if (decisionEntries.length === 0) return null;
+                return (
                 <div className="space-y-2">
                   <span className="text-[11px] font-fantasy font-bold text-[#8c672b] uppercase tracking-wide block">
                     {isSpanish
                       ? '⚡ Decisiones Tácticas de Especialización'
                       : '⚡ Tactical Specialization Decisions'}
                   </span>
-                  {Object.entries(charData.classDecisions).map(([key, val]) => {
+                  {decisionEntries.map(([key, val]) => {
                     const label = isSpanish
                       ? (key === 'elementalDisciplines'
                         ? 'Disciplinas de los Cuatro Elementos'
@@ -7404,6 +7866,30 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                         ? 'Idioma Dracónico (Dragón Ascendente)'
                         : key === 'paladinFightingStyle_2'
                         ? 'Estilo de Combate (Paladín)'
+                        : key === 'pactTomeRituals'
+                        ? 'Rituales de Nivel 1 (Pacto del Tomo)'
+                        : key === 'warlockAgonizingCantrip'
+                        ? 'Truco de Explosión Agonizante'
+                        : key === 'warlockSpearCantrip'
+                        ? 'Truco de Lanza Sobrenatural'
+                        : key === 'warlockRepellingCantrip'
+                        ? 'Truco de Explosión Repulsiva'
+                        : key === 'warlockLessonsFeat'
+                        ? 'Dote de Origen (Lecciones de los Primeros)'
+                        : key === 'divineOrder'
+                        ? 'Orden Divino (Clérigo)'
+                        : key === 'primalOrder'
+                        ? 'Orden Primigenio (Druida)'
+                        : key === 'clericBlessedStrikes'
+                        ? 'Golpes Benditos (Clérigo Nv 7)'
+                        : key === 'druidElementalFury'
+                        ? 'Furia Elemental (Druida Nv 7)'
+                        : key === 'fighterWeaponMasteries' || key === 'weaponMasteries'
+                        ? 'Maestrías con Armas (Weapon Mastery)'
+                        : key === 'rangerDeftExplorerSkill'
+                        ? 'Explorador Hábil — Pericia (Explorador Nv 2)'
+                        : key === 'rangerExpertise_9'
+                        ? 'Pericia (Explorador Nv 9)'
                         : key)
                       : (key === 'elementalDisciplines'
                         ? 'Four Elements Disciplines'
@@ -7554,7 +8040,110 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                     );
                   })}
                 </div>
-              )}
+                );
+              })()}
+
+              {/* Brujo: Invocaciones Sobrenaturales Interactivas */}
+              {isWarlockSheet && warlockMaxInvocationsSheet > 0 && (() => {
+                const chosenInvs = Array.isArray(charData.classDecisions?.['invocations'])
+                  ? (charData.classDecisions?.['invocations'] as string[])
+                  : [];
+                const invDefs = getEldritchInvocationsForEdition(sheetEdition, 20);
+                return (
+                  <div className="p-3.5 bg-[#f7f1fc] rounded-xl border-2 border-[#7b4ca0]/60 space-y-2.5 shadow-2xs">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div>
+                        <span className="text-[11px] font-fantasy font-bold text-[#4e276b] uppercase tracking-wide flex items-center gap-1.5">
+                          <Sparkles className="w-3.5 h-3.5 text-[#7b4ca0]" />
+                          {isSpanish
+                            ? `Invocaciones Sobrenaturales de Brujo (${chosenInvs.length} / ${warlockMaxInvocationsSheet})`
+                            : `Warlock Eldritch Invocations (${chosenInvs.length} / ${warlockMaxInvocationsSheet})`}
+                        </span>
+                        <span className="text-[10px] text-[#6d4c8a] block">
+                          {sheetEdition === '5.5e'
+                            ? `Reglas 5.5e (Nivel ${warlockLevelSheet}) • Desbloqueadas desde Nivel 1`
+                            : `Reglas 5e (Nivel ${warlockLevelSheet})`}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={openWarlockInvocationsModal}
+                        className="px-2.5 py-1 rounded-lg bg-[#542d72] hover:bg-[#6d3b94] text-white text-[11px] font-fantasy font-bold flex items-center gap-1 shadow-xs transition cursor-pointer"
+                      >
+                        <Sparkles className="w-3 h-3" />
+                        {chosenInvs.length > 0
+                          ? (isSpanish ? 'Cambiar / Editar Invocaciones' : 'Change Invocations')
+                          : (isSpanish ? 'Elegir Invocaciones' : 'Pick Invocations')}
+                      </button>
+                    </div>
+
+                    {chosenInvs.length === 0 ? (
+                      <p className="text-[11px] text-[#6d4c8a] italic bg-white/70 p-2.5 rounded-lg border border-[#dec9f0]">
+                        {isSpanish
+                          ? `Aún no has seleccionado invocaciones para tu Brujo (tienes ${warlockMaxInvocationsSheet} espacio(s) disponible(s)). Haz clic en "Elegir Invocaciones" para configurarlas.`
+                          : `No invocations selected yet (${warlockMaxInvocationsSheet} slot(s) available). Click "Pick Invocations" to configure them.`}
+                      </p>
+                    ) : (
+                      <div className="space-y-1.5">
+                        {chosenInvs.map((invName) => {
+                          const def = invDefs.find((d) => d.name.toLowerCase() === invName.toLowerCase());
+                          const subDetails: string[] = [];
+                          if (invName === 'Pacto del Tomo') {
+                            const tc = charData.classDecisions?.['pactTomeCantrips'];
+                            const tr = charData.classDecisions?.['pactTomeRituals'];
+                            if (Array.isArray(tc) && tc.length) subDetails.push(`Trucos: ${tc.join(', ')}`);
+                            if (Array.isArray(tr) && tr.length) subDetails.push(`Rituales Nv 1: ${tr.join(', ')}`);
+                          } else if (invName === 'Pacto de la Cadena') {
+                            const fam = charData.classDecisions?.['pactChainFamiliar'];
+                            if (Array.isArray(fam) && fam.length) subDetails.push(`Familiar: ${fam.join(', ')}`);
+                            else if (typeof fam === 'string' && fam) subDetails.push(`Familiar: ${fam}`);
+                          } else if (invName === 'Explosión Agonizante') {
+                            const c = charData.classDecisions?.['warlockAgonizingCantrip'];
+                            if (Array.isArray(c) && c.length) subDetails.push(`Truco vinculado: ${c.join(', ')}`);
+                          } else if (invName === 'Lanza Sobrenatural') {
+                            const c = charData.classDecisions?.['warlockSpearCantrip'];
+                            if (Array.isArray(c) && c.length) subDetails.push(`Truco vinculado: ${c.join(', ')}`);
+                          } else if (invName === 'Explosión Repulsiva') {
+                            const c = charData.classDecisions?.['warlockRepellingCantrip'];
+                            if (Array.isArray(c) && c.length) subDetails.push(`Truco vinculado: ${c.join(', ')}`);
+                          } else if (invName === 'Lecciones de los Primeros') {
+                            const lf = charData.classDecisions?.['warlockLessonsFeat'];
+                            if (Array.isArray(lf) && lf.length) subDetails.push(`Dote elegida: ${lf.join(', ')}`);
+                          }
+
+                          return (
+                            <div
+                              key={invName}
+                              className="p-2.5 bg-white/90 rounded-lg border border-[#dec9f0] space-y-1"
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="font-fantasy font-bold text-xs text-[#3b1c54]">
+                                  {invName}
+                                </span>
+                                {def?.badge && (
+                                  <span className="text-[9px] font-mono text-[#542d72] bg-[#f3eafa] px-1.5 py-0.5 rounded border border-[#d2b8ea]">
+                                    {def.badge}
+                                  </span>
+                                )}
+                              </div>
+                              {def?.desc && (
+                                <p className="text-[11px] text-[#4a3959] leading-snug">
+                                  {def.desc}
+                                </p>
+                              )}
+                              {subDetails.length > 0 && (
+                                <p className="text-[10px] text-[#542d72] font-semibold bg-[#f5effa] px-2 py-1 rounded border border-[#e3d2f2]">
+                                  {subDetails.join(' • ')}
+                                </p>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* Subclass Features */}
               {unlockedSubclassFeatures.length > 0 && (
@@ -9108,7 +9697,8 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
         {/* SPELL DETAIL MODAL */}
         {selectedSpellDetail && (
           <SpellDetailModal
-            spell={selectedSpellDetail}
+            spell={getSpellForEdition(selectedSpellDetail, charData.edition || '5e')}
+            edition={charData.edition || '5e'}
             onClose={() => setSelectedSpellDetail(null)}
             isKnown={true}
             onRemoveSpell={() => {
@@ -9121,6 +9711,7 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
         {/* SPELL PICKER COMPENDIUM MODAL */}
         <SpellPickerModal
           isOpen={isSpellPickerOpen}
+          edition={charData.edition || '5e'}
           onClose={() => setIsSpellPickerOpen(false)}
           onSelectSpell={(sp: any) => {
             handleAddSpell(sp);
@@ -9708,6 +10299,259 @@ export const CustomizableCharacterSheetModal: React.FC<CustomizableCharacterShee
                   className="px-4 py-1.5 bg-[#8c672b] hover:bg-[#73521e] text-white font-fantasy font-bold rounded-lg transition cursor-pointer shadow-xs active:scale-95"
                 >
                   Entendido
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal: Gestionar / Cambiar Invocaciones Sobrenaturales del Brujo */}
+        {isInvocationsModalOpen && (
+          <div className="fixed inset-0 z-[70] flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-sm">
+            <div className="relative w-full max-w-3xl max-h-[90vh] flex flex-col rounded-2xl overflow-hidden shadow-2xl border-4 border-[#542d72] bg-[#fbf7ee] text-[#2c241b]">
+              {/* Header */}
+              <div className="bg-gradient-to-r from-[#2c193d] via-[#3f2459] to-[#2c193d] border-b-2 border-[#a87cd1] p-4 px-5 flex items-center justify-between text-[#f7f2ea] shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-[#542d72] border border-[#c6a1ec] flex items-center justify-center text-[#f3eafa]">
+                    <Sparkles className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-fantasy font-bold text-base uppercase tracking-wider">
+                      Invocaciones Sobrenaturales del Brujo
+                    </h3>
+                    <p className="text-xs text-[#d6bfe9]">
+                      Nivel de Brujo {warlockLevelSheet} ({sheetEdition}) • Seleccionadas: {draftInvocations.length} / {warlockMaxInvocationsSheet}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsInvocationsModalOpen(false)}
+                  className="p-1.5 text-[#d6bfe9] hover:text-white hover:bg-[#542d72] rounded-lg transition cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Body */}
+              <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={draftInvocationFilter}
+                    onChange={(e) => setDraftInvocationFilter(e.target.value)}
+                    placeholder="Buscar invocación por nombre o efecto..."
+                    className="w-full px-3 py-2 bg-white border border-[#cfbeaa] rounded-xl text-xs focus:outline-none focus:border-[#542d72]"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-72 overflow-y-auto pr-1">
+                  {warlockAvailableInvocationsSheet
+                    .filter((inv) => {
+                      const q = draftInvocationFilter.trim().toLowerCase();
+                      if (!q) return true;
+                      return inv.name.toLowerCase().includes(q) || inv.desc.toLowerCase().includes(q);
+                    })
+                    .map((inv) => {
+                      const isPicked = draftInvocations.includes(inv.name);
+                      const minLvl = (inv as any).minLevel as number | undefined;
+                      return (
+                        <div
+                          key={inv.id}
+                          onClick={() => toggleDraftInvocation(inv.name)}
+                          className={`p-3 rounded-xl border-2 cursor-pointer transition text-left ${
+                            isPicked
+                              ? 'border-[#542d72] bg-[#f5effa] ring-1 ring-[#542d72] shadow-xs'
+                              : 'border-[#d8c8af] bg-white/80 hover:border-[#8c672b]'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between gap-1.5">
+                            <span className="font-fantasy font-bold text-xs text-[#2c221a]">
+                              {isPicked ? '✓ ' : ''}{inv.name}
+                            </span>
+                            <div className="flex items-center gap-1 shrink-0">
+                              {minLvl && minLvl > 1 && (
+                                <span className="text-[9px] font-mono text-[#5a4837] bg-[#f5ede0] px-1 py-0.5 rounded border border-[#d8c8af]">
+                                  Nv {minLvl}+
+                                </span>
+                              )}
+                              {inv.badge && (
+                                <span className="text-[10px] font-mono text-[#542d72] bg-[#f3eafa] px-1.5 py-0.5 rounded border border-[#d2b8ea]">
+                                  {inv.badge}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <p className="text-[11px] text-[#5e4e3e] mt-1 leading-snug">{inv.desc}</p>
+                        </div>
+                      );
+                    })}
+                </div>
+
+                {/* Sub-choices for active draft invocations */}
+                {draftInvocations.includes('Pacto del Tomo') && (
+                  <div className="p-3.5 bg-[#f5effa] rounded-xl border border-[#d2b8ea] space-y-3 text-xs">
+                    <span className="font-fantasy font-bold text-[#3b1c54] block uppercase">
+                      Libro de las Sombras (Pacto del Tomo): 3 Trucos + 2 Rituales de Nivel 1
+                    </span>
+                    <div className="space-y-1.5">
+                      <span className="text-[11px] font-bold text-[#4e276b]">Trucos ({draftTomeCantrips.length}/3):</span>
+                      <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto">
+                        {getCompendiumForEdition(sheetEdition)
+                          .filter((s) => s.level === 0)
+                          .map((c) => {
+                            const checked = draftTomeCantrips.includes(c.name);
+                            return (
+                              <button
+                                key={c.id}
+                                type="button"
+                                onClick={() =>
+                                  setDraftTomeCantrips((prev) =>
+                                    checked ? prev.filter((x) => x !== c.name) : prev.length < 3 ? [...prev, c.name] : prev
+                                  )
+                                }
+                                className={`px-2 py-1 rounded-lg border text-[11px] cursor-pointer ${
+                                  checked ? 'bg-[#542d72] text-white border-[#542d72]' : 'bg-white border-[#cfbeaa] text-[#2c221a]'
+                                }`}
+                              >
+                                {c.name}
+                              </button>
+                            );
+                          })}
+                      </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <span className="text-[11px] font-bold text-[#4e276b]">Conjuros Rituales Nv 1 ({draftTomeRituals.length}/2):</span>
+                      <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto">
+                        {getAnyClassLevel1RitualOptions(sheetEdition).map((r) => {
+                          const checked = draftTomeRituals.includes(r.name);
+                          return (
+                            <button
+                              key={r.id}
+                              type="button"
+                              onClick={() =>
+                                setDraftTomeRituals((prev) =>
+                                  checked ? prev.filter((x) => x !== r.name) : prev.length < 2 ? [...prev, r.name] : prev
+                                )
+                              }
+                              className={`px-2 py-1 rounded-lg border text-[11px] cursor-pointer ${
+                                checked ? 'bg-[#542d72] text-white border-[#542d72]' : 'bg-white border-[#cfbeaa] text-[#2c221a]'
+                              }`}
+                            >
+                              {r.name}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {draftInvocations.includes('Pacto de la Cadena') && (
+                  <div className="p-3 bg-[#f5effa] rounded-xl border border-[#d2b8ea] space-y-1.5 text-xs">
+                    <label className="font-fantasy font-bold text-[#3b1c54] block uppercase">
+                      Familiar Especial (Pacto de la Cadena):
+                    </label>
+                    <select
+                      value={draftChainFamiliar}
+                      onChange={(e) => setDraftChainFamiliar(e.target.value)}
+                      className="w-full bg-white border border-[#cfbeaa] rounded-lg p-2 text-xs"
+                    >
+                      <option value="">-- Elegir forma de familiar --</option>
+                      {PACT_CHAIN_FAMILIARS_2024.map((f) => (
+                        <option key={f.id} value={f.name}>{f.name} — {f.desc}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {(['Explosión Agonizante', 'Lanza Sobrenatural', 'Explosión Repulsiva'] as const).map((invKey) => {
+                  if (!draftInvocations.includes(invKey)) return null;
+                  const val =
+                    invKey === 'Explosión Agonizante'
+                      ? draftAgonizingCantrip
+                      : invKey === 'Lanza Sobrenatural'
+                      ? draftSpearCantrip
+                      : draftRepellingCantrip;
+                  const setter =
+                    invKey === 'Explosión Agonizante'
+                      ? setDraftAgonizingCantrip
+                      : invKey === 'Lanza Sobrenatural'
+                      ? setDraftSpearCantrip
+                      : setDraftRepellingCantrip;
+                  return (
+                    <div key={invKey} className="p-3 bg-[#f5effa] rounded-xl border border-[#d2b8ea] space-y-1.5 text-xs">
+                      <label className="font-fantasy font-bold text-[#3b1c54] block uppercase">
+                        Truco de Daño vinculado ({invKey}):
+                      </label>
+                      <select
+                        value={val}
+                        onChange={(e) => setter(e.target.value)}
+                        className="w-full bg-white border border-[#cfbeaa] rounded-lg p-2 text-xs"
+                      >
+                        <option value="">-- Elegir truco de daño de Brujo --</option>
+                        {getWarlockDamageCantripOptions(sheetEdition).map((c) => (
+                          <option key={c.id} value={c.name}>{c.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  );
+                })}
+
+                {draftInvocations.includes('Lecciones de los Primeros') && (
+                  <div className="p-3.5 bg-[#f5effa] rounded-xl border border-[#d2b8ea] space-y-2.5 text-xs">
+                    <label className="font-fantasy font-bold text-[#3b1c54] block uppercase">
+                      Dote de Origen por Lecciones de los Primeros:
+                    </label>
+                    <select
+                      value={draftLessonsFeatName}
+                      onChange={(e) => {
+                        setDraftLessonsFeatName(e.target.value);
+                        setDraftLessonsOriginData({ featId: '', skillsOrTools: [], tools: [], cantrips: [], level1Spell: '', spellList: 'Mago', spellAbility: 'cha' });
+                      }}
+                      className="w-full bg-white border border-[#cfbeaa] rounded-lg p-2 text-xs"
+                    >
+                      <option value="">-- Elegir Dote de Origen --</option>
+                      {ORIGIN_FEATS_2024_OPTIONS.map((of) => (
+                        <option key={of.id} value={of.name}>{of.name} ({of.badge})</option>
+                      ))}
+                    </select>
+                    {draftLessonsFeatName && (() => {
+                      const cleanL = draftLessonsFeatName.split('(')[0].trim().toLowerCase();
+                      const matched = DND_2024_AS_OFFICIAL_FEATS.find(
+                        (f) => f.id === draftLessonsFeatName || f.name.toLowerCase() === cleanL || f.name.toLowerCase().includes(cleanL)
+                      );
+                      if (!matched || !isOriginFeatWithSubChoice(matched.id)) return null;
+                      return (
+                        <OriginFeatSubChoicePicker
+                          featId={matched.id}
+                          featName={matched.name}
+                          value={draftLessonsOriginData}
+                          onChange={setDraftLessonsOriginData}
+                          edition={sheetEdition}
+                          onInspectSpell={(sp) => setSelectedSpellDetail(sp)}
+                        />
+                      );
+                    })()}
+                  </div>
+                )}
+              </div>
+
+              {/* Footer */}
+              <div className="p-3.5 px-5 bg-[#f5ede0] border-t border-[#d8c8af] flex items-center justify-between shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setIsInvocationsModalOpen(false)}
+                  className="px-4 py-1.5 rounded-lg border border-[#cfbeaa] bg-white text-xs font-bold text-[#4a361c] cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveWarlockInvocations}
+                  className="px-5 py-2 rounded-lg bg-[#542d72] hover:bg-[#6d3b94] text-white text-xs font-fantasy font-bold shadow cursor-pointer"
+                >
+                  Guardar Invocaciones en la Ficha
                 </button>
               </div>
             </div>
